@@ -12,11 +12,17 @@ part 'job_listing_state.dart';
 class JobListingCubit extends Cubit<JobListingState> {
   JobListingCubit() : super(JobListingInitial());
 
-  final List<String> categories = ['Semua', 'IT', 'Desain', 'Data', 'Marketing'];
+  final List<String> categories = [
+    'Semua',
+    'IT',
+    'Desain',
+    'Data',
+    'Marketing'
+  ];
 
   Future<void> getJobListings() async {
     emit(JobListingLoading());
-    
+
     var result = await sl<GetJobListingsUseCase>().call();
     var recommendationResult = await sl<GetAiRecommendationUseCase>().call();
 
@@ -46,8 +52,9 @@ class JobListingCubit extends Cubit<JobListingState> {
       }
     } else {
       emit(JobListingLoading());
-      
-      var result = await sl<GetJobListingsByCategoryUseCase>().call(param: category);
+
+      var result =
+          await sl<GetJobListingsByCategoryUseCase>().call(param: category);
 
       result.fold(
         (error) => emit(JobListingError(error.toString())),

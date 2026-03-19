@@ -53,7 +53,8 @@ class _WelcomePagesState extends State<WelcomePages> {
 
   Future<void> _signInWithGoogle(BuildContext context) async {
     if (kIsWeb) {
-      _showErrorSnackbar('Google Sign-In tidak tersedia di web saat ini', context);
+      _showErrorSnackbar(
+          'Google Sign-In tidak tersedia di web saat ini', context);
       return;
     }
 
@@ -71,7 +72,8 @@ class _WelcomePagesState extends State<WelcomePages> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Kredensial Firebase
       final AuthCredential credential = GoogleAuthProvider.credential(
@@ -80,7 +82,8 @@ class _WelcomePagesState extends State<WelcomePages> {
       );
 
       // Login ke Firebase
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
 
       // Ambil ID Token
       final idToken = await userCredential.user?.getIdToken();
@@ -95,7 +98,8 @@ class _WelcomePagesState extends State<WelcomePages> {
 
   Future<void> _sendTokenToBackend(String idToken, BuildContext context) async {
     try {
-      var response = await sl<SigninGoogleUseCase>().call(param: SigninGoogleReqParams(token: idToken));
+      var response = await sl<SigninGoogleUseCase>()
+          .call(param: SigninGoogleReqParams(token: idToken));
 
       response.fold((error) {
         _showErrorSnackbar('Email anda tidak terdaftar', context);
@@ -103,7 +107,8 @@ class _WelcomePagesState extends State<WelcomePages> {
       }, (data) async {
         print(data.toString());
 
-        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
         sharedPreferences.setString('token', data.data['data']['token']);
         sharedPreferences.setString('role', data.data['data']['role']);
 
@@ -204,7 +209,9 @@ class _WelcomePagesState extends State<WelcomePages> {
             Container(
               color: Colors.black54,
               child: Center(
-                child: CircularProgressIndicator(color: Colors.white,),
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
               ),
             ),
         ],

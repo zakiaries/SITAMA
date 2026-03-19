@@ -30,7 +30,8 @@ class SeminarCubit extends Cubit<SeminarState> {
           time: '10:00 - 12:00 WIB',
           location: 'Aula Blok C Lantai 2',
           organizer: 'Budi Hermawan, S.Kom., M.Eng.\nSiti Nurhaliza, S.Kom.',
-          description: 'Workshop pengembangan aplikasi mobile menggunakan Flutter',
+          description:
+              'Workshop pengembangan aplikasi mobile menggunakan Flutter',
           qrCode: 'mock_qr_code_2',
           status: 'scheduled',
         ),
@@ -42,7 +43,8 @@ class SeminarCubit extends Cubit<SeminarState> {
           time: '14:00 - 16:00 WIB',
           location: 'Aula Blok A Lantai 1',
           organizer: 'Prof. Ahmad Syaraf, Ph.D.\nDr. Yusri, S.Kom., M.M.',
-          description: 'Sharing session dari alumni tentang pengalaman magang mereka',
+          description:
+              'Sharing session dari alumni tentang pengalaman magang mereka',
           qrCode: 'mock_qr_code_3',
           status: 'scheduled',
         ),

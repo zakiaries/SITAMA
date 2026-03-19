@@ -16,7 +16,8 @@ class JobListingApiServiceImpl implements JobListingApiService {
       'position': 'Frontend Developer Intern',
       'company': 'PT. Telkom Indonesia',
       'company_logo': 'TI',
-      'description': 'Kami mencari Frontend Developer yang berpengalaman dengan Flutter dan Dart',
+      'description':
+          'Kami mencari Frontend Developer yang berpengalaman dengan Flutter dan Dart',
       'skills': ['Flutter', 'Dart', 'UI/UX'],
       'location': 'Semarang',
       'category': 'IT',
@@ -33,7 +34,8 @@ class JobListingApiServiceImpl implements JobListingApiService {
       'location': 'Semarang',
       'category': 'IT',
       'is_new': false,
-      'created_at': DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
+      'created_at':
+          DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
     },
     {
       'id': '3',
@@ -57,7 +59,8 @@ class JobListingApiServiceImpl implements JobListingApiService {
       'location': 'Jakarta',
       'category': 'Data',
       'is_new': false,
-      'created_at': DateTime.now().subtract(Duration(days: 5)).toIso8601String(),
+      'created_at':
+          DateTime.now().subtract(Duration(days: 5)).toIso8601String(),
     },
     {
       'id': '5',
@@ -81,7 +84,8 @@ class JobListingApiServiceImpl implements JobListingApiService {
       'location': 'Jakarta',
       'category': 'IT',
       'is_new': false,
-      'created_at': DateTime.now().subtract(Duration(days: 3)).toIso8601String(),
+      'created_at':
+          DateTime.now().subtract(Duration(days: 3)).toIso8601String(),
     },
   ];
 
@@ -90,11 +94,10 @@ class JobListingApiServiceImpl implements JobListingApiService {
     try {
       // Simulasi delay API call
       await Future.delayed(Duration(seconds: 1));
-      
-      List<JobListingModel> jobs = _mockJobListings
-          .map((job) => JobListingModel.fromMap(job))
-          .toList();
-      
+
+      List<JobListingModel> jobs =
+          _mockJobListings.map((job) => JobListingModel.fromMap(job)).toList();
+
       return Right(jobs);
     } catch (e) {
       return Left(e.toString());
@@ -105,12 +108,13 @@ class JobListingApiServiceImpl implements JobListingApiService {
   Future<Either> getJobListingsByCategory(String category) async {
     try {
       await Future.delayed(Duration(seconds: 1));
-      
+
       List<JobListingModel> jobs = _mockJobListings
-          .where((job) => job['category'].toLowerCase() == category.toLowerCase())
+          .where(
+              (job) => job['category'].toLowerCase() == category.toLowerCase())
           .map((job) => JobListingModel.fromMap(job))
           .toList();
-      
+
       return Right(jobs);
     } catch (e) {
       return Left(e.toString());
@@ -121,15 +125,16 @@ class JobListingApiServiceImpl implements JobListingApiService {
   Future<Either> searchJobListings(String query) async {
     try {
       await Future.delayed(Duration(seconds: 1));
-      
+
       List<JobListingModel> jobs = _mockJobListings
           .where((job) =>
               job['position'].toLowerCase().contains(query.toLowerCase()) ||
               job['company'].toLowerCase().contains(query.toLowerCase()) ||
-              job['skills'].any((skill) => skill.toLowerCase().contains(query.toLowerCase())))
+              job['skills'].any(
+                  (skill) => skill.toLowerCase().contains(query.toLowerCase())))
           .map((job) => JobListingModel.fromMap(job))
           .toList();
-      
+
       return Right(jobs);
     } catch (e) {
       return Left(e.toString());
@@ -140,14 +145,15 @@ class JobListingApiServiceImpl implements JobListingApiService {
   Future<Either> getAiRecommendation() async {
     try {
       await Future.delayed(Duration(seconds: 1));
-      
+
       // Return 1 random job sebagai rekomendasi AI
       if (_mockJobListings.isNotEmpty) {
         _mockJobListings.shuffle();
-        JobListingModel recommendation = JobListingModel.fromMap(_mockJobListings.first);
+        JobListingModel recommendation =
+            JobListingModel.fromMap(_mockJobListings.first);
         return Right(recommendation);
       }
-      
+
       return Left("No jobs available");
     } catch (e) {
       return Left(e.toString());

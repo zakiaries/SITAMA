@@ -48,7 +48,8 @@ class _JobListingPageState extends State<JobListingPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+                    Icon(Icons.error_outline,
+                        size: 48, color: Colors.grey[400]),
                     SizedBox(height: 16),
                     Text(
                       'Error: ${state.message}',
@@ -61,12 +62,14 @@ class _JobListingPageState extends State<JobListingPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF1E3A8A),
-                        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+                      child: Text('Coba Lagi',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -99,30 +102,37 @@ class _JobListingPageState extends State<JobListingPage> {
                       bottom: PreferredSize(
                         preferredSize: const Size.fromHeight(115),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
                           child: Column(
                             children: [
                               // Search Bar - Enhanced
                               TextField(
                                 decoration: InputDecoration(
                                   hintText: 'Cari posisi atau perusahaan...',
-                                  hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                                  hintStyle: TextStyle(
+                                      color: Colors.grey[500], fontSize: 14),
                                   filled: true,
                                   fillColor: Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(color: Colors.grey[200]!),
+                                    borderSide:
+                                        BorderSide(color: Colors.grey[200]!),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(color: Colors.grey[200]!, width: 1.5),
+                                    borderSide: BorderSide(
+                                        color: Colors.grey[200]!, width: 1.5),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(color: Color(0xFF1E3A8A), width: 2),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF1E3A8A), width: 2),
                                   ),
-                                  prefixIcon: Icon(Icons.search, color: Color(0xFF1E3A8A), size: 20),
-                                  contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                                  prefixIcon: Icon(Icons.search,
+                                      color: Color(0xFF1E3A8A), size: 20),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 16, horizontal: 14),
                                 ),
                                 onChanged: (query) {
                                   _jobListingCubit.searchJobListings(query);
@@ -135,29 +145,40 @@ class _JobListingPageState extends State<JobListingPage> {
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: _jobListingCubit.categories.length,
-                                  separatorBuilder: (_, __) => SizedBox(width: 10),
+                                  separatorBuilder: (_, __) =>
+                                      SizedBox(width: 10),
                                   itemBuilder: (context, index) {
-                                    final category = _jobListingCubit.categories[index];
-                                    final isSelected = category == state.selectedCategory;
+                                    final category =
+                                        _jobListingCubit.categories[index];
+                                    final isSelected =
+                                        category == state.selectedCategory;
 
                                     return GestureDetector(
                                       onTap: () {
-                                        _jobListingCubit.filterByCategory(category);
+                                        _jobListingCubit
+                                            .filterByCategory(category);
                                       },
                                       child: AnimatedContainer(
                                         duration: Duration(milliseconds: 200),
-                                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 10),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? Color(0xFF1E3A8A) : Colors.white,
+                                          color: isSelected
+                                              ? Color(0xFF1E3A8A)
+                                              : Colors.white,
                                           border: Border.all(
-                                            color: isSelected ? Color(0xFF1E3A8A) : Colors.grey[300]!,
+                                            color: isSelected
+                                                ? Color(0xFF1E3A8A)
+                                                : Colors.grey[300]!,
                                             width: 1.5,
                                           ),
-                                          borderRadius: BorderRadius.circular(25),
+                                          borderRadius:
+                                              BorderRadius.circular(25),
                                           boxShadow: isSelected
                                               ? [
                                                   BoxShadow(
-                                                    color: Color(0xFF1E3A8A).withOpacity(0.2),
+                                                    color: Color(0xFF1E3A8A)
+                                                        .withOpacity(0.2),
                                                     blurRadius: 8,
                                                     offset: Offset(0, 2),
                                                   )
@@ -170,7 +191,9 @@ class _JobListingPageState extends State<JobListingPage> {
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
-                                              color: isSelected ? Colors.white : Colors.grey[700],
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : Colors.grey[700],
                                             ),
                                           ),
                                         ),
@@ -190,7 +213,8 @@ class _JobListingPageState extends State<JobListingPage> {
                         // AI Recommendation
                         if (state.selectedCategory == 'Semua')
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             child: AiRecommendationCard(
                               recommendation: state.aiRecommendation,
                               onApply: () {
@@ -206,11 +230,12 @@ class _JobListingPageState extends State<JobListingPage> {
                               },
                             ),
                           ),
-                        
+
                         // Job Listings Header
                         if (state.jobListings.isNotEmpty)
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -233,7 +258,7 @@ class _JobListingPageState extends State<JobListingPage> {
                               ],
                             ),
                           ),
-                        
+
                         if (state.jobListings.isEmpty)
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 60),
@@ -284,7 +309,8 @@ class _JobListingPageState extends State<JobListingPage> {
                                     child: JobCard(
                                       job: job,
                                       onApply: () {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
                                           SnackBar(
                                             content: Text(
                                               'Terima kasih telah melamar ke ${job.position}',
@@ -300,7 +326,7 @@ class _JobListingPageState extends State<JobListingPage> {
                               ],
                             ),
                           ),
-                        
+
                         SizedBox(height: 32),
                       ]),
                     ),

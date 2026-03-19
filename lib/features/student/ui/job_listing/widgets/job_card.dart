@@ -59,7 +59,8 @@ class JobCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: _getColorFromLogo(job.company_logo).withOpacity(0.2),
+                      color:
+                          _getColorFromLogo(job.company_logo).withOpacity(0.2),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     )
@@ -145,9 +146,9 @@ class JobCard extends StatelessWidget {
               ),
             ],
           ),
-          
+
           SizedBox(height: 14),
-          
+
           // Skills Tags - Enhanced
           if (job.skills.isNotEmpty)
             Column(
@@ -164,12 +165,16 @@ class JobCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Color(0xFF1E3A8A).withOpacity(0.08), Color(0xFF3D568F).withOpacity(0.08)],
+                          colors: [
+                            Color(0xFF1E3A8A).withOpacity(0.08),
+                            Color(0xFF3D568F).withOpacity(0.08)
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Color(0xFF1E3A8A).withOpacity(0.2)),
+                        border: Border.all(
+                            color: Color(0xFF1E3A8A).withOpacity(0.2)),
                       ),
                       child: Text(
                         skill,
@@ -196,17 +201,17 @@ class JobCard extends StatelessWidget {
                   ),
               ],
             ),
-          
+
           SizedBox(height: 14),
-          
+
           // Divider
           Container(
             height: 1,
             color: Colors.grey[200],
           ),
-          
+
           SizedBox(height: 14),
-          
+
           // Footer - Location + Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

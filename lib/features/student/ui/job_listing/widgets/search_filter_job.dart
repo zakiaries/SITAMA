@@ -64,7 +64,8 @@ class _SearchFilterJobState extends State<SearchFilterJob> {
               prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 22),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear, color: Colors.grey[500], size: 20),
+                      icon:
+                          Icon(Icons.clear, color: Colors.grey[500], size: 20),
                       onPressed: () {
                         _searchController.clear();
                         widget.onSearch('');
@@ -72,13 +73,14 @@ class _SearchFilterJobState extends State<SearchFilterJob> {
                       },
                     )
                   : null,
-              contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 14, horizontal: 12),
             ),
           ),
         ),
-        
+
         SizedBox(height: 8),
-        
+
         // Category Filter Chips
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
@@ -101,7 +103,8 @@ class _SearchFilterJobState extends State<SearchFilterJob> {
                     decoration: BoxDecoration(
                       color: isSelected ? Color(0xFF1E3A8A) : Colors.white,
                       border: Border.all(
-                        color: isSelected ? Color(0xFF1E3A8A) : Colors.grey[300]!,
+                        color:
+                            isSelected ? Color(0xFF1E3A8A) : Colors.grey[300]!,
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(24),

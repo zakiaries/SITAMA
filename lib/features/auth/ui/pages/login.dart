@@ -14,9 +14,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
-  late final TextEditingController _usernameController = TextEditingController();
-  late final TextEditingController _passwordController = TextEditingController();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+      GlobalKey<ScaffoldMessengerState>();
+  late final TextEditingController _usernameController =
+      TextEditingController();
+  late final TextEditingController _passwordController =
+      TextEditingController();
   bool _obscureText = true;
   String _selectedRole = 'Student'; // Default role
   bool _isLoading = false;
@@ -28,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.green.shade800,
       duration: const Duration(seconds: 2),
     );
-    
+
     _scaffoldKey.currentState?.showSnackBar(snackBar);
   }
 
@@ -46,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
         },
       ),
     );
-    
+
     _scaffoldKey.currentState?.showSnackBar(snackBar);
   }
 
@@ -81,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
 
       // Navigate berdasarkan role
       if (!mounted) return;
-      
+
       if (_selectedRole == 'Student') {
         Navigator.pushReplacement(
           context,
@@ -151,7 +154,8 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -166,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    
+
                     // Password TextField
                     TextField(
                       controller: _passwordController,
@@ -214,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     SizedBox(height: 16),
-                    
+
                     TextButton(
                       onPressed: () {},
                       child: Text(
@@ -226,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 24),
-                    
+
                     // Login Button
                     SizedBox(
                       width: double.infinity,
@@ -246,7 +250,8 @@ class _LoginPageState extends State<LoginPage> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
                                 ),
                               )
                             : Text(

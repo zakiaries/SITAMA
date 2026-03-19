@@ -30,7 +30,8 @@ class HomeContent extends StatefulWidget {
   State<HomeContent> createState() => _HomeContentState();
 }
 
-class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClientMixin {
+class _HomeContentState extends State<HomeContent>
+    with AutomaticKeepAliveClientMixin {
   late final StudentDisplayCubit _studentCubit;
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
@@ -49,8 +50,8 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
     _connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> results) {
-      bool hasConnection = results.contains(ConnectivityResult.wifi) || 
-                          results.contains(ConnectivityResult.mobile);
+      bool hasConnection = results.contains(ConnectivityResult.wifi) ||
+          results.contains(ConnectivityResult.mobile);
       if (_wasError && hasConnection) {
         _studentCubit.displayStudent();
       }
@@ -111,7 +112,8 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           _header(context, state),
-          _buildSectionHeader(context, 'Bimbingan Terbaru', widget.allGuidances),
+          _buildSectionHeader(
+              context, 'Bimbingan Terbaru', widget.allGuidances),
           _guidancesList(state.studentHomeEntity),
           _buildSectionHeader(context, 'Log Book Terbaru', widget.allLogBooks),
           _logBooksList(state.studentHomeEntity),
@@ -122,9 +124,10 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
   }
 
   /// Builds a section header with title and forward arrow
-  SliverToBoxAdapter _buildSectionHeader(BuildContext context, String title, VoidCallback onTap) {
+  SliverToBoxAdapter _buildSectionHeader(
+      BuildContext context, String title, VoidCallback onTap) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
@@ -142,7 +145,7 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
             InkWell(
               onTap: onTap,
               child: Icon(
-                Icons.arrow_forward_ios, 
+                Icons.arrow_forward_ios,
                 size: 14,
                 color: colorScheme.onSurface,
               ),
@@ -197,12 +200,12 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
   /// - Notification loading widget
   SliverToBoxAdapter _header(BuildContext context, StudentDisplayState state) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     NotificationItemEntity? latestNotification;
     if (state is StudentLoaded) {
       latestNotification = state.notifications?.getLatestGeneralNotification();
     }
-    
+
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +230,7 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
                     const Text(
                       'HELLO,',
                       style: TextStyle(
-                        fontSize: 12, 
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -235,7 +238,7 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
                       Text(
                         state.studentHomeEntity.name,
                         style: const TextStyle(
-                          fontSize: 20, 
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -249,13 +252,14 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
                   child: BlocBuilder<StudentDisplayCubit, StudentDisplayState>(
                     builder: (context, state) {
                       int unreadCount = 0;
-                      
-                      if (state is StudentLoaded && state.notifications != null) {
+
+                      if (state is StudentLoaded &&
+                          state.notifications != null) {
                         unreadCount = state.notifications!.getUnreadCount();
                       }
 
                       return NotificationBadge(
-                        count: unreadCount,  
+                        count: unreadCount,
                         child: Builder(
                           builder: (BuildContext context) => IconButton(
                             icon: Icon(

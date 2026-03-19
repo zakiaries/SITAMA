@@ -25,7 +25,8 @@ class JobListingModel extends JobListingEntity {
       location: map['location'] ?? '',
       category: map['category'] ?? '',
       is_new: map['is_new'] ?? false,
-      created_at: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
+      created_at:
+          DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 

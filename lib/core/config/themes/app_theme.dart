@@ -7,7 +7,7 @@ class AppTheme {
     brightness: Brightness.light,
     primaryColor: AppColors.lightPrimary,
     scaffoldBackgroundColor: AppColors.lightBackground,
-    
+
     // Color Scheme
     colorScheme: ColorScheme.light(
       primary: AppColors.lightPrimary,
@@ -101,15 +101,15 @@ class AppTheme {
     brightness: Brightness.dark,
     primaryColor: AppColors.darkPrimaryLight,
     scaffoldBackgroundColor: AppColors.darkBackground,
-    
+
     // Color Scheme
     colorScheme: ColorScheme.dark(
       primary: AppColors.darkPrimaryLight,
       secondary: AppColors.darkWarning,
       surface: AppColors.darkBackground,
-      surfaceContainer: AppColors.darkWhite, 
+      surfaceContainer: AppColors.darkWhite,
       error: AppColors.darkDanger500,
-      onPrimary: AppColors.lightWhite, 
+      onPrimary: AppColors.lightWhite,
       onSecondary: AppColors.lightWhite,
       onSurface: AppColors.lightWhite,
       onError: AppColors.lightWhite,
