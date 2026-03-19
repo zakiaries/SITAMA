@@ -15,7 +15,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   setupServiceLocator(prefs);
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Firebase hanya untuk mobile dan desktop
   if (!kIsWeb) {
     try {
@@ -24,7 +24,7 @@ void main() async {
       print('Firebase initialization error: $e');
     }
   }
-  
+
   runApp(
     MultiProvider(
       providers: AppProviders.providers,
@@ -37,8 +37,9 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   const MyApp({super.key});
 
   @override
@@ -55,7 +56,8 @@ class _MyAppState extends State<MyApp> {
           title: 'Sitama',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          themeMode:
+              themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           debugShowCheckedModeBanner: false,
           home: const SplashPage(),
         );

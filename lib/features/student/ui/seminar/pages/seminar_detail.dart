@@ -25,8 +25,23 @@ class _SeminarDetailPageState extends State<SeminarDetailPage> {
   @override
   Widget build(BuildContext context) {
     // Format tanggal tanpa locale untuk kompatibilitas web
-    final monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final dateStr = '${widget.seminar.date.day} ${monthNames[widget.seminar.date.month]} ${widget.seminar.date.year}';
+    final monthNames = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    final dateStr =
+        '${widget.seminar.date.day} ${monthNames[widget.seminar.date.month]} ${widget.seminar.date.year}';
 
     return Scaffold(
       backgroundColor: Colors.grey[50],

@@ -19,7 +19,8 @@ class JobListingRepositoryImpl extends JobListingRepository {
 
   @override
   Future<Either> getJobListingsByCategory(String category) async {
-    Either result = await sl<JobListingApiService>().getJobListingsByCategory(category);
+    Either result =
+        await sl<JobListingApiService>().getJobListingsByCategory(category);
     return result.fold(
       (error) => Left(error),
       (data) {

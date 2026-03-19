@@ -13,7 +13,8 @@ class LogBookStudentCubit extends Cubit<LogBookStudentState> {
           id: 1,
           title: 'Hari Pertama Magang',
           date: DateTime.now().subtract(Duration(days: 10)),
-          activity: 'Setup development environment dan familiarize dengan codebase',
+          activity:
+              'Setup development environment dan familiarize dengan codebase',
           lecturer_note: 'Bagus, lanjutkan dengan tahap berikutnya',
         ),
         LogBookEntity(
@@ -39,7 +40,8 @@ class LogBookStudentCubit extends Cubit<LogBookStudentState> {
         ),
       ];
 
-      emit(LogBookLoaded(logBookEntity: ListLogBookEntity(log_books: mockLogBooks)));
+      emit(LogBookLoaded(
+          logBookEntity: ListLogBookEntity(log_books: mockLogBooks)));
     } catch (e) {
       emit(LoadLogBookFailure(errorMessage: e.toString()));
     }

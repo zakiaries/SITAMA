@@ -56,7 +56,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                     ),
                     centerTitle: true,
                   ),
-                  
+
                   // Content
                   SliverToBoxAdapter(
                     child: Padding(
@@ -87,7 +87,8 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.school, color: Colors.white, size: 24),
+                                    Icon(Icons.school,
+                                        color: Colors.white, size: 24),
                                     SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
@@ -114,9 +115,9 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                               ],
                             ),
                           ),
-                          
+
                           SizedBox(height: 28),
-                          
+
                           // Section Header
                           Row(
                             children: [
@@ -139,12 +140,15 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                               ),
                             ],
                           ),
-                          
+
                           SizedBox(height: 16),
-                          
+
                           // Seminars Grid/List
-                          ...state.seminars.map((seminar) => _buildSeminarCard(seminar, context)).toList(),
-                          
+                          ...state.seminars
+                              .map((seminar) =>
+                                  _buildSeminarCard(seminar, context))
+                              .toList(),
+
                           SizedBox(height: 24),
                         ],
                       ),
@@ -157,7 +161,8 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+                    Icon(Icons.error_outline,
+                        size: 48, color: Colors.grey[400]),
                     SizedBox(height: 16),
                     Text(
                       'Error: ${state.message}',
@@ -176,9 +181,24 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
 
   Widget _buildSeminarCard(SeminarEntity seminar, BuildContext context) {
     // Format tanggal tanpa locale untuk kompatibilitas web
-    final monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final dateStr = '${seminar.date.day} ${monthNames[seminar.date.month]} ${seminar.date.year}';
-    
+    final monthNames = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    final dateStr =
+        '${seminar.date.day} ${monthNames[seminar.date.month]} ${seminar.date.year}';
+
     final statusColor = seminar.status == 'scheduled'
         ? Color(0xFFFCBA28)
         : seminar.status == 'registered'
@@ -189,7 +209,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
         : seminar.status == 'registered'
             ? 'Terdaftar'
             : 'Selesai';
-    
+
     final statusIcon = seminar.status == 'scheduled'
         ? Icons.schedule
         : seminar.status == 'registered'
@@ -279,17 +299,17 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                 ),
               ],
             ),
-            
+
             SizedBox(height: 14),
-            
+
             // Divider
             Container(
               height: 1,
               color: Colors.grey[200],
             ),
-            
+
             SizedBox(height: 14),
-            
+
             // Info Items - Enhanced Layout
             Row(
               children: [
@@ -318,7 +338,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                 ),
               ],
             ),
-            
+
             // Tap to view detail hint
             SizedBox(height: 12),
             Row(

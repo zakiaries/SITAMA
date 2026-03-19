@@ -124,7 +124,8 @@ class _HomePageState extends State<HomePage>
                 label: 'Log book',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 3 ? Icons.work : Icons.work_outlined),
+                icon:
+                    Icon(_currentIndex == 3 ? Icons.work : Icons.work_outlined),
                 label: 'Lowongan',
               ),
               BottomNavigationBarItem(

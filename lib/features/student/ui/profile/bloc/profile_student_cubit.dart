@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileStudentCubit extends Cubit<ProfileStudentState> {
   final SharedPreferences prefs;
-  
+
   ProfileStudentCubit({
     required this.prefs,
   }) : super(StudentLoading());

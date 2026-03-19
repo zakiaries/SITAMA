@@ -55,7 +55,11 @@ class _ChatbotRecommendationPageState extends State<ChatbotRecommendationPage> {
                 text: 'Ada yang di Semarang saja?',
                 isBot: true,
                 isActionCard: true,
-                actions: ['Lowongan remote', 'Tambah skill', 'Daftar ke Telkom'],
+                actions: [
+                  'Lowongan remote',
+                  'Tambah skill',
+                  'Daftar ke Telkom'
+                ],
               ));
             } else {
               _messages.add(ChatMessage(
@@ -63,7 +67,11 @@ class _ChatbotRecommendationPageState extends State<ChatbotRecommendationPage> {
                     'Untuk lokasi Semarang dengan skill Flutter, PT. Telkom Indonesia paling sesuai sesuai karena mencari Flutter developer dengan pengalaman UI. Mau saya bantu daftarkan?',
                 isBot: true,
                 isActionCard: true,
-                actions: ['Lowongan remote', 'Tambah skill', 'Daftar ke Telkom'],
+                actions: [
+                  'Lowongan remote',
+                  'Tambah skill',
+                  'Daftar ke Telkom'
+                ],
               ));
             }
           });
