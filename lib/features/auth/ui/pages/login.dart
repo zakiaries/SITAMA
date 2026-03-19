@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/core/shared/widgets/alert/custom_snackbar.dart';
-import 'package:sitama/core/shared/widgets/buttons/basic_app_button.dart';
-import 'package:sitama/core/shared/widgets/buttons/button_state.dart';
-import 'package:sitama/core/shared/widgets/buttons/button_state_cubit.dart';
-import 'package:sitama/features/auth/data/models/signin_req_params.dart';
-import 'package:sitama/features/auth/domain/usecases/signin.dart';
 import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
 import 'package:sitama/features/student/ui/home/pages/home.dart';
-import 'package:sitama/service_locator.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,6 +18,19 @@ class _LoginPageState extends State<LoginPage> {
   late final TextEditingController _usernameController = TextEditingController();
   late final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+  String _selectedRole = 'Student'; // Default role
+  bool _isLoading = false;
+
+  void _showSuccessSnackbar(String message) {
+    final snackBar = CustomSnackBar(
+      message: message,
+      icon: Icons.check_circle_outline,
+      backgroundColor: Colors.green.shade800,
+      duration: const Duration(seconds: 2),
+    );
+    
+    _scaffoldKey.currentState?.showSnackBar(snackBar);
+  }
 
   void _showErrorSnackbar(String message) {
     final snackBar = CustomSnackBar(
@@ -45,15 +51,59 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _validateInputs() {
-    if (_usernameController.text.isEmpty) {
-      _showErrorSnackbar('NIM/NIP tidak boleh kosong');
-      return false;
+    // Untuk mock login, buat lebih permissive - minimal ada 1 karakter
+    if (_usernameController.text.trim().isEmpty) {
+      _usernameController.text = 'student'; // Auto-fill
     }
-    if (_passwordController.text.isEmpty) {
-      _showErrorSnackbar('Kata sandi tidak boleh kosong');
-      return false;
+    if (_passwordController.text.trim().isEmpty) {
+      _passwordController.text = '1234'; // Auto-fill
     }
     return true;
+  }
+
+  Future<void> _mockLogin() async {
+    if (!_validateInputs()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Simulasi delay login
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Save role to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('role', _selectedRole);
+      await prefs.setString('username', _usernameController.text);
+
+      _showSuccessSnackbar('Login berhasil!');
+
+      // Navigate berdasarkan role
+      if (!mounted) return;
+      
+      if (_selectedRole == 'Student') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LecturerHomePage(),
+          ),
+        );
+      }
+    } catch (e) {
+      _showErrorSnackbar('Terjadi kesalahan: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -68,162 +118,150 @@ class _LoginPageState extends State<LoginPage> {
     return ScaffoldMessenger(
       key: _scaffoldKey,
       child: Scaffold(
-        body: BlocProvider(
-          create: (context) => ButtonStateCubit(),
-          child: BlocListener<ButtonStateCubit, ButtonState>(
-            listener: (context, state) async {
-            if (state is ButtonSuccessState) {
-              SharedPreferences sharedPreferences =
-                  await SharedPreferences.getInstance();
-              var role = sharedPreferences.getString('role');
-
-              if (role == 'Student') {
-                if (!context.mounted) return;
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => HomePage(),
-                  ),
-                );
-              } else {
-                if (!context.mounted) return;
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => LecturerHomePage(),
-                  ),
-                );
-              }
-            }
-            if (state is ButtonFailurState) {
-                String errorMessage = state.errorMessage;
-                
-                // Map specific error codes/messages to user-friendly messages
-                if (errorMessage.contains('invalid_credentials')) {
-                  errorMessage = 'NIM/NIP atau kata sandi salah';
-                } else if (errorMessage.contains('network_error')) {
-                  errorMessage = 'Gagal terhubung ke server. Periksa koneksi internet Anda';
-                } else if (errorMessage.contains('account_locked')) {
-                  errorMessage = 'Akun Anda terkunci. Silakan hubungi admin';
-                } else {
-                  errorMessage = 'Terjadi kesalahan. Silakan coba lagi nanti';
-                }
-                
-                _showErrorSnackbar(errorMessage);
-              }
-            },
-            child: SingleChildScrollView(
-              child: Column(
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                height: 312,
+                color: AppColors.lightPrimary500,
+                child: Center(
+                  child: Image.asset(AppImages.loginvektor),
+                ),
+              ),
+              SizedBox(height: 20),
+              Row(
                 children: [
-                  Container(
-                    width: double.infinity,
-                    height: 312,
-                    color: AppColors.lightPrimary500,
-                    child: Center(
-                      child: Image.asset(AppImages.loginvektor),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.arrow_back_ios_rounded,
+                      size: 16,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(
-                          Icons.arrow_back_ios_rounded,
-                          size: 16,
-                        ),
-                      ),
-                      Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            labelText: 'NIM / NIP',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: _obscureText,
-                          decoration: InputDecoration(
-                            labelText: 'Kata sandi',
-                            border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        TextButton(
-                          onPressed: () {
-                            // showDialog(
-                            //   context: context,
-                            //   barrierDismissible: true, 
-                            //   builder: (BuildContext context) {
-                            //     return ForgotPassword();
-                            //   },
-                            // );
-                          },
-                          child: Text(
-                            'Lupa Kata Sandi ?',
-                            style: TextStyle(
-                              color: AppColors.lightInfo,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 24),
-                        Builder(builder: (context) {
-                          return BasicAppButton(
-                            onPressed: () {
-                              if (_validateInputs()) {
-                                context.read<ButtonStateCubit>().excute(
-                                  usecase: sl<SigninUseCase>(),
-                                  params: SigninReqParams(
-                                    username: _usernameController.text,
-                                    password: _passwordController.text,
-                                  ),
-                                );
-                              }
-                            },
-                            title: 'Login',
-                          );
-                        })
-                      ],
+                  Text(
+                    'Login',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                  )
+                  ),
                 ],
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Username/NIM/NIP TextField
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'NIM / NIP',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    // Password TextField
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscureText,
+                      decoration: InputDecoration(
+                        labelText: 'Kata sandi',
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+
+                    // Role Selection Dropdown
+                    DropdownButtonFormField<String>(
+                      value: _selectedRole,
+                      decoration: InputDecoration(
+                        labelText: 'Pilih Role',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                        ),
+                      ),
+                      items: ['Student', 'Lecturer']
+                          .map((role) => DropdownMenuItem(
+                                value: role,
+                                child: Text(role),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedRole = value ?? 'Student';
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'Lupa Kata Sandi ?',
+                        style: TextStyle(
+                          color: AppColors.lightInfo,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    
+                    // Login Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _mockLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.lightPrimary,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
           ),
         ),
       ),

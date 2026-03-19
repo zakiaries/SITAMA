@@ -9,17 +9,17 @@ import 'package:sitama/service_locator.dart';
 
 class AppProviders {
   static List<SingleChildWidget> get providers => [
-    ChangeNotifierProvider(create: (_) => ThemeProvider()),
-  ];
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ];
 
   static List<SingleChildWidget> get blocProviders => [
-    BlocProvider(
-      create: (context) => NotificationBloc(
-        addNotificationsUseCase: sl<AddNotificationsUseCase>(),
-      ),
-    ),
-    BlocProvider(
-      create: (context) => AssessmentCubit(),
-    ),
-  ];
+        BlocProvider(
+          create: (context) => NotificationBloc(
+            addNotificationsUseCase: sl<AddNotificationsUseCase>(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => AssessmentCubit(),
+        ),
+      ];
 }

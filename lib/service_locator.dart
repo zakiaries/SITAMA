@@ -39,7 +39,15 @@ import 'package:sitama/features/student/domain/usecases/notification/get_notific
 import 'package:sitama/features/student/domain/usecases/notification/mark_all_notifications.dart';
 import 'package:sitama/features/student/ui/guidance/bloc/guidance_student_cubit.dart';
 import 'package:sitama/features/student/ui/logbook/bloc/log_book_student_cubit.dart';
-
+import 'package:sitama/features/student/data/repositories/job_listing.dart';
+import 'package:sitama/features/student/data/sources/job_listing_api_service.dart';
+import 'package:sitama/features/student/domain/repositories/job_listing.dart';
+import 'package:sitama/features/student/domain/usecases/job_listing/get_job_listings.dart';
+import 'package:sitama/features/student/domain/usecases/job_listing/search_job_listings.dart';
+import 'package:sitama/features/student/domain/usecases/job_listing/get_job_listings_by_category.dart';
+import 'package:sitama/features/student/domain/usecases/job_listing/get_ai_recommendation.dart';
+import 'package:sitama/features/student/ui/job_listing/bloc/job_listing_cubit.dart';
+import 'package:sitama/features/student/ui/seminar/bloc/seminar_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -53,23 +61,28 @@ void setupServiceLocator(SharedPreferences prefs) {
   sl.registerSingleton<AuthLocalService>(AuthLocalServiceImpl());
   sl.registerSingleton<StudentApiService>(StudentApiServiceImpl());
   sl.registerSingleton<LecturerApiService>(LecturerApiServiceImpl());
+  sl.registerSingleton<JobListingApiService>(JobListingApiServiceImpl());
 
   // Repostory
   sl.registerSingleton<AuthRepostory>(AuthRepostoryImpl());
   sl.registerSingleton<StudentRepository>(StudentRepositoryImpl());
   sl.registerSingleton<LecturerRepository>(LecturerRepositoryImpl());
+  sl.registerSingleton<JobListingRepository>(JobListingRepositoryImpl());
 
   //bloc
   sl.registerSingleton<SelectionBloc>(SelectionBloc());
   sl.registerLazySingleton(() => GuidanceStudentCubit());
   sl.registerLazySingleton(() => LogBookStudentCubit());
-  
+  sl.registerLazySingleton(() => JobListingCubit());
+  sl.registerLazySingleton(() => SeminarCubit());
+
   // Usecase
   sl.registerSingleton<SigninUseCase>(SigninUseCase());
   sl.registerSingleton<SigninGoogleUseCase>(SigninGoogleUseCase());
   sl.registerSingleton<IsLoggedInUseCase>(IsLoggedInUseCase());
   sl.registerSingleton<GetHomeStudentUseCase>(GetHomeStudentUseCase());
-  sl.registerSingleton<GetGuidancesStudentUseCase>(GetGuidancesStudentUseCase());
+  sl.registerSingleton<GetGuidancesStudentUseCase>(
+      GetGuidancesStudentUseCase());
   sl.registerSingleton<AddGuidanceUseCase>(AddGuidanceUseCase());
   sl.registerSingleton<EditGuidanceUseCase>(EditGuidanceUseCase());
   sl.registerSingleton<DeleteGuidanceUseCase>(DeleteGuidanceUseCase());
@@ -85,12 +98,21 @@ void setupServiceLocator(SharedPreferences prefs) {
   sl.registerSingleton<GetHomeLecturerUseCase>(GetHomeLecturerUseCase());
   sl.registerSingleton<GetDetailStudentUseCase>(GetDetailStudentUseCase());
   sl.registerSingleton<UpdateLogBookNoteUseCase>(UpdateLogBookNoteUseCase());
-  sl.registerSingleton<UpdateStatusGuidanceUseCase>(UpdateStatusGuidanceUseCase());
+  sl.registerSingleton<UpdateStatusGuidanceUseCase>(
+      UpdateStatusGuidanceUseCase());
   sl.registerSingleton<AddNotificationsUseCase>(AddNotificationsUseCase());
   sl.registerSingleton<GetAssessments>(GetAssessments());
 
   sl.registerSingleton<GetNotificationsUseCase>(GetNotificationsUseCase());
-  sl.registerSingleton<MarkAllNotificationsReadUseCase>(MarkAllNotificationsReadUseCase());
+  sl.registerSingleton<MarkAllNotificationsReadUseCase>(
+      MarkAllNotificationsReadUseCase());
+
+  sl.registerSingleton<GetJobListingsUseCase>(GetJobListingsUseCase());
+  sl.registerSingleton<SearchJobListingsUseCase>(SearchJobListingsUseCase());
+  sl.registerSingleton<GetJobListingsByCategoryUseCase>(
+      GetJobListingsByCategoryUseCase());
+  sl.registerSingleton<GetAiRecommendationUseCase>(
+      GetAiRecommendationUseCase());
 
   sl.registerSingleton<UpdatePhotoProfileUseCase>(UpdatePhotoProfileUseCase());
   sl.registerSingleton<ResetPasswordUseCase>(ResetPasswordUseCase());

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/assets/app_vectors.dart';
@@ -11,7 +11,6 @@ import 'package:sitama/features/auth/ui/pages/login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../../core/shared/widgets/alert/custom_snackbar.dart';
 import '../../../../service_locator.dart';
 import '../../../lecturer/ui/home/pages/lecturer_home.dart';
 import '../../../student/ui/home/pages/home.dart';
@@ -24,9 +23,19 @@ class WelcomePages extends StatefulWidget {
 }
 
 class _WelcomePagesState extends State<WelcomePages> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool isLoading = false; // State untuk loading
+  late GoogleSignIn _googleSignIn;
+  late FirebaseAuth _auth;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize hanya untuk mobile/desktop
+    if (!kIsWeb) {
+      _googleSignIn = GoogleSignIn();
+      _auth = FirebaseAuth.instance;
+    }
+  }
 
   void _showErrorSnackbar(String message, BuildContext context) {
     final snackBar = SnackBar(
@@ -43,6 +52,11 @@ class _WelcomePagesState extends State<WelcomePages> {
   }
 
   Future<void> _signInWithGoogle(BuildContext context) async {
+    if (kIsWeb) {
+      _showErrorSnackbar('Google Sign-In tidak tersedia di web saat ini', context);
+      return;
+    }
+
     try {
       setState(() {
         isLoading = true;
@@ -54,7 +68,7 @@ class _WelcomePagesState extends State<WelcomePages> {
         setState(() {
           isLoading = false;
         });
-        return; // Login dibatalkan
+        return;
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -172,14 +186,17 @@ class _WelcomePagesState extends State<WelcomePages> {
                 SizedBox(height: 70),
                 _loginButton(context),
                 SizedBox(height: 16),
-                Text(
-                  'Or continue with',
-                  style: TextStyle(
-                    color: AppColors.lightGray,
+                // Google Sign-in hanya untuk mobile/desktop
+                if (!kIsWeb) ...[
+                  Text(
+                    'Or continue with',
+                    style: TextStyle(
+                      color: AppColors.lightGray,
+                    ),
                   ),
-                ),
-                SizedBox(height: 16),
-                _signInWithGoogleButton(context),
+                  SizedBox(height: 16),
+                  _signInWithGoogleButton(context),
+                ],
               ],
             ),
           ),

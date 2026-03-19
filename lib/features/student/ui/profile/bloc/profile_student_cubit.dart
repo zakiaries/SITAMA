@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sitama/features/student/domain/usecases/general/get_profile_student.dart';
+import 'package:sitama/features/student/domain/entities/student_home_entity.dart';
+import 'package:sitama/features/lecturer/domain/entities/lecturer_detail_student.dart';
 import 'package:sitama/features/student/ui/profile/bloc/profile_student_state.dart';
-import 'package:sitama/service_locator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../data/models/student_home.dart';
 
 class ProfileStudentCubit extends Cubit<ProfileStudentState> {
   final SharedPreferences prefs;
@@ -16,25 +13,29 @@ class ProfileStudentCubit extends Cubit<ProfileStudentState> {
 
   void displayStudent() async {
     try {
-      // Get cached data from SharedPreferences
-      final cachedJson = prefs.getString('cached_student_data');
-      
-      if (cachedJson != null) {
-        final cachedData = StudentProfileModel.fromMap(json.decode(cachedJson)).toEntity();
+      // Mock data untuk development
+      final mockProfile = StudentProfileEntity(
+        name: 'Budi Santoso',
+        username: 'student',
+        email: 'budi.santoso@student.edu',
+        photo_profile: null,
+        internships: [
+          InternshipStudentEntity(
+            name: 'PT. Maju Jaya Indonesia - Flutter Developer',
+            start_date: DateTime.now().subtract(Duration(days: 60)),
+            end_date: DateTime.now().add(Duration(days: 30)),
+            status: 'active',
+          ),
+          InternshipStudentEntity(
+            name: 'PT. Digital Indonesia - Frontend Developer',
+            start_date: DateTime.now().subtract(Duration(days: 180)),
+            end_date: DateTime.now().subtract(Duration(days: 120)),
+            status: 'completed',
+          ),
+        ],
+      );
 
-        emit(StudentLoaded(studentProfileEntity: cachedData));
-      } else {
-        // If no cached data, make initial API call
-        var result = await sl<GetProfileStudentUseCase>().call();
-        result.fold(
-          (error) => emit(LoadStudentFailure(errorMessage: error)),
-          (data) async {
-            // Cache the new data
-            await prefs.setString('cached_student_data', json.encode(data.toJson()));
-            emit(StudentLoaded(studentProfileEntity: data));
-          },
-        );
-      }
+      emit(StudentLoaded(studentProfileEntity: mockProfile));
     } catch (e) {
       emit(LoadStudentFailure(errorMessage: e.toString()));
     }
