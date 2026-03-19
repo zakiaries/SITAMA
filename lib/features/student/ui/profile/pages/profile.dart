@@ -24,7 +24,8 @@ class StudentProfilePage extends StatefulWidget {
   State<StudentProfilePage> createState() => Student_ProfilePageState();
 }
 
-class Student_ProfilePageState extends State<StudentProfilePage> with AutomaticKeepAliveClientMixin {
+class Student_ProfilePageState extends State<StudentProfilePage>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -44,14 +45,14 @@ class Student_ProfilePageState extends State<StudentProfilePage> with AutomaticK
             return const Center(child: CircularProgressIndicator());
           }
           if (state is StudentLoaded) {
-
             return Scaffold(
               body: SingleChildScrollView(
                 child: Column(
                   children: [
                     _header(state.studentProfileEntity),
                     const SizedBox(height: 22),
-                    IndustryCard(internships: state.studentProfileEntity.internships),
+                    IndustryCard(
+                        internships: state.studentProfileEntity.internships),
                     const SizedBox(height: 40),
                     _settingsList(context, isDarkMode),
                   ],
@@ -90,7 +91,7 @@ class Student_ProfilePageState extends State<StudentProfilePage> with AutomaticK
 
   Padding _settingsList(BuildContext context, bool isDarkMode) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -108,8 +109,7 @@ class Student_ProfilePageState extends State<StudentProfilePage> with AutomaticK
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => FAQPage()),
+                MaterialPageRoute(builder: (context) => FAQPage()),
               );
             },
           ),
@@ -153,7 +153,6 @@ class Student_ProfilePageState extends State<StudentProfilePage> with AutomaticK
     );
   }
 
-  
   Stack _header(StudentProfileEntity student) {
     return Stack(
       children: [
