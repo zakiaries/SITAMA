@@ -41,7 +41,7 @@ class _AddGuidanceState extends State<AddGuidance> {
       allowedExtensions: ['pdf'],
       withData: true,
     );
-    if (result != null){
+    if (result != null) {
       setState(() {
         _selectedFile = result.files.first;
       });
@@ -58,8 +58,8 @@ class _AddGuidanceState extends State<AddGuidance> {
             ScaffoldMessenger.of(context).showSnackBar(
               CustomSnackBar(
                 message: 'Berhasil Menambahkan Bimbingan 🥸',
-                icon: Icons.check_circle_outline,  
-                backgroundColor: Colors.green.shade800,  
+                icon: Icons.check_circle_outline,
+                backgroundColor: Colors.green.shade800,
               ),
             );
             Navigator.pushAndRemoveUntil(
@@ -81,7 +81,9 @@ class _AddGuidanceState extends State<AddGuidance> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withAlpha((0.1*255).round()),
+                    color: Theme.of(context)
+                        .primaryColor
+                        .withAlpha((0.1 * 255).round()),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -114,33 +116,40 @@ class _AddGuidanceState extends State<AddGuidance> {
                     decoration: InputDecoration(
                       labelText: 'Judul',
                       labelStyle: TextStyle(
-                        color: _titleError ? AppColors.lightDanger : Theme.of(context).primaryColor
-                      ),
+                          color: _titleError
+                              ? AppColors.lightDanger
+                              : Theme.of(context).primaryColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: _titleError ? AppColors.lightDanger : Theme.of(context).primaryColor
-                        ),
+                            color: _titleError
+                                ? AppColors.lightDanger
+                                : Theme.of(context).primaryColor),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: _titleError ? AppColors.lightDanger : Colors.grey
-                        ),
+                            color: _titleError
+                                ? AppColors.lightDanger
+                                : Colors.grey),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: _titleError ? AppColors.lightDanger : Theme.of(context).primaryColor,
-                          width: 2
-                        ),
+                            color: _titleError
+                                ? AppColors.lightDanger
+                                : Theme.of(context).primaryColor,
+                            width: 2),
                       ),
-                      errorText: _titleError ? 'Judul tidak boleh kosong' : null,
+                      errorText:
+                          _titleError ? 'Judul tidak boleh kosong' : null,
                       errorStyle: TextStyle(
                         color: AppColors.lightDanger,
                       ),
                       filled: true,
-                      fillColor: Theme.of(context).primaryColor.withAlpha((0.05*255).round()),
+                      fillColor: Theme.of(context)
+                          .primaryColor
+                          .withAlpha((0.05 * 255).round()),
                     ),
                     onChanged: (value) {
                       // Clear error when user starts typing
@@ -161,29 +170,41 @@ class _AddGuidanceState extends State<AddGuidance> {
                         lastDate: DateTime.now(),
                         builder: (context, child) {
                           // Get the current brightness
-                          final isDark = Theme.of(context).brightness == Brightness.dark;
-                          
+                          final isDark =
+                              Theme.of(context).brightness == Brightness.dark;
+
                           return Theme(
                             data: Theme.of(context).copyWith(
-                              colorScheme: isDark 
-                                ? ColorScheme.dark(
-                                    primary: Theme.of(context).primaryColor,
-                                    onPrimary: Colors.white,
-                                    surface: Theme.of(context).colorScheme.surfaceContainer,
-                                    onSurface: Theme.of(context).colorScheme.onSurface,
-                                  )
-                                : ColorScheme.light(
-                                    primary: Theme.of(context).primaryColor,
-                                    onPrimary: Colors.white,
-                                    surface: Theme.of(context).colorScheme.surfaceContainer,
-                                    onSurface: Theme.of(context).colorScheme.onSurface,
-                                  ),
-                              dialogBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                              colorScheme: isDark
+                                  ? ColorScheme.dark(
+                                      primary: Theme.of(context).primaryColor,
+                                      onPrimary: Colors.white,
+                                      surface: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainer,
+                                      onSurface: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    )
+                                  : ColorScheme.light(
+                                      primary: Theme.of(context).primaryColor,
+                                      onPrimary: Colors.white,
+                                      surface: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainer,
+                                      onSurface: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
                               textButtonTheme: TextButtonThemeData(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Theme.of(context).primaryColor,
+                                  foregroundColor:
+                                      Theme.of(context).primaryColor,
                                 ),
                               ),
+                              dialogTheme: DialogThemeData(
+                                  backgroundColor: Theme.of(context)
+                                      .scaffoldBackgroundColor),
                             ),
                             child: child!,
                           );
@@ -197,16 +218,20 @@ class _AddGuidanceState extends State<AddGuidance> {
                     },
                     child: InputDecorator(
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.calendar_month, color: Theme.of(context).primaryColor),
+                        prefixIcon: Icon(Icons.calendar_month,
+                            color: Theme.of(context).primaryColor),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor, width: 2),
                         ),
                         filled: true,
-                        fillColor: Theme.of(context).primaryColor.withAlpha((0.05).round()),
+                        fillColor: Theme.of(context)
+                            .primaryColor
+                            .withAlpha((0.05).round()),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -215,7 +240,8 @@ class _AddGuidanceState extends State<AddGuidance> {
                             DateFormat('dd/MM/yyyy').format(_date),
                             style: const TextStyle(fontSize: 16),
                           ),
-                          Icon(Icons.arrow_drop_down, color: Theme.of(context).primaryColor),
+                          Icon(Icons.arrow_drop_down,
+                              color: Theme.of(context).primaryColor),
                         ],
                       ),
                     ),
@@ -227,30 +253,37 @@ class _AddGuidanceState extends State<AddGuidance> {
                     decoration: InputDecoration(
                       labelText: 'Aktivitas',
                       labelStyle: TextStyle(
-                        color: _activityError ? AppColors.lightDanger : Theme.of(context).primaryColor
-                      ),
+                          color: _activityError
+                              ? AppColors.lightDanger
+                              : Theme.of(context).primaryColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: _activityError ? AppColors.lightDanger : Colors.grey
-                        ),
+                            color: _activityError
+                                ? AppColors.lightDanger
+                                : Colors.grey),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: _activityError ? AppColors.lightDanger : Theme.of(context).primaryColor,
-                          width: 2
-                        ),
+                            color: _activityError
+                                ? AppColors.lightDanger
+                                : Theme.of(context).primaryColor,
+                            width: 2),
                       ),
-                      errorText: _activityError ? 'Aktivitas tidak boleh kosong' : null,
+                      errorText: _activityError
+                          ? 'Aktivitas tidak boleh kosong'
+                          : null,
                       errorStyle: TextStyle(
                         color: AppColors.lightDanger,
                       ),
                       filled: true,
-                      fillColor: Theme.of(context).primaryColor.withAlpha((0.05).round()),
+                      fillColor: Theme.of(context)
+                          .primaryColor
+                          .withAlpha((0.05).round()),
                     ),
                     onChanged: (value) {
                       // Clear error when user starts typing
@@ -276,7 +309,9 @@ class _AddGuidanceState extends State<AddGuidance> {
                         ),
                         borderRadius: BorderRadius.circular(12),
                         color: _selectedFile != null
-                            ? Theme.of(context).primaryColor.withAlpha((0.05).round())
+                            ? Theme.of(context)
+                                .primaryColor
+                                .withAlpha((0.05).round())
                             : null,
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 12),
@@ -306,7 +341,8 @@ class _AddGuidanceState extends State<AddGuidance> {
                             IconButton(
                               padding: EdgeInsets.zero,
                               constraints: BoxConstraints(minWidth: 40),
-                              icon: const Icon(Icons.clear, color: AppColors.lightDanger),
+                              icon: const Icon(Icons.clear,
+                                  color: AppColors.lightDanger),
                               onPressed: () {
                                 setState(() {
                                   _selectedFile = null;
@@ -334,14 +370,13 @@ class _AddGuidanceState extends State<AddGuidance> {
                   // Only proceed if there are no errors
                   if (!_titleError && !_activityError) {
                     context.read<ButtonStateCubit>().excute(
-                      usecase: sl<AddGuidanceUseCase>(),
-                      params: AddGuidanceReqParams(
-                        title: _title.text.trim(),
-                        activity: _activity.text.trim(),
-                        date: _date,
-                        file: _selectedFile
-                      ),
-                    );
+                          usecase: sl<AddGuidanceUseCase>(),
+                          params: AddGuidanceReqParams(
+                              title: _title.text.trim(),
+                              activity: _activity.text.trim(),
+                              date: _date,
+                              file: _selectedFile),
+                        );
                   }
                 },
                 title: 'Add',

@@ -3,6 +3,8 @@ import 'package:sitama/features/student/ui/guidance/pages/guidance.dart';
 import 'package:sitama/features/student/ui/home/widgets/home_content.dart';
 import 'package:sitama/features/student/ui/logbook/pages/logbook.dart';
 import 'package:sitama/features/student/ui/profile/pages/profile.dart';
+import 'package:sitama/features/student/ui/job_listing/pages/job_listing.dart';
+import 'package:sitama/features/student/ui/seminar/pages/seminar_listing.dart';
 
 /// A stateful widget that serves as the main navigation hub for the student interface.
 /// Contains a bottom navigation bar for switching between different sections of the app.
@@ -17,7 +19,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
+class _HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin {
   /// Tracks the currently selected index in the bottom navigation bar
   late int _currentIndex;
   late PageController _pageController;
@@ -49,6 +52,8 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
       _buildHomeContent(),
       const GuidancePage(),
       const LogBookPage(),
+      const JobListingPage(),
+      const SeminarListingPage(),
       const StudentProfilePage(),
     ];
 
@@ -68,13 +73,13 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
           return pages[index];
         },
       ),
-      
+
       // Custom styled bottom navigation bar with elevation shadow
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha((0.1*255).round()),
+              color: Colors.black.withAlpha((0.1 * 255).round()),
               blurRadius: 20,
               offset: const Offset(0, -2),
             ),
@@ -88,7 +93,10 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
             type: BottomNavigationBarType.fixed,
             backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
             selectedItemColor: Theme.of(context).colorScheme.primary,
-            unselectedItemColor: Theme.of(context).colorScheme.onSurface.withAlpha((0.6*255).round()),
+            unselectedItemColor: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withAlpha((0.6 * 255).round()),
             selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
             elevation: 0,
             onTap: (index) {
@@ -101,19 +109,32 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
             },
             items: [
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 0 ? Icons.home : Icons.home_outlined),
+                icon:
+                    Icon(_currentIndex == 0 ? Icons.home : Icons.home_outlined),
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 1 ? Icons.school : Icons.school_outlined),
+                icon: Icon(
+                    _currentIndex == 1 ? Icons.school : Icons.school_outlined),
                 label: 'Bimbingan',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 2 ? Icons.book : Icons.book_outlined),
+                icon:
+                    Icon(_currentIndex == 2 ? Icons.book : Icons.book_outlined),
                 label: 'Log book',
               ),
               BottomNavigationBarItem(
-                icon: Icon(_currentIndex == 3 ? Icons.person : Icons.person_outlined),
+                icon: Icon(_currentIndex == 3 ? Icons.work : Icons.work_outlined),
+                label: 'Lowongan',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                    _currentIndex == 4 ? Icons.event : Icons.event_outlined),
+                label: 'Seminar',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                    _currentIndex == 5 ? Icons.person : Icons.person_outlined),
                 label: 'Profile',
               ),
             ],
@@ -128,7 +149,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
     return HomeContent(
       // Callback to navigate to guidance section
       allGuidances: () {
-        // Animate to guidance page
+        // Animate to guidance page (index 1)
         _pageController.animateToPage(
           1,
           duration: const Duration(milliseconds: 300),
@@ -137,7 +158,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
       },
       // Callback to navigate to logbook section
       allLogBooks: () {
-        // Animate to logbook page
+        // Animate to logbook page (index 2)
         _pageController.animateToPage(
           2,
           duration: const Duration(milliseconds: 300),

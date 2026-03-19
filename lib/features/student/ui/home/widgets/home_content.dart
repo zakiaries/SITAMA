@@ -60,7 +60,6 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
   @override
   void dispose() {
     _connectivitySubscription.cancel();
-    _studentCubit.close();
     super.dispose();
   }
 
