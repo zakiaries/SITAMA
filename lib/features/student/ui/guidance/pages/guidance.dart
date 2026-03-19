@@ -16,23 +16,24 @@ class GuidancePage extends StatefulWidget {
   State<GuidancePage> createState() => _GuidancePageState();
 }
 
-class _GuidancePageState extends State<GuidancePage> with AutomaticKeepAliveClientMixin {
+class _GuidancePageState extends State<GuidancePage>
+    with AutomaticKeepAliveClientMixin {
   String _search = '';
   String _selectedFilter = 'All';
 
   @override
-  bool get wantKeepAlive => true;  
+  bool get wantKeepAlive => true;
   bool _wasError = false;
 
   List<GuidanceEntity> _filterGuidances(List<GuidanceEntity> guidances) {
     return guidances.where((guidance) {
-      bool matchesSearch = guidance.title
-          .toLowerCase()
-          .contains(_search.toLowerCase());
+      bool matchesSearch =
+          guidance.title.toLowerCase().contains(_search.toLowerCase());
 
       bool matchesStatus = _selectedFilter == 'All' ||
           (_selectedFilter == 'Approved' && guidance.status == 'approved') ||
-          (_selectedFilter == 'InProgress' && guidance.status == 'in-progress') ||
+          (_selectedFilter == 'InProgress' &&
+              guidance.status == 'in-progress') ||
           (_selectedFilter == 'Rejected' && guidance.status == 'rejected') ||
           (_selectedFilter == 'Updated' && guidance.status == 'updated');
 
@@ -40,11 +41,11 @@ class _GuidancePageState extends State<GuidancePage> with AutomaticKeepAliveClie
     }).toList();
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: BlocProvider(
         create: (context) => GuidanceStudentCubit()..displayGuidance(),
@@ -63,13 +64,14 @@ class _GuidancePageState extends State<GuidancePage> with AutomaticKeepAliveClie
             if (state is LoadGuidanceFailure) {
               return ErrorContent(
                 errorMessage: state.errorMessage,
-                onRetry: () => context.read<GuidanceStudentCubit>().displayGuidance(),
+                onRetry: () =>
+                    context.read<GuidanceStudentCubit>().displayGuidance(),
                 wasError: _wasError,
               );
             }
             if (state is GuidanceLoaded) {
-              List<GuidanceEntity> filteredGuidances = 
-                _filterGuidances(state.guidanceEntity.guidances);
+              List<GuidanceEntity> filteredGuidances =
+                  _filterGuidances(state.guidanceEntity.guidances);
 
               return CustomScrollView(
                 slivers: [
@@ -84,7 +86,7 @@ class _GuidancePageState extends State<GuidancePage> with AutomaticKeepAliveClie
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface, 
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     centerTitle: true,
@@ -98,14 +100,15 @@ class _GuidancePageState extends State<GuidancePage> with AutomaticKeepAliveClie
                         },
                         icon: Icon(
                           Icons.add,
-                          color: theme.colorScheme.onSurface, 
+                          color: theme.colorScheme.onSurface,
                         ),
                       )
                     ],
                     bottom: PreferredSize(
                       preferredSize: const Size.fromHeight(80),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         child: Row(
                           children: [
                             Expanded(

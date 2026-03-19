@@ -16,15 +16,17 @@ class LogBookPage extends StatefulWidget {
   State<LogBookPage> createState() => _LogBookPageState();
 }
 
-class _LogBookPageState extends State<LogBookPage> with AutomaticKeepAliveClientMixin {
+class _LogBookPageState extends State<LogBookPage>
+    with AutomaticKeepAliveClientMixin {
   String _search = '';
   SortMode _sortMode = SortMode.newest;
 
   @override
-  bool get wantKeepAlive => true;  
+  bool get wantKeepAlive => true;
   bool _wasError = false;
 
-  List<LogBookEntity> _getSortedAndFilteredLogBooks(List<LogBookEntity> logBooks) {
+  List<LogBookEntity> _getSortedAndFilteredLogBooks(
+      List<LogBookEntity> logBooks) {
     var filteredBooks = logBooks.where((logBook) {
       return logBook.title.toLowerCase().contains(_search.toLowerCase());
     }).toList();
@@ -63,13 +65,14 @@ class _LogBookPageState extends State<LogBookPage> with AutomaticKeepAliveClient
             if (state is LoadLogBookFailure) {
               return ErrorContent(
                 errorMessage: state.errorMessage,
-                onRetry: () => context.read<LogBookStudentCubit>().displayLogBook(),
+                onRetry: () =>
+                    context.read<LogBookStudentCubit>().displayLogBook(),
                 wasError: _wasError,
               );
             }
             if (state is LogBookLoaded) {
-              final sortedAndFilteredLogBooks = 
-                _getSortedAndFilteredLogBooks(state.logBookEntity.log_books);
+              final sortedAndFilteredLogBooks =
+                  _getSortedAndFilteredLogBooks(state.logBookEntity.log_books);
 
               return CustomScrollView(
                 slivers: [
@@ -84,7 +87,7 @@ class _LogBookPageState extends State<LogBookPage> with AutomaticKeepAliveClient
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface, 
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     centerTitle: true,
@@ -98,14 +101,15 @@ class _LogBookPageState extends State<LogBookPage> with AutomaticKeepAliveClient
                         },
                         icon: Icon(
                           Icons.add,
-                          color: theme.colorScheme.onSurface, 
+                          color: theme.colorScheme.onSurface,
                         ),
                       )
                     ],
                     bottom: PreferredSize(
                       preferredSize: const Size.fromHeight(80),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         child: Row(
                           children: [
                             Expanded(
@@ -138,8 +142,10 @@ class _LogBookPageState extends State<LogBookPage> with AutomaticKeepAliveClient
                           id: sortedAndFilteredLogBooks[index].id,
                           title: sortedAndFilteredLogBooks[index].title,
                           date: sortedAndFilteredLogBooks[index].date,
-                          lecturerNote: sortedAndFilteredLogBooks[index].lecturer_note,
-                          description: sortedAndFilteredLogBooks[index].activity,
+                          lecturerNote:
+                              sortedAndFilteredLogBooks[index].lecturer_note,
+                          description:
+                              sortedAndFilteredLogBooks[index].activity,
                           curentPage: 2,
                         ),
                       ),
