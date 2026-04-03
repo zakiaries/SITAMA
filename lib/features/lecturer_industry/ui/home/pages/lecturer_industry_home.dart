@@ -135,8 +135,8 @@ class _LecturerIndustryHomePageState extends State<LecturerIndustryHomePage> {
                             fontSize: 12,
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           prefixIcon: const Icon(Icons.search,
                               size: 15, color: Color(0xFF93B4F0)),
                         ),
@@ -153,8 +153,7 @@ class _LecturerIndustryHomePageState extends State<LecturerIndustryHomePage> {
               child: Row(
                 children: [
                   Expanded(
-                    child:
-                        _buildStatCard('${data.total_students}', 'Mahasiswa'),
+                    child: _buildStatCard('${data.total_students}', 'Mahasiswa'),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -162,8 +161,7 @@ class _LecturerIndustryHomePageState extends State<LecturerIndustryHomePage> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child:
-                        _buildStatCard('${data.new_logbooks}', 'Logbook Baru'),
+                    child: _buildStatCard('${data.new_logbooks}', 'Logbook Baru'),
                   ),
                 ],
               ),

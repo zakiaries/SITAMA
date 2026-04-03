@@ -221,12 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                       ),
-                      items: [
-                        'Student',
-                        'Lecturer',
-                        'Lecturer Industry',
-                        'Kaprodi'
-                      ]
+                      items: ['Student', 'Lecturer', 'Lecturer Industry', 'Kaprodi']
                           .map((role) => DropdownMenuItem(
                                 value: role,
                                 child: Text(role),

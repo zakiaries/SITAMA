@@ -312,9 +312,7 @@ class _KaprodiProfileState extends State<KaprodiProfile> {
               title,
               style: TextStyle(
                 fontSize: 13,
-                color: isDanger
-                    ? const Color(0xFF9B2F2F)
-                    : const Color(0xFF1A2050),
+                color: isDanger ? const Color(0xFF9B2F2F) : const Color(0xFF1A2050),
                 fontWeight: FontWeight.w600,
               ),
             ),

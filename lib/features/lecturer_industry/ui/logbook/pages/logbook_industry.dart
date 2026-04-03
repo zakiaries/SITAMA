@@ -197,7 +197,9 @@ class _LogbookIndustryPageState extends State<LogbookIndustryPage> {
           color: isActive ? const Color(0xFF0D2B6E) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? const Color(0xFF0D2B6E) : const Color(0xFFC8D8F0),
+            color: isActive
+                ? const Color(0xFF0D2B6E)
+                : const Color(0xFFC8D8F0),
             width: 0.5,
           ),
         ),
@@ -539,27 +541,11 @@ class _LogbookIndustryPageState extends State<LogbookIndustryPage> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Des'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Des'
     ];
     final days = [
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Minggu'
+      'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'
     ];
     return '${days[date.weekday - 1]}, ${date.day} ${months[date.month - 1]} ${date.year}';
   }

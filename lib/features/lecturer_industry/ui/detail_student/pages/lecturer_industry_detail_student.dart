@@ -43,8 +43,8 @@ class _LecturerIndustryDetailStudentPageState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5FB),
-      body:
-          BlocBuilder<LecturerIndustryDetailCubit, LecturerIndustryDetailState>(
+      body: BlocBuilder<LecturerIndustryDetailCubit,
+          LecturerIndustryDetailState>(
         builder: (context, state) {
           if (state is DetailLoaded) {
             return _buildContent(state.data);
@@ -78,8 +78,7 @@ class _LecturerIndustryDetailStudentPageState
                     Row(
                       children: [
                         GestureDetector(
-                          onTap:
-                              widget.onBack ?? (() => Navigator.pop(context)),
+                          onTap: widget.onBack ?? (() => Navigator.pop(context)),
                           child: Container(
                             width: 34,
                             height: 34,
@@ -186,13 +185,15 @@ class _LecturerIndustryDetailStudentPageState
                 crossAxisSpacing: 10,
                 childAspectRatio: 2.2,
                 children: [
-                  _buildInfoBox('Mulai Magang', _formatDate(data.start_date)),
+                  _buildInfoBox('Mulai Magang',
+                      _formatDate(data.start_date)),
                   _buildInfoBox(
-                      'Selesai', _formatDate(data.end_date ?? DateTime.now()),
+                      'Selesai',
+                      _formatDate(data.end_date ?? DateTime.now()),
                       color: const Color(0xFFFBBF24)),
+                  _buildInfoBox('Total Logbook', '${data.total_logbooks} entri'),
                   _buildInfoBox(
-                      'Total Logbook', '${data.total_logbooks} entri'),
-                  _buildInfoBox('Kehadiran',
+                      'Kehadiran',
                       '${data.attendance_percentage.toStringAsFixed(0)}%',
                       color: const Color(0xFF1A4BBB)),
                 ],
@@ -315,8 +316,7 @@ class _LecturerIndustryDetailStudentPageState
                               if (_activityController.text.isNotEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text(
-                                        'Catatan kerja berhasil ditambahkan'),
+                                    content: Text('Catatan kerja berhasil ditambahkan'),
                                     duration: Duration(seconds: 1),
                                   ),
                                 );
@@ -405,11 +405,12 @@ class _LecturerIndustryDetailStudentPageState
     );
   }
 
-  Widget _buildInfoBox(String label, String value, {Color? color}) {
+  Widget _buildInfoBox(String label, String value,
+      {Color? color}) {
     // Determine icon based on label
     IconData icon = Icons.calendar_today;
     Color bgColor = const Color(0xFFF0F4FF);
-
+    
     if (label.contains('Selesai')) {
       icon = Icons.check_circle_outline;
       bgColor = const Color(0xFFFEF3F0);
@@ -604,18 +605,8 @@ class _LecturerIndustryDetailStudentPageState
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Des'
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Des'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

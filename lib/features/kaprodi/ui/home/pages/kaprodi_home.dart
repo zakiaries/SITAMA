@@ -123,7 +123,8 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.fromBorderSide(
                                 BorderSide(
-                                  color: const Color.fromARGB(77, 251, 191, 36),
+                                  color:
+                                      const Color.fromARGB(77, 251, 191, 36),
                                 ),
                               ),
                             ),
@@ -175,7 +176,8 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                         Expanded(
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: 'Cari mahasiswa, dosen, industri...',
+                              hintText:
+                                  'Cari mahasiswa, dosen, industri...',
                               hintStyle: const TextStyle(
                                 color: Color(0xFF9FA8DA),
                                 fontSize: 12,
@@ -238,7 +240,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
                   // Quick Actions
                   const Text(
                     'Aksi Cepat',
@@ -314,8 +316,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                   _buildStudentCard(
                     initials: 'MZ',
                     name: 'Muhammad Zaki A.P.',
-                    nimAndCompany:
-                        '3.34.23.2.15 · IK-3C · PT. Telkom Indonesia',
+                    nimAndCompany: '3.34.23.2.15 · IK-3C · PT. Telkom Indonesia',
                     advisor: 'Kuwat Santoso, M.Kom',
                     status: 'Aktif',
                     statusColor: const Color(0xFFE8F0FE),

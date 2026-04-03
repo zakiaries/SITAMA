@@ -87,8 +87,7 @@ class _KaprodiDataDosenState extends State<KaprodiDataDosen> {
                     color: Colors.white.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
                     children: [
                       Icon(
@@ -129,8 +128,7 @@ class _KaprodiDataDosenState extends State<KaprodiDataDosen> {
                 children: List.generate(
                   _tabs.length,
                   (index) => Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                     child: GestureDetector(
                       onTap: () {
                         setState(() {

@@ -18,7 +18,8 @@ class Failure extends LecturerIndustryProfileState {
 }
 
 // ──── CUBIT ────
-class LecturerIndustryProfileCubit extends Cubit<LecturerIndustryProfileState> {
+class LecturerIndustryProfileCubit
+    extends Cubit<LecturerIndustryProfileState> {
   LecturerIndustryProfileCubit() : super(Loading());
 
   void displayProfile() async {
