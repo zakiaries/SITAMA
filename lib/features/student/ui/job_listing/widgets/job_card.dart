@@ -6,10 +6,10 @@ class JobCard extends StatelessWidget {
   final VoidCallback onApply;
 
   const JobCard({
-    Key? key,
+    super.key,
     required this.job,
     required this.onApply,
-  }) : super(key: key);
+  });
 
   Color _getColorFromLogo(String logo) {
     final colors = {

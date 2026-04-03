@@ -7,12 +7,12 @@ class SearchFilterJob extends StatefulWidget {
   final String selectedCategory;
 
   const SearchFilterJob({
-    Key? key,
+    super.key,
     required this.onSearch,
     required this.onCategoryFilter,
     required this.categories,
     required this.selectedCategory,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchFilterJob> createState() => _SearchFilterJobState();

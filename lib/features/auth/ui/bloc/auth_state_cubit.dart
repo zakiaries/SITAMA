@@ -16,6 +16,10 @@ class AuthStateCubit extends Cubit<AuthState>{
 
       if (role == 'Student'){
         emit(AuthenticatedStudent());
+      } else if (role == 'Lecturer Industry'){
+        emit(AuthenticatedLecturerIndustry());
+      } else if (role == 'Kaprodi'){
+        emit(AuthenticatedKaprodi());
       } else {
         emit(AuthenticatedLecturer());
       }

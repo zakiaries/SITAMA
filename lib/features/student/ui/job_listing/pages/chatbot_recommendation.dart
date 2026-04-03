@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ChatbotRecommendationPage extends StatefulWidget {
-  const ChatbotRecommendationPage({Key? key}) : super(key: key);
+  const ChatbotRecommendationPage({super.key});
 
   @override
   State<ChatbotRecommendationPage> createState() =>

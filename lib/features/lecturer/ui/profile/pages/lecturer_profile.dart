@@ -5,7 +5,6 @@ import 'package:sitama/features/lecturer/ui/profile/bloc/profile_lecturer_cubit.
 import 'package:sitama/features/lecturer/ui/profile/bloc/profile_lecturer_state.dart';
 import 'package:sitama/features/lecturer/ui/profile/pages/faq.dart';
 import 'package:sitama/features/shared/ui/widgets/edit_photo_profile_pop_up.dart';
-import 'package:sitama/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +12,6 @@ import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/core/config/themes/theme_provider.dart';
 import 'package:sitama/features/lecturer/domain/entities/lecturer_profile_entity.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LecturerProfilePage extends StatefulWidget {
   const LecturerProfilePage({super.key});
@@ -33,9 +31,7 @@ class Lecturer_ProfilePageState extends State<LecturerProfilePage> with Automati
     final isDarkMode = themeProvider.isDarkMode;
 
     return BlocProvider(
-      create: (context) => ProfileLecturerCubit(
-        prefs: sl<SharedPreferences>(),
-      )..displayLecturer(),
+      create: (context) => ProfileLecturerCubit()..displayLecturer(),
       child: BlocBuilder<ProfileLecturerCubit, ProfileLecturerState>(
         builder: (context, state) {
           if (state is LecturerLoading) {

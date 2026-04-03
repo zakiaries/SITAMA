@@ -1,38 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sitama/features/lecturer/data/models/score_request.dart';
-import 'package:sitama/features/lecturer/domain/repositories/lecturer.dart';
-import 'package:sitama/features/lecturer/domain/usecases/get_assessmet.dart';
+import 'package:sitama/features/lecturer/data/static_data.dart';
 import 'package:sitama/features/lecturer/ui/input_score/bloc/assessment_state.dart';
-import 'package:sitama/service_locator.dart';
 
 class AssessmentCubit extends Cubit<AssessmentState> {
-  final LecturerRepository _repository;
-  AssessmentCubit() : _repository = sl<LecturerRepository>(),
-  super(AssessmentLoading());
+  AssessmentCubit() : super(AssessmentLoading());
 
   void fetchAssessments(int id) async {
-    final result = await sl<GetAssessments>().call(param: id);
-
-    result.fold(
-      (error) {
-        emit(LoadAssessmentFailure(errorMessage: error.message));
-      },
-      (data) {
-        emit(AssessmentLoaded(assessments: data));
-      },
-    );
+    try {
+      // Emit static assessment data with a small delay to simulate loading
+      await Future.delayed(Duration(milliseconds: 500));
+      final staticData = getStaticAssessmentData(id);
+      emit(AssessmentLoaded(assessments: staticData));
+    } catch (e) {
+      emit(LoadAssessmentFailure(errorMessage: e.toString()));
+    }
   }
 
-  Future<void> submitScores(int id, List<ScoreRequest> scores) async {
-
-    final result = await _repository.submitScores(
-      id,
-      scores.map((e) => e.toMap()).toList(),
-    );
-    result.fold(
-      (error) => emit(AssessmentSubmissionFailed(errorMessage: error)),
-      (_) => emit(AssessmentSubmittedSuccess()),
-    );
+  Future<void> submitScores(int id, List<dynamic> scores) async {
+    try {
+      // Simulate score submission
+      await Future.delayed(Duration(milliseconds: 800));
+      emit(AssessmentSubmittedSuccess());
+      // Reload assessments after submission
+      await Future.delayed(Duration(milliseconds: 300));
+      fetchAssessments(id);
+    } catch (e) {
+      emit(AssessmentSubmissionFailed(errorMessage: e.toString()));
+    }
   }
-
 }

@@ -8,11 +8,8 @@ import 'package:sitama/features/lecturer/ui/detail_student/widgets/section/tab_g
 import 'package:sitama/features/lecturer/ui/detail_student/widgets/section/tab_logbook/lecturer_log_book_tab.dart';
 import 'package:sitama/features/lecturer/ui/detail_student/widgets/section/tab_logbook/notification_manager.dart';
 import 'package:sitama/features/lecturer/ui/detail_student/widgets/utils/statistics.dart';
-import 'package:sitama/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-// Key Features :
 // Captures student and industry internship details
 // Manages internship status approval
 
@@ -31,7 +28,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // Faculty capabilities:
 // - View student activity logs
 // - Comment on log entries
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailStudentPage extends StatefulWidget {
   final int id;
@@ -93,15 +89,15 @@ class _DetailStudentPageState extends State<DetailStudentPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => DetailStudentDisplayCubit(
-          prefs: sl<SharedPreferences>(),
-        )..displayStudent(widget.id),
-        child: BlocBuilder<DetailStudentDisplayCubit, DetailStudentDisplayState>(
+        create: (context) =>
+            DetailStudentDisplayCubit()..displayStudent(widget.id),
+        child:
+            BlocBuilder<DetailStudentDisplayCubit, DetailStudentDisplayState>(
           builder: (context, state) {
             if (state is DetailLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             // Handle failure state with cached data
             if (state is DetailFailure) {
               if (state.isOffline && state.cachedData != null) {
@@ -114,7 +110,9 @@ class _DetailStudentPageState extends State<DetailStudentPage>
               return ErrorView(
                 errorMessage: state.errorMessage,
                 onRetry: () {
-                  context.read<DetailStudentDisplayCubit>().displayStudent(widget.id);
+                  context
+                      .read<DetailStudentDisplayCubit>()
+                      .displayStudent(widget.id);
                 },
               );
             }
@@ -244,7 +242,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: _tabBar,
