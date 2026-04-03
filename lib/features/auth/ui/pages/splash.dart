@@ -4,7 +4,9 @@ import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/features/auth/ui/bloc/auth_state.dart';
 import 'package:sitama/features/auth/ui/bloc/auth_state_cubit.dart';
 import 'package:sitama/features/auth/ui/pages/welcome.dart';
+import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
+import 'package:sitama/features/lecturer_industry/ui/lecturer_industry_shell.dart';
 import 'package:sitama/features/student/ui/home/pages/home.dart';
 
 class SplashPage extends StatefulWidget {
@@ -59,6 +61,12 @@ class _SplashPageState extends State<SplashPage> {
             }
             if (state is AuthenticatedLecturer) {
               return LecturerHomePage();
+            }
+            if (state is AuthenticatedLecturerIndustry) {
+              return LecturerIndustryShell();
+            }
+            if (state is AuthenticatedKaprodi) {
+              return const KaprodiShell();
             }
             if (state is UnAuthenticated) {
               return WelcomePages();

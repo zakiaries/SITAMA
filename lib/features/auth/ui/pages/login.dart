@@ -4,6 +4,8 @@ import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/core/shared/widgets/alert/custom_snackbar.dart';
 import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
+import 'package:sitama/features/lecturer_industry/ui/lecturer_industry_shell.dart';
+import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/student/ui/home/pages/home.dart';
 
 class LoginPage extends StatefulWidget {
@@ -90,6 +92,20 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(
             builder: (context) => HomePage(),
+          ),
+        );
+      } else if (_selectedRole == 'Lecturer Industry') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LecturerIndustryShell(),
+          ),
+        );
+      } else if (_selectedRole == 'Kaprodi') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const KaprodiShell(),
           ),
         );
       } else {
@@ -198,14 +214,14 @@ class _LoginPageState extends State<LoginPage> {
 
                     // Role Selection Dropdown
                     DropdownButtonFormField<String>(
-                      value: _selectedRole,
+                      initialValue: _selectedRole,
                       decoration: InputDecoration(
                         labelText: 'Pilih Role',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                       ),
-                      items: ['Student', 'Lecturer']
+                      items: ['Student', 'Lecturer', 'Lecturer Industry', 'Kaprodi']
                           .map((role) => DropdownMenuItem(
                                 value: role,
                                 child: Text(role),

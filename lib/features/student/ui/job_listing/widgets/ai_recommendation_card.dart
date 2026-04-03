@@ -7,10 +7,10 @@ class AiRecommendationCard extends StatelessWidget {
   final VoidCallback? onApply;
 
   const AiRecommendationCard({
-    Key? key,
+    super.key,
     required this.recommendation,
     this.onApply,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

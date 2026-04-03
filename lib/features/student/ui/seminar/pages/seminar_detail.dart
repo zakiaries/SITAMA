@@ -4,7 +4,7 @@ import 'package:sitama/features/student/domain/entities/seminar_entity.dart';
 class SeminarDetailPage extends StatefulWidget {
   final SeminarEntity seminar;
 
-  const SeminarDetailPage({Key? key, required this.seminar}) : super(key: key);
+  const SeminarDetailPage({super.key, required this.seminar});
 
   @override
   State<SeminarDetailPage> createState() => _SeminarDetailPageState();

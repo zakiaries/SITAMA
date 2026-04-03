@@ -6,7 +6,7 @@ import 'package:sitama/features/student/ui/job_listing/widgets/ai_recommendation
 import 'package:sitama/service_locator.dart';
 
 class JobListingPage extends StatefulWidget {
-  const JobListingPage({Key? key}) : super(key: key);
+  const JobListingPage({super.key});
 
   @override
   State<JobListingPage> createState() => _JobListingPageState();
@@ -322,7 +322,7 @@ class _JobListingPageState extends State<JobListingPage> {
                                       },
                                     ),
                                   );
-                                }).toList(),
+                                }),
                               ],
                             ),
                           ),

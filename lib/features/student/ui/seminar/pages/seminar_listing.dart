@@ -6,7 +6,7 @@ import 'package:sitama/features/student/ui/seminar/bloc/seminar_cubit.dart';
 import 'package:sitama/service_locator.dart';
 
 class SeminarListingPage extends StatefulWidget {
-  const SeminarListingPage({Key? key}) : super(key: key);
+  const SeminarListingPage({super.key});
 
   @override
   State<SeminarListingPage> createState() => _SeminarListingPageState();
@@ -144,10 +144,8 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                           SizedBox(height: 16),
 
                           // Seminars Grid/List
-                          ...state.seminars
-                              .map((seminar) =>
-                                  _buildSeminarCard(seminar, context))
-                              .toList(),
+                          ...state.seminars.map(
+                              (seminar) => _buildSeminarCard(seminar, context)),
 
                           SizedBox(height: 24),
                         ],
