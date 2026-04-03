@@ -17,7 +17,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -37,10 +38,10 @@ class _SplashPageState extends State<SplashPage> {
         ),
         Center(
           child: Image.asset(
-                AppImages.logo,
-                width: 200,  
-                height: 150, 
-              ),
+            AppImages.logo,
+            width: 200,
+            height: 150,
+          ),
         ),
       ]),
     );

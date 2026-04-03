@@ -226,7 +226,8 @@ DetailStudentEntity getStaticDetailStudentData(int studentId) {
         title: 'Bimbingan Progress Report 1',
         activity: 'Review progress minggu ke-1 dan ke-2',
         date: DateTime(2024, 2, 15),
-        lecturer_note: 'Progress berjalan baik, lanjutkan dengan tahap berikutnya',
+        lecturer_note:
+            'Progress berjalan baik, lanjutkan dengan tahap berikutnya',
         name_file: 'progress_1.pdf',
         status: 'Disetujui',
       ),

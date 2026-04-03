@@ -78,7 +78,7 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
               ),
             ],
             child: BlocListener<SelectionBloc, SelectionState>(
-              listenWhen: (previous, current) => 
+              listenWhen: (previous, current) =>
                   previous.archivedIds != current.archivedIds,
               listener: (context, state) {
                 context.read<LecturerDisplayCubit>().displayLecturer();
@@ -124,9 +124,10 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
 
   Widget _buildLoadedState(LecturerLoaded state) {
     LecturerHomeEntity data = state.lecturerHomeEntity;
-    Set<LecturerStudentsEntity> students = _filterStudents(data.students!.toSet());
+    Set<LecturerStudentsEntity> students =
+        _filterStudents(data.students!.toSet());
 
-    return BlocBuilder<SelectionBloc, SelectionState>( 
+    return BlocBuilder<SelectionBloc, SelectionState>(
       builder: (context, selectionState) {
         return Stack(
           children: [
@@ -152,7 +153,7 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
                 ],
               ),
             ),
-            if (selectionState.isSelectionMode && 
+            if (selectionState.isSelectionMode &&
                 selectionState.selectedIds.isNotEmpty)
               _buildFloatingActionButton(context, selectionState.selectedIds),
           ],
@@ -161,7 +162,8 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
     );
   }
 
-  Set<LecturerStudentsEntity> _filterStudents(Set<LecturerStudentsEntity> students) {
+  Set<LecturerStudentsEntity> _filterStudents(
+      Set<LecturerStudentsEntity> students) {
     return students.where((student) {
       return student.name.toLowerCase().contains(_search.toLowerCase()) ||
           student.major.toLowerCase().contains(_search.toLowerCase());
@@ -174,7 +176,8 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
     SelectionState selectionState,
   ) {
     return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+      physics:
+          const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
       slivers: [
         SliverToBoxAdapter(
           child: Container(
@@ -201,7 +204,7 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: StudentList(
-            students: students.toList(), 
+            students: students.toList(),
             searchAnimation: _searchAnimation,
             animationController: _animationController,
             selectionState: selectionState,
@@ -211,7 +214,8 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
     );
   }
 
-  Widget _buildFloatingActionButton(BuildContext context, List<int> selectedIds) {
+  Widget _buildFloatingActionButton(
+      BuildContext context, List<int> selectedIds) {
     return Positioned(
       bottom: 16,
       right: 16,

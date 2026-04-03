@@ -44,163 +44,161 @@ class _LecturerIndustryProfilePageState
     return SingleChildScrollView(
       child: Column(
         children: [
-        // Header - Full Width
-        Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Color(0xFF0D2B6E),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(32),
-              bottomRight: Radius.circular(32),
+          // Header - Full Width
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF0D2B6E),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 24, 18, 36),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Container(
+                        width: 76,
+                        height: 76,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.2),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 2.5,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(profile.name),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFFBBF24),
+                        ),
+                        child: const Icon(Icons.edit,
+                            size: 12, color: Color(0xFF1A1A2E)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    profile.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Pembimbing Industri · ${profile.company_name}',
+                    style: const TextStyle(
+                      color: Color(0xFF93B4F0),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    profile.division,
+                    style: const TextStyle(
+                      color: Color(0xFF93B4F0),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 24, 18, 36),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+          // Stats
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 18, 14, 16),
+            child: GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 1.85,
               children: [
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                          width: 76,
-                          height: 76,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.2),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
-                              width: 2.5,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              _getInitials(profile.name),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFFFBBF24),
-                          ),
-                          child: const Icon(Icons.edit,
-                              size: 12, color: Color(0xFF1A1A2E)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      profile.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Pembimbing Industri · ${profile.company_name}',
-                      style: const TextStyle(
-                        color: Color(0xFF93B4F0),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      profile.division,
-                      style: const TextStyle(
-                        color: Color(0xFF93B4F0),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                _buildStatBox(
+                    'Total Mahasiswa', '${profile.total_students} orang'),
+                _buildStatBox(
+                    'Sedang Aktif', '${profile.active_students} orang',
+                    color: const Color(0xFF1A4BBB)),
+                _buildStatBox(
+                    'Telah Dinilai', '${profile.evaluated_students} orang'),
+                _buildStatBox(
+                    'Rata-rata Nilai', profile.average_score.toStringAsFixed(1),
+                    color: const Color(0xFF1A4BBB)),
+              ],
+            ),
+          ),
+          // Divider
+          Container(
+            height: 1,
+            color: const Color(0xFFE8F0FE),
+            margin: const EdgeInsets.symmetric(vertical: 6),
+          ),
+          // Menu Items
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 16),
+            child: Column(
+              children: [
+                _buildMenuItem(
+                  'Edit Profil',
+                  icon: Icons.person,
+                  onTap: () {},
                 ),
-              ),
+                _buildMenuItem(
+                  'Pengaturan',
+                  icon: Icons.settings,
+                  onTap: () {},
+                ),
+                _buildMenuItem(
+                  'Notifikasi',
+                  icon: Icons.notifications,
+                  onTap: () {},
+                ),
+                _buildMenuItem(
+                  'Help & Support',
+                  icon: Icons.help,
+                  onTap: () {},
+                ),
+                _buildMenuItem(
+                  'Ganti Password',
+                  icon: Icons.lock,
+                  onTap: () {},
+                ),
+                _buildMenuItem(
+                  'Logout',
+                  icon: Icons.logout,
+                  isDanger: true,
+                  onTap: () {},
+                ),
+              ],
             ),
-            // Stats
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 18, 14, 16),
-              child: GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 1.85,
-                children: [
-                  _buildStatBox('Total Mahasiswa', '${profile.total_students} orang'),
-                  _buildStatBox(
-                      'Sedang Aktif',
-                      '${profile.active_students} orang',
-                      color: const Color(0xFF1A4BBB)),
-                  _buildStatBox(
-                      'Telah Dinilai',
-                      '${profile.evaluated_students} orang'),
-                  _buildStatBox(
-                      'Rata-rata Nilai',
-                      profile.average_score.toStringAsFixed(1),
-                      color: const Color(0xFF1A4BBB)),
-                ],
-              ),
-            ),
-            // Divider
-            Container(
-              height: 1,
-              color: const Color(0xFFE8F0FE),
-              margin: const EdgeInsets.symmetric(vertical: 6),
-            ),
-            // Menu Items
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 16),
-              child: Column(
-                children: [
-                  _buildMenuItem(
-                    'Edit Profil',
-                    icon: Icons.person,
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    'Pengaturan',
-                    icon: Icons.settings,
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    'Notifikasi',
-                    icon: Icons.notifications,
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    'Help & Support',
-                    icon: Icons.help,
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    'Ganti Password',
-                    icon: Icons.lock,
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    'Logout',
-                    icon: Icons.logout,
-                    isDanger: true,
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
