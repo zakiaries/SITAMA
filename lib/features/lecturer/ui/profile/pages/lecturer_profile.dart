@@ -20,7 +20,8 @@ class LecturerProfilePage extends StatefulWidget {
   State<LecturerProfilePage> createState() => Lecturer_ProfilePageState();
 }
 
-class Lecturer_ProfilePageState extends State<LecturerProfilePage> with AutomaticKeepAliveClientMixin {
+class Lecturer_ProfilePageState extends State<LecturerProfilePage>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -38,7 +39,6 @@ class Lecturer_ProfilePageState extends State<LecturerProfilePage> with Automati
             return const Center(child: CircularProgressIndicator());
           }
           if (state is LecturerLoaded) {
-
             return Scaffold(
               body: SingleChildScrollView(
                 child: Column(
@@ -82,7 +82,7 @@ class Lecturer_ProfilePageState extends State<LecturerProfilePage> with Automati
 
   Padding _settingsList(BuildContext context, bool isDarkMode) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -100,8 +100,7 @@ class Lecturer_ProfilePageState extends State<LecturerProfilePage> with Automati
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => LecturerFAQPage()),
+                MaterialPageRoute(builder: (context) => LecturerFAQPage()),
               );
             },
           ),
@@ -134,7 +133,6 @@ class Lecturer_ProfilePageState extends State<LecturerProfilePage> with Automati
     );
   }
 
-  
   Stack _header(LecturerProfileEntity lecturer) {
     return Stack(
       children: [

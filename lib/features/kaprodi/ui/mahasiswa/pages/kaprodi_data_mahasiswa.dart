@@ -115,7 +115,8 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
                 preferredSize: const Size.fromHeight(45),
                 child: Container(
                   color: const Color(0xFF1A1A3E),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
