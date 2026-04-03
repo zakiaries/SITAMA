@@ -44,7 +44,8 @@ class IndustryScoreCubit extends Cubit<IndustryScoreState> {
     try {
       await Future.delayed(const Duration(milliseconds: 800));
       emit(ScoreSaved(
-          message: 'Penilaian berhasil disimpan dan dikirim ke sistem'));
+          message:
+              'Penilaian berhasil disimpan dan dikirim ke sistem'));
     } catch (e) {
       emit(Failure(errorMessage: e.toString()));
     }

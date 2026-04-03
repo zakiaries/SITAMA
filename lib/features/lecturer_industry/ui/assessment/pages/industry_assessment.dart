@@ -14,7 +14,8 @@ class IndustryAssessmentPage extends StatefulWidget {
   });
 
   @override
-  State<IndustryAssessmentPage> createState() => _IndustryAssessmentPageState();
+  State<IndustryAssessmentPage> createState() =>
+      _IndustryAssessmentPageState();
 }
 
 class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
@@ -165,8 +166,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border:
-                      Border.all(color: const Color(0xFFD0DDF5), width: 0.5),
+                  border: Border.all(
+                      color: const Color(0xFFD0DDF5), width: 0.5),
                 ),
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -203,7 +204,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                                 child: LinearProgressIndicator(
                                   value: scores.average_score / 100,
                                   minHeight: 8,
-                                  backgroundColor: const Color(0xFFD8E8F8),
+                                  backgroundColor:
+                                      const Color(0xFFD8E8F8),
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(
                                     Color(0xFF1A4BBB),
@@ -237,8 +239,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border:
-                      Border.all(color: const Color(0xFFD0DDF5), width: 0.5),
+                  border: Border.all(
+                      color: const Color(0xFFD0DDF5), width: 0.5),
                 ),
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -258,7 +260,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                       controller: _notesController,
                       maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: 'Catatan akhir untuk mahasiswa...',
+                        hintText:
+                            'Catatan akhir untuk mahasiswa...',
                         filled: true,
                         fillColor: const Color(0xFFF7F9FF),
                         border: OutlineInputBorder(
@@ -283,7 +286,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    _cubit.saveScores(widget.studentId, _notesController.text);
+                    _cubit.saveScores(
+                        widget.studentId, _notesController.text);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D2B6E),
