@@ -726,7 +726,8 @@ class _KaprodiDataDosenState extends State<KaprodiDataDosen> {
                         MaterialPageRoute(
                           builder: (context) => KaprodiDosenDetail(
                             dosenName: dosen['name'],
-                            students: List<Map<String, dynamic>>.from(dosen['students']),
+                            students: List<Map<String, dynamic>>.from(
+                                dosen['students']),
                           ),
                         ),
                       );
@@ -744,7 +745,7 @@ class _KaprodiDataDosenState extends State<KaprodiDataDosen> {
 
   Widget _buildDosenCard(Map<String, dynamic> dosen) {
     final bgColor = _parseColor(dosen['bgColor'] as String);
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -819,7 +820,8 @@ class _KaprodiDataDosenState extends State<KaprodiDataDosen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: (dosen['count'] as int) / (dosen['maxLoad'] as int),
+                          value: (dosen['count'] as int) /
+                              (dosen['maxLoad'] as int),
                           minHeight: 6,
                           backgroundColor: const Color(0xFFD0D6EB),
                           valueColor: AlwaysStoppedAnimation<Color>(bgColor),
