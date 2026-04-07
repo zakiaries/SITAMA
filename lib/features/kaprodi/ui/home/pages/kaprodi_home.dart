@@ -123,8 +123,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.fromBorderSide(
                                 BorderSide(
-                                  color:
-                                      const Color.fromARGB(77, 251, 191, 36),
+                                  color: const Color.fromARGB(77, 251, 191, 36),
                                 ),
                               ),
                             ),
@@ -176,8 +175,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                         Expanded(
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText:
-                                  'Cari mahasiswa, dosen, industri...',
+                              hintText: 'Cari mahasiswa, dosen, industri...',
                               hintStyle: const TextStyle(
                                 color: Color(0xFF9FA8DA),
                                 fontSize: 12,
@@ -218,29 +216,29 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                         subtitleColor: const Color(0xFF3D5AF1),
                       ),
                       _buildStatCard(
-                        title: 'Belum Ada Dosen',
+                        title: 'Belum Dospem',
                         value: '5',
                         subtitle: 'Tugaskan sekarang ›',
                         subtitleColor: const Color(0xFFE53E3E),
                         valueColor: const Color(0xFFE53E3E),
                       ),
                       _buildStatCard(
-                        title: 'Menunggu Verifikasi',
+                        title: 'Verif. Industri',
                         value: '3',
                         subtitle: 'Akun industri baru ›',
                         subtitleColor: const Color(0xFF7C3AED),
                         valueColor: const Color(0xFF7C3AED),
                       ),
                       _buildStatCard(
-                        title: 'Seminar Bulan Ini',
-                        value: '3',
-                        subtitle: '2 terjadwal ›',
+                        title: 'Seminar',
+                        value: '4',
+                        subtitle: 'Terjadwal ›',
                         subtitleColor: const Color(0xFF1A4BBB),
                         valueColor: const Color(0xFF1A4BBB),
                       ),
                     ],
                   ),
-                    const SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // Quick Actions
                   const Text(
                     'Aksi Cepat',
@@ -261,29 +259,29 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                     children: [
                       _buildQuickActionCard(
                         icon: Icons.person_add,
-                        title: 'Tugaskan',
-                        subtitle: 'Dosen Pembimbing',
+                        title: 'Tugaskan Dosen',
+                        subtitle: '5 belum ada',
                         bgColor: const Color(0xFFFFF8E1),
                         iconColor: const Color(0xFFF59E0B),
                       ),
                       _buildQuickActionCard(
                         icon: Icons.verified,
-                        title: 'Verifikasi',
-                        subtitle: 'Akun Industri',
+                        title: 'Verifikasi Industri',
+                        subtitle: '3 menunggu',
                         bgColor: const Color(0xFFF3E8FF),
                         iconColor: const Color(0xFF7C3AED),
                       ),
                       _buildQuickActionCard(
                         icon: Icons.calendar_today,
-                        title: 'Jadwalkan',
-                        subtitle: 'Seminar Magang',
+                        title: 'Seminar',
+                        subtitle: '4 terjadwal',
                         bgColor: const Color(0xFFE8F0FE),
                         iconColor: const Color(0xFF1A4BBB),
                       ),
                       _buildQuickActionCard(
                         icon: Icons.receipt,
-                        title: 'Verifikasi',
-                        subtitle: 'Surat Penerimaan',
+                        title: 'Data Dosen',
+                        subtitle: '12 dosen',
                         bgColor: const Color(0xFFE6F4EA),
                         iconColor: const Color(0xFF1E6E3E),
                       ),
@@ -316,7 +314,8 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                   _buildStudentCard(
                     initials: 'MZ',
                     name: 'Muhammad Zaki A.P.',
-                    nimAndCompany: '3.34.23.2.15 · IK-3C · PT. Telkom Indonesia',
+                    nimAndCompany:
+                        '3.34.23.2.15 · IK-3C · PT. Telkom Indonesia',
                     advisor: 'Kuwat Santoso, M.Kom',
                     status: 'Aktif',
                     statusColor: const Color(0xFFE8F0FE),
@@ -328,7 +327,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                     initials: 'VC',
                     name: 'Vincencius Kurnia Putra',
                     nimAndCompany: '3.34.23.2.24 · IK-3C · PT. BNI',
-                    status: 'Belum Dosen',
+                    status: 'Belum Dospem',
                     statusColor: const Color(0xFFFCE8E6),
                     statusTextColor: const Color(0xFF9B2F2F),
                     initialsColor: const Color(0xFFFCE8E6),
@@ -472,7 +471,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
           width: 0.5,
         ),
       ),
-      padding: const EdgeInsets.all(9),
+      padding: const EdgeInsets.all(13),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -505,16 +504,16 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                     Text(
                       name,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF1A2050),
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       nimAndCompany,
                       style: const TextStyle(
-                        fontSize: 9,
+                        fontSize: 10,
                         color: Color(0xFF8A9BC0),
                         fontWeight: FontWeight.w500,
                       ),
@@ -542,19 +541,19 @@ class _KaprodiHomeState extends State<KaprodiHome> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Container(
             color: const Color(0xFFEEF0FA),
             height: 0.5,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           if (advisor != null)
             Row(
               children: [
                 const Text(
-                  'Pembimbing: ',
+                  'Dospem: ',
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 10,
                     color: Color(0xFF8A9BC0),
                     fontWeight: FontWeight.w500,
                   ),
@@ -563,7 +562,7 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                   child: Text(
                     advisor,
                     style: const TextStyle(
-                      fontSize: 8,
+                      fontSize: 10,
                       color: Color(0xFF1A2050),
                       fontWeight: FontWeight.w700,
                     ),
@@ -578,28 +577,32 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                 Expanded(
                   child: Text(
                     'Belum ada dosen pembimbing',
-                    style: TextStyle(
-                      fontSize: 8,
-                      color: const Color(0xFFEA4335),
-                      fontStyle: FontStyle.italic,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFFEA4335),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 3,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
-                    backgroundColor: const Color(0xFF1A1A3E),
-                  ),
-                  child: const Text(
-                    'Tugaskan',
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A3E),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Tugaskan',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

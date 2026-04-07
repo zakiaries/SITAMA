@@ -32,90 +32,55 @@ class _KaprodiManajemenSeminarState extends State<KaprodiManajemenSeminar>
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              backgroundColor: const Color(0xFF1A1A3E),
+              backgroundColor: Colors.transparent,
               pinned: true,
               elevation: 0,
+              shadowColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
               automaticallyImplyLeading: false,
               expandedHeight: 0,
               toolbarHeight: 70,
-              flexibleSpace: Container(
-                color: const Color(0xFF1A1A3E),
-                padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Color(0xFFE8EAF6),
-                        size: 16,
-                      ),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints:
-                          const BoxConstraints(minWidth: 34, minHeight: 34),
-                    ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Manajemen Seminar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.add,
-                        color: Color(0xFFE8EAF6),
-                        size: 16,
-                      ),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints:
-                          const BoxConstraints(minWidth: 34, minHeight: 34),
-                    ),
-                  ],
+              flexibleSpace: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(28),
+                  bottomRight: Radius.circular(28),
                 ),
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(40),
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    labelColor: const Color(0xFF1A1A3E),
-                    unselectedLabelColor: const Color(0xFF5A6E90),
-                    indicator: BoxDecoration(
-                      color: const Color(0xFF1A1A3E),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    unselectedLabelStyle: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    labelStyle: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    tabs: const [
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text('Akan Datang (2)'),
+                child: Container(
+                  color: const Color(0xFF1A1A3E),
+                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Color(0xFFE8EAF6),
+                          size: 16,
+                        ),
+                        onPressed: () {},
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            const BoxConstraints(minWidth: 34, minHeight: 34),
                       ),
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text('Belum Jadwal (1)'),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Manajemen Seminar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text('Selesai (3)'),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.add,
+                          color: Color(0xFFE8EAF6),
+                          size: 16,
+                        ),
+                        onPressed: () {},
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            const BoxConstraints(minWidth: 34, minHeight: 34),
                       ),
                     ],
                   ),
@@ -124,12 +89,35 @@ class _KaprodiManajemenSeminarState extends State<KaprodiManajemenSeminar>
             ),
           ];
         },
-        body: TabBarView(
-          controller: _tabController,
+        body: Column(
           children: [
-            _buildSeminarList(),
-            _buildSeminarList(),
-            _buildSeminarList(),
+            // Tab Pills
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildTabPill(0, 'Akan Datang (2)'),
+                    SizedBox(width: 10),
+                    _buildTabPill(1, 'Belum Jadwal (1)'),
+                    SizedBox(width: 10),
+                    _buildTabPill(2, 'Selesai (3)'),
+                  ],
+                ),
+              ),
+            ),
+            // Content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildSeminarList(),
+                  _buildSeminarList(),
+                  _buildSeminarList(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -170,6 +158,41 @@ class _KaprodiManajemenSeminarState extends State<KaprodiManajemenSeminar>
           statusTextColor: const Color(0xFF1A3A8E),
         ),
       ],
+    );
+  }
+
+  Widget _buildTabPill(int index, String label) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _tabController.animateTo(index);
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: _tabController.index == index
+              ? const Color(0xFF1A1A3E)
+              : Colors.white,
+          border: Border.all(
+            color: _tabController.index == index
+                ? const Color(0xFF1A1A3E)
+                : const Color(0xFFC5CDE2),
+            width: 1.2,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: _tabController.index == index
+                ? Colors.white
+                : const Color(0xFF1A2050),
+          ),
+        ),
+      ),
     );
   }
 

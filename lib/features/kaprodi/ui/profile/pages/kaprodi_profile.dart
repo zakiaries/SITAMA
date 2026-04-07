@@ -150,6 +150,7 @@ class _KaprodiProfileState extends State<KaprodiProfile> {
                   // Info Grid
                   GridView.count(
                     crossAxisCount: 2,
+                    childAspectRatio: 2.2,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                     shrinkWrap: true,
@@ -205,12 +206,6 @@ class _KaprodiProfileState extends State<KaprodiProfile> {
                     title: 'Kelola Akun Dosen',
                     bgColor: const Color(0xFFF3E8FF),
                     iconColor: const Color(0xFF6D28D9),
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.verified,
-                    title: 'Verifikasi Industri',
-                    bgColor: const Color(0xFFE6F4EA),
-                    iconColor: const Color(0xFF1E6E3E),
                   ),
                   _buildMenuItem(
                     icon: Icons.notifications,
@@ -312,7 +307,9 @@ class _KaprodiProfileState extends State<KaprodiProfile> {
               title,
               style: TextStyle(
                 fontSize: 13,
-                color: isDanger ? const Color(0xFF9B2F2F) : const Color(0xFF1A2050),
+                color: isDanger
+                    ? const Color(0xFF9B2F2F)
+                    : const Color(0xFF1A2050),
                 fontWeight: FontWeight.w600,
               ),
             ),
