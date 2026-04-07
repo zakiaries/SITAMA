@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sitama/features/kaprodi/ui/home/pages/kaprodi_home.dart';
 import 'package:sitama/features/kaprodi/ui/mahasiswa/pages/kaprodi_data_mahasiswa.dart';
 import 'package:sitama/features/kaprodi/ui/dosen/pages/kaprodi_data_dosen.dart';
-import 'package:sitama/features/kaprodi/ui/seminar/pages/kaprodi_manajemen_seminar.dart';
+import 'package:sitama/features/kaprodi/ui/profile/pages/verifikasi_industri.dart';
 import 'package:sitama/features/kaprodi/ui/profile/pages/kaprodi_profile.dart';
 
 class KaprodiShell extends StatefulWidget {
@@ -19,7 +19,7 @@ class _KaprodiShellState extends State<KaprodiShell> {
     KaprodiHome(),
     KaprodiDataMahasiswa(),
     KaprodiDataDosen(),
-    KaprodiManajemenSeminar(),
+    VerifikasiIndustriPage(),
     KaprodiProfile(),
   ];
 
@@ -47,8 +47,8 @@ class _KaprodiShellState extends State<KaprodiShell> {
             label: 'Dosen',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Seminar',
+            icon: Icon(Icons.verified),
+            label: 'Industri',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
