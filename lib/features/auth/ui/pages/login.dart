@@ -7,6 +7,7 @@ import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
 import 'package:sitama/features/lecturer_industry/ui/lecturer_industry_shell.dart';
 import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/student/ui/home/pages/home.dart';
+import 'package:sitama/features/industri/ui/industri_shell.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -106,6 +107,13 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(
             builder: (context) => const KaprodiShell(),
+          ),
+        );
+      } else if (_selectedRole == 'Industri') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const IndustriShell(),
           ),
         );
       } else {
@@ -221,7 +229,13 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                       ),
-                      items: ['Student', 'Lecturer', 'Lecturer Industry', 'Kaprodi']
+                      items: [
+                        'Student',
+                        'Lecturer',
+                        'Lecturer Industry',
+                        'Kaprodi',
+                        'Industri'
+                      ]
                           .map((role) => DropdownMenuItem(
                                 value: role,
                                 child: Text(role),
