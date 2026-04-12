@@ -171,8 +171,7 @@ class _JobListingPageState extends State<JobListingPage> {
                                               : Colors.grey[300]!,
                                           width: 1.5,
                                         ),
-                                        borderRadius:
-                                            BorderRadius.circular(25),
+                                        borderRadius: BorderRadius.circular(25),
                                         boxShadow: isSelected
                                             ? [
                                                 BoxShadow(
