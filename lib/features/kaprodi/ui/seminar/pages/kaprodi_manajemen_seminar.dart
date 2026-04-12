@@ -47,40 +47,19 @@ class _KaprodiManajemenSeminarState extends State<KaprodiManajemenSeminar>
                 ),
                 child: Container(
                   color: const Color(0xFF1A1A3E),
-                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Color(0xFFE8EAF6),
-                          size: 16,
-                        ),
-                        onPressed: () {},
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 34, minHeight: 34),
-                      ),
-                      const SizedBox(width: 10),
+                      SizedBox(height: MediaQuery.of(context).padding.top + 16),
+                      // Title
                       const Text(
                         'Manajemen Seminar',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.add,
-                          color: Color(0xFFE8EAF6),
-                          size: 16,
-                        ),
-                        onPressed: () {},
-                        padding: EdgeInsets.zero,
-                        constraints:
-                            const BoxConstraints(minWidth: 34, minHeight: 34),
                       ),
                     ],
                   ),

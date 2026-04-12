@@ -27,36 +27,21 @@ class KaprodiDosenDetail extends StatelessWidget {
                   color: const Color(0xFF1A1A3E),
                   padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).padding.top + 4),
-                      // Back arrow + Title
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Color(0xFFE8EAF6),
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              dosenName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                      SizedBox(height: MediaQuery.of(context).padding.top + 16),
+                      // Title
+                      Text(
+                        dosenName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Text(
                         'Bimbingan ${students.length} Mahasiswa',
                         style: const TextStyle(

@@ -197,7 +197,7 @@ class IndustriHome extends StatelessWidget {
                 childAspectRatio: 1.4,
                 children: [
                   _buildStatCard(
-                    '3 lowongan',
+                    '3',
                     'Lowongan Aktif',
                     '12 pelamar ›',
                     const Color(0xFF1A3A8E),
@@ -320,7 +320,7 @@ class IndustriHome extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             value,
@@ -329,6 +329,7 @@ class IndustriHome extends StatelessWidget {
               fontWeight: FontWeight.w800,
               color: color,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
@@ -338,6 +339,7 @@ class IndustriHome extends StatelessWidget {
               color: Color(0xFF1A2050),
               fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),
           Text(
@@ -347,6 +349,7 @@ class IndustriHome extends StatelessWidget {
               color: color,
               fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -628,51 +631,48 @@ class _IndustriPelamarState extends State<IndustriPelamar>
                   color: const Color(0xFF1A1A3E),
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).padding.top + 4),
+                      SizedBox(height: MediaQuery.of(context).padding.top + 16),
                       const Text(
                         'Review Pelamar',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       // Search Bar
                       Container(
                         height: 40,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2D2D5F).withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Cari nama atau NIM...',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF8A9BC0),
+                              fontSize: 13,
+                            ),
+                            prefixIcon: const Icon(
                               Icons.search,
-                              color: Colors.white.withValues(alpha: 0.6),
-                              size: 14,
+                              size: 18,
+                              color: Color(0xFF8A9BC0),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                style: const TextStyle(
-                                  color: Color(0xFFE8EAF6),
-                                  fontSize: 12,
-                                ),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Cari nama atau NIM...',
-                                  hintStyle: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 12,
                             ),
-                          ],
+                            border: InputBorder.none,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A3E),
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],

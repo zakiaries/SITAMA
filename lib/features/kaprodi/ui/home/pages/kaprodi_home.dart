@@ -25,10 +25,11 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                   bottomRight: Radius.circular(28),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(18, 24, 18, 32),
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: MediaQuery.of(context).padding.top + 16),
                   // Profile row with greeting
                   Row(
                     children: [
@@ -156,39 +157,38 @@ class _KaprodiHomeState extends State<KaprodiHome> {
                   const SizedBox(height: 14),
                   // Search bar
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(30, 255, 255, 255),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                      border: Border.all(
+                        color: const Color(0xFFE5E7EB),
+                        width: 1,
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Cari mahasiswa, dosen, industri...',
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF9CA3AF),
+                          fontSize: 13,
+                        ),
+                        prefixIcon: const Icon(
                           Icons.search,
-                          color: Color(0xFF9FA8DA),
-                          size: 15,
+                          size: 18,
+                          color: Color(0xFF9CA3AF),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Cari mahasiswa, dosen, industri...',
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF9FA8DA),
-                                fontSize: 12,
-                              ),
-                              border: InputBorder.none,
-                            ),
-                            style: const TextStyle(
-                              color: Color(0xFFE8EAF6),
-                              fontSize: 12,
-                            ),
-                          ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 12,
                         ),
-                      ],
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                      style: const TextStyle(
+                        color: Color(0xFF1F2937),
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],

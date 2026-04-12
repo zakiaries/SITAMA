@@ -14,13 +14,14 @@ class IndustryAssessmentPage extends StatefulWidget {
   });
 
   @override
-  State<IndustryAssessmentPage> createState() =>
-      _IndustryAssessmentPageState();
+  State<IndustryAssessmentPage> createState() => _IndustryAssessmentPageState();
 }
 
 class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
   late IndustryScoreCubit _cubit;
   final TextEditingController _notesController = TextEditingController();
+  final Map<String, TextEditingController> _scoreControllers = {};
+  late IndustryScoreEntity _scores;
 
   @override
   void initState() {
@@ -30,18 +31,65 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
   }
 
   @override
+  void dispose() {
+    _notesController.dispose();
+    for (var controller in _scoreControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _initializeScoreControllers(IndustryScoreEntity scores) {
+    if (_scoreControllers.isEmpty) {
+      for (var category in scores.categories) {
+        for (var item in category.items) {
+          final key = '${category.category_name}_${item.item_name}';
+          _scoreControllers[key] =
+              TextEditingController(text: item.score.toString());
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5FB),
-      body: BlocBuilder<IndustryScoreCubit, IndustryScoreState>(
-        builder: (context, state) {
-          if (state is Loaded) {
-            return _buildContent(state.scores);
+      body: BlocListener<IndustryScoreCubit, IndustryScoreState>(
+        listener: (context, state) {
+          if (state is ScoreSaved) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                duration: const Duration(seconds: 2),
+                backgroundColor: const Color(0xFF10B981),
+              ),
+            );
+            Future.delayed(const Duration(milliseconds: 1500), () {
+              Navigator.pop(context);
+            });
           } else if (state is Failure) {
-            return Center(child: Text('Error: ${state.errorMessage}'));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: ${state.errorMessage}'),
+                duration: const Duration(seconds: 2),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
-          return const Center(child: CircularProgressIndicator());
         },
+        child: BlocBuilder<IndustryScoreCubit, IndustryScoreState>(
+          builder: (context, state) {
+            if (state is Loaded) {
+              _initializeScoreControllers(state.scores);
+              _scores = state.scores;
+              return _buildContent(state.scores);
+            } else if (state is Failure) {
+              return Center(child: Text('Error: ${state.errorMessage}'));
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }
@@ -166,8 +214,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: const Color(0xFFD0DDF5), width: 0.5),
+                  border:
+                      Border.all(color: const Color(0xFFD0DDF5), width: 0.5),
                 ),
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -204,8 +252,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                                 child: LinearProgressIndicator(
                                   value: scores.average_score / 100,
                                   minHeight: 8,
-                                  backgroundColor:
-                                      const Color(0xFFD8E8F8),
+                                  backgroundColor: const Color(0xFFD8E8F8),
                                   valueColor:
                                       const AlwaysStoppedAnimation<Color>(
                                     Color(0xFF1A4BBB),
@@ -239,8 +286,8 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: const Color(0xFFD0DDF5), width: 0.5),
+                  border:
+                      Border.all(color: const Color(0xFFD0DDF5), width: 0.5),
                 ),
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -260,8 +307,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                       controller: _notesController,
                       maxLines: 4,
                       decoration: InputDecoration(
-                        hintText:
-                            'Catatan akhir untuk mahasiswa...',
+                        hintText: 'Catatan akhir untuk mahasiswa...',
                         filled: true,
                         fillColor: const Color(0xFFF7F9FF),
                         border: OutlineInputBorder(
@@ -286,8 +332,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    _cubit.saveScores(
-                        widget.studentId, _notesController.text);
+                    _cubit.saveScores(widget.studentId, _notesController.text);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D2B6E),
@@ -336,50 +381,77 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...category.items.map((item) {
+          ...category.items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final key = '${category.category_name}_${item.item_name}';
+            final controller = _scoreControllers[key];
+
             return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      item.item_name,
-                      style: const TextStyle(
-                        color: Color(0xFF3A5A7A),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: item.score / item.max_score,
-                          minHeight: 6,
-                          backgroundColor: const Color(0xFFD8E8F8),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFF1A4BBB),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.item_name,
+                          style: const TextStyle(
+                            color: Color(0xFF3A5A7A),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 34,
-                    child: Text(
-                      '${item.score}',
-                      style: const TextStyle(
-                        color: Color(0xFF0D2B6E),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
+                      SizedBox(
+                        width: 70,
+                        child: TextField(
+                          controller: controller,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: false),
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF7F9FF),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFC8D8F0),
+                                width: 0.5,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFC8D8F0),
+                                width: 0.5,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF1A4BBB),
+                                width: 1,
+                              ),
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 8),
+                            suffixText: '/${item.max_score}',
+                            suffixStyle: const TextStyle(
+                              color: Color(0xFF8A9BBF),
+                              fontSize: 11,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {});
+                          },
+                        ),
                       ),
-                      textAlign: TextAlign.right,
-                    ),
+                    ],
                   ),
+                  if (index < category.items.length - 1)
+                    const SizedBox(height: 0),
                 ],
               ),
             );

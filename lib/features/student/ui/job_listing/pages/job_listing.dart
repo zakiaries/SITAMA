@@ -30,7 +30,6 @@ class _JobListingPageState extends State<JobListingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF8F9FB),
       body: BlocProvider.value(
         value: _jobListingCubit,
         child: BlocBuilder<JobListingCubit, JobListingState>(
@@ -89,121 +88,120 @@ class _JobListingPageState extends State<JobListingPage> {
                       snap: false,
                       pinned: true,
                       elevation: 0,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       title: Text(
                         'Lowongan Magang',
                         style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E3A8A),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       centerTitle: true,
-                      bottom: PreferredSize(
-                        preferredSize: const Size.fromHeight(115),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
-                          child: Column(
-                            children: [
-                              // Search Bar - Enhanced
-                              TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Cari posisi atau perusahaan...',
-                                  hintStyle: TextStyle(
-                                      color: Colors.grey[500], fontSize: 14),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide:
-                                        BorderSide(color: Colors.grey[200]!),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                        color: Colors.grey[200]!, width: 1.5),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    borderSide: BorderSide(
-                                        color: Color(0xFF1E3A8A), width: 2),
-                                  ),
-                                  prefixIcon: Icon(Icons.search,
-                                      color: Color(0xFF1E3A8A), size: 20),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      vertical: 16, horizontal: 14),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Column(
+                          children: [
+                            // Search Bar - Enhanced
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Cari posisi atau perusahaan...',
+                                hintStyle: TextStyle(
+                                    color: Colors.grey[500], fontSize: 14),
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey[200]!),
                                 ),
-                                onChanged: (query) {
-                                  _jobListingCubit.searchJobListings(query);
-                                },
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: Colors.grey[200]!, width: 1.5),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                      color: Color(0xFF1E3A8A), width: 2),
+                                ),
+                                prefixIcon: Icon(Icons.search,
+                                    color: Color(0xFF1E3A8A), size: 20),
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 14),
                               ),
-                              SizedBox(height: 12),
-                              // Category Filter Chips - Enhanced
-                              SizedBox(
-                                height: 42,
-                                child: ListView.separated(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: _jobListingCubit.categories.length,
-                                  separatorBuilder: (_, __) =>
-                                      SizedBox(width: 10),
-                                  itemBuilder: (context, index) {
-                                    final category =
-                                        _jobListingCubit.categories[index];
-                                    final isSelected =
-                                        category == state.selectedCategory;
+                              onChanged: (query) {
+                                _jobListingCubit.searchJobListings(query);
+                              },
+                            ),
+                            SizedBox(height: 12),
+                            // Category Filter Chips - Enhanced
+                            SizedBox(
+                              height: 42,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _jobListingCubit.categories.length,
+                                separatorBuilder: (_, __) =>
+                                    SizedBox(width: 10),
+                                itemBuilder: (context, index) {
+                                  final category =
+                                      _jobListingCubit.categories[index];
+                                  final isSelected =
+                                      category == state.selectedCategory;
 
-                                    return GestureDetector(
-                                      onTap: () {
-                                        _jobListingCubit
-                                            .filterByCategory(category);
-                                      },
-                                      child: AnimatedContainer(
-                                        duration: Duration(milliseconds: 200),
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 10),
-                                        decoration: BoxDecoration(
+                                  return GestureDetector(
+                                    onTap: () {
+                                      _jobListingCubit
+                                          .filterByCategory(category);
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: Duration(milliseconds: 200),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? Color(0xFF1E3A8A)
+                                            : Colors.white,
+                                        border: Border.all(
                                           color: isSelected
                                               ? Color(0xFF1E3A8A)
-                                              : Colors.white,
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? Color(0xFF1E3A8A)
-                                                : Colors.grey[300]!,
-                                            width: 1.5,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(25),
-                                          boxShadow: isSelected
-                                              ? [
-                                                  BoxShadow(
-                                                    color: Color(0xFF1E3A8A)
-                                                        .withOpacity(0.2),
-                                                    blurRadius: 8,
-                                                    offset: Offset(0, 2),
-                                                  )
-                                                ]
-                                              : [],
+                                              : Colors.grey[300]!,
+                                          width: 1.5,
                                         ),
-                                        child: Center(
-                                          child: Text(
-                                            category,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: isSelected
-                                                  ? Colors.white
-                                                  : Colors.grey[700],
-                                            ),
+                                        borderRadius:
+                                            BorderRadius.circular(25),
+                                        boxShadow: isSelected
+                                            ? [
+                                                BoxShadow(
+                                                  color: Color(0xFF1E3A8A)
+                                                      .withOpacity(0.2),
+                                                  blurRadius: 8,
+                                                  offset: Offset(0, 2),
+                                                )
+                                              ]
+                                            : [],
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          category,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: isSelected
+                                                ? Colors.white
+                                                : Colors.grey[700],
                                           ),
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

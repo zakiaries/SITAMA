@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EditProfilPerusahaan extends StatefulWidget {
-  const EditProfilPerusahaan({Key? key}) : super(key: key);
+  const EditProfilPerusahaan({super.key});
 
   @override
   State<EditProfilPerusahaan> createState() => _EditProfilPerusahaanState();
