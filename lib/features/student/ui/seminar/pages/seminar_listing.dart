@@ -27,7 +27,6 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
     return BlocProvider<SeminarCubit>.value(
       value: _seminarCubit,
       child: Scaffold(
-        backgroundColor: Color(0xFFF8F9FB),
         body: BlocBuilder<SeminarCubit, SeminarState>(
           builder: (context, state) {
             if (state is SeminarLoading) {
@@ -39,19 +38,18 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
             } else if (state is SeminarLoaded) {
               return CustomScrollView(
                 slivers: [
-                  // Header with SliverAppBar
                   SliverAppBar(
                     floating: false,
                     snap: false,
                     pinned: true,
                     elevation: 0,
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     title: Text(
                       'Seminar Magang',
                       style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E3A8A),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     centerTitle: true,

@@ -652,57 +652,55 @@ class _KaprodiDataDosenState extends State<KaprodiDataDosen> {
                 ),
                 child: Container(
                   color: const Color(0xFF1A1A3E),
-                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).padding.top + 4),
+                      SizedBox(height: MediaQuery.of(context).padding.top + 16),
                       // Title
                       const Text(
                         'Data Dosen',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       // Search Bar
                       Container(
                         height: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2D2D5F).withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: const Color(0xFFE5E7EB),
+                            width: 1,
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Cari nama dosen...',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 13,
+                            ),
+                            prefixIcon: const Icon(
                               Icons.search,
-                              color: Colors.white.withValues(alpha: 0.6),
-                              size: 14,
+                              size: 18,
+                              color: Color(0xFF9CA3AF),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                style: const TextStyle(
-                                  color: Color(0xFFE8EAF6),
-                                  fontSize: 12,
-                                ),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Cari nama dosen...',
-                                  hintStyle: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 12,
                             ),
-                          ],
+                            border: InputBorder.none,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF1F2937),
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],

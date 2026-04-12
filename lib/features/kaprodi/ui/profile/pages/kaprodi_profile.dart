@@ -25,10 +25,11 @@ class _KaprodiProfileState extends State<KaprodiProfile> {
                   bottomRight: Radius.circular(28),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(18, 30, 18, 36),
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 36),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: MediaQuery.of(context).padding.top + 16),
                   Container(
                     width: 78,
                     height: 78,

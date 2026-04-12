@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sitama/features/lecturer_industry/ui/detail_student/bloc/lecturer_industry_detail_cubit.dart';
+import 'package:sitama/features/lecturer_industry/ui/detail_student/bloc/lecturer_industry_detail_cubit.dart'
+    as detail;
 import 'package:sitama/features/lecturer_industry/domain/entities/lecturer_industry_detail_student_entity.dart';
 import 'package:sitama/features/lecturer_industry/ui/assessment/pages/industry_assessment.dart';
+import 'package:sitama/features/lecturer_industry/ui/assessment/bloc/industry_score_cubit.dart'
+    as score;
 
 class LecturerIndustryDetailStudentPage extends StatefulWidget {
   final int studentId;
@@ -21,14 +24,14 @@ class LecturerIndustryDetailStudentPage extends StatefulWidget {
 
 class _LecturerIndustryDetailStudentPageState
     extends State<LecturerIndustryDetailStudentPage> {
-  late LecturerIndustryDetailCubit _cubit;
+  late detail.LecturerIndustryDetailCubit _cubit;
   final TextEditingController _logbookController = TextEditingController();
   final TextEditingController _activityController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _cubit = context.read<LecturerIndustryDetailCubit>();
+    _cubit = context.read<detail.LecturerIndustryDetailCubit>();
     _cubit.displayStudent(widget.studentId);
   }
 
@@ -43,12 +46,12 @@ class _LecturerIndustryDetailStudentPageState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F5FB),
-      body: BlocBuilder<LecturerIndustryDetailCubit,
-          LecturerIndustryDetailState>(
+      body: BlocBuilder<detail.LecturerIndustryDetailCubit,
+          detail.LecturerIndustryDetailState>(
         builder: (context, state) {
-          if (state is DetailLoaded) {
+          if (state is detail.DetailLoaded) {
             return _buildContent(state.data);
-          } else if (state is Failure) {
+          } else if (state is detail.Failure) {
             return Center(child: Text('Error: ${state.errorMessage}'));
           }
           return const Center(child: CircularProgressIndicator());
@@ -78,7 +81,8 @@ class _LecturerIndustryDetailStudentPageState
                     Row(
                       children: [
                         GestureDetector(
-                          onTap: widget.onBack ?? (() => Navigator.pop(context)),
+                          onTap:
+                              widget.onBack ?? (() => Navigator.pop(context)),
                           child: Container(
                             width: 34,
                             height: 34,
@@ -185,15 +189,13 @@ class _LecturerIndustryDetailStudentPageState
                 crossAxisSpacing: 10,
                 childAspectRatio: 2.2,
                 children: [
-                  _buildInfoBox('Mulai Magang',
-                      _formatDate(data.start_date)),
+                  _buildInfoBox('Mulai Magang', _formatDate(data.start_date)),
                   _buildInfoBox(
-                      'Selesai',
-                      _formatDate(data.end_date ?? DateTime.now()),
+                      'Selesai', _formatDate(data.end_date ?? DateTime.now()),
                       color: const Color(0xFFFBBF24)),
-                  _buildInfoBox('Total Logbook', '${data.total_logbooks} entri'),
                   _buildInfoBox(
-                      'Kehadiran',
+                      'Total Logbook', '${data.total_logbooks} entri'),
+                  _buildInfoBox('Kehadiran',
                       '${data.attendance_percentage.toStringAsFixed(0)}%',
                       color: const Color(0xFF1A4BBB)),
                 ],
@@ -316,7 +318,8 @@ class _LecturerIndustryDetailStudentPageState
                               if (_activityController.text.isNotEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Catatan kerja berhasil ditambahkan'),
+                                    content: Text(
+                                        'Catatan kerja berhasil ditambahkan'),
                                     duration: Duration(seconds: 1),
                                   ),
                                 );
@@ -371,9 +374,12 @@ class _LecturerIndustryDetailStudentPageState
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => IndustryAssessmentPage(
-                          studentId: widget.studentId,
-                          studentName: data.student_name,
+                        builder: (context) => BlocProvider(
+                          create: (context) => score.IndustryScoreCubit(),
+                          child: IndustryAssessmentPage(
+                            studentId: widget.studentId,
+                            studentName: data.student_name,
+                          ),
                         ),
                       ),
                     );
@@ -405,12 +411,11 @@ class _LecturerIndustryDetailStudentPageState
     );
   }
 
-  Widget _buildInfoBox(String label, String value,
-      {Color? color}) {
+  Widget _buildInfoBox(String label, String value, {Color? color}) {
     // Determine icon based on label
     IconData icon = Icons.calendar_today;
     Color bgColor = const Color(0xFFF0F4FF);
-    
+
     if (label.contains('Selesai')) {
       icon = Icons.check_circle_outline;
       bgColor = const Color(0xFFFEF3F0);
@@ -605,8 +610,18 @@ class _LecturerIndustryDetailStudentPageState
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Des'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Des'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

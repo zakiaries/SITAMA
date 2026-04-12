@@ -17,7 +17,6 @@ class LecturerIndustryShell extends StatefulWidget {
 class _LecturerIndustryShellState extends State<LecturerIndustryShell> {
   int _currentIndex = 0;
   int? _selectedStudentId;
-  String? _selectedStudentName;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,6 @@ class _LecturerIndustryShellState extends State<LecturerIndustryShell> {
           setState(() {
             _currentIndex = 0;
             _selectedStudentId = null;
-            _selectedStudentName = null;
           });
           return false;
         }
@@ -62,7 +60,6 @@ class _LecturerIndustryShellState extends State<LecturerIndustryShell> {
             onStudentSelected: (studentId, studentName) {
               setState(() {
                 _selectedStudentId = studentId;
-                _selectedStudentName = studentName;
               });
             },
           ),
@@ -99,7 +96,6 @@ class _LecturerIndustryShellState extends State<LecturerIndustryShell> {
             studentId: _selectedStudentId!,
             onBack: () => setState(() {
               _selectedStudentId = null;
-              _selectedStudentName = null;
             }),
           ),
         );
@@ -115,7 +111,6 @@ class _LecturerIndustryShellState extends State<LecturerIndustryShell> {
             studentId: _selectedStudentId!,
             onBack: () => setState(() {
               _selectedStudentId = null;
-              _selectedStudentName = null;
             }),
           ),
         );

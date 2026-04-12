@@ -88,53 +88,48 @@ class _IndustriLowonganState extends State<IndustriLowongan>
                   color: const Color(0xFF1A1A3E),
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).padding.top + 4),
+                      SizedBox(height: MediaQuery.of(context).padding.top + 16),
                       const Text(
                         'Kelola Lowongan',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       // Search Bar
                       Container(
-                        height: 38,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2D2D5F).withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Cari lowongan...',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF8A9BC0),
+                              fontSize: 13,
+                            ),
+                            prefixIcon: const Icon(
                               Icons.search,
-                              color: Colors.white.withValues(alpha: 0.6),
-                              size: 16,
+                              size: 18,
+                              color: Color(0xFF8A9BC0),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Cari lowongan...',
-                                  hintStyle: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    fontSize: 12,
-                                  ),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 12,
                             ),
-                          ],
+                            border: InputBorder.none,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A3E),
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class KelolaPembimbingIndustri extends StatefulWidget {
-  const KelolaPembimbingIndustri({Key? key}) : super(key: key);
+  const KelolaPembimbingIndustri({super.key});
 
   @override
   State<KelolaPembimbingIndustri> createState() =>

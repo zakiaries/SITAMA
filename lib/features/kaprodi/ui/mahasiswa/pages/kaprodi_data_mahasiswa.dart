@@ -38,7 +38,7 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
               surfaceTintColor: Colors.transparent,
               automaticallyImplyLeading: false,
               expandedHeight: 0,
-              toolbarHeight: 110,
+              toolbarHeight: 140,
               flexibleSpace: ClipRRect(
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(28),
@@ -46,65 +46,55 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
                 ),
                 child: Container(
                   color: const Color(0xFF1A1A3E),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      SizedBox(height: MediaQuery.of(context).padding.top + 16),
                       // Header Title
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.arrow_back,
-                            color: Color(0xFFB0BDD4),
-                            size: 20,
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Data Mahasiswa',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+                      const Text(
+                        'Data Mahasiswa',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       // Search Bar
                       Container(
-                        height: 38,
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: Color(0xFF2D2D5F).withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: const Color(0xFFE5E7EB),
+                            width: 1,
+                          ),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Cari NIM atau nama mahasiswa...',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 13,
+                            ),
+                            prefixIcon: const Icon(
                               Icons.search,
-                              color: Color(0xFFB0BDD4),
-                              size: 16,
+                              size: 18,
+                              color: Color(0xFF9CA3AF),
                             ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Cari NIM atau nama mahasiswa...',
-                                  hintStyle: TextStyle(
-                                    color: Color(0xFFB0BDD4),
-                                    fontSize: 12,
-                                  ),
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 12,
                             ),
-                          ],
+                            border: InputBorder.none,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(
+                            color: Color(0xFF1F2937),
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
