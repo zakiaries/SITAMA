@@ -20,16 +20,15 @@ class _LecturerIndustryShellState extends State<LecturerIndustryShell> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_currentIndex != 0) {
+    return PopScope(
+      canPop: _currentIndex == 0 && _selectedStudentId == null,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
           setState(() {
             _currentIndex = 0;
             _selectedStudentId = null;
           });
-          return false;
         }
-        return true;
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF2F5FB),

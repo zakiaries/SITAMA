@@ -38,7 +38,7 @@ class AiRecommendationCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Color(0xFF1E3A8A).withOpacity(0.25),
+              color: Color(0xFF1E3A8A).withValues(alpha: 0.25),
               blurRadius: 12,
               offset: Offset(0, 6),
             ),
@@ -51,7 +51,7 @@ class AiRecommendationCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
@@ -82,7 +82,7 @@ class AiRecommendationCard extends StatelessWidget {
                     'Dapatkan rekomendasi posisi yang sesuai',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       height: 1.3,
                     ),
                   ),
@@ -95,7 +95,7 @@ class AiRecommendationCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Center(

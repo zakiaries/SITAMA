@@ -19,7 +19,7 @@ class ScoreInputOverlay extends StatefulWidget {
   });
 
   @override
-  _ScoreInputOverlayState createState() => _ScoreInputOverlayState();
+  State<ScoreInputOverlay> createState() => _ScoreInputOverlayState();
 }
 
 class _ScoreInputOverlayState extends State<ScoreInputOverlay> {
@@ -180,7 +180,7 @@ class _ScoreInputOverlayState extends State<ScoreInputOverlay> {
 
     context.read<AssessmentCubit>().submitScores(widget.id, scores);
 
-    print(scores.map((score) => 'ScoreRequest(id: ${score.detailedAssessmentComponentsId}, score: ${score.score})').toList());
+    debugPrint(scores.map((score) => 'ScoreRequest(id: ${score.detailedAssessmentComponentsId}, score: ${score.score})').toList().toString());
   }
 
 

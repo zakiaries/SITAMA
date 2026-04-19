@@ -138,10 +138,10 @@ class _BuatLowonganBaruState extends State<BuatLowonganBaru> {
                   'Jumlah Posisi',
                   DropdownButtonFormField<String>(
                     initialValue: _selectedJumlahPosisi,
-                    items: jumlahPosisi.map((num) {
+                    items: jumlahPosisi.map((item) {
                       return DropdownMenuItem(
-                        value: num,
-                        child: Text(num),
+                        value: item,
+                        child: Text(item),
                       );
                     }).toList(),
                     onChanged: (value) {

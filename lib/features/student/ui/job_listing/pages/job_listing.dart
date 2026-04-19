@@ -176,7 +176,7 @@ class _JobListingPageState extends State<JobListingPage> {
                                             ? [
                                                 BoxShadow(
                                                   color: Color(0xFF1E3A8A)
-                                                      .withOpacity(0.2),
+                                                      .withValues(alpha: 0.2),
                                                   blurRadius: 8,
                                                   offset: Offset(0, 2),
                                                 )

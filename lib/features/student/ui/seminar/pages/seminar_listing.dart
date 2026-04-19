@@ -74,7 +74,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Color(0xFF1E3A8A).withOpacity(0.2),
+                                  color: Color(0xFF1E3A8A).withValues(alpha: 0.2),
                                   blurRadius: 12,
                                   offset: Offset(0, 4),
                                 ),
@@ -105,7 +105,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                                   'Daftarkan diri Anda untuk mengikuti seminar magang kami. Absensi dapat dilakukan dengan scan QR code di lokasi seminar.',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.white.withOpacity(0.95),
+                                    color: Colors.white.withValues(alpha: 0.95),
                                     height: 1.6,
                                     fontWeight: FontWeight.w400,
                                   ),
@@ -230,7 +230,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
           border: Border.all(color: Colors.grey[200]!, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -274,7 +274,7 @@ class _SeminarListingPageState extends State<SeminarListingPage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

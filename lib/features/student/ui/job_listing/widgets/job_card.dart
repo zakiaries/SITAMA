@@ -37,7 +37,7 @@ class JobCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: Offset(0, 3),
           )
@@ -55,12 +55,12 @@ class JobCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: _getColorFromLogo(job.company_logo),
+                  color: _getColorFromLogo(job.companyLogo),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color:
-                          _getColorFromLogo(job.company_logo).withOpacity(0.2),
+                          _getColorFromLogo(job.companyLogo).withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: Offset(0, 2),
                     )
@@ -68,7 +68,7 @@ class JobCard extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    job.company_logo,
+                    job.companyLogo,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -98,7 +98,7 @@ class JobCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (job.is_new)
+                        if (job.isNew)
                           Padding(
                             padding: EdgeInsets.only(left: 8),
                             child: Container(
@@ -166,15 +166,15 @@ class JobCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Color(0xFF1E3A8A).withOpacity(0.08),
-                            Color(0xFF3D568F).withOpacity(0.08)
+                            Color(0xFF1E3A8A).withValues(alpha: 0.08),
+                            Color(0xFF3D568F).withValues(alpha: 0.08)
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: Color(0xFF1E3A8A).withOpacity(0.2)),
+                            color: Color(0xFF1E3A8A).withValues(alpha: 0.2)),
                       ),
                       child: Text(
                         skill,
@@ -251,7 +251,7 @@ class JobCard extends StatelessWidget {
                     vertical: 10,
                   ),
                   elevation: 2,
-                  shadowColor: Color(0xFF1E3A8A).withOpacity(0.3),
+                  shadowColor: Color(0xFF1E3A8A).withValues(alpha: 0.3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

@@ -21,7 +21,6 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
   late IndustryScoreCubit _cubit;
   final TextEditingController _notesController = TextEditingController();
   final Map<String, TextEditingController> _scoreControllers = {};
-  late IndustryScoreEntity _scores;
 
   @override
   void initState() {
@@ -66,7 +65,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
               ),
             );
             Future.delayed(const Duration(milliseconds: 1500), () {
-              Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             });
           } else if (state is Failure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -82,7 +81,6 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
           builder: (context, state) {
             if (state is Loaded) {
               _initializeScoreControllers(state.scores);
-              _scores = state.scores;
               return _buildContent(state.scores);
             } else if (state is Failure) {
               return Center(child: Text('Error: ${state.errorMessage}'));
@@ -122,7 +120,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                             height: 34,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.12),
+                              color: Colors.white.withValues(alpha: 0.12),
                             ),
                             child: const Icon(Icons.arrow_back,
                                 color: Color(0xFFE8F0FE), size: 16),
@@ -142,7 +140,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                     const SizedBox(height: 14),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -154,7 +152,7 @@ class _IndustryAssessmentPageState extends State<IndustryAssessmentPage> {
                             height: 30,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                             ),
                             child: Center(
                               child: Text(

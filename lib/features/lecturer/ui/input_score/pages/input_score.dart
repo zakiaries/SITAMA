@@ -14,7 +14,7 @@ class InputScorePage extends StatefulWidget {
   const InputScorePage({super.key, required this.id});
 
   @override
-  _InputScorePageState createState() => _InputScorePageState();
+  State<InputScorePage> createState() => _InputScorePageState();
 }
 
 class _InputScorePageState extends State<InputScorePage> {

@@ -101,7 +101,7 @@ class _SeminarDetailPageState extends State<SeminarDetailPage> {
                         padding:
                             EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Color(0xFFFCBA28).withOpacity(0.1),
+                          color: Color(0xFFFCBA28).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -387,7 +387,7 @@ class _SeminarDetailPageState extends State<SeminarDetailPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -423,8 +423,8 @@ class _SeminarDetailPageState extends State<SeminarDetailPage> {
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: status == 'Terdaftar'
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.blue.withOpacity(0.1),
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.blue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

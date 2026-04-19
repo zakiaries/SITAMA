@@ -25,7 +25,7 @@ class LogBookContent extends StatefulWidget {
   });
 
   @override
-  _LogBookContentState createState() => _LogBookContentState();
+  State<LogBookContent> createState() => _LogBookContentState();
 }
 
 class _LogBookContentState extends State<LogBookContent> {

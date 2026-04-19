@@ -88,7 +88,7 @@ class _LecturerIndustryDetailStudentPageState
                             height: 34,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.12),
+                              color: Colors.white.withValues(alpha: 0.12),
                             ),
                             child: const Icon(Icons.arrow_back,
                                 color: Color(0xFFE8F0FE), size: 16),
@@ -113,9 +113,9 @@ class _LecturerIndustryDetailStudentPageState
                           height: 60,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               width: 2,
                             ),
                           ),
@@ -432,7 +432,7 @@ class _LecturerIndustryDetailStudentPageState
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: (color ?? const Color(0xFF0D2B6E)).withOpacity(0.08),
+          color: (color ?? const Color(0xFF0D2B6E)).withValues(alpha: 0.08),
           width: 1,
         ),
       ),
@@ -491,7 +491,7 @@ class _LecturerIndustryDetailStudentPageState
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

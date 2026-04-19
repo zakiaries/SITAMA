@@ -35,7 +35,7 @@ class DetailStudentPage extends StatefulWidget {
   const DetailStudentPage({super.key, required this.id});
 
   @override
-  _DetailStudentPageState createState() => _DetailStudentPageState();
+  State<DetailStudentPage> createState() => _DetailStudentPageState();
 }
 
 class _DetailStudentPageState extends State<DetailStudentPage>

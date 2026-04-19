@@ -188,7 +188,7 @@ class _ChatbotRecommendationPageState extends State<ChatbotRecommendationPage> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Color(0xFF3D568F).withOpacity(0.1),
+                              color: Color(0xFF3D568F).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -275,7 +275,7 @@ class _ChatbotRecommendationPageState extends State<ChatbotRecommendationPage> {
           decoration: BoxDecoration(
             color: message.isBot
                 ? Colors.grey[100]
-                : Color(0xFF3D568F).withOpacity(0.85),
+                : Color(0xFF3D568F).withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(

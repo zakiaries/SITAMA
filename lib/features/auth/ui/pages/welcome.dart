@@ -19,7 +19,7 @@ class WelcomePages extends StatefulWidget {
   const WelcomePages({super.key});
 
   @override
-  _WelcomePagesState createState() => _WelcomePagesState();
+  State<WelcomePages> createState() => _WelcomePagesState();
 }
 
 class _WelcomePagesState extends State<WelcomePages> {
@@ -87,12 +87,13 @@ class _WelcomePagesState extends State<WelcomePages> {
 
       // Ambil ID Token
       final idToken = await userCredential.user?.getIdToken();
+      if (!context.mounted) return;
       await _sendTokenToBackend(idToken!, context);
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
   }
 
@@ -103,9 +104,9 @@ class _WelcomePagesState extends State<WelcomePages> {
 
       response.fold((error) {
         _showErrorSnackbar('Email anda tidak terdaftar', context);
-        print(error);
+        debugPrint(error.toString());
       }, (data) async {
-        print(data.toString());
+        debugPrint(data.toString());
 
         SharedPreferences sharedPreferences =
             await SharedPreferences.getInstance();

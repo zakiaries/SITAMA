@@ -25,7 +25,7 @@ class LecturerGuidanceCard extends StatefulWidget {
   });
 
   @override
-  _LecturerGuidanceCardState createState() => _LecturerGuidanceCardState();
+  State<LecturerGuidanceCard> createState() => _LecturerGuidanceCardState();
 }
 
 class _LecturerGuidanceCardState extends State<LecturerGuidanceCard> {

@@ -21,10 +21,10 @@ class StudentProfilePage extends StatefulWidget {
   const StudentProfilePage({super.key});
 
   @override
-  State<StudentProfilePage> createState() => Student_ProfilePageState();
+  State<StudentProfilePage> createState() => _StudentProfilePageState();
 }
 
-class Student_ProfilePageState extends State<StudentProfilePage>
+class _StudentProfilePageState extends State<StudentProfilePage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;

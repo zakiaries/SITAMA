@@ -71,7 +71,7 @@ class _LogbookIndustryPageState extends State<LogbookIndustryPage> {
                           height: 34,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.12),
+                            color: Colors.white.withValues(alpha: 0.12),
                           ),
                           child: const Icon(Icons.arrow_back,
                               color: Color(0xFFE8F0FE), size: 16),
@@ -91,7 +91,7 @@ class _LogbookIndustryPageState extends State<LogbookIndustryPage> {
                   const SizedBox(height: 14),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
+                      color: Colors.white.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding:
@@ -103,7 +103,7 @@ class _LogbookIndustryPageState extends State<LogbookIndustryPage> {
                           height: 30,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                           ),
                           child: Center(
                             child: Text(

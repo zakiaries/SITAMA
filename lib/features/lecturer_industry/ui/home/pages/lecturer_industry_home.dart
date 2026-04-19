@@ -101,9 +101,9 @@ class _LecturerIndustryHomePageState extends State<LecturerIndustryHomePage> {
                           height: 46,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withValues(alpha: 0.15),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               width: 2,
                             ),
                           ),
@@ -124,7 +124,7 @@ class _LecturerIndustryHomePageState extends State<LecturerIndustryHomePage> {
                     // Search
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextField(
@@ -266,7 +266,7 @@ class _LecturerIndustryHomePageState extends State<LecturerIndustryHomePage> {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _getStatusColor(student.status).withOpacity(0.2),
+                    color: _getStatusColor(student.status).withValues(alpha: 0.2),
                   ),
                   child: Center(
                     child: Text(

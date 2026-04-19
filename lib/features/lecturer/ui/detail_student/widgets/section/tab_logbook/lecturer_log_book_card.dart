@@ -16,7 +16,7 @@ class LecturerLogBookCard extends StatefulWidget {
   });
 
   @override
-  _LecturerLogBookCardState createState() => _LecturerLogBookCardState();
+  State<LecturerLogBookCard> createState() => _LecturerLogBookCardState();
 }
 
 class _LecturerLogBookCardState extends State<LecturerLogBookCard> {

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sitama/core/constants/api_urls.dart';
 import 'package:sitama/core/network/dio_client.dart';
@@ -90,7 +91,7 @@ class AuthApiServiceImpl extends AuthApiService {
           await sl<DioClient>().post(ApiUrls.loginGoogle, data: request.toMap());
       return Right(response);
     } on DioException catch (e) {
-      print(e.response.toString());
+      debugPrint(e.response.toString());
       if (e.response != null) {
         return Left(e.response!.data['errors']['message'].toString());
       } else {

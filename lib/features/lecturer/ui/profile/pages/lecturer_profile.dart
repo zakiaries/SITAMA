@@ -17,10 +17,10 @@ class LecturerProfilePage extends StatefulWidget {
   const LecturerProfilePage({super.key});
 
   @override
-  State<LecturerProfilePage> createState() => Lecturer_ProfilePageState();
+  State<LecturerProfilePage> createState() => _LecturerProfilePageState();
 }
 
-class Lecturer_ProfilePageState extends State<LecturerProfilePage>
+class _LecturerProfilePageState extends State<LecturerProfilePage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;

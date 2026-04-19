@@ -5,13 +5,13 @@ class JobListingModel extends JobListingEntity {
     required super.id,
     required super.position,
     required super.company,
-    required super.company_logo,
+    required super.companyLogo,
     required super.description,
     required super.skills,
     required super.location,
     required super.category,
-    required super.is_new,
-    required super.created_at,
+    required super.isNew,
+    required super.createdAt,
   });
 
   factory JobListingModel.fromMap(Map<String, dynamic> map) {
@@ -19,13 +19,13 @@ class JobListingModel extends JobListingEntity {
       id: map['id'] ?? '',
       position: map['position'] ?? '',
       company: map['company'] ?? '',
-      company_logo: map['company_logo'] ?? '',
+      companyLogo: map['company_logo'] ?? '',
       description: map['description'] ?? '',
       skills: List<String>.from(map['skills'] ?? []),
       location: map['location'] ?? '',
       category: map['category'] ?? '',
-      is_new: map['is_new'] ?? false,
-      created_at:
+      isNew: map['is_new'] ?? false,
+      createdAt:
           DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
@@ -35,13 +35,13 @@ class JobListingModel extends JobListingEntity {
       'id': id,
       'position': position,
       'company': company,
-      'company_logo': company_logo,
+      'company_logo': companyLogo,
       'description': description,
       'skills': skills,
       'location': location,
       'category': category,
-      'is_new': is_new,
-      'created_at': created_at.toIso8601String(),
+      'is_new': isNew,
+      'created_at': createdAt.toIso8601String(),
     };
   }
 
@@ -50,13 +50,13 @@ class JobListingModel extends JobListingEntity {
       id: id,
       position: position,
       company: company,
-      company_logo: company_logo,
+      companyLogo: companyLogo,
       description: description,
       skills: skills,
       location: location,
       category: category,
-      is_new: is_new,
-      created_at: created_at,
+      isNew: isNew,
+      createdAt: createdAt,
     );
   }
 }
