@@ -42,3 +42,22 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Sensitive files (DO NOT COMMIT)
+.env
+.env.local
+.env.*.local
+google-services.json
+GoogleService-Info.plist
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+
+# API Keys and Credentials
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+serviceAccountKey.json
+*.secret
+.vscode/settings.local.json
