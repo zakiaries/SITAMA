@@ -3,11 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/core/shared/widgets/alert/custom_snackbar.dart';
+import 'package:sitama/features/auth/data/models/signin_req_params.dart';
+import 'package:sitama/features/auth/domain/usecases/signin.dart';
+import 'package:sitama/features/industri/ui/industri_shell.dart';
+import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
 import 'package:sitama/features/lecturer_industry/ui/lecturer_industry_shell.dart';
-import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/student/ui/home/pages/home.dart';
-import 'package:sitama/features/industri/ui/industri_shell.dart';
+import 'package:sitama/service_locator.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,125 +22,84 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
-  late final TextEditingController _usernameController =
-      TextEditingController();
-  late final TextEditingController _passwordController =
-      TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
-  String _selectedRole = 'Student'; // Default role
   bool _isLoading = false;
-
-  void _showSuccessSnackbar(String message) {
-    final snackBar = CustomSnackBar(
-      message: message,
-      icon: Icons.check_circle_outline,
-      backgroundColor: Colors.green.shade800,
-      duration: const Duration(seconds: 2),
-    );
-
-    _scaffoldKey.currentState?.showSnackBar(snackBar);
-  }
-
-  void _showErrorSnackbar(String message) {
-    final snackBar = CustomSnackBar(
-      message: message,
-      icon: Icons.error_outline,
-      backgroundColor: Colors.red.shade800,
-      duration: const Duration(seconds: 3),
-      action: SnackBarAction(
-        label: 'OK',
-        textColor: Colors.white,
-        onPressed: () {
-          _scaffoldKey.currentState?.hideCurrentSnackBar();
-        },
-      ),
-    );
-
-    _scaffoldKey.currentState?.showSnackBar(snackBar);
-  }
-
-  bool _validateInputs() {
-    // Untuk mock login, buat lebih permissive - minimal ada 1 karakter
-    if (_usernameController.text.trim().isEmpty) {
-      _usernameController.text = 'student'; // Auto-fill
-    }
-    if (_passwordController.text.trim().isEmpty) {
-      _passwordController.text = '1234'; // Auto-fill
-    }
-    return true;
-  }
-
-  Future<void> _mockLogin() async {
-    if (!_validateInputs()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Simulasi delay login
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Save role to SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('role', _selectedRole);
-      await prefs.setString('username', _usernameController.text);
-
-      _showSuccessSnackbar('Login berhasil!');
-
-      // Navigate berdasarkan role
-      if (!mounted) return;
-
-      if (_selectedRole == 'Student') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(),
-          ),
-        );
-      } else if (_selectedRole == 'Lecturer Industry') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LecturerIndustryShell(),
-          ),
-        );
-      } else if (_selectedRole == 'Kaprodi') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const KaprodiShell(),
-          ),
-        );
-      } else if (_selectedRole == 'Industri') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const IndustriShell(),
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LecturerHomePage(),
-          ),
-        );
-      }
-    } catch (e) {
-      _showErrorSnackbar('Terjadi kesalahan: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _showErrorSnackbar(String message) {
+    _scaffoldKey.currentState?.showSnackBar(
+      CustomSnackBar(
+        message: message,
+        icon: Icons.error_outline,
+        backgroundColor: Colors.red.shade800,
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () => _scaffoldKey.currentState?.hideCurrentSnackBar(),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _login() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      _showErrorSnackbar('Username dan password tidak boleh kosong');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await sl<SigninUseCase>().call(
+        param: SigninReqParams(username: username, password: password),
+      );
+
+      result.fold(
+        (error) => _showErrorSnackbar(error.toString()),
+        (_) async {
+          final prefs = await SharedPreferences.getInstance();
+          final role = prefs.getString('role') ?? '';
+
+          if (!mounted) return;
+
+          switch (role) {
+            case 'Student':
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => HomePage()));
+            case 'Lecturer':
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => LecturerHomePage()));
+            case 'Lecturer Industry':
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => LecturerIndustryShell()));
+            case 'Kaprodi':
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const KaprodiShell()));
+            case 'Industri':
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const IndustriShell()));
+            default:
+              _showErrorSnackbar('Role tidak dikenali: $role');
+          }
+        },
+      );
+    } catch (e) {
+      _showErrorSnackbar('Terjadi kesalahan: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -156,24 +118,16 @@ class _LoginPageState extends State<LoginPage> {
                   child: Image.asset(AppImages.loginvektor),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      Icons.arrow_back_ios_rounded,
-                      size: 16,
-                    ),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios_rounded, size: 16),
                   ),
-                  Text(
+                  const Text(
                     'Login',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -183,99 +137,58 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Username/NIM/NIP TextField
                     TextField(
                       controller: _usernameController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'NIM / NIP',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
-
-                    // Password TextField
+                    const SizedBox(height: 16),
                     TextField(
                       controller: _passwordController,
                       obscureText: _obscureText,
+                      onSubmitted: (_) => _login(),
                       decoration: InputDecoration(
                         labelText: 'Kata sandi',
                         border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureText
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                            });
-                          },
+                          icon: Icon(_obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                          onPressed: () =>
+                              setState(() => _obscureText = !_obscureText),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
-
-                    // Role Selection Dropdown
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedRole,
-                      decoration: InputDecoration(
-                        labelText: 'Pilih Role',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                      ),
-                      items: [
-                        'Student',
-                        'Lecturer',
-                        'Lecturer Industry',
-                        'Kaprodi',
-                        'Industri'
-                      ]
-                          .map((role) => DropdownMenuItem(
-                                value: role,
-                                child: Text(role),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedRole = value ?? 'Student';
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16),
-
+                    const SizedBox(height: 8),
                     TextButton(
                       onPressed: () {},
                       child: Text(
                         'Lupa Kata Sandi ?',
                         style: TextStyle(
-                          color: AppColors.lightInfo,
-                          fontSize: 12,
-                        ),
+                            color: AppColors.lightInfo, fontSize: 12),
                       ),
                     ),
-                    SizedBox(height: 24),
-
-                    // Login Button
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _mockLogin,
+                        onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.lightPrimary,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: _isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
@@ -284,18 +197,16 @@ class _LoginPageState extends State<LoginPage> {
                                       Colors.white),
                                 ),
                               )
-                            : Text(
+                            : const Text(
                                 'Login',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
