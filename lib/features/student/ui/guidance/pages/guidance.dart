@@ -5,6 +5,7 @@ import 'package:sitama/core/shared/widgets/common/search_field.dart';
 import 'package:sitama/features/student/domain/entities/guidance_entity.dart';
 import 'package:sitama/features/student/ui/guidance/bloc/guidance_student_cubit.dart';
 import 'package:sitama/features/student/ui/guidance/bloc/guidance_student_state.dart';
+import 'package:sitama/service_locator.dart';
 import 'package:sitama/features/student/ui/guidance/widgets/add_guidance.dart';
 import 'package:sitama/features/student/ui/guidance/widgets/filter_dialog.dart';
 import 'package:sitama/features/student/ui/guidance/widgets/student_guidance_card.dart';
@@ -48,7 +49,7 @@ class _GuidancePageState extends State<GuidancePage>
 
     return Scaffold(
       body: BlocProvider(
-        create: (context) => GuidanceStudentCubit()..displayGuidance(),
+        create: (context) => sl<GuidanceStudentCubit>()..displayGuidance(),
         child: BlocBuilder<GuidanceStudentCubit, GuidanceStudentState>(
           builder: (context, state) {
             // Update error state

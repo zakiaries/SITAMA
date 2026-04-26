@@ -12,8 +12,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/features/lecturer/domain/entities/lecturer_home_entity.dart';
+import 'package:sitama/features/lecturer/domain/usecases/get_home_lecturer.dart';
 import 'package:sitama/features/lecturer/ui/home/bloc/display/lecturer_display_cubit.dart';
 import 'package:sitama/features/lecturer/ui/home/bloc/display/lecturer_display_state.dart';
+import 'package:sitama/service_locator.dart';
 
 class LecturerHomeContent extends StatefulWidget {
   const LecturerHomeContent({super.key});
@@ -73,6 +75,7 @@ class _LecturerHomeContentState extends State<LecturerHomeContent>
               BlocProvider(
                 create: (context) => LecturerDisplayCubit(
                   selectionBloc: context.read<SelectionBloc>(),
+                  getHomeLecturerUseCase: sl<GetHomeLecturerUseCase>(),
                 )..displayLecturer(),
                 lazy: false,
               ),

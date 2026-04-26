@@ -11,165 +11,101 @@ import 'package:sitama/features/shared/data/models/log_book.dart';
 import 'package:sitama/features/student/data/models/notification.dart';
 import 'package:sitama/service_locator.dart';
 
-class LecturerRepositoryImpl extends LecturerRepository{
+class LecturerRepositoryImpl extends LecturerRepository {
   @override
   Future<Either> getLecturerHome() async {
     Either result = await sl<LecturerApiService>().getLecturerHome();
     return result.fold(
-      (error) {
-        return Left(error);
-      },
+      (error) => Left(error),
       (data) {
         Response response = data;
-
-        if (response.data['data'] == null ||
-            response.data['data'] is! Map<String, dynamic>) {
-          return Left("Invalid data format");
-        }
-
         try {
-          var dataModel = LecturerHomeModel.fromMap(response.data['data']);
-          var dataEntity = dataModel.toEntity();
-          return Right(dataEntity);
+          var dataModel = LecturerHomeModel.fromMap(response.data);
+          return Right(dataModel.toEntity());
         } catch (e) {
           return Left("Parsing error: $e");
         }
       },
     );
   }
-  
+
   @override
   Future<Either> getDetailStudent(int id) async {
     Either result = await sl<LecturerApiService>().getDetailStudent(id);
     return result.fold(
-      (error) {
-        return Left(error);
-      },
+      (error) => Left(error),
       (data) {
         Response response = data;
-
-        if (response.data['data'] == null ||
-            response.data['data'] is! Map<String, dynamic>) {
-          return Left("Invalid data format");
-        }
-
         try {
-          var dataModel = DetailStudentModel.fromMap(response.data['data']);
-          var dataEntity = dataModel.toEntity();
-          return Right(dataEntity);
+          var dataModel = DetailStudentModel.fromMap(response.data);
+          return Right(dataModel.toEntity());
         } catch (e) {
           return Left("Parsing error: $e");
         }
       },
     );
   }
-  
+
   @override
   Future<Either> updateStatusGuidance(UpdateStatusGuidanceReqParams request) async {
     Either result = await sl<LecturerApiService>().updateStatusGuidance(request);
-    return result.fold(
-      (error) {
-        return Left(error);
-      },
-      (data) {
-        return Right(data);
-      },
-    );
+    return result.fold((error) => Left(error), (data) => Right(data));
   }
 
   @override
   Future<Either> updateLogBookNote(UpdateLogBookReqParams request) async {
     Either result = await sl<LecturerApiService>().updateLogBookNote(request);
-    return result.fold(
-      (error) {
-        return Left(error);
-      },
-      (data) {
-        return Right(data);
-      },
-    );
+    return result.fold((error) => Left(error), (data) => Right(data));
   }
-  
+
   @override
   Future<Either> getLecturerProfile() async {
     Either result = await sl<LecturerApiService>().getLecturerProfile();
     return result.fold(
-      (error) {
-        return Left(error);
-      },
+      (error) => Left(error),
       (data) {
         Response response = data;
-
-        // Check if 'data' is not null and is a Map
-        if (response.data['data'] == null ||
-            response.data['data'] is! Map<String, dynamic>) {
-          return Left("Invalid data format");
-        }
-
         try {
-          var dataModel = LecturerProfileModel.fromMap(response.data['data']);
-          var dataEntity = dataModel.toEntity();
-          return Right(dataEntity);
+          var dataModel = LecturerProfileModel.fromMap(response.data);
+          return Right(dataModel.toEntity());
         } catch (e) {
           return Left("Parsing error: $e");
         }
       },
     );
   }
-  
+
   @override
   Future<Either> fetchAssessments(int id) async {
     Either result = await sl<LecturerApiService>().fetchAssessments(id);
     return result.fold(
-      (error) {
-        return Left(error);
-      },
+      (error) => Left(error),
       (data) {
         Response response = data;
-
         try {
-          final data = (response.data['data'] as List)
+          final list = (response.data as List)
               .map((item) => AssessmentModel.fromMap(item).toEntity())
               .toList();
-          return Right(data);
+          return Right(list);
         } catch (e) {
           return Left("Parsing error: $e");
         }
       },
     );
   }
-  
+
   @override
   Future<Either<String, Response>> submitScores(
       int id, List<Map<String, dynamic>> scores) async {
-    
-    Either result =
-        await sl<LecturerApiService>().submitScores(id, scores);
-    return result.fold(
-      (error) {
-        return Left(error);
-      },
-      (data) {
-        return Right(data);
-      },
-    );
-
+    Either result = await sl<LecturerApiService>().submitScores(id, scores);
+    return result.fold((error) => Left(error), (data) => Right(data));
   }
-  
+
   @override
-  Future<Either> updateFinishedStudent({required bool status,required int id}) async {
-    Either result =
-        await sl<LecturerApiService>().updateFinishedStudent(status, id);
-    return result.fold(
-      (error) {
-        return Left(error);
-      },
-      (data) {
-        return Right(data);
-      },
-    );
+  Future<Either> updateFinishedStudent({required bool status, required int id}) async {
+    Either result = await sl<LecturerApiService>().updateFinishedStudent(status, id);
+    return result.fold((error) => Left(error), (data) => Right(data));
   }
-
 
   @override
   Future<Either<String, Response>> addNotification(AddNotificationReqParams request) async {

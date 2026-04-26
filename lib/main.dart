@@ -7,23 +7,11 @@ import 'package:sitama/core/shared/provider/app_providers.dart';
 import 'package:sitama/features/auth/ui/pages/splash.dart';
 import 'package:sitama/service_locator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   setupServiceLocator(prefs);
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Firebase hanya untuk mobile dan desktop
-  if (!kIsWeb) {
-    try {
-      await Firebase.initializeApp();
-    } catch (e) {
-      debugPrint('Firebase initialization error: $e');
-    }
-  }
 
   runApp(
     MultiProvider(

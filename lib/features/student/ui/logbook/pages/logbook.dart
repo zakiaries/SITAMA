@@ -6,6 +6,7 @@ import 'package:sitama/features/student/ui/logbook/widgets/student_log_book_card
 import 'package:sitama/core/shared/widgets/common/search_field.dart';
 import 'package:sitama/features/student/ui/logbook/bloc/log_book_student_cubit.dart';
 import 'package:sitama/features/student/ui/logbook/bloc/log_book_student_state.dart';
+import 'package:sitama/service_locator.dart';
 import 'package:sitama/features/student/ui/logbook/widgets/add_log_book.dart';
 import 'package:sitama/features/student/ui/logbook/widgets/filter_dilog.dart';
 
@@ -49,7 +50,7 @@ class _LogBookPageState extends State<LogBookPage>
 
     return Scaffold(
       body: BlocProvider(
-        create: (context) => LogBookStudentCubit()..displayLogBook(),
+        create: (context) => sl<LogBookStudentCubit>()..displayLogBook(),
         child: BlocBuilder<LogBookStudentCubit, LogBookStudentState>(
           builder: (context, state) {
             // Update error state

@@ -43,6 +43,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Environment files
+.env
+*.env
+
+# Firebase config (contains API keys — never commit)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # Laravel backend
 /backend/vendor/
 /backend/node_modules/

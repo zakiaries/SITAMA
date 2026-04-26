@@ -1,6 +1,7 @@
 class ApiUrls {
   // Base URL for the API
-  static const baseUrl = 'http://10.91.115.208:8000/api/';
+  // 10.0.2.2 = host machine from Android emulator
+  static const baseUrl = 'http://10.0.2.2:8000/api/';
 
   // Authentication endpoints
   static const login = '${baseUrl}login';

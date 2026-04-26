@@ -11,6 +11,7 @@ import 'package:sitama/features/student/domain/entities/student_home_entity.dart
 import 'package:sitama/features/student/ui/guidance/widgets/student_guidance_card.dart';
 import 'package:sitama/features/student/ui/home/bloc/student_display_cubit.dart';
 import 'package:sitama/features/student/ui/home/bloc/student_display_state.dart';
+import 'package:sitama/service_locator.dart';
 import 'package:sitama/features/student/ui/home/widgets/load_notification.dart';
 import 'package:sitama/features/student/ui/home/widgets/notification_badge.dart';
 import 'package:sitama/features/student/ui/home/widgets/notification_page.dart';
@@ -42,7 +43,7 @@ class _HomeContentState extends State<HomeContent>
   @override
   void initState() {
     super.initState();
-    _studentCubit = StudentDisplayCubit()..displayStudent();
+    _studentCubit = sl<StudentDisplayCubit>()..displayStudent();
     _setupConnectivityListener();
   }
 
