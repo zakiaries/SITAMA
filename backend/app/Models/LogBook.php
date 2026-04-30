@@ -11,6 +11,7 @@ class LogBook extends Model
         'title',
         'activity',
         'date',
+        'category',
         'lecturer_note',
     ];
 

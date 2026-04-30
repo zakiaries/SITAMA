@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sitama/features/kaprodi/ui/bloc/kaprodi_cubit.dart';
+import 'package:sitama/service_locator.dart';
 
 class VerifikasiIndustriPage extends StatefulWidget {
   const VerifikasiIndustriPage({super.key});
@@ -11,43 +14,21 @@ class _VerifikasiIndustriPageState extends State<VerifikasiIndustriPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
-  final List<Map<String, String>> _industryList = [
-    {
-      'name': 'PT Telkom Indonesia',
-      'division': 'Digital Solutions',
-      'city': 'Jakarta',
-      'pic': 'Budi Santoso',
-      'email': 'budi@telkom.co.id',
-      'description': '5 posisi tersedia',
-      'avatar': 'PT',
-      'color': '#3D5AF1',
-    },
-    {
-      'name': 'PT BNI (Persero)',
-      'division': 'Technology Innovation',
-      'city': 'Semarang',
-      'pic': 'Siti Rahayu',
-      'email': 'siti@bni.co.id',
-      'description': '3 posisi tersedia',
-      'avatar': 'BN',
-      'color': '#E53E3E',
-    },
-    {
-      'name': 'PT Mitra Digital Nusantara',
-      'division': 'Software Development',
-      'city': 'Bandung',
-      'pic': 'Ahmad Wijaya',
-      'email': 'ahmad@mitrdig.com',
-      'description': '7 posisi tersedia',
-      'avatar': 'MD',
-      'color': '#7C3AED',
-    },
-  ];
+  static const _statusKeys   = ['pending', 'verified', 'rejected'];
+  static const _tabColors    = [Color(0xFF7C3AED), Color(0xFF1E6E3E), Color(0xFF9B2F2F)];
+  static const _tabBgColors  = [Color(0xFFF3E8FF), Color(0xFFE6F4EA), Color(0xFFFCE8E6)];
+  static const _tabLabels    = ['Menunggu', 'Terverifikasi', 'Ditolak'];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        sl<KaprodiCubit>().loadIndustri(status: _statusKeys[_tabController.index]);
+      }
+    });
+    sl<KaprodiCubit>().loadIndustri(status: 'pending');
   }
 
   @override
@@ -58,11 +39,12 @@ class _VerifikasiIndustriPageState extends State<VerifikasiIndustriPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return [
+    return BlocProvider.value(
+      value: sl<KaprodiCubit>(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F6FA),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, _) => [
             SliverToBoxAdapter(
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
@@ -76,49 +58,26 @@ class _VerifikasiIndustriPageState extends State<VerifikasiIndustriPage>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(height: MediaQuery.of(context).padding.top + 16),
-                      // Title
-                      const Text(
-                        'Verifikasi Industri',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      const Text('Verifikasi Industri',
+                          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 16),
-                      // Search Bar
                       Container(
                         height: 40,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
-                          border: Border.all(
-                            color: const Color(0xFFE5E7EB),
-                            width: 1,
-                          ),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
                         ),
                         child: TextField(
-                          decoration: InputDecoration(
+                          onSubmitted: (q) => sl<KaprodiCubit>().loadIndustri(
+                            status: _statusKeys[_tabController.index], search: q),
+                          decoration: const InputDecoration(
                             hintText: 'Cari nama perusahaan...',
-                            hintStyle: const TextStyle(
-                              color: Color(0xFF9CA3AF),
-                              fontSize: 13,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              size: 18,
-                              color: Color(0xFF9CA3AF),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 0,
-                              horizontal: 12,
-                            ),
+                            hintStyle: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
+                            prefixIcon: Icon(Icons.search, size: 18, color: Color(0xFF9CA3AF)),
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                             border: InputBorder.none,
                             isDense: true,
-                          ),
-                          style: const TextStyle(
-                            color: Color(0xFF1F2937),
-                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -127,225 +86,96 @@ class _VerifikasiIndustriPageState extends State<VerifikasiIndustriPage>
                 ),
               ),
             ),
-          ];
-        },
-        body: Column(
-          children: [
-            // Tab Pills
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildTabPill(0, 'Menunggu (3)'),
-                    const SizedBox(width: 10),
-                    _buildTabPill(1, 'Terverifikasi (4)'),
-                    const SizedBox(width: 10),
-                    _buildTabPill(2, 'Ditolak (1)'),
-                  ],
-                ),
-              ),
-            ),
-            // Content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildPendingIndustries(),
-                  _buildVerifiedIndustries(),
-                  _buildRejectedIndustries(),
-                ],
-              ),
-            ),
           ],
+          body: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(3, (i) => Padding(
+                      padding: EdgeInsets.only(right: i < 2 ? 10 : 0),
+                      child: _buildTabPill(i, _tabLabels[i]),
+                    )),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: BlocBuilder<KaprodiCubit, KaprodiState>(
+                  builder: (context, state) {
+                    if (state is KaprodiLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is KaprodiError) {
+                      return Center(child: Text(state.message,
+                          style: const TextStyle(color: Colors.red)));
+                    }
+
+                    final tabIndex = _tabController.index;
+                    final industri = state is KaprodiIndustriLoaded ? state.industri : [];
+                    final color    = _tabColors[tabIndex];
+                    final bgColor  = _tabBgColors[tabIndex];
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        children: [
+                          // Banner
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: bgColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 8, height: 8,
+                                  decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    '${industri.length} perusahaan ${_tabLabels[tabIndex].toLowerCase()}',
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (industri.isEmpty)
+                            Text('Tidak ada data', style: TextStyle(fontSize: 11, color: color))
+                          else
+                            ...industri.map((c) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildIndustryCard(c as Map<String, dynamic>, tabIndex),
+                            )),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTabPill(int index, String label) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _tabController.animateTo(index);
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: _tabController.index == index
-              ? const Color(0xFF1A1A3E)
-              : Colors.white,
-          border: Border.all(
-            color: _tabController.index == index
-                ? const Color(0xFF1A1A3E)
-                : const Color(0xFFC5CDE2),
-            width: 1.2,
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: _tabController.index == index
-                ? Colors.white
-                : const Color(0xFF1A2050),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildIndustryCard(Map<String, dynamic> c, int tabIndex) {
+    final name    = c['name']      as String? ?? '';
+    final field   = c['field']     as String? ?? '-';
+    final pic     = c['pic_name']  as String? ?? '-';
+    final email   = c['pic_email'] as String? ?? '-';
+    final id      = c['id']        as int;
+    final initials = name.trim().split(' ').take(2)
+        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
 
-  Widget _buildPendingIndustries() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        children: [
-          // Purple Banner
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3E8FF),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF7C3AED),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    '3 perusahaan menunggu verifikasi akun',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6D28D9),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Industry Cards
-          ..._industryList.map((industry) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildIndustryCard(industry),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerifiedIndustries() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE6F4EA),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E6E3E),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    '4 perusahaan sudah terverifikasi',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E6E3E),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Data akun terverifikasi akan ditampilkan di sini',
-            style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF8A9BC0),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRejectedIndustries() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFCE8E6),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF9B2F2F),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    '1 perusahaan ditolak',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF9B2F2F),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Data akun ditolak akan ditampilkan di sini',
-            style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF8A9BC0),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIndustryCard(Map<String, String> industry) {
-    final color = _parseColor(industry['color']!);
+    final clr   = _tabColors[tabIndex];
+    final bgClr = _tabBgColors[tabIndex];
 
     return Container(
       decoration: BoxDecoration(
@@ -357,204 +187,116 @@ class _VerifikasiIndustriPageState extends State<VerifikasiIndustriPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Company Header
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 40, height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
+                  color: clr.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: Text(
-                    industry['avatar']!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
-                  ),
+                  child: Text(initials,
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: clr)),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  industry['name']!,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A2050),
-                  ),
-                ),
+                child: Text(name,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1A2050))),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3E8FF),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  'Menunggu',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF7C3AED),
-                  ),
-                ),
+                decoration: BoxDecoration(color: bgClr, borderRadius: BorderRadius.circular(6)),
+                child: Text(_tabLabels[tabIndex],
+                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: clr)),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          // Division and City
-          Text(
-            '${industry['division']} · ${industry['city']}',
-            style: const TextStyle(
-              fontSize: 10,
-              color: Color(0xFF8A9BC0),
-              fontWeight: FontWeight.w500,
+          Text(field, style: const TextStyle(fontSize: 10, color: Color(0xFF8A9BC0), fontWeight: FontWeight.w500)),
+          const SizedBox(height: 10),
+          Container(color: const Color(0xFFEEF0FA), height: 0.5),
+          const SizedBox(height: 10),
+          _infoRow('PIC', pic),
+          const SizedBox(height: 4),
+          _infoRow('Email', email),
+          if (tabIndex == 0) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => sl<KaprodiCubit>().rejectIndustri(id, 'pending'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFCE8E6),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFEA4335)),
+                      ),
+                      child: const Text('Tolak', textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFFEA4335))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => sl<KaprodiCubit>().verifyIndustri(id, 'pending'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A3E),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text('Verifikasi Akun', textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          // Divider
-          Container(
-            color: const Color(0xFFEEF0FA),
-            height: 0.5,
-          ),
-          const SizedBox(height: 10),
-          // Company Info
-          Row(
-            children: [
-              const Text(
-                'PIC: ',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF8A9BC0),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  industry['pic']!,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF1A2050),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Text(
-                'Email: ',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF8A9BC0),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  industry['email']!,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF1A2050),
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Text(
-                'Lowongan yang akan dipost: ',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF8A9BC0),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  industry['description']!,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF1A2050),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Action Buttons
-          Row(
-            children: [
-              // Reject Button
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFCE8E6),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFFEA4335),
-                        width: 1,
-                      ),
-                    ),
-                    child: const Text(
-                      'Tolak',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFFEA4335),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              // Verify Button
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A3E),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Verifikasi Akun',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Color _parseColor(String colorHex) {
-    final String hexColor = colorHex.replaceAll('#', '');
-    return Color(int.parse('FF$hexColor', radix: 16));
+  Widget _infoRow(String label, String value) {
+    return Row(
+      children: [
+        Text('$label: ', style: const TextStyle(fontSize: 10, color: Color(0xFF8A9BC0), fontWeight: FontWeight.w500)),
+        Expanded(child: Text(value,
+            style: const TextStyle(fontSize: 10, color: Color(0xFF1A2050), fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis)),
+      ],
+    );
+  }
+
+  Widget _buildTabPill(int index, String label) {
+    final active = _tabController.index == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _tabController.animateTo(index));
+        sl<KaprodiCubit>().loadIndustri(status: _statusKeys[index]);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFF1A1A3E) : Colors.white,
+          border: Border.all(
+            color: active ? const Color(0xFF1A1A3E) : const Color(0xFFC5CDE2),
+            width: 1.2,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(label,
+            style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w700,
+              color: active ? Colors.white : const Color(0xFF1A2050),
+            )),
+      ),
+    );
   }
 }

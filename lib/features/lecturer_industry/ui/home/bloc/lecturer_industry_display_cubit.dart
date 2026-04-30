@@ -1,31 +1,30 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sitama/features/lecturer_industry/data/repositories/lecturer_industry_repository.dart';
 import 'package:sitama/features/lecturer_industry/domain/entities/lecturer_industry_home_entity.dart';
-import 'package:sitama/features/lecturer_industry/data/static_industry_data.dart';
+import 'package:sitama/service_locator.dart';
 
-// ──── STATES ────
 abstract class LecturerIndustryDisplayState {}
-
 class Loading extends LecturerIndustryDisplayState {}
-
 class DetailLoaded extends LecturerIndustryDisplayState {
   final LecturerIndustryHomeEntity data;
   DetailLoaded({required this.data});
 }
-
 class Failure extends LecturerIndustryDisplayState {
   final String errorMessage;
   Failure({required this.errorMessage});
 }
 
-// ──── CUBIT ────
 class LecturerIndustryDisplayCubit extends Cubit<LecturerIndustryDisplayState> {
   LecturerIndustryDisplayCubit() : super(Loading());
 
-  void displayLecturerIndus() async {
+  Future<void> displayLecturerIndus() async {
+    emit(Loading());
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      final data = getStaticIndustryLecturerHomeData();
-      emit(DetailLoaded(data: data));
+      final result = await sl<LecturerIndustryRepository>().getHome();
+      result.fold(
+        (error) => emit(Failure(errorMessage: error.toString())),
+        (entity) => emit(DetailLoaded(data: entity)),
+      );
     } catch (e) {
       emit(Failure(errorMessage: e.toString()));
     }

@@ -47,7 +47,7 @@ class StudentController extends Controller
     public function getGuidances(Request $request)
     {
         $student   = $request->user()->student;
-        $guidances = $student->guidances()->orderBy('date', 'desc')->get()
+        $guidances = $student->guidances()->orderBy('date', 'desc')->limit(100)->get()
             ->map(fn($g) => $this->formatGuidance($g));
 
         return response()->json(['guidances' => $guidances]);
@@ -130,7 +130,7 @@ class StudentController extends Controller
     public function getLogBooks(Request $request)
     {
         $student  = $request->user()->student;
-        $logBooks = $student->logBooks()->orderBy('date', 'desc')->get()
+        $logBooks = $student->logBooks()->orderBy('date', 'desc')->limit(100)->get()
             ->map(fn($lb) => $this->formatLogBook($lb));
 
         return response()->json(['log_books' => $logBooks]);
@@ -228,6 +228,20 @@ class StudentController extends Controller
                 : null,
             'internships'   => $internships ?? [],
         ]);
+    }
+
+    // ─── File Download ───────────────────────────────────────────────────────
+
+    public function downloadGuidanceFile(Request $request, int $id)
+    {
+        $student  = $request->user()->student;
+        $guidance = $student->guidances()->findOrFail($id);
+
+        if (!$guidance->name_file || !Storage::disk('public')->exists($guidance->name_file)) {
+            return response()->json(['errors' => ['message' => 'File tidak ditemukan']], 404);
+        }
+
+        return Storage::disk('public')->download($guidance->name_file);
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

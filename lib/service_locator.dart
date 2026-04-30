@@ -12,6 +12,8 @@ import 'package:sitama/features/auth/domain/usecases/signin_google.dart';
 import 'package:sitama/features/lecturer/data/repositories/lecturer.dart';
 import 'package:sitama/features/lecturer/data/sources/lecturer_api_service.dart';
 import 'package:sitama/features/lecturer/domain/repositories/lecturer.dart';
+import 'package:sitama/features/lecturer_industry/data/repositories/lecturer_industry_repository.dart';
+import 'package:sitama/features/lecturer_industry/data/sources/lecturer_industry_api_service.dart';
 import 'package:sitama/features/lecturer/domain/usecases/get_assessmet.dart';
 import 'package:sitama/features/lecturer/domain/usecases/get_detail_student.dart';
 import 'package:sitama/features/lecturer/domain/usecases/get_home_lecturer.dart';
@@ -49,6 +51,10 @@ import 'package:sitama/features/student/ui/home/bloc/student_display_cubit.dart'
 import 'package:sitama/features/student/ui/job_listing/bloc/job_listing_cubit.dart';
 import 'package:sitama/features/student/ui/logbook/bloc/log_book_student_cubit.dart';
 import 'package:sitama/features/student/ui/seminar/bloc/seminar_cubit.dart';
+import 'package:sitama/features/kaprodi/data/kaprodi_api_service.dart';
+import 'package:sitama/features/kaprodi/ui/bloc/kaprodi_cubit.dart';
+import 'package:sitama/features/industri/data/industri_api_service.dart';
+import 'package:sitama/features/industri/ui/bloc/industri_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -61,12 +67,16 @@ void setupServiceLocator(SharedPreferences prefs) {
   sl.registerSingleton<AuthLocalService>(AuthLocalServiceImpl());
   sl.registerSingleton<StudentApiService>(StudentApiServiceImpl());
   sl.registerSingleton<LecturerApiService>(LecturerApiServiceImpl());
+  sl.registerSingleton<LecturerIndustryApiService>(LecturerIndustryApiServiceImpl());
   sl.registerSingleton<JobListingApiService>(JobListingApiServiceImpl());
+  sl.registerSingleton<KaprodiApiService>(KaprodiApiService());
+  sl.registerSingleton<IndustriApiService>(IndustriApiService());
 
   // Repositories
   sl.registerSingleton<AuthRepostory>(AuthRepostoryImpl());
   sl.registerSingleton<StudentRepository>(StudentRepositoryImpl());
   sl.registerSingleton<LecturerRepository>(LecturerRepositoryImpl());
+  sl.registerSingleton<LecturerIndustryRepository>(LecturerIndustryRepositoryImpl());
   sl.registerSingleton<JobListingRepository>(JobListingRepositoryImpl());
 
   // Use cases — Auth
@@ -126,4 +136,6 @@ void setupServiceLocator(SharedPreferences prefs) {
 
   sl.registerLazySingleton<JobListingCubit>(() => JobListingCubit());
   sl.registerLazySingleton<SeminarCubit>(() => SeminarCubit());
+  sl.registerLazySingleton<KaprodiCubit>(() => KaprodiCubit());
+  sl.registerLazySingleton<IndustriCubit>(() => IndustriCubit());
 }

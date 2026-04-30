@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AssessmentComponentSeeder::class,
             UserSeeder::class,
+            SeminarSeeder::class,
         ]);
     }
 }

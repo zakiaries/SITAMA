@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sitama/core/constants/api_urls.dart';
+import 'package:sitama/core/network/dio_client.dart';
 import 'package:sitama/features/auth/data/models/reset_password_req_params.dart';
 import 'package:sitama/features/auth/data/models/signin_google_req_params.dart';
 import 'package:sitama/features/auth/data/models/signin_req_params.dart';
@@ -36,8 +38,19 @@ class AuthRepostoryImpl extends AuthRepostory{
   
   @override
   Future<Either> logout() async {
-    Either resullt = await sl<AuthLocalService>().logout();
-    return resullt;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token != null) {
+        await sl<DioClient>().post(
+          '${ApiUrls.baseUrl}logout',
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+        );
+      }
+    } catch (_) {
+      // If backend call fails, still clear local session
+    }
+    return await sl<AuthLocalService>().logout();
   }
 
   @override

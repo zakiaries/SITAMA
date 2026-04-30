@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sitama/features/kaprodi/ui/bloc/kaprodi_cubit.dart';
+import 'package:sitama/service_locator.dart';
 
 class KaprodiDataMahasiswa extends StatefulWidget {
   const KaprodiDataMahasiswa({super.key});
@@ -11,10 +14,20 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
+  static const _statusMap = ['all', 'aktif', 'belum_dospem', 'belum_magang', 'all', 'selesai'];
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) _loadTab(_tabController.index);
+    });
+    sl<KaprodiCubit>().loadMahasiswa();
+  }
+
+  void _loadTab(int index) {
+    sl<KaprodiCubit>().loadMahasiswa(status: _statusMap[index]);
   }
 
   @override
@@ -25,11 +38,12 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      body: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return [
+    return BlocProvider.value(
+      value: sl<KaprodiCubit>(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF5F6FA),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               backgroundColor: Colors.transparent,
               pinned: true,
@@ -51,49 +65,28 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(height: MediaQuery.of(context).padding.top + 16),
-                      // Header Title
                       const Text(
                         'Data Mahasiswa',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-                      // Search Bar
                       Container(
                         height: 40,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
-                          border: Border.all(
-                            color: const Color(0xFFE5E7EB),
-                            width: 1,
-                          ),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
                         ),
                         child: TextField(
-                          decoration: InputDecoration(
+                          onSubmitted: (q) => sl<KaprodiCubit>().loadMahasiswa(
+                            status: _statusMap[_tabController.index], search: q),
+                          decoration: const InputDecoration(
                             hintText: 'Cari NIM atau nama mahasiswa...',
-                            hintStyle: const TextStyle(
-                              color: Color(0xFF9CA3AF),
-                              fontSize: 13,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              size: 18,
-                              color: Color(0xFF9CA3AF),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 0,
-                              horizontal: 12,
-                            ),
+                            hintStyle: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
+                            prefixIcon: Icon(Icons.search, size: 18, color: Color(0xFF9CA3AF)),
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                             border: InputBorder.none,
                             isDense: true,
-                          ),
-                          style: const TextStyle(
-                            color: Color(0xFF1F2937),
-                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -102,282 +95,87 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
                 ),
               ),
             ),
-          ];
-        },
-        body: Column(
-          children: [
-            // Filter Pills
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildFilterPill(0, 'Semua'),
-                    SizedBox(width: 10),
-                    _buildFilterPill(1, 'Aktif'),
-                    SizedBox(width: 10),
-                    _buildFilterPill(2, 'Belum Dospem'),
-                    SizedBox(width: 10),
-                    _buildFilterPill(3, 'Belum Magang'),
-                    SizedBox(width: 10),
-                    _buildFilterPill(4, 'Seminar'),
-                    SizedBox(width: 10),
-                    _buildFilterPill(5, 'Selesai'),
-                  ],
-                ),
-              ),
-            ),
-            // Content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildStudentListSemua(),
-                  _buildStudentListAktif(),
-                  _buildStudentListBelumDospem(),
-                  _buildStudentListBelumMagang(),
-                  _buildStudentListSeminar(),
-                  _buildStudentListSelesai(),
-                ],
-              ),
-            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStudentListSemua() {
-    return ListView(
-      padding: const EdgeInsets.all(14),
-      children: [
-        _buildStudentCardWithAdvisor(
-          initials: 'MZ',
-          name: 'Muhammad Zaki Aries Putra',
-          nim: '3.34.23.2.15',
-          className: 'IK-3C',
-          company: 'PT. Telkom Indonesia',
-          advisor: 'Kuwat Santoso, M.Kom',
-          status: 'Aktif',
-          statusBg: const Color(0xFFE8F0FE),
-          statusText: const Color(0xFF1A3A8E),
-          initialsColor: const Color(0xFFE8F0FE),
-          hasAction: true,
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithAdvisor(
-          initials: 'AR',
-          name: 'Alif Rahman Maulana',
-          nim: '3.34.23.2.01',
-          className: 'IK-3C',
-          company: 'PT. Gojek',
-          advisor: 'Slamet Handoko, M.Kom',
-          status: 'Aktif',
-          statusBg: const Color(0xFFE8F0FE),
-          statusText: const Color(0xFF1A3A8E),
-          initialsColor: const Color(0xFFE8F0FE),
-          hasAction: true,
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithoutAdvisor(
-          initials: 'VK',
-          name: 'Vincencius Kurnia Putra',
-          nim: '3.34.23.2.24',
-          className: 'IK-3C',
-          company: 'PT. BNI',
-          status: 'Belum Dospem',
-          statusBg: const Color(0xFFFCE8E6),
-          statusText: const Color(0xFF9B2F2F),
-          initialsColor: const Color(0xFFFCE8E6),
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithSeminar(
-          initials: 'EP',
-          name: 'Eka Pramudita',
-          nim: '3.34.23.2.07',
-          className: 'IK-3C',
-          company: 'PT. Gojek',
-          status: 'Seminar',
-          statusBg: const Color(0xFFE6F4EA),
-          statusText: const Color(0xFF1E6E3E),
-          initialsColor: const Color(0xFFE6F4EA),
-          schedule: 'Jadwal: 15 Jan 2025 · 09:00 · B.301',
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithAdvisor(
-          initials: 'RP',
-          name: 'Rahma Setianing P.A.',
-          nim: '3.34.23.2.19',
-          className: 'IK-3C',
-          company: 'PT. Tokopedia',
-          advisor: 'Slamet Handoko, M.Kom',
-          status: 'Selesai',
-          statusBg: const Color(0xFFE6F4EA),
-          statusText: const Color(0xFF1E6E3E),
-          initialsColor: const Color(0xFFE6F4EA),
-          hasAction: false,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStudentListAktif() {
-    return ListView(
-      padding: const EdgeInsets.all(14),
-      children: [
-        _buildStudentCardWithAdvisor(
-          initials: 'MZ',
-          name: 'Muhammad Zaki Aries Putra',
-          nim: '3.34.23.2.15',
-          className: 'IK-3C',
-          company: 'PT. Telkom Indonesia',
-          advisor: 'Kuwat Santoso, M.Kom',
-          status: 'Aktif',
-          statusBg: const Color(0xFFE8F0FE),
-          statusText: const Color(0xFF1A3A8E),
-          initialsColor: const Color(0xFFE8F0FE),
-          hasAction: true,
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithAdvisor(
-          initials: 'AR',
-          name: 'Alif Rahman Maulana',
-          nim: '3.34.23.2.01',
-          className: 'IK-3C',
-          company: 'PT. Gojek',
-          advisor: 'Slamet Handoko, M.Kom',
-          status: 'Aktif',
-          statusBg: const Color(0xFFE8F0FE),
-          statusText: const Color(0xFF1A3A8E),
-          initialsColor: const Color(0xFFE8F0FE),
-          hasAction: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStudentListBelumDospem() {
-    return ListView(
-      padding: const EdgeInsets.all(14),
-      children: [
-        _buildStudentCardWithoutAdvisor(
-          initials: 'VK',
-          name: 'Vincencius Kurnia Putra',
-          nim: '3.34.23.2.24',
-          className: 'IK-3C',
-          company: 'PT. BNI',
-          status: 'Belum',
-          statusBg: const Color(0xFFFCE8E6),
-          statusText: const Color(0xFF9B2F2F),
-          initialsColor: const Color(0xFFFCE8E6),
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithoutAdvisor(
-          initials: 'YK',
-          name: 'Yohannes Kevin G.P.',
-          nim: '3.34.23.2.26',
-          className: 'IK-3C',
-          company: 'PT. Grab',
-          status: 'Belum',
-          statusBg: const Color(0xFFFCE8E6),
-          statusText: const Color(0xFF9B2F2F),
-          initialsColor: const Color(0xFFFCE8E6),
-        ),
-        const SizedBox(height: 10),
-        _buildStudentCardWithoutAdvisor(
-          initials: 'AP',
-          name: 'Alvina Putri Aulia',
-          nim: '3.34.23.2.02',
-          className: 'IK-3C',
-          company: 'PT. Shopee',
-          status: 'Belum',
-          statusBg: const Color(0xFFFCE8E6),
-          statusText: const Color(0xFF9B2F2F),
-          initialsColor: const Color(0xFFFCE8E6),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStudentListBelumMagang() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(14),
-      child: Center(
-        child: Text(
-          'Tidak ada mahasiswa belum magang',
-          style: TextStyle(
-            fontSize: 14,
-            color: const Color(0xFF8A9BC0),
-            fontWeight: FontWeight.w500,
+          body: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterPill(0, 'Semua'),
+                      const SizedBox(width: 10),
+                      _buildFilterPill(1, 'Aktif'),
+                      const SizedBox(width: 10),
+                      _buildFilterPill(2, 'Belum Dospem'),
+                      const SizedBox(width: 10),
+                      _buildFilterPill(3, 'Belum Magang'),
+                      const SizedBox(width: 10),
+                      _buildFilterPill(4, 'Seminar'),
+                      const SizedBox(width: 10),
+                      _buildFilterPill(5, 'Selesai'),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: BlocBuilder<KaprodiCubit, KaprodiState>(
+                  builder: (context, state) {
+                    if (state is KaprodiLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is KaprodiError) {
+                      return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+                    }
+                    final students = state is KaprodiMahasiswaLoaded ? state.mahasiswa : [];
+                    if (students.isEmpty) {
+                      return const Center(
+                        child: Text('Tidak ada data mahasiswa',
+                            style: TextStyle(fontSize: 14, color: Color(0xFF8A9BC0))),
+                      );
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.all(14),
+                      itemCount: students.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) => _buildStudentCard(students[i] as Map<String, dynamic>),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStudentListSelesai() {
-    return ListView(
-      padding: const EdgeInsets.all(14),
-      children: [
-        _buildStudentCardWithAdvisor(
-          initials: 'RP',
-          name: 'Rahma Setianing P.A.',
-          nim: '3.34.23.2.19',
-          className: 'IK-3C',
-          company: 'PT. Tokopedia',
-          advisor: 'Slamet Handoko, M.Kom',
-          status: 'Selesai',
-          statusBg: const Color(0xFFE6F4EA),
-          statusText: const Color(0xFF1E6E3E),
-          initialsColor: const Color(0xFFE6F4EA),
-          hasAction: false,
-        ),
-      ],
-    );
-  }
+  Widget _buildStudentCard(Map<String, dynamic> s) {
+    final name     = s['name'] as String? ?? '';
+    final nim      = s['nim']  as String? ?? '';
+    final cls      = s['class'] as String? ?? '';
+    final company  = s['company'] as String? ?? '-';
+    final lecturer = s['lecturer'] as String? ?? '';
+    final status   = s['status'] as String? ?? 'Aktif';
+    final initials = name.trim().split(' ').take(2)
+        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
 
-  Widget _buildStudentListSeminar() {
-    return ListView(
-      padding: const EdgeInsets.all(14),
-      children: [
-        _buildStudentCardWithSeminar(
-          initials: 'EP',
-          name: 'Eka Pramudita',
-          nim: '3.34.23.2.07',
-          className: 'IK-3C',
-          company: 'PT. Gojek',
-          status: 'Seminar',
-          statusBg: const Color(0xFFE6F4EA),
-          statusText: const Color(0xFF1E6E3E),
-          initialsColor: const Color(0xFFE6F4EA),
-          schedule: 'Jadwal: 15 Jan 2025 · 09:00 · B.301',
-        ),
-      ],
-    );
-  }
+    Color statusBg, statusText;
+    switch (status) {
+      case 'Selesai':
+        statusBg = const Color(0xFFE6F4EA); statusText = const Color(0xFF1E6E3E);
+      case 'Belum Magang':
+        statusBg = const Color(0xFFFFF8E1); statusText = const Color(0xFFF59E0B);
+      default:
+        statusBg = const Color(0xFFE8F0FE); statusText = const Color(0xFF1A3A8E);
+    }
 
-  Widget _buildStudentCardWithAdvisor({
-    required String initials,
-    required String name,
-    required String nim,
-    required String className,
-    required String company,
-    required String advisor,
-    required String status,
-    required Color statusBg,
-    required Color statusText,
-    required Color initialsColor,
-    bool hasAction = false,
-  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFD0D6EB),
-          width: 0.5,
-        ),
+        border: Border.all(color: const Color(0xFFD0D6EB), width: 0.5),
       ),
       padding: const EdgeInsets.all(13),
       child: Column(
@@ -387,21 +185,11 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: initialsColor,
-                  shape: BoxShape.circle,
-                ),
+                width: 42, height: 42,
+                decoration: BoxDecoration(color: statusBg, shape: BoxShape.circle),
                 child: Center(
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A3A8E),
-                    ),
-                  ),
+                  child: Text(initials,
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: statusText)),
                 ),
               ),
               const SizedBox(width: 11),
@@ -409,367 +197,49 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A2050),
-                      ),
-                    ),
+                    Text(name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1A2050))),
                     const SizedBox(height: 2),
-                    Text(
-                      '$nim · $className · $company',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF8A9BC0),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    Text('$nim · $cls · $company',
+                        style: const TextStyle(fontSize: 10, color: Color(0xFF8A9BC0), fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: statusText,
-                  ),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 3),
+                decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(20)),
+                child: Text(status, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: statusText)),
               ),
             ],
           ),
           const SizedBox(height: 9),
-          Container(
-            color: const Color(0xFFEEF0FA),
-            height: 0.5,
-          ),
+          Container(color: const Color(0xFFEEF0FA), height: 0.5),
           const SizedBox(height: 9),
-          Row(
-            children: [
-              const Text(
-                'Dospem: ',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF8A9BC0),
-                  fontWeight: FontWeight.w500,
+          if (lecturer.isNotEmpty)
+            Row(
+              children: [
+                const Text('Dospem: ', style: TextStyle(fontSize: 10, color: Color(0xFF8A9BC0), fontWeight: FontWeight.w500)),
+                Expanded(child: Text(lecturer, style: const TextStyle(fontSize: 10, color: Color(0xFF1A2050), fontWeight: FontWeight.w700))),
+              ],
+            )
+          else
+            Row(
+              children: [
+                const Expanded(
+                  child: Text('Belum ada dosen pembimbing',
+                      style: TextStyle(fontSize: 10, color: Color(0xFFE53E3E), fontStyle: FontStyle.italic)),
                 ),
-              ),
-              Expanded(
-                child: Text(
-                  advisor,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF1A2050),
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(color: const Color(0xFF1A1A3E), borderRadius: BorderRadius.circular(6)),
+                    child: const Text('Tugaskan Dosen',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white)),
                   ),
                 ),
-              ),
-              if (hasAction)
-                TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 5,
-                    ),
-                    backgroundColor: const Color(0xFFE8F0FE),
-                  ),
-                  child: const Text(
-                    'Ubah',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A3A8E),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStudentCardWithoutAdvisor({
-    required String initials,
-    required String name,
-    required String nim,
-    required String className,
-    required String company,
-    required String status,
-    required Color statusBg,
-    required Color statusText,
-    required Color initialsColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFD0D6EB),
-          width: 0.5,
-        ),
-      ),
-      padding: const EdgeInsets.all(13),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: initialsColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A3A8E),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A2050),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$nim · $className · $company',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF8A9BC0),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: statusText,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          Container(
-            color: const Color(0xFFEEF0FA),
-            height: 0.5,
-          ),
-          const SizedBox(height: 9),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Belum ada dosen pembimbing',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFFE53E3E),
-                    fontWeight: FontWeight.w500,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A3E),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'Tugaskan Dosen',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStudentCardWithSeminar({
-    required String initials,
-    required String name,
-    required String nim,
-    required String className,
-    required String company,
-    required String status,
-    required Color statusBg,
-    required Color statusText,
-    required Color initialsColor,
-    required String schedule,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFD0D6EB),
-          width: 0.5,
-        ),
-      ),
-      padding: const EdgeInsets.all(13),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: initialsColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A3A8E),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A2050),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$nim · $className · $company',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF8A9BC0),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: statusText,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          Container(
-            color: const Color(0xFFEEF0FA),
-            height: 0.5,
-          ),
-          const SizedBox(height: 9),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  schedule,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF8A9BC0),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 5,
-                  ),
-                  backgroundColor: const Color(0xFF1A1A3E),
-                ),
-                child: const Text(
-                  'Detail',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -778,20 +248,15 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
   Widget _buildFilterPill(int index, String label) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _tabController.animateTo(index);
-        });
+        setState(() => _tabController.animateTo(index));
+        _loadTab(index);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: _tabController.index == index
-              ? const Color(0xFF1A1A3E)
-              : Colors.white,
+          color: _tabController.index == index ? const Color(0xFF1A1A3E) : Colors.white,
           border: Border.all(
-            color: _tabController.index == index
-                ? const Color(0xFF1A1A3E)
-                : const Color(0xFFC5CDE2),
+            color: _tabController.index == index ? const Color(0xFF1A1A3E) : const Color(0xFFC5CDE2),
             width: 1.2,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -799,11 +264,8 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: _tabController.index == index
-                ? Colors.white
-                : const Color(0xFF1A2050),
+            fontSize: 11, fontWeight: FontWeight.w700,
+            color: _tabController.index == index ? Colors.white : const Color(0xFF1A2050),
           ),
         ),
       ),

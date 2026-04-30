@@ -15,12 +15,16 @@ class Internship extends Model
         'start_date',
         'end_date',
         'is_finished',
+        'performance_notes',
+        'performance_notes_by',
+        'performance_notes_date',
     ];
 
     protected $casts = [
-        'start_date'  => 'date',
-        'end_date'    => 'date',
-        'is_finished' => 'boolean',
+        'start_date'              => 'date',
+        'end_date'                => 'date',
+        'performance_notes_date'  => 'date',
+        'is_finished'             => 'boolean',
     ];
 
     public function student()
