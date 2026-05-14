@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
+import 'package:sitama/core/shared/widgets/alert/custom_snackbar.dart';
+import 'package:sitama/features/student/ui/logbook/bloc/log_book_student_cubit.dart';
 import 'package:sitama/features/student/ui/logbook/widgets/delete_log_book.dart';
 import 'package:sitama/features/student/ui/logbook/widgets/edit_log_book.dart';
 
@@ -111,8 +114,10 @@ class LogBookCard extends StatelessWidget {
                         icon: Icons.edit,
                         label: 'Edit',
                         color: colorScheme.primary,
-                        onTap: () {
-                          showDialog(
+                        onTap: () async {
+                          final cubit = context.read<LogBookStudentCubit>();
+                          final messenger = ScaffoldMessenger.of(context);
+                          final result = await showDialog<bool>(
                             context: context,
                             builder: (context) {
                               return EditLogBook(
@@ -124,6 +129,16 @@ class LogBookCard extends StatelessWidget {
                               );
                             },
                           );
+                          if (result == true) {
+                            messenger.showSnackBar(
+                              CustomSnackBar(
+                                message: 'Berhasil Mengedit Log Book ✍️',
+                                icon: Icons.check_circle_outline,
+                                backgroundColor: Colors.green.shade800,
+                              ),
+                            );
+                            cubit.displayLogBook();
+                          }
                         },
                       ),
                       const SizedBox(width: 10),

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sitama/core/constants/api_urls.dart';
 import 'package:sitama/core/network/dio_client.dart';
 import 'package:sitama/features/student/domain/entities/seminar_entity.dart';
 import 'package:sitama/service_locator.dart';
@@ -15,7 +16,7 @@ class SeminarCubit extends Cubit<SeminarState> {
       final token = prefs.getString('token');
 
       final response = await sl<DioClient>().get(
-        'http://10.0.2.2:8000/api/seminars',
+        '${ApiUrls.baseUrl}seminars',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 

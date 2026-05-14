@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:sitama/core/constants/api_urls.dart';
 import 'package:sitama/core/network/dio_client.dart';
 import 'package:sitama/features/student/data/models/job_listing.dart';
 import 'package:sitama/service_locator.dart';
 
-const _baseUrl = 'http://10.0.2.2:8000/api/job-listings';
+final _baseUrl = '${ApiUrls.baseUrl}job-listings';
 
 abstract class JobListingApiService {
   Future<Either> getJobListings();

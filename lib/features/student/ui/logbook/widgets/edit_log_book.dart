@@ -8,7 +8,6 @@ import 'package:sitama/core/shared/widgets/buttons/button_state.dart';
 import 'package:sitama/core/shared/widgets/buttons/button_state_cubit.dart';
 import 'package:sitama/features/shared/data/models/log_book.dart';
 import 'package:sitama/features/student/domain/usecases/logbook/edit_log_book_student.dart';
-import 'package:sitama/features/student/ui/home/pages/home.dart';
 import 'package:sitama/service_locator.dart';
 
 class EditLogBook extends StatefulWidget {
@@ -59,23 +58,16 @@ class _EditLogBookState extends State<EditLogBook> {
     return BlocProvider(
       create: (context) => ButtonStateCubit(),
       child: BlocListener<ButtonStateCubit, ButtonState>(
-        listener: (context, state) async {
+        listener: (context, state) {
           if (state is ButtonSuccessState) {
+            Navigator.of(context).pop(true);
+          } else if (state is ButtonFailurState) {
             ScaffoldMessenger.of(context).showSnackBar(
               CustomSnackBar(
-                message: 'Berhasil Mengedit Log Book ✍️',
-                icon: Icons.check_circle_outline,  
-                backgroundColor: Colors.green.shade800,  
+                message: state.errorMessage,
+                icon: Icons.error_outline,
+                backgroundColor: Colors.red.shade800,
               ),
-            );
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(
-                  currentIndex: widget.curentPage,
-                ),
-              ),
-              (Route<dynamic> route) => false,
             );
           }
         },

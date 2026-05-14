@@ -95,7 +95,6 @@ class StudentApiServiceImpl extends StudentApiService {
       var token = sharedPreferences.get('token');
 
       final formData = await request.toFormData();
-      formData.fields.add(MapEntry('_method', 'PUT'));
 
       var response = await sl<DioClient>().post(
         "${ApiUrls.studentGuidance}/${request.id}",
@@ -190,7 +189,6 @@ class StudentApiServiceImpl extends StudentApiService {
       var token = sharedPreferences.get('token');
 
       final formData = await request.toFormData();
-      formData.fields.add(MapEntry('_method', 'PUT'));
 
       var response = await sl<DioClient>().post(
         "${ApiUrls.studentLogBook}/${request.id}",

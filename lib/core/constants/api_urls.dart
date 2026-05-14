@@ -1,7 +1,7 @@
 class ApiUrls {
   // Base URL for the API
   // 10.0.2.2 = host machine from Android emulator
-  static const baseUrl = 'http://10.0.2.2:8000/api/';
+  static const baseUrl = 'http://localhost:8000/api/';
 
   // Authentication endpoints
   static const login = '${baseUrl}login';
@@ -26,6 +26,12 @@ class ApiUrls {
   static const submitScores = '${baseUrl}lecturer/addAssessment';
   static const updateFinishedStudent = '${baseUrl}lecturer/finishedStudent';
   static const addNotification = '${baseUrl}lecturer/notification';
+
+  // Job listings
+  static const jobListings = '${baseUrl}job-listings';
+
+  // Seminars
+  static const seminars = '${baseUrl}seminars';
 
   // Common endpoints
   static const updatePhotoProfile = '${baseUrl}updateProfile';
