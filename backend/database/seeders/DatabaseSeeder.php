@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AssessmentComponentSeeder::class,
             UserSeeder::class,
             SeminarSeeder::class,
+            JobListingSeeder::class,
         ]);
     }
 }

@@ -70,14 +70,25 @@ class UserSeeder extends Seeder
             'field'   => 'Telekomunikasi & Teknologi Informasi',
             'phone'   => '022-4521111',
             'email'   => 'info@telkom.co.id',
+            'verification_status' => 'verified',
+        ]);
+
+        $companyUser2 = User::create([
+            'name'     => 'PT. Gojek Indonesia',
+            'username' => 'gojek_hr',
+            'email'    => 'hr@gojek.com',
+            'password' => Hash::make('password'),
+            'role'     => 'industri',
         ]);
 
         $company2 = Company::create([
+            'user_id' => $companyUser2->id,
             'name'    => 'PT. Gojek Indonesia',
             'address' => 'Pasaraya Blok M, Jakarta Selatan',
             'field'   => 'Teknologi & Ride-Hailing',
             'phone'   => '021-5010000',
             'email'   => 'info@gojek.com',
+            'verification_status' => 'verified',
         ]);
 
         // ── Students ──────────────────────────────────────────────────────────
