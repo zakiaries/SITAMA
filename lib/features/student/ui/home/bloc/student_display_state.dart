@@ -6,6 +6,11 @@ abstract class StudentDisplayState {}
 
 class StudentLoading extends StudentDisplayState{}
 
+class StudentNotMapped extends StudentDisplayState {
+  final String name;
+  StudentNotMapped({required this.name});
+}
+
 class StudentLoaded extends StudentDisplayState {
   final StudentHomeEntity studentHomeEntity;
   final NotificationDataEntity? notifications;  

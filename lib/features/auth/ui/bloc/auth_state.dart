@@ -5,4 +5,5 @@ class AuthenticatedStudent extends AuthState{}
 class AuthenticatedLecturer extends AuthState{}
 class AuthenticatedLecturerIndustry extends AuthState{}
 class AuthenticatedKaprodi extends AuthState{}
+class AuthenticatedIndustri extends AuthState{}
 class UnAuthenticated extends AuthState{}

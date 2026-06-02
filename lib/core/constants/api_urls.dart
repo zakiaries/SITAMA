@@ -4,6 +4,7 @@ class ApiUrls {
   static const baseUrl = 'http://localhost:8000/api/';
 
   // Authentication endpoints
+  static const register = '${baseUrl}register';
   static const login = '${baseUrl}login';
   static const loginGoogle = '${baseUrl}loginGoogle';
 

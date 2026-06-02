@@ -4,6 +4,7 @@ import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/features/auth/ui/bloc/auth_state.dart';
 import 'package:sitama/features/auth/ui/bloc/auth_state_cubit.dart';
 import 'package:sitama/features/auth/ui/pages/welcome.dart';
+import 'package:sitama/features/industri/ui/industri_shell.dart';
 import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
 import 'package:sitama/features/lecturer_industry/ui/lecturer_industry_shell.dart';
@@ -67,6 +68,9 @@ class _SplashPageState extends State<SplashPage> {
             }
             if (state is AuthenticatedKaprodi) {
               return const KaprodiShell();
+            }
+            if (state is AuthenticatedIndustri) {
+              return const IndustriShell();
             }
             if (state is UnAuthenticated) {
               return WelcomePages();

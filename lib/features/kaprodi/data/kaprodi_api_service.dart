@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sitama/core/constants/api_urls.dart';
 import 'package:sitama/core/network/dio_client.dart';
 import 'package:sitama/service_locator.dart';
 
-const _base = 'http://10.0.2.2:8000/api/kaprodi';
+const _base = '${ApiUrls.baseUrl}kaprodi';
 
 class KaprodiApiService {
   Future<Options> get _auth async {
@@ -93,6 +94,19 @@ class KaprodiApiService {
         '$_base/industri/$id/reject',
         options: await _auth,
         data: {'reason': reason},
+      );
+      return Right(r.data['message']);
+    } on DioException catch (e) {
+      return Left(e.response?.data?['errors']?['message'] ?? e.message);
+    }
+  }
+
+  Future<Either> assignLecturer(int studentId, int lecturerId) async {
+    try {
+      final r = await sl<DioClient>().put(
+        '$_base/mahasiswa/$studentId/assign-lecturer',
+        options: await _auth,
+        data: {'lecturer_id': lecturerId},
       );
       return Right(r.data['message']);
     } on DioException catch (e) {

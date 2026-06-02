@@ -6,11 +6,13 @@ import 'package:sitama/features/student/domain/entities/log_book_entity.dart';
 
 class StudentHomeEntity {
   final String name;
+  final bool isMapped;
   final List<GuidanceEntity> latest_guidances;
   final List<LogBookEntity> latest_log_books;
 
   StudentHomeEntity(
       {required this.name,
+      required this.isMapped,
       required this.latest_guidances,
       required this.latest_log_books});
 }

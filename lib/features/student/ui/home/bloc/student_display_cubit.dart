@@ -23,6 +23,10 @@ class StudentDisplayCubit extends Cubit<StudentDisplayState> {
       homeResult.fold(
         (error) => emit(LoadStudentFailure(errorMessage: error.toString())),
         (studentHomeEntity) {
+          if (!studentHomeEntity.isMapped) {
+            emit(StudentNotMapped(name: studentHomeEntity.name));
+            return;
+          }
           notifResult.fold(
             (error) => emit(LoadStudentFailure(errorMessage: error.toString())),
             (notifications) => emit(StudentLoaded(

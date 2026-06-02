@@ -11,11 +11,13 @@ import 'package:sitama/features/student/domain/entities/student_home_entity.dart
 
 class StudentHomeModel {
   final String name;
+  final bool isMapped;
   final List<GuidanceModel> latest_guidances;
   final List<LogBookModel> latest_log_books;
 
   StudentHomeModel({
     required this.name,
+    required this.isMapped,
     required this.latest_guidances,
     required this.latest_log_books,
   });
@@ -23,6 +25,7 @@ class StudentHomeModel {
   factory StudentHomeModel.fromMap(Map<String, dynamic> map) {
     return StudentHomeModel(
       name: map['name'] as String,
+      isMapped: map['is_mapped'] as bool? ?? false,
       latest_guidances: List<GuidanceModel>.from(
         (map['latest_guidances'] as List<dynamic>).map<GuidanceModel>(
           (x) => GuidanceModel.fromMap(x as Map<String, dynamic>),
@@ -41,6 +44,7 @@ extension StudentHomeXModel on StudentHomeModel {
   StudentHomeEntity toEntity() {
     return StudentHomeEntity(
       name: name,
+      isMapped: isMapped,
       latest_guidances: latest_guidances
           .map<GuidanceEntity>((data) => GuidanceEntity(
                 id: data.id,

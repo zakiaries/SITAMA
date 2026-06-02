@@ -36,6 +36,7 @@ class StudentController extends Controller
         return response()->json([
             'data' => [
                 'name'             => $user->name,
+                'is_mapped'        => $student->internships()->exists(),
                 'latest_guidances' => $latestGuidances,
                 'latest_log_books' => $latestLogBooks,
             ],

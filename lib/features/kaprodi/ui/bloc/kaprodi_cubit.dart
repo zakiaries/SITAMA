@@ -39,6 +39,13 @@ class KaprodiError extends KaprodiState {
   KaprodiError(this.message);
 }
 
+class KaprodiAssignSuccess extends KaprodiState {}
+
+class KaprodiAssignError extends KaprodiState {
+  final String message;
+  KaprodiAssignError(this.message);
+}
+
 // ─── Cubit ───────────────────────────────────────────────────────────────────
 
 class KaprodiCubit extends Cubit<KaprodiState> {
@@ -107,5 +114,21 @@ class KaprodiCubit extends Cubit<KaprodiState> {
   Future<void> rejectIndustri(int id, String currentStatus, {String? reason}) async {
     await _api.rejectIndustri(id, reason: reason);
     await loadIndustri(status: currentStatus);
+  }
+
+  Future<dynamic> fetchDosenList({String search = ''}) async {
+    final result = await _api.getDosen(search: search);
+    return result.fold((e) => throw Exception(e.toString()), (data) => data);
+  }
+
+  Future<void> assignLecturer(int studentId, int lecturerId, String currentStatus) async {
+    final result = await _api.assignLecturer(studentId, lecturerId);
+    result.fold(
+      (e) => emit(KaprodiAssignError(e.toString())),
+      (_) async {
+        emit(KaprodiAssignSuccess());
+        await loadMahasiswa(status: currentStatus);
+      },
+    );
   }
 }

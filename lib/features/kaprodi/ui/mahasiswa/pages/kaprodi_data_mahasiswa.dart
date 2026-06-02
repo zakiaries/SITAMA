@@ -15,13 +15,17 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
   late TabController _tabController;
 
   static const _statusMap = ['all', 'aktif', 'belum_dospem', 'belum_magang', 'all', 'selesai'];
+  int _activeTab = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
     _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) _loadTab(_tabController.index);
+      if (!_tabController.indexIsChanging) {
+        setState(() => _activeTab = _tabController.index);
+        _loadTab(_tabController.index);
+      }
     });
     sl<KaprodiCubit>().loadMahasiswa();
   }
@@ -40,7 +44,25 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: sl<KaprodiCubit>(),
-      child: Scaffold(
+      child: BlocListener<KaprodiCubit, KaprodiState>(
+        listener: (context, state) {
+          if (state is KaprodiAssignSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Dosen pembimbing berhasil ditugaskan'),
+                backgroundColor: Color(0xFF1E6E3E),
+              ),
+            );
+          } else if (state is KaprodiAssignError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Gagal: ${state.message}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: Scaffold(
         backgroundColor: const Color(0xFFF5F6FA),
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -148,10 +170,99 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
           ),
         ),
       ),
+    ),
+  );
+  }
+
+  Future<void> _showAssignDosenDialog(BuildContext pageContext, int studentId, String studentName) async {
+    int? selectedLecturerId;
+    List<Map<String, dynamic>> dosenList = [];
+    bool isLoading = true;
+    String? errorMsg;
+
+    await showDialog(
+      context: pageContext,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (_, setDialogState) {
+            if (isLoading && dosenList.isEmpty && errorMsg == null) {
+              sl<KaprodiCubit>().fetchDosenList().then((data) {
+                setDialogState(() {
+                  isLoading = false;
+                  dosenList = List<Map<String, dynamic>>.from(data as List);
+                });
+              }).catchError((e) {
+                setDialogState(() {
+                  isLoading = false;
+                  errorMsg = e.toString();
+                });
+              });
+            }
+
+            return AlertDialog(
+              title: const Text('Tugaskan Dosen',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Mahasiswa: $studentName',
+                      style: const TextStyle(fontSize: 13, color: Color(0xFF8A9BC0))),
+                  const SizedBox(height: 16),
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (errorMsg != null)
+                    Text('Gagal memuat dosen: $errorMsg',
+                        style: const TextStyle(color: Colors.red, fontSize: 12))
+                  else
+                    InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Pilih Dosen Pembimbing',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      ),
+                      child: DropdownButton<int>(
+                        value: selectedLecturerId,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        hint: const Text('Pilih dosen...', style: TextStyle(fontSize: 13)),
+                        items: dosenList.map((d) => DropdownMenuItem<int>(
+                          value: d['id'] as int,
+                          child: Text(d['name'] as String? ?? '',
+                              style: const TextStyle(fontSize: 13)),
+                        )).toList(),
+                        onChanged: (val) => setDialogState(() => selectedLecturerId = val),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: selectedLecturerId == null ? null : () {
+                    Navigator.pop(dialogContext);
+                    sl<KaprodiCubit>().assignLecturer(
+                        studentId, selectedLecturerId!, _statusMap[_activeTab]);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A1A3E)),
+                  child: const Text('Tugaskan',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _buildStudentCard(Map<String, dynamic> s) {
+    final id       = s['id'] as int? ?? 0;
     final name     = s['name'] as String? ?? '';
     final nim      = s['nim']  as String? ?? '';
     final cls      = s['class'] as String? ?? '';
@@ -230,7 +341,7 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => _showAssignDosenDialog(context, id, name),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(color: const Color(0xFF1A1A3E), borderRadius: BorderRadius.circular(6)),
@@ -254,9 +365,9 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: _tabController.index == index ? const Color(0xFF1A1A3E) : Colors.white,
+          color: _activeTab == index ? const Color(0xFF1A1A3E) : Colors.white,
           border: Border.all(
-            color: _tabController.index == index ? const Color(0xFF1A1A3E) : const Color(0xFFC5CDE2),
+            color: _activeTab == index ? const Color(0xFF1A1A3E) : const Color(0xFFC5CDE2),
             width: 1.2,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -265,7 +376,7 @@ class _KaprodiDataMahasiswaState extends State<KaprodiDataMahasiswa>
           label,
           style: TextStyle(
             fontSize: 11, fontWeight: FontWeight.w700,
-            color: _tabController.index == index ? Colors.white : const Color(0xFF1A2050),
+            color: _activeTab == index ? Colors.white : const Color(0xFF1A2050),
           ),
         ),
       ),

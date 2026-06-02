@@ -76,13 +76,14 @@ class KaprodiController extends Controller
         $request->validate(['lecturer_id' => 'required|exists:lecturers,id']);
 
         $student    = Student::findOrFail($studentId);
-        $internship = $student->internships()->latest()->first();
+        $internship = $student->internships()->whereNull('lecturer_id')->first()
+                   ?? $student->internships()->latest()->first();
 
-        if (!$internship) {
-            return response()->json(['errors' => ['message' => 'Mahasiswa belum memiliki data magang']], 404);
+        if ($internship) {
+            $internship->update(['lecturer_id' => $request->lecturer_id]);
+        } else {
+            $student->internships()->create(['lecturer_id' => $request->lecturer_id]);
         }
-
-        $internship->update(['lecturer_id' => $request->lecturer_id]);
 
         return response()->json(['message' => 'Dosen pembimbing berhasil ditugaskan']);
     }

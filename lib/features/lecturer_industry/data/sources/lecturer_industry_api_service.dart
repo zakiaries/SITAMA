@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sitama/core/constants/api_urls.dart';
 import 'package:sitama/core/network/dio_client.dart';
 import 'package:sitama/service_locator.dart';
 
-const _base = 'http://10.0.2.2:8000/api/lecturer-industry';
+const _base = '${ApiUrls.baseUrl}lecturer-industry';
 
 abstract class LecturerIndustryApiService {
   Future<Either> getHome();

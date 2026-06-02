@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:sitama/features/auth/data/models/register_req_params.dart';
 import 'package:sitama/features/auth/data/models/reset_password_req_params.dart';
 import 'package:sitama/features/auth/data/models/signin_google_req_params.dart';
 import 'package:sitama/features/auth/data/models/signin_req_params.dart';
@@ -6,6 +7,7 @@ import 'package:sitama/features/shared/data/models/update_profile_req_params.dar
 
 abstract class AuthRepostory {
 
+  Future<Either> register(RegisterReqParams request);
   Future<Either> signin(SigninReqParams request);
   Future<bool> isLoggedIn();
   Future<Either> logout();

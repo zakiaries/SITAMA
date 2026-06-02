@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sitama/core/constants/api_urls.dart';
 import 'package:sitama/core/network/dio_client.dart';
+import 'package:sitama/features/auth/data/models/register_req_params.dart';
 import 'package:sitama/features/auth/data/models/reset_password_req_params.dart';
 import 'package:sitama/features/auth/data/models/signin_google_req_params.dart';
 import 'package:sitama/features/auth/data/models/signin_req_params.dart';
@@ -13,6 +14,21 @@ import 'package:sitama/features/shared/data/models/update_profile_req_params.dar
 import 'package:sitama/service_locator.dart';
 
 class AuthRepostoryImpl extends AuthRepostory{
+
+  @override
+  Future<Either> register(RegisterReqParams request) async {
+    Either result = await sl<AuthApiService>().register(request);
+    return result.fold(
+      (error) => Left(error),
+      (data) async {
+        Response response = data;
+        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        sharedPreferences.setString('token', response.data['data']['token']);
+        sharedPreferences.setString('role', response.data['data']['role']);
+        return Right(response);
+      },
+    );
+  }
 
   @override
   Future<Either> signin(SigninReqParams request) async {

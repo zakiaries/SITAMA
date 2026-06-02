@@ -73,10 +73,9 @@ class _HomeContentState extends State<HomeContent>
       create: (context) => _studentCubit,
       child: BlocBuilder<StudentDisplayCubit, StudentDisplayState>(
         builder: (context, state) {
-          // Update _wasError berdasarkan state
           if (state is LoadStudentFailure) {
             _wasError = true;
-          } else if (state is StudentLoaded) {
+          } else if (state is StudentLoaded || state is StudentNotMapped) {
             _wasError = false;
           }
 
@@ -93,8 +92,9 @@ class _HomeContentState extends State<HomeContent>
 
   Widget _buildContent(BuildContext context, StudentDisplayState state) {
     return switch (state) {
-      StudentLoading() => const Center(child: CircularProgressIndicator()),
-      StudentLoaded() => _buildLoadedContent(state),
+      StudentLoading()    => const Center(child: CircularProgressIndicator()),
+      StudentNotMapped()  => _buildNotMappedContent(state),
+      StudentLoaded()     => _buildLoadedContent(state),
       LoadStudentFailure() => ErrorContent(
           errorMessage: state.errorMessage,
           onRetry: () => _studentCubit.displayStudent(),
@@ -102,6 +102,91 @@ class _HomeContentState extends State<HomeContent>
         ),
       _ => Container(),
     };
+  }
+
+  Widget _buildNotMappedContent(StudentNotMapped state) {
+    return RefreshIndicator(
+      onRefresh: () async => _studentCubit.displayStudent(),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
+              width: double.infinity,
+              height: 160,
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(AppImages.homePattern),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('HELLO,',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text(state.name,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ),
+          SliverFillRemaining(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.pending_actions_outlined,
+                      size: 72,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withAlpha(180)),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Menunggu Pemetaan',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Akunmu belum dipetakan ke dosen pembimbing. '
+                    'Kaprodi akan segera menugaskan dosen pembimbingmu.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withAlpha(153),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'Sambil menunggu, kamu bisa mencari lowongan magang.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withAlpha(128),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLoadedContent(StudentLoaded state) {

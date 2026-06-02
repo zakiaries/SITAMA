@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sitama/core/config/assets/app_images.dart';
 import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/features/auth/ui/pages/login.dart';
+import 'package:sitama/features/auth/ui/pages/register.dart';
 
 class WelcomePages extends StatelessWidget {
   const WelcomePages({super.key});
@@ -74,6 +75,29 @@ class WelcomePages extends StatelessWidget {
                     'Login',
                     style: TextStyle(
                       color: AppColors.lightWhite,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterPage()),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.lightPrimary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(55),
+                    ),
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                  child: const Text(
+                    'Daftar',
+                    style: TextStyle(
+                      color: AppColors.lightPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

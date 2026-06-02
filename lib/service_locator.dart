@@ -7,6 +7,7 @@ import 'package:sitama/features/auth/data/sources/auth_local_service.dart';
 import 'package:sitama/features/auth/domain/repositories/auth.dart';
 import 'package:sitama/features/auth/domain/usecases/is_logged_in.dart';
 import 'package:sitama/features/auth/domain/usecases/log_out.dart';
+import 'package:sitama/features/auth/domain/usecases/register.dart';
 import 'package:sitama/features/auth/domain/usecases/signin.dart';
 import 'package:sitama/features/auth/domain/usecases/signin_google.dart';
 import 'package:sitama/features/lecturer/data/repositories/lecturer.dart';
@@ -80,6 +81,7 @@ void setupServiceLocator(SharedPreferences prefs) {
   sl.registerSingleton<JobListingRepository>(JobListingRepositoryImpl());
 
   // Use cases — Auth
+  sl.registerSingleton<RegisterUseCase>(RegisterUseCase());
   sl.registerSingleton<SigninUseCase>(SigninUseCase());
   sl.registerSingleton<SigninGoogleUseCase>(SigninGoogleUseCase());
   sl.registerSingleton<IsLoggedInUseCase>(IsLoggedInUseCase());
