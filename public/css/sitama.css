@@ -370,10 +370,14 @@ html, body { height: 100%; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-
 .setting-arr { color: var(--text-muted); }
 
 /* ── MODALS ── */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(3px); padding: 16px; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--card); border-radius: var(--radius-lg); padding: 24px; width: 430px; max-width: 95%; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
-.modal-title { font-size: 16px; font-weight: 700; color: var(--primary); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+.modal     { background: var(--card); border-radius: var(--radius-lg); padding: 24px; width: 430px; max-width: 95%; box-shadow: 0 12px 40px rgba(0,0,0,0.18); }
+.modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 16px 48px rgba(0,0,0,0.22); padding: 24px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title  { font-size: 16px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+.modal-close  { background: #f3f4f6; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 13px; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
+.modal-close:hover { background: #e5e7eb; color: #374151; }
 .modal-icon  { width: 36px; height: 36px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .form-group  { margin-bottom: 13px; }
 .form-group label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }

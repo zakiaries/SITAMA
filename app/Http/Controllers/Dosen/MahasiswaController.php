@@ -1,0 +1,138 @@
+<?php
+
+namespace App\Http\Controllers\Dosen;
+
+use App\Http\Controllers\Controller;
+use App\Models\AssessmentComponent;
+use App\Models\Guidance;
+use App\Models\LogBook;
+use App\Models\Student;
+use App\Models\StudentScore;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class MahasiswaController extends Controller
+{
+    private function getLecturer()
+    {
+        $lecturer = Auth::user()->lecturer;
+        if (!$lecturer) abort(403, 'Akses ditolak.');
+        return $lecturer;
+    }
+
+    private function getInternship(Student $student, $lecturer)
+    {
+        $internship = $student->internships()
+            ->where('lecturer_id', $lecturer->id)
+            ->with('company')
+            ->first();
+
+        if (!$internship) abort(404, 'Data magang tidak ditemukan.');
+        return $internship;
+    }
+
+    public function detail(Student $student)
+    {
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
+
+        $student->load([
+            'user',
+            'guidances'  => fn($q) => $q->orderByDesc('date'),
+            'logBooks'   => fn($q) => $q->orderByDesc('date'),
+        ]);
+
+        $assessments = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
+            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)]);
+        }])->get();
+
+        $allScores = $assessments->flatMap(fn($c) => $c->detailedComponents)
+            ->flatMap(fn($d) => $d->scores)
+            ->pluck('score')
+            ->filter();
+
+        $overallAvg = $allScores->count() > 0 ? round($allScores->avg(), 2) : null;
+
+        return view('dosen.mahasiswa.detail', compact(
+            'student', 'internship', 'assessments', 'overallAvg'
+        ));
+    }
+
+    public function approveBimbingan(Request $request, Student $student, Guidance $guidance)
+    {
+        $lecturer = $this->getLecturer();
+        $this->getInternship($student, $lecturer);
+
+        $guidance->update([
+            'status'       => 'approved',
+            'lecturer_note' => $request->input('note'),
+        ]);
+
+        return back()->with('success', 'Bimbingan berhasil disetujui.');
+    }
+
+    public function revisiBimbingan(Request $request, Student $student, Guidance $guidance)
+    {
+        $lecturer = $this->getLecturer();
+        $this->getInternship($student, $lecturer);
+
+        $request->validate(['note' => 'required|string'], [
+            'note.required' => 'Catatan revisi wajib diisi.',
+        ]);
+
+        $guidance->update([
+            'status'       => 'rejected',
+            'lecturer_note' => $request->note,
+        ]);
+
+        return back()->with('success', 'Bimbingan ditandai untuk revisi.');
+    }
+
+    public function logBookNote(Request $request, Student $student, LogBook $logBook)
+    {
+        $lecturer = $this->getLecturer();
+        $this->getInternship($student, $lecturer);
+
+        $logBook->update(['lecturer_note' => $request->input('note')]);
+
+        return back()->with('success', 'Catatan logbook berhasil disimpan.');
+    }
+
+    public function nilaiPage(Student $student)
+    {
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
+        $student->load('user');
+
+        $components = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
+            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)]);
+        }])->get();
+
+        return view('dosen.mahasiswa.nilai', compact('student', 'internship', 'components'));
+    }
+
+    public function updateNilai(Request $request, Student $student)
+    {
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
+
+        $request->validate([
+            'scores'   => 'required|array',
+            'scores.*' => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        foreach ($request->scores as $detailId => $score) {
+            if ($score !== null && $score !== '') {
+                StudentScore::updateOrCreate(
+                    [
+                        'internship_id'                    => $internship->id,
+                        'detailed_assessment_component_id' => $detailId,
+                    ],
+                    ['score' => $score]
+                );
+            }
+        }
+
+        return back()->with('success', 'Nilai berhasil diperbarui.');
+    }
+}
