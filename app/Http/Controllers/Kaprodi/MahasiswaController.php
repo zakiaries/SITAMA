@@ -16,6 +16,7 @@ class MahasiswaController extends Controller
 
         $query = Student::with([
             'user',
+            'lecturer.user',
             'internships' => fn($q) => $q->with(['company', 'lecturer.user'])->latest(),
         ]);
 
@@ -82,14 +83,15 @@ class MahasiswaController extends Controller
             'lecturer_id.required' => 'Silakan pilih dosen pembimbing.',
         ]);
 
-        $internship = $student->internships()->latest()->first();
+        // Plot dosen ke student langsung (sebelum magang dimulai)
+        $student->update(['lecturer_id' => $request->lecturer_id]);
 
-        if (!$internship) {
-            return back()->with('error', 'Mahasiswa belum memiliki data magang, tidak dapat menugaskan dosen.');
+        // Jika sudah ada internship aktif, sinkronkan juga
+        $internship = $student->internships()->latest()->first();
+        if ($internship) {
+            $internship->update(['lecturer_id' => $request->lecturer_id]);
         }
 
-        $internship->update(['lecturer_id' => $request->lecturer_id]);
-
-        return back()->with('success', 'Dosen pembimbing berhasil ditugaskan.');
+        return back()->with('success', 'Dosen pembimbing berhasil ditugaskan kepada ' . $student->user->name . '.');
     }
 }

@@ -10,7 +10,7 @@ class Student extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'status',
+        'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'status', 'lecturer_id',
     ];
 
     public function user()
@@ -36,5 +36,10 @@ class Student extends Model
     public function activeInternship()
     {
         return $this->hasOne(Internship::class)->latest();
+    }
+
+    public function lecturer()
+    {
+        return $this->belongsTo(Lecturer::class);
     }
 }

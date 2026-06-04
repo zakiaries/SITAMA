@@ -64,8 +64,8 @@
 {{-- Student List --}}
 @forelse($students as $student)
 @php
-  $internship = $student->internships->first();
-  $lecturer   = $internship?->lecturer;
+  $internship      = $student->internships->first();
+  $assignedLecturer = $student->lecturer;
   $colors = [
     ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
     ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#eeedfe','text'=>'#3c3489'],
@@ -79,11 +79,9 @@
   <div class="mhs-info">
     <div class="mhs-name">{{ $student->user->name }}</div>
     <div class="mhs-meta">{{ $student->user->username }} · {{ $student->the_class }}@if($internship?->company) · {{ $internship->company->name }}@endif</div>
-    @if($internship)
-      <div class="mhs-dosen">
-        Dospem: <strong>{{ $lecturer?->user?->name ?? 'Belum ditugaskan' }}</strong>
-      </div>
-    @endif
+    <div class="mhs-dosen">
+      Dospem: <strong>{{ $assignedLecturer?->user?->name ?? 'Belum di-plot' }}</strong>
+    </div>
   </div>
 
   @if($student->status === 'pending')
@@ -105,10 +103,10 @@
     <span class="st-badge st-aktif">Aktif</span>
   @endif
 
-  @if($student->status === 'active' && $internship)
+  @if($student->status === 'active')
     <button type="button" class="btn btn-outline btn-sm"
-      onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $lecturer?->id ?? 'null' }})">
-      {{ $lecturer ? 'Ganti Dosen' : '+ Tugaskan' }}
+      onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
+      {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
     </button>
   @endif
 </div>
