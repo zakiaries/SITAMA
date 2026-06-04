@@ -26,6 +26,7 @@
 .st-aktif   { background:#eff6ff;color:#2563eb; }
 .st-selesai { background:#dcfce7;color:#16a34a; }
 .st-belum   { background:#fef9c3;color:#92400e; }
+.st-pending { background:#fff7ed;color:#c2410c; }
 </style>
 @endpush
 
@@ -50,7 +51,7 @@
 {{-- Filter Tabs --}}
 <div class="filter-tabs">
   @php
-    $tabs = ['semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang'];
+    $tabs = ['pending'=>'Menunggu','semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang'];
   @endphp
   @foreach($tabs as $key => $label)
   <a href="{{ route('kaprodi.mahasiswa.index', ['status' => $key, 'search' => request('search')]) }}"
@@ -85,7 +86,18 @@
     @endif
   </div>
 
-  @if(!$internship)
+  @if($student->status === 'pending')
+    <span class="st-badge st-pending">Menunggu</span>
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.approve', $student) }}" style="display:inline;">
+      @csrf
+      <button type="submit" class="btn btn-primary btn-sm">Setujui</button>
+    </form>
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.reject', $student) }}" style="display:inline;"
+      onsubmit="return confirm('Tolak pendaftaran {{ addslashes($student->user->name) }}?')">
+      @csrf
+      <button type="submit" class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#dc2626;">Tolak</button>
+    </form>
+  @elseif(!$internship)
     <span class="st-badge st-belum">Belum Magang</span>
   @elseif($internship->is_finished)
     <span class="st-badge st-selesai">Selesai</span>
@@ -93,7 +105,7 @@
     <span class="st-badge st-aktif">Aktif</span>
   @endif
 
-  @if($internship)
+  @if($student->status === 'active' && $internship)
     <button type="button" class="btn btn-outline btn-sm"
       onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $lecturer?->id ?? 'null' }})">
       {{ $lecturer ? 'Ganti Dosen' : '+ Tugaskan' }}

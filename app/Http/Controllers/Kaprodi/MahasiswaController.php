@@ -11,7 +11,7 @@ class MahasiswaController extends Controller
 {
     public function index(Request $request)
     {
-        $status = $request->input('status', 'semua');
+        $status = $request->input('status', 'pending');
         $search = $request->input('search');
 
         $query = Student::with([
@@ -28,30 +28,50 @@ class MahasiswaController extends Controller
         }
 
         switch ($status) {
+            case 'pending':
+                $query->where('status', 'pending');
+                break;
             case 'aktif':
-                $query->whereHas('internships', fn($q) => $q->where('is_finished', false));
+                $query->where('status', 'active')
+                      ->whereHas('internships', fn($q) => $q->where('is_finished', false));
                 break;
             case 'selesai':
-                $query->whereHas('internships', fn($q) => $q->where('is_finished', true));
+                $query->where('status', 'active')
+                      ->whereHas('internships', fn($q) => $q->where('is_finished', true));
                 break;
             case 'belum_magang':
-                $query->whereDoesntHave('internships');
+                $query->where('status', 'active')
+                      ->whereDoesntHave('internships');
                 break;
+            default:
+                $query->where('status', 'active');
         }
 
         $students = $query->get();
 
-        // Hitungan untuk badge tab
         $counts = [
-            'semua'        => Student::count(),
-            'aktif'        => Student::whereHas('internships', fn($q) => $q->where('is_finished', false))->count(),
-            'selesai'      => Student::whereHas('internships', fn($q) => $q->where('is_finished', true))->count(),
-            'belum_magang' => Student::whereDoesntHave('internships')->count(),
+            'pending'      => Student::where('status', 'pending')->count(),
+            'semua'        => Student::where('status', 'active')->count(),
+            'aktif'        => Student::where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', false))->count(),
+            'selesai'      => Student::where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', true))->count(),
+            'belum_magang' => Student::where('status', 'active')->whereDoesntHave('internships')->count(),
         ];
 
         $lecturers = Lecturer::with('user')->get();
 
         return view('kaprodi.mahasiswa.index', compact('students', 'status', 'counts', 'lecturers'));
+    }
+
+    public function approve(Student $student)
+    {
+        $student->update(['status' => 'active']);
+        return back()->with('success', "Akun {$student->user->name} berhasil disetujui.");
+    }
+
+    public function reject(Request $request, Student $student)
+    {
+        $student->update(['status' => 'rejected']);
+        return back()->with('success', "Akun {$student->user->name} telah ditolak.");
     }
 
     public function assignLecturer(Request $request, Student $student)

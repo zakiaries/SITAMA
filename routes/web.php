@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Mahasiswa\BimbinganController;
 use App\Http\Controllers\Mahasiswa\DashboardController;
 use App\Http\Controllers\Mahasiswa\InternshipGroupController;
@@ -33,39 +34,45 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/register', [RegisterController::class, 'showForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
 
 // Mahasiswa Routes (protected)
 Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Accessible to pending students too
+    Route::get('/menunggu', fn() => view('mahasiswa.menunggu'))->name('menunggu');
 
-    Route::get('/bimbingan', [BimbinganController::class, 'index'])->name('bimbingan');
-    Route::post('/bimbingan', [BimbinganController::class, 'store'])->name('bimbingan.store');
+    // Requires approved status
+    Route::middleware('student.approved')->group(function () {
 
-    Route::get('/logbook', [LogBookController::class, 'index'])->name('logbook');
-    Route::post('/logbook', [LogBookController::class, 'store'])->name('logbook.store');
-    Route::delete('/logbook/{logBook}', [LogBookController::class, 'destroy'])->name('logbook.destroy');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/lowongan', [LowonganController::class, 'index'])->name('lowongan');
-    Route::post('/lowongan/{jobListing}/apply', [LowonganController::class, 'apply'])->name('lowongan.apply');
+        Route::get('/bimbingan', [BimbinganController::class, 'index'])->name('bimbingan');
+        Route::post('/bimbingan', [BimbinganController::class, 'store'])->name('bimbingan.store');
 
-    Route::get('/seminar', [SeminarController::class, 'index'])->name('seminar');
-    Route::get('/seminar/{seminar}', [SeminarController::class, 'detail'])->name('seminar.detail');
-    Route::post('/seminar/{seminar}/register', [SeminarController::class, 'register'])->name('seminar.register');
+        Route::get('/logbook', [LogBookController::class, 'index'])->name('logbook');
+        Route::post('/logbook', [LogBookController::class, 'store'])->name('logbook.store');
+        Route::delete('/logbook/{logBook}', [LogBookController::class, 'destroy'])->name('logbook.destroy');
 
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/lowongan', [LowonganController::class, 'index'])->name('lowongan');
+        Route::post('/lowongan/{jobListing}/apply', [LowonganController::class, 'apply'])->name('lowongan.apply');
 
-    // Magang Saya
-    Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
+        Route::get('/seminar', [SeminarController::class, 'index'])->name('seminar');
+        Route::get('/seminar/{seminar}', [SeminarController::class, 'detail'])->name('seminar.detail');
+        Route::post('/seminar/{seminar}/register', [SeminarController::class, 'register'])->name('seminar.register');
 
-    // Internship Groups (kelompok magang)
-    Route::get('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invitePage'])->name('internship-groups.invite');
-    Route::post('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invite'])->name('internship-groups.invite.store');
+        Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    // Terima / Tolak undangan kelompok
-    Route::post('/internship-group-members/{member}/accept', [InternshipGroupController::class, 'accept'])->name('internship-group-members.accept');
-    Route::post('/internship-group-members/{member}/decline', [InternshipGroupController::class, 'decline'])->name('internship-group-members.decline');
+        Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
+
+        Route::get('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invitePage'])->name('internship-groups.invite');
+        Route::post('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invite'])->name('internship-groups.invite.store');
+
+        Route::post('/internship-group-members/{member}/accept', [InternshipGroupController::class, 'accept'])->name('internship-group-members.accept');
+        Route::post('/internship-group-members/{member}/decline', [InternshipGroupController::class, 'decline'])->name('internship-group-members.decline');
+    });
 });
 
 // ── Dosen Routes (protected) ──────────────────────────────────────────────────
@@ -106,6 +113,8 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
 
     Route::get('/mahasiswa',                            [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
     Route::post('/mahasiswa/{student}/assign-lecturer', [KaprodiMahasiswaController::class, 'assignLecturer'])->name('mahasiswa.assign');
+    Route::post('/mahasiswa/{student}/approve',         [KaprodiMahasiswaController::class, 'approve'])->name('mahasiswa.approve');
+    Route::post('/mahasiswa/{student}/reject',          [KaprodiMahasiswaController::class, 'reject'])->name('mahasiswa.reject');
 
     Route::get('/dosen',            [KaprodiDosenController::class, 'index'])->name('dosen.index');
     Route::get('/dosen/{lecturer}', [KaprodiDosenController::class, 'detail'])->name('dosen.detail');
