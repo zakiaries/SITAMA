@@ -13,16 +13,10 @@
       </svg>
       Dashboard
     </a>
-    <a class="nav-item {{ request()->routeIs('dosen-industri.profile') ? 'active' : '' }}"
-       href="{{ route('dosen-industri.profile') }}">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-      </svg>
-      Profil
-    </a>
   </nav>
 
-  <div class="sb-user">
+  <a class="sb-user {{ request()->routeIs('dosen-industri.profile') ? 'sb-user-active' : '' }}"
+     href="{{ route('dosen-industri.profile') }}" style="text-decoration:none;">
     @php $initials = collect(explode(' ', $sbUser->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
     <div class="avatar" style="width:36px;height:36px;font-size:12px;background:rgba(255,255,255,0.18);color:#fff;">
       {{ $initials }}
@@ -31,5 +25,5 @@
       <div class="uname">{{ $sbUser->name }}</div>
       <div class="urole">Pembimbing Industri</div>
     </div>
-  </div>
+  </a>
 </div>

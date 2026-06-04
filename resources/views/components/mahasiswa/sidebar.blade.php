@@ -30,13 +30,10 @@
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
       Seminar
     </a>
-    <a class="nav-item {{ request()->routeIs('mahasiswa.profile') ? 'active' : '' }}" href="{{ route('mahasiswa.profile') }}">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Profile
-    </a>
   </nav>
 
-  <div class="sb-user">
+  <a class="sb-user {{ request()->routeIs('mahasiswa.profile') ? 'sb-user-active' : '' }}"
+     href="{{ route('mahasiswa.profile') }}" style="text-decoration:none;">
     @php $initials = collect(explode(' ', $sbUser->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
     <div class="avatar" style="width:36px;height:36px;font-size:12px;background:rgba(255,255,255,0.18);color:#fff;">
       {{ $initials }}
@@ -45,5 +42,5 @@
       <div class="uname">{{ $sbUser->name }}</div>
       <div class="urole">{{ ucfirst(str_replace('_', ' ', $sbUser->role)) }}</div>
     </div>
-  </div>
+  </a>
 </div>

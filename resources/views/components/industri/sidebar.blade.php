@@ -24,15 +24,10 @@
       </svg>
       Review Pelamar
     </a>
-    <a class="nav-item {{ request()->routeIs('industri.profile') ? 'active' : '' }}" href="{{ route('industri.profile') }}">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/>
-      </svg>
-      Profil Perusahaan
-    </a>
   </nav>
 
-  <div class="sb-user">
+  <a class="sb-user {{ request()->routeIs('industri.profile') ? 'sb-user-active' : '' }}"
+     href="{{ route('industri.profile') }}" style="text-decoration:none;">
     @php $initials = collect(explode(' ', preg_replace('/^PT\.?\s*/i','', $sbCompany->name ?? $sbUser->name ?? '')))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
     <div class="avatar" style="width:36px;height:36px;font-size:12px;background:rgba(255,255,255,0.18);color:#fff;">
       {{ $initials }}
@@ -41,5 +36,5 @@
       <div class="uname">{{ $sbCompany->name ?? $sbUser->name }}</div>
       <div class="urole">Perusahaan</div>
     </div>
-  </div>
+  </a>
 </div>
