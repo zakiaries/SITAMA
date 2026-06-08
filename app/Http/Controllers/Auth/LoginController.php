@@ -32,8 +32,33 @@ class LoginController extends Controller
         ];
 
         if (Auth::attempt($credentials, $request->remember)) {
+            $user = Auth::user();
+
+            // Cek status akun mahasiswa (harus disetujui Kaprodi dulu)
+            if ($user->role === 'student' && $user->student) {
+                $status = $user->student->status;
+
+                if ($status === 'pending') {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'username' => 'Akun Anda masih menunggu persetujuan dari Kaprodi. Silakan coba lagi nanti.',
+                    ])->withInput($request->only('username'));
+                }
+
+                if ($status === 'rejected') {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'username' => 'Pendaftaran Anda ditolak oleh Kaprodi. Silakan hubungi pihak program studi.',
+                    ])->withInput($request->only('username'));
+                }
+            }
+
             $request->session()->regenerate();
-            return $this->redirectByRole(Auth::user()->role);
+            return $this->redirectByRole($user->role);
         }
 
         return back()->withErrors([

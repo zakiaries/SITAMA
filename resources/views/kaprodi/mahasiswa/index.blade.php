@@ -16,6 +16,13 @@
   background:#fff;border:1.5px solid var(--border);border-radius:12px;
   padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;
 }
+.mhs-card.is-pending { border-color:#fdba74;background:#fffbf5;border-left:4px solid #ea580c; }
+.pending-actions { display:flex;gap:8px;flex-shrink:0; }
+.btn-setujui { background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
+.btn-setujui:hover { background:#15803d; }
+.btn-tolak { background:#fff;color:#dc2626;border:1.5px solid #dc2626;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
+.btn-tolak:hover { background:#fef2f2; }
+.info-note { background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:#1e40af;display:flex;gap:10px;align-items:flex-start; }
 .mhs-av   { width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px; }
 .mhs-info { flex:1;min-width:0; }
 .mhs-name { font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px; }
@@ -61,6 +68,14 @@
   @endforeach
 </div>
 
+{{-- Info penjelasan saat di tab Menunggu --}}
+@if($status === 'pending')
+<div class="info-note">
+  <span style="font-size:16px;">ℹ️</span>
+  <span>Mahasiswa berikut baru mendaftar dan <strong>belum bisa masuk ke sistem</strong> sampai Anda menyetujui akunnya. Klik <strong>Setujui</strong> untuk mengaktifkan, atau <strong>Tolak</strong> jika data tidak valid.</span>
+</div>
+@endif
+
 {{-- Student List --}}
 @forelse($students as $student)
 @php
@@ -74,36 +89,43 @@
   $color    = $colors[$student->id % count($colors)];
   $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
 @endphp
-<div class="mhs-card">
+<div class="mhs-card {{ $student->status === 'pending' ? 'is-pending' : '' }}">
   <div class="mhs-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};">{{ $initials }}</div>
   <div class="mhs-info">
     <div class="mhs-name">{{ $student->user->name }}</div>
     <div class="mhs-meta">{{ $student->user->username }} · {{ $student->the_class }}@if($internship?->company) · {{ $internship->company->name }}@endif</div>
+    @if($student->status === 'active')
     <div class="mhs-dosen">
       Dospem: <strong>{{ $assignedLecturer?->user?->name ?? 'Belum di-plot' }}</strong>
     </div>
+    @endif
   </div>
 
   @if($student->status === 'pending')
-    <span class="st-badge st-pending">Menunggu</span>
-    <form method="POST" action="{{ route('kaprodi.mahasiswa.approve', $student) }}" style="display:inline;">
-      @csrf
-      <button type="submit" class="btn btn-primary btn-sm">Setujui</button>
-    </form>
-    <form method="POST" action="{{ route('kaprodi.mahasiswa.reject', $student) }}" style="display:inline;"
-      onsubmit="return confirm('Tolak pendaftaran {{ addslashes($student->user->name) }}?')">
-      @csrf
-      <button type="submit" class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#dc2626;">Tolak</button>
-    </form>
+    {{-- Pendaftar baru: tunggu persetujuan --}}
+    <span class="st-badge st-pending">⏳ Menunggu</span>
+    <div class="pending-actions">
+      <form method="POST" action="{{ route('kaprodi.mahasiswa.approve', $student) }}"
+        onsubmit="return confirm('Setujui akun {{ addslashes($student->user->name) }}? Mahasiswa akan bisa login.')">
+        @csrf
+        <button type="submit" class="btn-setujui">✓ Setujui</button>
+      </form>
+      <form method="POST" action="{{ route('kaprodi.mahasiswa.reject', $student) }}"
+        onsubmit="return confirm('Tolak pendaftaran {{ addslashes($student->user->name) }}?')">
+        @csrf
+        <button type="submit" class="btn-tolak">✕ Tolak</button>
+      </form>
+    </div>
   @elseif(!$internship)
     <span class="st-badge st-belum">Belum Magang</span>
-  @elseif($internship->is_finished)
-    <span class="st-badge st-selesai">Selesai</span>
+    <button type="button" class="btn btn-outline btn-sm"
+      onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
+      {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
+    </button>
   @else
-    <span class="st-badge st-aktif">Aktif</span>
-  @endif
-
-  @if($student->status === 'active')
+    <span class="st-badge {{ $internship->is_finished ? 'st-selesai' : 'st-aktif' }}">
+      {{ $internship->is_finished ? 'Selesai' : 'Aktif' }}
+    </span>
     <button type="button" class="btn btn-outline btn-sm"
       onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
       {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
@@ -111,8 +133,15 @@
   @endif
 </div>
 @empty
-<div style="text-align:center;padding:40px;color:var(--text-muted);">
-  <p>Tidak ada mahasiswa pada filter ini.</p>
+<div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
+  @if($status === 'pending')
+    <div style="font-size:40px;margin-bottom:12px;">✅</div>
+    <p style="font-weight:600;color:var(--text);">Tidak ada pendaftar yang menunggu</p>
+    <p style="font-size:13px;">Semua pendaftaran mahasiswa sudah ditinjau.</p>
+  @else
+    <div style="font-size:40px;margin-bottom:12px;">👨‍🎓</div>
+    <p>Tidak ada mahasiswa pada filter ini.</p>
+  @endif
 </div>
 @endforelse
 

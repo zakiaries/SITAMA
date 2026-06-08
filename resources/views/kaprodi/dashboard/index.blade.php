@@ -59,6 +59,29 @@
   </div>
 </div>
 
+{{-- Banner Notifikasi: Mahasiswa Menunggu Persetujuan --}}
+@if($pendingMahasiswa > 0)
+<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:14px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+  <div style="width:48px;height:48px;border-radius:12px;background:#fed7aa;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">
+    🔔
+  </div>
+  <div style="flex:1;min-width:200px;">
+    <div style="font-size:15px;font-weight:800;color:#9a3412;margin-bottom:2px;">
+      {{ $pendingMahasiswa }} pendaftar baru menunggu persetujuan
+    </div>
+    <div style="font-size:12px;color:#c2410c;">
+      @foreach($pendingList as $p){{ $p->user->name }}@if(!$loop->last), @endif @endforeach
+      @if($pendingMahasiswa > 3) dan {{ $pendingMahasiswa - 3 }} lainnya @endif
+      perlu Anda tinjau sebelum bisa masuk ke sistem.
+    </div>
+  </div>
+  <a href="{{ route('kaprodi.mahasiswa.index', ['status' => 'pending']) }}"
+     style="background:#ea580c;color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+    Tinjau Sekarang →
+  </a>
+</div>
+@endif
+
 {{-- Statistik --}}
 <div class="stat-grid">
   <div class="stat-card-k">
