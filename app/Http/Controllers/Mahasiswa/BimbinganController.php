@@ -12,6 +12,7 @@ class BimbinganController extends Controller
     public function index(Request $request)
     {
         $student  = Auth::user()->student;
+        $student->loadMissing('lecturer.user');
         $query    = $student->guidances()->orderByDesc('date');
 
         if ($request->filled('search')) {
@@ -19,8 +20,9 @@ class BimbinganController extends Controller
         }
 
         $guidances = $query->get();
+        $lecturer  = $student->lecturer;
 
-        return view('mahasiswa.bimbingan.index', compact('guidances'));
+        return view('mahasiswa.bimbingan.index', compact('guidances', 'lecturer'));
     }
 
     public function store(Request $request)
@@ -49,5 +51,38 @@ class BimbinganController extends Controller
 
         return redirect()->route('mahasiswa.bimbingan')
             ->with('success', 'Bimbingan berhasil ditambahkan.');
+    }
+
+    public function update(Request $request, Guidance $guidance)
+    {
+        $student = Auth::user()->student;
+
+        // Hanya pemilik & hanya bimbingan yang diminta revisi (ditolak) yang boleh dikirim ulang.
+        if ($guidance->student_id !== $student->id) abort(403);
+        if ($guidance->status !== 'rejected') {
+            return back()->with('error', 'Bimbingan ini tidak sedang dalam status revisi.');
+        }
+
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'activity' => 'required|string',
+            'date'     => 'required|date',
+        ]);
+
+        $data = [
+            'title'    => $request->title,
+            'activity' => $request->activity,
+            'date'     => $request->date,
+            'status'   => 'pending',
+        ];
+
+        if ($request->hasFile('file')) {
+            $data['name_file'] = $request->file('file')->store('guidances', 'public');
+        }
+
+        $guidance->update($data);
+
+        return redirect()->route('mahasiswa.bimbingan')
+            ->with('success', 'Revisi bimbingan berhasil dikirim ulang ke dosen.');
     }
 }

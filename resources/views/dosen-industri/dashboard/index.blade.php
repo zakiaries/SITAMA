@@ -109,7 +109,7 @@
   $internship  = $student->internships->first();
   $isFinished  = $internship?->is_finished ?? false;
   $totalLog    = $student->logBooks->count();
-  $dikomen     = $student->logBooks->whereNotNull('lecturer_note')->count();
+  $dikomen     = $student->logBooks->whereNotNull('industry_note')->count();
   $pct         = $totalLog > 0 ? round($dikomen / $totalLog * 100) : 0;
   $colors = [
     ['bg'=>'#d1fae5','text'=>'#065f46'],['bg'=>'#e0f2fe','text'=>'#075985'],

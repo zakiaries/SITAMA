@@ -80,7 +80,8 @@
 @forelse($students as $student)
 @php
   $internship      = $student->internships->first();
-  $assignedLecturer = $student->lecturer;
+  // Dospem dari students.lecturer_id; fallback ke dospem yang menempel di internship.
+  $assignedLecturer = $student->lecturer ?? $internship?->lecturer;
   $colors = [
     ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
     ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#eeedfe','text'=>'#3c3489'],
@@ -106,12 +107,12 @@
     <span class="st-badge st-pending">⏳ Menunggu</span>
     <div class="pending-actions">
       <form method="POST" action="{{ route('kaprodi.mahasiswa.approve', $student) }}"
-        onsubmit="return confirm('Setujui akun {{ addslashes($student->user->name) }}? Mahasiswa akan bisa login.')">
+        data-confirm="Setujui akun {{ $student->user->name }}? Mahasiswa akan bisa login.">
         @csrf
         <button type="submit" class="btn-setujui">✓ Setujui</button>
       </form>
       <form method="POST" action="{{ route('kaprodi.mahasiswa.reject', $student) }}"
-        onsubmit="return confirm('Tolak pendaftaran {{ addslashes($student->user->name) }}?')">
+        data-confirm="Tolak pendaftaran {{ $student->user->name }}?" data-confirm-danger>
         @csrf
         <button type="submit" class="btn-tolak">✕ Tolak</button>
       </form>

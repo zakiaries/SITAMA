@@ -60,6 +60,14 @@
 .student-stat-item strong { display: block; font-size: 15px; font-weight: 700; color: var(--primary); }
 .badge-selesai { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
 .badge-aktif   { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.badge-dinilai { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.dz-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.dz-tab {
+  padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 20px;
+  font-size: 12px; font-weight: 600; color: var(--text-muted); background: #fff;
+  cursor: pointer; text-decoration: none; transition: all .15s;
+}
+.dz-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 </style>
 @endpush
 
@@ -108,11 +116,21 @@
   </form>
 </div>
 
+{{-- Tab status penilaian --}}
+<div class="dz-tabs">
+  @php $statusTabs = ['semua' => 'Semua', 'belum' => 'Belum Dinilai', 'dinilai' => 'Sudah Dinilai']; @endphp
+  @foreach($statusTabs as $key => $label)
+    <a href="{{ route('dosen.dashboard', array_merge(request()->only('search', 'jurusan', 'tahun'), ['status' => $key])) }}"
+       class="dz-tab {{ $status === $key ? 'active' : '' }}">{{ $label }} ({{ $counts[$key] }})</a>
+  @endforeach
+</div>
+
 {{-- Student List --}}
 @forelse($students as $student)
 @php
   $internship = $student->internships->first();
   $isFinished = $internship?->is_finished ?? false;
+  $graded     = ($internship?->scores_count ?? 0) > 0;
   $colors = [
     ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
     ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#eeedfe','text'=>'#3c3489'],
@@ -146,7 +164,9 @@
       Log
     </div>
   </div>
-  @if($isFinished)
+  @if($graded)
+    <span class="badge-dinilai">✓ Dinilai</span>
+  @elseif($isFinished)
     <span class="badge-selesai">Selesai</span>
   @else
     <span class="badge-aktif">Aktif</span>

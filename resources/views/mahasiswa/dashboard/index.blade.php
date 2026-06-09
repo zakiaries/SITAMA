@@ -117,6 +117,10 @@
       <div class="info-val" style="color:var(--primary);">{{ $internship->company->name ?? '-' }} — {{ $internship->position }}</div>
     </div>
     <div class="info-row">
+      <div class="info-key">Dosen Pembimbing</div>
+      <div class="info-val">{{ optional(optional($student->lecturer)->user)->name ?? 'Belum ditugaskan' }}</div>
+    </div>
+    <div class="info-row">
       <div class="info-key">Mulai</div>
       <div class="info-val">{{ $internship->start_date->format('d M Y') }}</div>
     </div>

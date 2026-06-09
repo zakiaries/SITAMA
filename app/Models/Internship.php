@@ -35,4 +35,9 @@ class Internship extends Model
     {
         return $this->belongsTo(Lecturer::class);
     }
+
+    public function scores()
+    {
+        return $this->hasMany(StudentScore::class);
+    }
 }

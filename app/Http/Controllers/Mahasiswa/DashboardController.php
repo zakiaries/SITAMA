@@ -21,6 +21,7 @@ class DashboardController extends Controller
         $notifications   = collect();
 
         if ($student) {
+            $student->loadMissing('lecturer.user');
             $internship = $student->activeInternship()->with('company')->first();
 
             $logBooksCount = $student->logBooks()->count();
@@ -42,7 +43,10 @@ class DashboardController extends Controller
         $notifications = $user->notifications()
             ->where('is_read', false)->orderByDesc('created_at')->take(5)->get();
 
-        $seminarsCount = \App\Models\Seminar::count();
+        // Seminar umum + seminar yang diajukan mahasiswa ini (bukan punya mahasiswa lain).
+        $seminarsCount = \App\Models\Seminar::whereNull('student_id')
+            ->when($student, fn($q) => $q->orWhere('student_id', $student->id))
+            ->count();
 
         return view('mahasiswa.dashboard.index', compact(
             'user', 'student', 'internship',

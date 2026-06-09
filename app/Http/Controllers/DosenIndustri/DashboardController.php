@@ -36,7 +36,7 @@ class DashboardController extends Controller
 
         $totalMahasiswa = $students->count();
         $aktif          = $students->filter(fn($s) => !($s->internships->first()?->is_finished ?? true))->count();
-        $belumDikomen   = $students->sum(fn($s) => $s->logBooks->whereNull('lecturer_note')->count());
+        $belumDikomen   = $students->sum(fn($s) => $s->logBooks->whereNull('industry_note')->count());
 
         return view('dosen-industri.dashboard.index', compact(
             'user', 'lecturer', 'students', 'totalMahasiswa', 'aktif', 'belumDikomen'

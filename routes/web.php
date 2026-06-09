@@ -8,6 +8,7 @@ use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
 use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
+use App\Http\Controllers\Mahasiswa\NotificationController;
 use App\Http\Controllers\Mahasiswa\ProfileController;
 use App\Http\Controllers\Mahasiswa\SeminarController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
@@ -50,6 +51,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
 
         Route::get('/bimbingan', [BimbinganController::class, 'index'])->name('bimbingan');
         Route::post('/bimbingan', [BimbinganController::class, 'store'])->name('bimbingan.store');
+        Route::put('/bimbingan/{guidance}', [BimbinganController::class, 'update'])->name('bimbingan.update');
 
         Route::get('/logbook', [LogBookController::class, 'index'])->name('logbook');
         Route::post('/logbook', [LogBookController::class, 'store'])->name('logbook.store');
@@ -59,6 +61,9 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::post('/lowongan/{jobListing}/apply', [LowonganController::class, 'apply'])->name('lowongan.apply');
 
         Route::get('/seminar', [SeminarController::class, 'index'])->name('seminar');
+        Route::post('/seminar', [SeminarController::class, 'store'])->name('seminar.store');
+        Route::put('/seminar/{seminar}', [SeminarController::class, 'update'])->name('seminar.update');
+        Route::delete('/seminar/{seminar}', [SeminarController::class, 'destroy'])->name('seminar.destroy');
         Route::get('/seminar/{seminar}', [SeminarController::class, 'detail'])->name('seminar.detail');
         Route::post('/seminar/{seminar}/register', [SeminarController::class, 'register'])->name('seminar.register');
 
@@ -66,6 +71,10 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
         Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
+
+        Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
+        Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
+        Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'markRead'])->name('notifikasi.read');
 
         Route::get('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invitePage'])->name('internship-groups.invite');
         Route::post('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invite'])->name('internship-groups.invite.store');

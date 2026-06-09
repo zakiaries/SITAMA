@@ -16,14 +16,25 @@ class DashboardController extends Controller
 
         if (!$lecturer) abort(403, 'Akses ditolak.');
 
+        $status = $request->input('status', 'semua');
+
+        // Internship bimbingan dosen ini yang sudah dinilai (punya StudentScore).
+        $gradedInternship = fn($q) => $q->where('lecturer_id', $lecturer->id)->whereHas('scores');
+
         $query = Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id))
             ->with([
                 'user',
                 'internships' => fn($q) => $q->where('lecturer_id', $lecturer->id)
-                    ->with('company')->latest(),
+                    ->with('company')->withCount('scores')->latest(),
                 'guidances',
                 'logBooks',
             ]);
+
+        if ($status === 'dinilai') {
+            $query->whereHas('internships', $gradedInternship);
+        } elseif ($status === 'belum') {
+            $query->whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores'));
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -43,12 +54,20 @@ class DashboardController extends Controller
 
         $students = $query->get();
 
+        // Hitungan untuk tab status (mengabaikan filter status, tetap ikut filter dasar bimbingan dosen).
+        $base = fn() => Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id));
+        $counts = [
+            'semua'   => $base()->count(),
+            'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),
+            'belum'   => $base()->whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores'))->count(),
+        ];
+
         $majors = Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id))
             ->distinct()->pluck('major');
 
         $years = Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id))
             ->distinct()->pluck('academic_year');
 
-        return view('dosen.dashboard.index', compact('user', 'lecturer', 'students', 'majors', 'years'));
+        return view('dosen.dashboard.index', compact('user', 'lecturer', 'students', 'majors', 'years', 'status', 'counts'));
     }
 }

@@ -36,6 +36,10 @@
   <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 
+@if($errors->any())
+  <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ $errors->first() }}</div>
+@endif
+
 <form method="GET" action="{{ route('industri.pelamar.index') }}">
   <input type="hidden" name="status" value="{{ $status }}">
   <div class="search-bar">
@@ -85,16 +89,29 @@
   </div>
 
   @if($pelamar->status === 'pending')
-  <div class="pel-actions">
-    <form method="POST" action="{{ route('industri.pelamar.accept', $pelamar) }}" onsubmit="return confirm('Terima pelamar ini?')">
-      @csrf
+  <form method="POST" action="{{ route('industri.pelamar.accept', $pelamar) }}"
+        data-confirm="Terima pelamar ini?">
+    @csrf
+    <div style="margin-top:14px;">
+      <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:5px;">Dosen Pembimbing Industri</label>
+      <select name="lecturer_industry_id" required
+              style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+        <option value="">— Pilih pembimbing industri —</option>
+        @foreach($industriLecturers as $il)
+          <option value="{{ $il->id }}">{{ $il->user->name ?? 'Tanpa nama' }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="pel-actions">
       <button type="submit" class="btn-accept">✓ Terima</button>
-    </form>
-    <form method="POST" action="{{ route('industri.pelamar.reject', $pelamar) }}" onsubmit="return confirm('Tolak pelamar ini?')">
-      @csrf
-      <button type="submit" class="btn-reject">✕ Tolak</button>
-    </form>
-  </div>
+      <button type="button" class="btn-reject"
+              onclick="confirmDialog('Tolak pelamar ini?', function(){document.getElementById('reject-{{ $pelamar->id }}').submit()}, 'danger')">✕ Tolak</button>
+    </div>
+  </form>
+  <form method="POST" id="reject-{{ $pelamar->id }}" action="{{ route('industri.pelamar.reject', $pelamar) }}"
+        style="display:none;">
+    @csrf
+  </form>
   @endif
 </div>
 @empty

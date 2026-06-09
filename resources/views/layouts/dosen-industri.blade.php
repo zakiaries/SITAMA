@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+@include('components.confirm-dialog')
 @stack('scripts')
 </body>
 </html>

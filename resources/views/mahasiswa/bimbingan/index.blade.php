@@ -9,6 +9,23 @@
     </div>
   @endif
 
+  {{-- Dosen Pembimbing --}}
+  <div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+    <div class="avatar" style="width:42px;height:42px;font-size:14px;background:var(--primary-light);color:var(--primary-text);">
+      @if($lecturer && $lecturer->user)
+        {{ collect(explode(' ', $lecturer->user->name))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('') }}
+      @else
+        ?
+      @endif
+    </div>
+    <div>
+      <div class="field-label">Dosen Pembimbing</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);">
+        {{ $lecturer && $lecturer->user ? $lecturer->user->name : 'Belum ditugaskan oleh Kaprodi' }}
+      </div>
+    </div>
+  </div>
+
   <div class="page-header">
     <div class="page-title">Daftar Bimbingan</div>
     <button class="btn btn-primary" onclick="document.getElementById('modal-bimb').classList.add('open')">+ Tambah Bimbingan</button>
@@ -54,6 +71,14 @@
         <a href="{{ Storage::url($g->name_file) }}" target="_blank">File Bimbingan</a>
       </div>
       @endif
+      @if($g->status === 'rejected')
+      <div style="margin-top:14px;">
+        <button class="btn btn-primary btn-sm"
+          onclick="openRevisi({{ $g->id }}, @js($g->title), '{{ $g->date->format('Y-m-d') }}', @js($g->activity))">
+          ↺ Revisi & Kirim Ulang
+        </button>
+      </div>
+      @endif
     </div>
   </div>
   @empty
@@ -62,4 +87,51 @@
   </div>
   @endforelse
 
+  {{-- Modal Revisi --}}
+  <div class="modal-overlay" id="modal-revisi">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Revisi Bimbingan</div>
+        <button class="modal-close" onclick="document.getElementById('modal-revisi').classList.remove('open')">✕</button>
+      </div>
+      <form method="POST" id="form-revisi" action="" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        <div class="form-group">
+          <label>Judul Bimbingan</label>
+          <input type="text" name="title" id="revisi-title" required>
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" name="date" id="revisi-date" required>
+        </div>
+        <div class="form-group">
+          <label>Aktivitas / Deskripsi</label>
+          <textarea name="activity" id="revisi-activity" rows="4" required style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ganti File (opsional)</label>
+          <input type="file" name="file" accept=".pdf,.doc,.docx">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-revisi').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">Kirim Ulang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 @endsection
+
+@push('scripts')
+<script>
+  function openRevisi(id, title, date, activity) {
+    var form = document.getElementById('form-revisi');
+    form.action = '{{ url('mahasiswa/bimbingan') }}/' + id;
+    document.getElementById('revisi-title').value = title;
+    document.getElementById('revisi-date').value = date;
+    document.getElementById('revisi-activity').value = activity;
+    document.getElementById('modal-revisi').classList.add('open');
+  }
+</script>
+@endpush

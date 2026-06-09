@@ -12,7 +12,7 @@ class LogBook extends Model
     protected $table = 'log_books';
 
     protected $fillable = [
-        'student_id', 'title', 'activity', 'date', 'lecturer_note',
+        'student_id', 'title', 'activity', 'date', 'lecturer_note', 'industry_note',
     ];
 
     protected $casts = [

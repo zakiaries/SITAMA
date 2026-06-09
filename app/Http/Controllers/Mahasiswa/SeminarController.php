@@ -5,20 +5,101 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Seminar;
 use App\Models\SeminarRegistration;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SeminarController extends Controller
 {
     public function index()
     {
-        $seminars = Seminar::with('registrations')->orderByDesc('date')->get();
         $student  = Auth::user()->student;
+
+        // Seminar wajib/umum (tidak terikat ke mahasiswa tertentu)
+        $seminars = Seminar::whereNull('student_id')->with('registrations')->orderByDesc('date')->get();
+
+        // Jadwal seminar yang diajukan mahasiswa ini sendiri
+        $mySeminars = $student
+            ? Seminar::where('student_id', $student->id)->with('registrations')->orderByDesc('date')->get()
+            : collect();
 
         $registeredIds = $student
             ? SeminarRegistration::where('student_id', $student->id)->pluck('seminar_id')->toArray()
             : [];
 
-        return view('mahasiswa.seminar.index', compact('seminars', 'registeredIds'));
+        return view('mahasiswa.seminar.index', compact('seminars', 'mySeminars', 'registeredIds'));
+    }
+
+    public function store(Request $request)
+    {
+        $student = Auth::user()->student;
+
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'date'     => 'required|date|after_or_equal:today',
+            'time'     => 'nullable|string|max:50',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ], [
+            'date.after_or_equal' => 'Tanggal seminar tidak boleh sebelum hari ini.',
+        ]);
+
+        $seminar = Seminar::create([
+            'title'       => $request->title,
+            'program'     => $student->study_program ?: 'Magang',
+            'date'        => $request->date,
+            'time'        => $request->time,
+            'location'    => $request->location,
+            'organizer'   => Auth::user()->name,
+            'description' => $request->description,
+            'status'      => 'scheduled',
+            'student_id'  => $student->id,
+        ]);
+
+        // Mahasiswa otomatis terdaftar pada seminar yang ia ajukan sendiri.
+        SeminarRegistration::firstOrCreate(
+            ['student_id' => $student->id, 'seminar_id' => $seminar->id],
+            ['status' => 'registered']
+        );
+
+        return redirect()->route('mahasiswa.seminar')
+            ->with('success', 'Jadwal seminar berhasil diajukan.');
+    }
+
+    public function update(Request $request, Seminar $seminar)
+    {
+        $this->authorizeOwnSeminar($seminar);
+
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'date'     => 'required|date|after_or_equal:today',
+            'time'     => 'nullable|string|max:50',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ], [
+            'date.after_or_equal' => 'Tanggal seminar tidak boleh sebelum hari ini.',
+        ]);
+
+        $seminar->update($request->only('title', 'date', 'time', 'location', 'description'));
+
+        return redirect()->route('mahasiswa.seminar')
+            ->with('success', 'Jadwal seminar berhasil diperbarui.');
+    }
+
+    public function destroy(Seminar $seminar)
+    {
+        $this->authorizeOwnSeminar($seminar);
+
+        $seminar->registrations()->delete();
+        $seminar->delete();
+
+        return redirect()->route('mahasiswa.seminar')
+            ->with('success', 'Pengajuan seminar dibatalkan.');
+    }
+
+    private function authorizeOwnSeminar(Seminar $seminar): void
+    {
+        $student = Auth::user()->student;
+        if (!$student || $seminar->student_id !== $student->id) abort(403);
     }
 
     public function detail(Seminar $seminar)

@@ -137,7 +137,7 @@
 
 {{-- Logbook List --}}
 @forelse($logBooks as $lb)
-@php $dt = $lb->date; $hasComment = !empty($lb->lecturer_note); @endphp
+@php $dt = $lb->date; $hasComment = !empty($lb->industry_note); @endphp
 <div class="lb-card">
   <div class="lb-card-head">
     <div class="lb-day-box">
@@ -161,7 +161,7 @@
       @if($hasComment)
         <div class="comment-box">
           <div class="cb-label">💬 Komentar Saya</div>
-          <div class="cb-text">{{ $lb->lecturer_note }}</div>
+          <div class="cb-text">{{ $lb->industry_note }}</div>
         </div>
       @endif
 
@@ -173,12 +173,12 @@
       <div id="cf-{{ $lb->id }}" class="comment-form" style="display:none;">
         <form method="POST" action="{{ route('dosen-industri.mahasiswa.logbook.komentar', [$student, $lb]) }}">
           @csrf
-          <textarea name="komentar" class="comment-input" placeholder="Masukkan komentar..." required>{{ $lb->lecturer_note }}</textarea>
+          <textarea name="komentar" class="comment-input" placeholder="Masukkan komentar..." required>{{ $lb->industry_note }}</textarea>
           <div class="comment-actions">
             <button type="submit" class="btn btn-primary btn-sm">➤ Kirim</button>
             @if($hasComment)
             <button type="button" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;"
-              onclick="if(confirm('Hapus komentar?'))document.getElementById('del-{{ $lb->id }}').submit()">🗑 Hapus</button>
+              onclick="confirmDialog('Hapus komentar?', function(){document.getElementById('del-{{ $lb->id }}').submit()}, 'danger')">🗑 Hapus</button>
             @endif
           </div>
         </form>

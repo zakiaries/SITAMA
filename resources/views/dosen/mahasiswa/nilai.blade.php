@@ -110,18 +110,35 @@
           class="score-input"
           value="{{ $currentScore !== null ? number_format($currentScore, 1) : '' }}"
           placeholder="0 - 100"
-          min="0" max="100" step="0.5">
+          min="0" max="100" step="0.5"
+          oninput="clampScore(this)">
       </div>
       @endforeach
     </div>
   </div>
   @endforeach
 
+  @php
+    $hasAnyScore = collect($components)->flatMap->detailedComponents
+      ->flatMap(fn($d) => $d->scores)->isNotEmpty();
+  @endphp
   <div style="margin-top:8px;">
     <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
-      Update Nilai
+      {{ $hasAnyScore ? 'Update Nilai' : 'Simpan Nilai' }}
     </button>
   </div>
 </form>
 
 @endsection
+
+@push('scripts')
+<script>
+function clampScore(el) {
+  if (el.value === '') return;
+  var v = parseFloat(el.value);
+  if (isNaN(v)) { el.value = ''; return; }
+  if (v > 100) el.value = 100;
+  if (v < 0)   el.value = 0;
+}
+</script>
+@endpush

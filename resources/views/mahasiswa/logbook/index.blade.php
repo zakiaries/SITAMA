@@ -34,13 +34,19 @@
       <div class="field-label">Aktivitas</div>
       <div class="field-value">{{ $lb->activity }}</div>
       @if($lb->lecturer_note)
-      <div class="field-group">
-        <div class="field-label">Catatan Dosen</div>
+      <div class="field-group" style="border-left:3px solid #2563eb;padding-left:10px;margin-top:12px;">
+        <div class="field-label" style="color:#2563eb;">Catatan Dosen Pembimbing (Kampus)</div>
         <div class="field-value">{{ $lb->lecturer_note }}</div>
       </div>
       @endif
+      @if($lb->industry_note)
+      <div class="field-group" style="border-left:3px solid #16a34a;padding-left:10px;margin-top:12px;">
+        <div class="field-label" style="color:#16a34a;">Catatan Pembimbing Industri</div>
+        <div class="field-value">{{ $lb->industry_note }}</div>
+      </div>
+      @endif
       <div style="display:flex;gap:8px;margin-top:12px;">
-        <form method="POST" action="{{ route('mahasiswa.logbook.destroy', $lb->id) }}" onsubmit="return confirm('Hapus log book ini?')">
+        <form method="POST" action="{{ route('mahasiswa.logbook.destroy', $lb->id) }}" data-confirm="Hapus log book ini?" data-confirm-danger>
           @csrf
           @method('DELETE')
           <button type="submit" class="btn btn-danger btn-sm">🗑 Hapus</button>

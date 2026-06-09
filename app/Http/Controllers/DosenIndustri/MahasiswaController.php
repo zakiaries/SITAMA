@@ -41,15 +41,15 @@ class MahasiswaController extends Controller
         $query = $student->logBooks()->orderByDesc('date');
 
         if ($filter === 'belum') {
-            $query->whereNull('lecturer_note');
+            $query->whereNull('industry_note');
         } elseif ($filter === 'sudah') {
-            $query->whereNotNull('lecturer_note');
+            $query->whereNotNull('industry_note');
         }
 
         $logBooks = $query->get();
 
         $totalLog     = $student->logBooks()->count();
-        $sudahDikomen = $student->logBooks()->whereNotNull('lecturer_note')->count();
+        $sudahDikomen = $student->logBooks()->whereNotNull('industry_note')->count();
 
         return view('dosen-industri.mahasiswa.detail', compact(
             'student', 'internship', 'logBooks', 'filter', 'totalLog', 'sudahDikomen'
@@ -65,7 +65,7 @@ class MahasiswaController extends Controller
             'komentar.required' => 'Komentar tidak boleh kosong.',
         ]);
 
-        $logBook->update(['lecturer_note' => $request->komentar]);
+        $logBook->update(['industry_note' => $request->komentar]);
 
         return back()->with('success', 'Komentar berhasil dikirim.');
     }
@@ -75,7 +75,7 @@ class MahasiswaController extends Controller
         $lecturer = $this->getLecturer();
         $this->getInternship($student, $lecturer);
 
-        $logBook->update(['lecturer_note' => null]);
+        $logBook->update(['industry_note' => null]);
 
         return back()->with('success', 'Komentar berhasil dihapus.');
     }

@@ -251,27 +251,39 @@
             <div class="field-value" style="margin-bottom:10px;">{{ $g->activity }}</div>
             @if($g->lecturer_note)
               <div class="lecturer-note-box">
-                <strong>Catatan sebelumnya:</strong> {{ $g->lecturer_note }}
+                <strong>{{ $g->status === 'approved' ? 'Catatan dosen:' : 'Catatan sebelumnya:' }}</strong> {{ $g->lecturer_note }}
               </div>
             @endif
-            {{-- Approve Form --}}
-            <form method="POST" action="{{ route('dosen.mahasiswa.bimbingan.approve', [$student, $g]) }}"
-                  style="margin-top:12px;" onsubmit="return confirm('Setujui bimbingan ini?')">
-              @csrf
-              <textarea name="note" class="note-input"
-                placeholder="Catatan untuk mahasiswa (opsional)...">{{ $g->lecturer_note }}</textarea>
-              <div class="action-row">
-                <button type="submit" class="btn-approve">✓ Setujui</button>
-                <button type="button" class="btn-revisi"
-                  onclick="submitRevisi(this, {{ $g->id }})">✕ Revisi</button>
+
+            @if(in_array($g->status, ['approved', 'rejected']))
+              {{-- Keputusan sudah diambil: tombol disembunyikan --}}
+              <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">
+                @if($g->status === 'approved')
+                  ✓ Bimbingan ini sudah disetujui.
+                @else
+                  ✕ Diminta revisi — menunggu mahasiswa mengirim ulang.
+                @endif
               </div>
-            </form>
-            {{-- Revisi Form (hidden, triggered by JS) --}}
-            <form id="form-revisi-{{ $g->id }}" method="POST"
-                  action="{{ route('dosen.mahasiswa.bimbingan.revisi', [$student, $g]) }}" style="display:none;">
-              @csrf
-              <input type="hidden" name="note" id="note-revisi-{{ $g->id }}">
-            </form>
+            @else
+              {{-- Approve Form --}}
+              <form method="POST" action="{{ route('dosen.mahasiswa.bimbingan.approve', [$student, $g]) }}"
+                    style="margin-top:12px;" data-confirm="Setujui bimbingan ini?">
+                @csrf
+                <textarea name="note" class="note-input"
+                  placeholder="Catatan untuk mahasiswa (opsional)...">{{ $g->lecturer_note }}</textarea>
+                <div class="action-row">
+                  <button type="submit" class="btn-approve">✓ Setujui</button>
+                  <button type="button" class="btn-revisi"
+                    onclick="submitRevisi(this, {{ $g->id }})">✕ Revisi</button>
+                </div>
+              </form>
+              {{-- Revisi Form (hidden, triggered by JS) --}}
+              <form id="form-revisi-{{ $g->id }}" method="POST"
+                    action="{{ route('dosen.mahasiswa.bimbingan.revisi', [$student, $g]) }}" style="display:none;">
+                @csrf
+                <input type="hidden" name="note" id="note-revisi-{{ $g->id }}">
+              </form>
+            @endif
           </div>
         </div>
         @empty
@@ -302,7 +314,9 @@
               <textarea name="note" class="note-input"
                 placeholder="Tambahkan catatan...">{{ $lb->lecturer_note }}</textarea>
               <div class="action-row">
-                <button type="submit" class="btn btn-primary btn-sm">💾 Simpan Catatan</button>
+                <button type="submit" class="btn btn-primary btn-sm">
+                  {{ $lb->lecturer_note ? '✏ Edit Catatan' : '💾 Simpan Catatan' }}
+                </button>
               </div>
             </form>
           </div>
@@ -330,13 +344,14 @@ function submitRevisi(btn, id) {
   const noteEl = btn.closest('form').querySelector('textarea[name="note"]');
   const note   = noteEl ? noteEl.value.trim() : '';
   if (!note) {
-    alert('Catatan revisi wajib diisi!');
+    alertDialog('Catatan revisi wajib diisi!');
     noteEl.focus();
     return;
   }
-  if (!confirm('Tandai bimbingan ini untuk revisi?')) return;
-  document.getElementById('note-revisi-' + id).value = note;
-  document.getElementById('form-revisi-' + id).submit();
+  confirmDialog('Tandai bimbingan ini untuk revisi?', function () {
+    document.getElementById('note-revisi-' + id).value = note;
+    document.getElementById('form-revisi-' + id).submit();
+  }, 'danger');
 }
 </script>
 @endpush

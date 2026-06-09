@@ -104,7 +104,7 @@
 
   @if($company->verification_status === 'pending')
   <div class="ind-actions">
-    <form method="POST" action="{{ route('kaprodi.industri.verify', $company) }}" onsubmit="return confirm('Verifikasi {{ addslashes($company->name) }}?')">
+    <form method="POST" action="{{ route('kaprodi.industri.verify', $company) }}" data-confirm="Verifikasi {{ $company->name }}?">
       @csrf
       <button type="submit" class="btn-verify">✓ Verifikasi Akun</button>
     </form>

@@ -70,6 +70,23 @@ html, body { height: 100%; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-
 .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; border-left-color: #7aaef5; }
 .nav-item svg { flex-shrink: 0; }
 
+/* ── Collapsible nav groups ── */
+.nav-group-header { user-select: none; }
+.nav-caret {
+  margin-left: auto;
+  font-size: 11px;
+  transition: transform .2s ease;
+  opacity: 0.6;
+}
+.nav-group.open > .nav-group-header .nav-caret { transform: rotate(180deg); }
+.nav-sub {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .25s ease;
+}
+.nav-group.open > .nav-sub { max-height: 320px; }
+.nav-sub-item { padding-left: 38px; font-size: 13px; }
+
 .sb-user {
   padding: 16px 20px;
   border-top: 1px solid rgba(255,255,255,0.08);

@@ -78,7 +78,7 @@
         @csrf @method('PATCH')
         <button type="submit" class="btn btn-outline btn-sm">{{ $job->status === 'active' ? '🔒 Tutup' : '🔓 Buka' }}</button>
       </form>
-      <form method="POST" action="{{ route('industri.lowongan.destroy', $job) }}" onsubmit="return confirm('Hapus lowongan ini?')">
+      <form method="POST" action="{{ route('industri.lowongan.destroy', $job) }}" data-confirm="Hapus lowongan ini?" data-confirm-danger>
         @csrf @method('DELETE')
         <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;">🗑</button>
       </form>
