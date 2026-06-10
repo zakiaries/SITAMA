@@ -18,14 +18,15 @@ class DashboardController extends Controller
 
         $status = $request->input('status', 'semua');
 
-        // Internship bimbingan dosen ini yang sudah dinilai (punya StudentScore).
-        $gradedInternship = fn($q) => $q->where('lecturer_id', $lecturer->id)->whereHas('scores');
+        // Internship bimbingan dosen ini yang sudah dinilai oleh dosen ini (punya StudentScore scorer_type=lecturer).
+        $ownScores = fn($q) => $q->where('scorer_type', 'lecturer');
+        $gradedInternship = fn($q) => $q->where('lecturer_id', $lecturer->id)->whereHas('scores', $ownScores);
 
         $query = Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id))
             ->with([
                 'user',
                 'internships' => fn($q) => $q->where('lecturer_id', $lecturer->id)
-                    ->with('company')->withCount('scores')->latest(),
+                    ->with('company')->withCount(['scores' => $ownScores])->latest(),
                 'guidances',
                 'logBooks',
             ]);
@@ -33,7 +34,7 @@ class DashboardController extends Controller
         if ($status === 'dinilai') {
             $query->whereHas('internships', $gradedInternship);
         } elseif ($status === 'belum') {
-            $query->whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores'));
+            $query->whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores', $ownScores));
         }
 
         if ($request->filled('search')) {
@@ -59,7 +60,7 @@ class DashboardController extends Controller
         $counts = [
             'semua'   => $base()->count(),
             'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),
-            'belum'   => $base()->whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores'))->count(),
+            'belum'   => $base()->whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores', $ownScores))->count(),
         ];
 
         $majors = Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id))

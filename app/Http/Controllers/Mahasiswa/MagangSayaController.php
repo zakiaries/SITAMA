@@ -30,6 +30,12 @@ class MagangSayaController extends Controller
             ->latest()
             ->get();
 
-        return view('mahasiswa.magang-saya.index', compact('applications', 'invitations'));
+        $internship = $student->activeInternship()
+            ->with(['company', 'lecturer.user', 'lecturerIndustry.user'])
+            ->first();
+
+        $logBooks = $student->logBooks()->orderByDesc('date')->limit(5)->get();
+
+        return view('mahasiswa.magang-saya.index', compact('applications', 'invitations', 'internship', 'logBooks'));
     }
 }

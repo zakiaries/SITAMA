@@ -75,6 +75,37 @@ class MahasiswaController extends Controller
         return back()->with('success', "Akun {$student->user->name} telah ditolak.");
     }
 
+    public function detail(Student $student)
+    {
+        $student->load('user');
+
+        $internship = $student->internships()
+            ->with(['company', 'lecturer.user', 'lecturerIndustry.user'])
+            ->latest()
+            ->first();
+
+        $nilai = $internship?->nilaiSummary();
+
+        return view('kaprodi.mahasiswa.detail', compact('student', 'internship', 'nilai'));
+    }
+
+    public function toggleFinished(Student $student)
+    {
+        $internship = $student->internships()->latest()->first();
+
+        if (!$internship) {
+            return back()->with('error', 'Mahasiswa belum memiliki data magang.');
+        }
+
+        $internship->update(['is_finished' => !$internship->is_finished]);
+
+        $message = $internship->is_finished
+            ? "Magang {$student->user->name} ditandai selesai."
+            : "Magang {$student->user->name} ditandai aktif kembali.";
+
+        return back()->with('success', $message);
+    }
+
     public function assignLecturer(Request $request, Student $student)
     {
         $request->validate([

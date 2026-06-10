@@ -127,6 +127,7 @@
     <span class="st-badge {{ $internship->is_finished ? 'st-selesai' : 'st-aktif' }}">
       {{ $internship->is_finished ? 'Selesai' : 'Aktif' }}
     </span>
+    <a href="{{ route('kaprodi.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">Detail</a>
     <button type="button" class="btn btn-outline btn-sm"
       onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
       {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}

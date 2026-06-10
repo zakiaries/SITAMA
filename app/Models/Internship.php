@@ -36,8 +36,39 @@ class Internship extends Model
         return $this->belongsTo(Lecturer::class);
     }
 
+    public function lecturerIndustry()
+    {
+        return $this->belongsTo(Lecturer::class, 'lecturer_industry_id');
+    }
+
     public function scores()
     {
         return $this->hasMany(StudentScore::class);
+    }
+
+    /**
+     * Rata-rata nilai per komponen penilaian (gabungan dosen kampus & dosen industri),
+     * beserta rata-rata keseluruhan.
+     */
+    public function nilaiSummary(): array
+    {
+        $components = AssessmentComponent::with(['detailedComponents.scores' => function ($q) {
+            $q->where('internship_id', $this->id);
+        }])->get();
+
+        $items = $components->map(function ($comp) {
+            $scores = $comp->detailedComponents->flatMap->scores->pluck('score')->filter();
+            return [
+                'name' => $comp->name,
+                'avg'  => $scores->count() > 0 ? round($scores->avg(), 2) : null,
+            ];
+        });
+
+        $filled = $items->pluck('avg')->filter();
+
+        return [
+            'items'   => $items,
+            'overall' => $filled->count() > 0 ? round($filled->avg(), 2) : null,
+        ];
     }
 }

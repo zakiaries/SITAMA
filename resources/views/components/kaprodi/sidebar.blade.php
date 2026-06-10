@@ -28,7 +28,7 @@
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M2 20h20M4 20V8l6-4v16M14 20V9l6 3v8"/>
       </svg>
-      Verifikasi Industri
+      Akun Industri
     </a>
   </nav>
 

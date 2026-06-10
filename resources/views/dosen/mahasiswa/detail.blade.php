@@ -90,6 +90,15 @@
 }
 .note-input:focus { border-color: var(--primary); }
 .lecturer-note-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 12px; color: #1e40af; }
+
+/* Filter tabs */
+.filter-tabs { display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center; }
+.filter-tab {
+  padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;
+  font-size:12px;font-weight:600;color:var(--text-muted);background:#fff;
+  cursor:pointer;text-decoration:none;transition:all .15s;
+}
+.filter-tab.active { background:var(--primary);color:#fff;border-color:var(--primary); }
 </style>
 @endpush
 
@@ -211,7 +220,7 @@
           Bimbingan ({{ $student->guidances->count() }})
         </button>
         <button class="tab-btn" onclick="switchTab('logbook', this)">
-          Log Book ({{ $student->logBooks->count() }})
+          Log Book ({{ $totalLog }})
         </button>
       </div>
 
@@ -249,6 +258,12 @@
           <div class="bimb-body">
             <div class="field-label">Aktivitas</div>
             <div class="field-value" style="margin-bottom:10px;">{{ $g->activity }}</div>
+            @if($g->name_file)
+              <div class="file-badge">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <a href="{{ Storage::url($g->name_file) }}" target="_blank">File Bimbingan</a>
+              </div>
+            @endif
             @if($g->lecturer_note)
               <div class="lecturer-note-box">
                 <strong>{{ $g->status === 'approved' ? 'Catatan dosen:' : 'Catatan sebelumnya:' }}</strong> {{ $g->lecturer_note }}
@@ -293,7 +308,25 @@
 
       {{-- TAB: LOG BOOK --}}
       <div id="tab-logbook" class="tab-pane" style="padding-bottom:8px;">
-        @forelse($student->logBooks as $lb)
+        <div class="filter-tabs">
+          <a href="{{ route('dosen.mahasiswa.detail', [$student, 'filter' => 'semua', 'period' => $period]) }}"
+             class="filter-tab {{ $filter === 'semua' ? 'active' : '' }}">Semua ({{ $totalLog }})</a>
+          <a href="{{ route('dosen.mahasiswa.detail', [$student, 'filter' => 'belum', 'period' => $period]) }}"
+             class="filter-tab {{ $filter === 'belum' ? 'active' : '' }}">Belum Dicatat ({{ $totalLog - $sudahDicatat }})</a>
+          <a href="{{ route('dosen.mahasiswa.detail', [$student, 'filter' => 'sudah', 'period' => $period]) }}"
+             class="filter-tab {{ $filter === 'sudah' ? 'active' : '' }}">Sudah Dicatat ({{ $sudahDicatat }})</a>
+
+          <form method="GET" action="{{ route('dosen.mahasiswa.detail', $student) }}" style="margin-left:auto;">
+            <input type="hidden" name="filter" value="{{ $filter }}">
+            <select name="period" onchange="this.form.submit()" class="filter-tab" style="cursor:pointer;">
+              <option value="semua" {{ $period === 'semua' ? 'selected' : '' }}>Semua Waktu</option>
+              <option value="7hari" {{ $period === '7hari' ? 'selected' : '' }}>7 Hari Terakhir</option>
+              <option value="30hari" {{ $period === '30hari' ? 'selected' : '' }}>30 Hari Terakhir</option>
+              <option value="bulan_ini" {{ $period === 'bulan_ini' ? 'selected' : '' }}>Bulan Ini</option>
+            </select>
+          </form>
+        </div>
+        @forelse($logBooks as $lb)
         <div class="bimb-item">
           <div class="bimb-header" onclick="toggle(this)">
             <div style="flex:1;">
@@ -339,6 +372,12 @@ function switchTab(name, btn) {
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
 }
+
+@if(request()->has('filter') || request()->has('period'))
+document.addEventListener('DOMContentLoaded', function () {
+  switchTab('logbook', document.querySelectorAll('.tab-btn')[1]);
+});
+@endif
 
 function submitRevisi(btn, id) {
   const noteEl = btn.closest('form').querySelector('textarea[name="note"]');

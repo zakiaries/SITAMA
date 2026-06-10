@@ -51,6 +51,60 @@
   </div>
   @endif
 
+  {{-- Magang Aktif --}}
+  @if($internship)
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header" style="margin-bottom:12px;">
+      <div class="card-title">Magang Aktif</div>
+      @if($internship->is_finished)
+        <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">✓ Selesai</span>
+      @else
+        <span style="background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
+      @endif
+    </div>
+    <div class="info-row"><div class="info-key">Perusahaan</div><div class="info-val" style="color:var(--primary);font-weight:600;">{{ $internship->company->name ?? '-' }}</div></div>
+    <div class="info-row"><div class="info-key">Posisi</div><div class="info-val">{{ $internship->position }}</div></div>
+    <div class="info-row">
+      <div class="info-key">Dosen Pembimbing</div>
+      <div class="info-val">{{ $internship->lecturer && $internship->lecturer->user ? $internship->lecturer->user->name : 'Belum ditugaskan' }}</div>
+    </div>
+    <div class="info-row">
+      <div class="info-key">Pembimbing Industri</div>
+      <div class="info-val">{{ $internship->lecturerIndustry && $internship->lecturerIndustry->user ? $internship->lecturerIndustry->user->name : 'Belum ditugaskan' }}</div>
+    </div>
+  </div>
+
+  {{-- Log Book Terbaru --}}
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header" style="margin-bottom:12px;">
+      <div class="card-title">Log Book Terbaru</div>
+      <a href="{{ route('mahasiswa.logbook') }}" class="btn btn-outline btn-sm">Lihat Semua</a>
+    </div>
+    @forelse($logBooks as $lb)
+    <div style="padding:10px 0;{{ !$loop->last ? 'border-bottom:1px solid var(--border);' : '' }}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <div style="font-weight:700;font-size:13px;color:var(--text);">{{ $lb->title }}</div>
+        <div style="font-size:11px;color:var(--text-muted);">{{ $lb->date->format('d M Y') }}</div>
+      </div>
+      @if($lb->lecturer_note)
+      <div class="field-group" style="border-left:3px solid #2563eb;padding-left:10px;margin-top:8px;">
+        <div class="field-label" style="color:#2563eb;">Catatan Dosen Pembimbing (Kampus)</div>
+        <div class="field-value">{{ $lb->lecturer_note }}</div>
+      </div>
+      @endif
+      @if($lb->industry_note)
+      <div class="field-group" style="border-left:3px solid #16a34a;padding-left:10px;margin-top:8px;">
+        <div class="field-label" style="color:#16a34a;">Catatan Pembimbing Industri</div>
+        <div class="field-value">{{ $lb->industry_note }}</div>
+      </div>
+      @endif
+    </div>
+    @empty
+      <p style="color:var(--text-muted);font-size:13px;padding:8px 0;">Belum ada log book.</p>
+    @endforelse
+  </div>
+  @endif
+
   {{-- Pendaftaran Saya --}}
   <div class="page-header">
     <div class="page-title">Pendaftaran Saya</div>

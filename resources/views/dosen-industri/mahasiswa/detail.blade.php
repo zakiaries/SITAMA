@@ -127,12 +127,22 @@
 
 {{-- Filter Tabs --}}
 <div class="filter-tabs">
-  <a href="{{ route('dosen-industri.mahasiswa.detail', [$student, 'filter' => 'semua']) }}"
+  <a href="{{ route('dosen-industri.mahasiswa.detail', [$student, 'filter' => 'semua', 'period' => $period]) }}"
      class="filter-tab {{ $filter === 'semua' ? 'active' : '' }}">Semua ({{ $totalLog }})</a>
-  <a href="{{ route('dosen-industri.mahasiswa.detail', [$student, 'filter' => 'belum']) }}"
+  <a href="{{ route('dosen-industri.mahasiswa.detail', [$student, 'filter' => 'belum', 'period' => $period]) }}"
      class="filter-tab {{ $filter === 'belum' ? 'active' : '' }}">Belum Dikomen ({{ $totalLog - $sudahDikomen }})</a>
-  <a href="{{ route('dosen-industri.mahasiswa.detail', [$student, 'filter' => 'sudah']) }}"
+  <a href="{{ route('dosen-industri.mahasiswa.detail', [$student, 'filter' => 'sudah', 'period' => $period]) }}"
      class="filter-tab {{ $filter === 'sudah' ? 'active' : '' }}">Sudah Dikomen ({{ $sudahDikomen }})</a>
+
+  <form method="GET" action="{{ route('dosen-industri.mahasiswa.detail', $student) }}" style="margin-left:auto;">
+    <input type="hidden" name="filter" value="{{ $filter }}">
+    <select name="period" onchange="this.form.submit()" class="filter-tab" style="cursor:pointer;">
+      <option value="semua" {{ $period === 'semua' ? 'selected' : '' }}>Semua Waktu</option>
+      <option value="7hari" {{ $period === '7hari' ? 'selected' : '' }}>7 Hari Terakhir</option>
+      <option value="30hari" {{ $period === '30hari' ? 'selected' : '' }}>30 Hari Terakhir</option>
+      <option value="bulan_ini" {{ $period === 'bulan_ini' ? 'selected' : '' }}>Bulan Ini</option>
+    </select>
+  </form>
 </div>
 
 {{-- Logbook List --}}

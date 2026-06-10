@@ -11,7 +11,7 @@ class StudentScore extends Model
 
     protected $table = 'student_scores';
 
-    protected $fillable = ['internship_id', 'detailed_assessment_component_id', 'score'];
+    protected $fillable = ['internship_id', 'detailed_assessment_component_id', 'scorer_type', 'score'];
 
     protected $casts = ['score' => 'float'];
 

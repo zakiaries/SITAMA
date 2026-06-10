@@ -8,19 +8,24 @@ use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
 use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
+use App\Http\Controllers\Mahasiswa\NilaiController;
+use App\Http\Controllers\Mahasiswa\IndustriRequestController;
 use App\Http\Controllers\Mahasiswa\NotificationController;
 use App\Http\Controllers\Mahasiswa\ProfileController;
 use App\Http\Controllers\Mahasiswa\SeminarController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
+use App\Http\Controllers\Dosen\NotificationController as DosenNotificationController;
 use App\Http\Controllers\Dosen\ProfileController as DosenProfileController;
 use App\Http\Controllers\DosenIndustri\DashboardController as IndustriDashboardController;
 use App\Http\Controllers\DosenIndustri\MahasiswaController as IndustriMahasiswaController;
+use App\Http\Controllers\DosenIndustri\NotificationController as IndustriNotificationController;
 use App\Http\Controllers\DosenIndustri\ProfileController as IndustriProfileController;
 use App\Http\Controllers\Kaprodi\DashboardController as KaprodiDashboardController;
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
 use App\Http\Controllers\Kaprodi\DosenController as KaprodiDosenController;
 use App\Http\Controllers\Kaprodi\IndustriController as KaprodiIndustriController;
+use App\Http\Controllers\Kaprodi\IndustriRequestController as KaprodiIndustriRequestController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
 use App\Http\Controllers\Industri\DashboardController as IndustriHomeController;
 use App\Http\Controllers\Industri\LowonganController as IndustriLowonganController;
@@ -72,6 +77,11 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
 
         Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
 
+        Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai');
+
+        Route::get('/permintaan-industri',  [IndustriRequestController::class, 'index'])->name('industri-request');
+        Route::post('/permintaan-industri', [IndustriRequestController::class, 'store'])->name('industri-request.store');
+
         Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
         Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
         Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'markRead'])->name('notifikasi.read');
@@ -98,6 +108,10 @@ Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
 
     Route::get('/profile',  [DosenProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [DosenProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/notifikasi', [DosenNotificationController::class, 'index'])->name('notifikasi');
+    Route::post('/notifikasi/read-all', [DosenNotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
+    Route::post('/notifikasi/{notification}/read', [DosenNotificationController::class, 'markRead'])->name('notifikasi.read');
 });
 
 // ── Dosen Industri Routes (protected) ─────────────────────────────────────────
@@ -113,6 +127,10 @@ Route::prefix('dosen-industri')->name('dosen-industri.')->middleware('auth')->gr
 
     Route::get('/profile',  [IndustriProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [IndustriProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/notifikasi', [IndustriNotificationController::class, 'index'])->name('notifikasi');
+    Route::post('/notifikasi/read-all', [IndustriNotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
+    Route::post('/notifikasi/{notification}/read', [IndustriNotificationController::class, 'markRead'])->name('notifikasi.read');
 });
 
 // ── Kaprodi Routes (protected) ────────────────────────────────────────────────
@@ -121,6 +139,8 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/mahasiswa',                            [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
+    Route::get('/mahasiswa/{student}',                  [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
+    Route::post('/mahasiswa/{student}/toggle-finished', [KaprodiMahasiswaController::class, 'toggleFinished'])->name('mahasiswa.toggle-finished');
     Route::post('/mahasiswa/{student}/assign-lecturer', [KaprodiMahasiswaController::class, 'assignLecturer'])->name('mahasiswa.assign');
     Route::post('/mahasiswa/{student}/approve',         [KaprodiMahasiswaController::class, 'approve'])->name('mahasiswa.approve');
     Route::post('/mahasiswa/{student}/reject',          [KaprodiMahasiswaController::class, 'reject'])->name('mahasiswa.reject');
@@ -131,6 +151,9 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::get('/industri',                     [KaprodiIndustriController::class, 'index'])->name('industri.index');
     Route::post('/industri/{company}/verify',   [KaprodiIndustriController::class, 'verify'])->name('industri.verify');
     Route::post('/industri/{company}/reject',   [KaprodiIndustriController::class, 'reject'])->name('industri.reject');
+
+    Route::post('/industri-request/{companyRequest}/approve', [KaprodiIndustriRequestController::class, 'approve'])->name('industri-request.approve');
+    Route::post('/industri-request/{companyRequest}/reject',  [KaprodiIndustriRequestController::class, 'reject'])->name('industri-request.reject');
 
     Route::get('/profile',  [KaprodiProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [KaprodiProfileController::class, 'update'])->name('profile.update');

@@ -37,13 +37,28 @@ class MahasiswaController extends Controller
         $student->load('user');
 
         $filter = $request->input('filter', 'semua');
+        $period = $request->input('period', 'semua');
 
-        $query = $student->logBooks()->orderByDesc('date');
+        $query = $student->logBooks();
 
         if ($filter === 'belum') {
             $query->whereNull('industry_note');
         } elseif ($filter === 'sudah') {
             $query->whereNotNull('industry_note');
+        }
+
+        if ($period === '7hari') {
+            $query->where('date', '>=', now()->subDays(7));
+        } elseif ($period === '30hari') {
+            $query->where('date', '>=', now()->subDays(30));
+        } elseif ($period === 'bulan_ini') {
+            $query->whereMonth('date', now()->month)->whereYear('date', now()->year);
+        }
+
+        if ($filter === 'semua') {
+            $query->orderByRaw('industry_note IS NOT NULL')->orderByDesc('date');
+        } else {
+            $query->orderByDesc('date');
         }
 
         $logBooks = $query->get();
@@ -52,7 +67,7 @@ class MahasiswaController extends Controller
         $sudahDikomen = $student->logBooks()->whereNotNull('industry_note')->count();
 
         return view('dosen-industri.mahasiswa.detail', compact(
-            'student', 'internship', 'logBooks', 'filter', 'totalLog', 'sudahDikomen'
+            'student', 'internship', 'logBooks', 'filter', 'period', 'totalLog', 'sudahDikomen'
         ));
     }
 
@@ -87,7 +102,8 @@ class MahasiswaController extends Controller
         $student->load('user');
 
         $components = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
-            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)]);
+            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)
+                ->where('scorer_type', 'lecturer_industry')]);
         }])->get();
 
         return view('dosen-industri.mahasiswa.penilaian', compact(
@@ -112,6 +128,7 @@ class MahasiswaController extends Controller
                     [
                         'internship_id'                    => $internship->id,
                         'detailed_assessment_component_id' => $detailId,
+                        'scorer_type'                       => 'lecturer_industry',
                     ],
                     ['score' => $score]
                 );

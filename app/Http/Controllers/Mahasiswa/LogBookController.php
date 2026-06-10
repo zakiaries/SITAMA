@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\LogBook;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,15 +34,45 @@ class LogBookController extends Controller
 
         $student = Auth::user()->student;
 
-        LogBook::create([
+        $logBook = LogBook::create([
             'student_id' => $student->id,
             'title'      => $request->title,
             'activity'   => $request->activity,
             'date'       => $request->date,
         ]);
 
+        $this->notifySupervisors($student, $logBook);
+
         return redirect()->route('mahasiswa.logbook')
             ->with('success', 'Log book berhasil ditambahkan.');
+    }
+
+    private function notifySupervisors($student, LogBook $logBook): void
+    {
+        $internship = $student->activeInternship()->with(['lecturer.user', 'lecturerIndustry.user'])->first();
+
+        if (!$internship) {
+            return;
+        }
+
+        $message = "{$student->user->name} mengisi log book baru: \"{$logBook->title}\".";
+        $detail  = "Log book tanggal {$logBook->date->format('d M Y')}: {$logBook->activity}";
+
+        $userIds = collect([
+            $internship->lecturer?->user?->id,
+            $internship->lecturerIndustry?->user?->id,
+        ])->filter()->unique();
+
+        foreach ($userIds as $userId) {
+            Notification::create([
+                'user_id'     => $userId,
+                'message'     => $message,
+                'date'        => now()->toDateString(),
+                'category'    => 'log_book',
+                'is_read'     => false,
+                'detail_text' => $detail,
+            ]);
+        }
     }
 
     public function destroy(LogBook $logBook)

@@ -31,7 +31,7 @@ class MahasiswaController extends Controller
         return $internship;
     }
 
-    public function detail(Student $student)
+    public function detail(Request $request, Student $student)
     {
         $lecturer   = $this->getLecturer();
         $internship = $this->getInternship($student, $lecturer);
@@ -39,7 +39,6 @@ class MahasiswaController extends Controller
         $student->load([
             'user',
             'guidances'  => fn($q) => $q->orderByDesc('date'),
-            'logBooks'   => fn($q) => $q->orderByDesc('date'),
         ]);
 
         $assessments = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
@@ -53,8 +52,39 @@ class MahasiswaController extends Controller
 
         $overallAvg = $allScores->count() > 0 ? round($allScores->avg(), 2) : null;
 
+        $filter = $request->input('filter', 'semua');
+        $period = $request->input('period', 'semua');
+
+        $logQuery = $student->logBooks();
+
+        if ($filter === 'belum') {
+            $logQuery->whereNull('lecturer_note');
+        } elseif ($filter === 'sudah') {
+            $logQuery->whereNotNull('lecturer_note');
+        }
+
+        if ($period === '7hari') {
+            $logQuery->where('date', '>=', now()->subDays(7));
+        } elseif ($period === '30hari') {
+            $logQuery->where('date', '>=', now()->subDays(30));
+        } elseif ($period === 'bulan_ini') {
+            $logQuery->whereMonth('date', now()->month)->whereYear('date', now()->year);
+        }
+
+        if ($filter === 'semua') {
+            $logQuery->orderByRaw('lecturer_note IS NOT NULL')->orderByDesc('date');
+        } else {
+            $logQuery->orderByDesc('date');
+        }
+
+        $logBooks = $logQuery->get();
+
+        $totalLog     = $student->logBooks()->count();
+        $sudahDicatat = $student->logBooks()->whereNotNull('lecturer_note')->count();
+
         return view('dosen.mahasiswa.detail', compact(
-            'student', 'internship', 'assessments', 'overallAvg'
+            'student', 'internship', 'assessments', 'overallAvg',
+            'logBooks', 'filter', 'period', 'totalLog', 'sudahDicatat'
         ));
     }
 
@@ -105,7 +135,8 @@ class MahasiswaController extends Controller
         $student->load('user');
 
         $components = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
-            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)]);
+            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)
+                ->where('scorer_type', 'lecturer')]);
         }])->get();
 
         return view('dosen.mahasiswa.nilai', compact('student', 'internship', 'components'));
@@ -127,6 +158,7 @@ class MahasiswaController extends Controller
                     [
                         'internship_id'                    => $internship->id,
                         'detailed_assessment_component_id' => $detailId,
+                        'scorer_type'                       => 'lecturer',
                     ],
                     ['score' => $score]
                 );

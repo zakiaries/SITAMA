@@ -65,7 +65,10 @@
             <span class="tag">{{ $skill }}</span>
           @endforeach
           @if(count($skills) > 3)
-            <span style="font-size:11px;color:var(--primary);font-weight:600;cursor:default;">+{{ count($skills) - 3 }} keahlian lainnya</span>
+            <span style="font-size:11px;color:var(--primary);font-weight:600;cursor:pointer;text-decoration:underline;"
+              data-skills='{{ json_encode($skills) }}'
+              data-title="{{ addslashes($job->title) }}"
+              onclick="openSkillsModal(this)">+{{ count($skills) - 3 }} keahlian lainnya</span>
           @endif
         </div>
       </div>
@@ -91,6 +94,20 @@
   </div>
   @endforelse
 
+
+{{-- ═══════════════════════════════════════════
+     MODAL LIHAT KEAHLIAN
+═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="modal-skills" onclick="if(event.target===this)closeSkillsModal()">
+  <div class="modal-box" style="max-width:380px;padding:20px;">
+    <div class="modal-header" style="margin-bottom:14px;">
+      <div class="modal-title">Keahlian yang Dibutuhkan</div>
+      <button class="modal-close" onclick="closeSkillsModal()">✕</button>
+    </div>
+    <div id="skills-modal-job" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;"></div>
+    <div id="skills-modal-list" class="job-tags" style="flex-wrap:wrap;"></div>
+  </div>
+</div>
 
 {{-- ═══════════════════════════════════════════
      MODAL MULTI-STEP PENDAFTARAN
@@ -241,6 +258,26 @@
 
 @push('scripts')
 <script>
+function openSkillsModal(el) {
+  var skills = JSON.parse(el.getAttribute('data-skills'));
+  document.getElementById('skills-modal-job').textContent = el.getAttribute('data-title');
+
+  var list = document.getElementById('skills-modal-list');
+  list.innerHTML = '';
+  skills.forEach(function (skill) {
+    var span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = skill;
+    list.appendChild(span);
+  });
+
+  document.getElementById('modal-skills').classList.add('open');
+}
+
+function closeSkillsModal() {
+  document.getElementById('modal-skills').classList.remove('open');
+}
+
 var invitedNims = [];
 
 function openApplyModal(jobId, title, company) {
