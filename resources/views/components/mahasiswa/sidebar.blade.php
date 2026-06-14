@@ -6,7 +6,9 @@
   </div>
 
   @php
-    $kampusActive = request()->routeIs('mahasiswa.bimbingan') || request()->routeIs('mahasiswa.seminar');
+    $kampusActive = request()->routeIs('mahasiswa.bimbingan')
+        || request()->routeIs('mahasiswa.laporan')
+        || request()->routeIs('mahasiswa.seminar');
     $industriActive = request()->routeIs('mahasiswa.lowongan')
         || request()->routeIs('mahasiswa.magang-saya')
         || request()->routeIs('mahasiswa.internship-groups.*');
@@ -29,6 +31,10 @@
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.bimbingan') ? 'active' : '' }}" href="{{ route('mahasiswa.bimbingan') }}">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
           Bimbingan
+        </a>
+        <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.laporan') ? 'active' : '' }}" href="{{ route('mahasiswa.laporan') }}">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Laporan Akhir
         </a>
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.seminar') ? 'active' : '' }}" href="{{ route('mahasiswa.seminar') }}">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>

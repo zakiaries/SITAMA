@@ -33,6 +33,11 @@ class Student extends Model
         return $this->hasMany(LogBook::class);
     }
 
+    public function report()
+    {
+        return $this->hasOne(InternshipReport::class)->latestOfMany();
+    }
+
     public function activeInternship()
     {
         return $this->hasOne(Internship::class)->latest();

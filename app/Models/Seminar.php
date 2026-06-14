@@ -9,6 +9,9 @@ class Seminar extends Model
 {
     use HasFactory;
 
+    /** Jumlah minimal audiens (adik tingkat) untuk seminar hasil magang. */
+    public const MIN_AUDIENCE = 10;
+
     protected $fillable = [
         'title', 'program', 'date', 'time', 'location', 'organizer',
         'description', 'qr_code', 'status', 'student_id',
@@ -26,5 +29,20 @@ class Seminar extends Model
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    /**
+     * Jumlah audiens = peserta terdaftar selain mahasiswa penyaji itu sendiri.
+     */
+    public function audienceCount(): int
+    {
+        return $this->registrations
+            ->where('student_id', '!=', $this->student_id)
+            ->count();
+    }
+
+    public function audienceMet(): bool
+    {
+        return $this->audienceCount() >= self::MIN_AUDIENCE;
     }
 }

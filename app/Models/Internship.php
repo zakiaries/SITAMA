@@ -13,6 +13,7 @@ class Internship extends Model
         'student_id', 'lecturer_id', 'company_id', 'lecturer_industry_id',
         'position', 'start_date', 'end_date', 'is_finished',
         'performance_notes', 'performance_notes_by', 'performance_notes_date',
+        'certificate_path',
     ];
 
     protected $casts = [

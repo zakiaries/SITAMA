@@ -9,6 +9,7 @@ use App\Http\Controllers\Mahasiswa\LogBookController;
 use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
 use App\Http\Controllers\Mahasiswa\NilaiController;
+use App\Http\Controllers\Mahasiswa\LaporanController;
 use App\Http\Controllers\Mahasiswa\IndustriRequestController;
 use App\Http\Controllers\Mahasiswa\NotificationController;
 use App\Http\Controllers\Mahasiswa\ProfileController;
@@ -76,8 +77,12 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
         Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
+        Route::post('/magang-saya/sertifikat', [MagangSayaController::class, 'uploadCertificate'])->name('magang-saya.sertifikat');
 
         Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai');
+
+        Route::get('/laporan',  [LaporanController::class, 'index'])->name('laporan');
+        Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
 
         Route::get('/permintaan-industri',  [IndustriRequestController::class, 'index'])->name('industri-request');
         Route::post('/permintaan-industri', [IndustriRequestController::class, 'store'])->name('industri-request.store');
@@ -105,6 +110,8 @@ Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
     Route::post('/mahasiswa/{student}/logbook/{logBook}/note',        [DosenMahasiswaController::class, 'logBookNote'])->name('mahasiswa.logbook.note');
     Route::get('/mahasiswa/{student}/nilai',                          [DosenMahasiswaController::class, 'nilaiPage'])->name('mahasiswa.nilai');
     Route::post('/mahasiswa/{student}/nilai',                         [DosenMahasiswaController::class, 'updateNilai'])->name('mahasiswa.nilai.update');
+    Route::post('/mahasiswa/{student}/laporan/{report}/approve',      [DosenMahasiswaController::class, 'approveLaporan'])->name('mahasiswa.laporan.approve');
+    Route::post('/mahasiswa/{student}/laporan/{report}/revisi',       [DosenMahasiswaController::class, 'revisiLaporan'])->name('mahasiswa.laporan.revisi');
 
     Route::get('/profile',  [DosenProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [DosenProfileController::class, 'update'])->name('profile.update');

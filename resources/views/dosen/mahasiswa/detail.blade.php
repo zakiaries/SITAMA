@@ -222,6 +222,9 @@
         <button class="tab-btn" onclick="switchTab('logbook', this)">
           Log Book ({{ $totalLog }})
         </button>
+        <button class="tab-btn" onclick="switchTab('laporan', this)">
+          Laporan Akhir
+        </button>
       </div>
 
       {{-- TAB: BIMBINGAN --}}
@@ -358,6 +361,67 @@
           <p style="color:var(--text-muted);font-size:13px;padding:12px 0;">Belum ada data log book.</p>
         @endforelse
       </div>
+
+      {{-- TAB: LAPORAN AKHIR --}}
+      <div id="tab-laporan" class="tab-pane" style="padding-bottom:8px;">
+        @php $rpt = $student->report; @endphp
+        @if(!$rpt)
+          <p style="color:var(--text-muted);font-size:13px;padding:12px 0;">Mahasiswa belum mengunggah laporan akhir.</p>
+        @else
+          @php
+            $rBadge = match($rpt->status) {
+              'approved' => ['#dcfce7', '#16a34a', 'Disetujui'],
+              'rejected' => ['#fee2e2', '#dc2626', 'Perlu Revisi'],
+              default    => ['#fef9c3', '#854f0b', 'Menunggu'],
+            };
+          @endphp
+          <div class="bimb-item open">
+            <div class="bimb-header">
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $rpt->title }}</div>
+                <div style="font-size:11px;color:var(--text-muted);">Diunggah {{ $rpt->updated_at->format('d M Y, H:i') }}</div>
+              </div>
+              <span style="font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600;background:{{ $rBadge[0] }};color:{{ $rBadge[1] }};">
+                {{ $rBadge[2] }}
+              </span>
+            </div>
+            <div class="bimb-body" style="display:block;">
+              <div class="file-badge">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <a href="{{ Storage::url($rpt->file_path) }}" target="_blank">Lihat File Laporan</a>
+              </div>
+
+              @if($rpt->lecturer_note)
+                <div class="lecturer-note-box" style="margin-top:12px;">
+                  <strong>{{ $rpt->status === 'approved' ? 'Catatan dosen:' : 'Catatan revisi:' }}</strong> {{ $rpt->lecturer_note }}
+                </div>
+              @endif
+
+              @if($rpt->status === 'approved')
+                <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">✓ Laporan ini sudah disetujui.</div>
+              @elseif($rpt->status === 'rejected')
+                <div style="margin-top:12px;font-size:12px;color:var(--text-muted);">✕ Diminta revisi — menunggu mahasiswa mengirim ulang.</div>
+              @else
+                {{-- Approve Form --}}
+                <form method="POST" action="{{ route('dosen.mahasiswa.laporan.approve', [$student, $rpt]) }}"
+                      style="margin-top:12px;" data-confirm="Setujui laporan akhir ini?">
+                  @csrf
+                  <textarea name="note" class="note-input" placeholder="Catatan untuk mahasiswa (opsional)..."></textarea>
+                  <div class="action-row">
+                    <button type="submit" class="btn-approve">✓ Setujui</button>
+                    <button type="button" class="btn-revisi" onclick="submitRevisiLaporan(this)">✕ Revisi</button>
+                  </div>
+                </form>
+                <form id="form-revisi-laporan" method="POST"
+                      action="{{ route('dosen.mahasiswa.laporan.revisi', [$student, $rpt]) }}" style="display:none;">
+                  @csrf
+                  <input type="hidden" name="note" id="note-revisi-laporan">
+                </form>
+              @endif
+            </div>
+          </div>
+        @endif
+      </div>
     </div>
   </div>
 </div>
@@ -390,6 +454,20 @@ function submitRevisi(btn, id) {
   confirmDialog('Tandai bimbingan ini untuk revisi?', function () {
     document.getElementById('note-revisi-' + id).value = note;
     document.getElementById('form-revisi-' + id).submit();
+  }, 'danger');
+}
+
+function submitRevisiLaporan(btn) {
+  const noteEl = btn.closest('form').querySelector('textarea[name="note"]');
+  const note   = noteEl ? noteEl.value.trim() : '';
+  if (!note) {
+    alertDialog('Catatan revisi wajib diisi!');
+    noteEl.focus();
+    return;
+  }
+  confirmDialog('Tandai laporan ini untuk revisi?', function () {
+    document.getElementById('note-revisi-laporan').value = note;
+    document.getElementById('form-revisi-laporan').submit();
   }, 'danger');
 }
 </script>

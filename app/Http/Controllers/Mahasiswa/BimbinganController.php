@@ -12,7 +12,7 @@ class BimbinganController extends Controller
     public function index(Request $request)
     {
         $student  = Auth::user()->student;
-        $student->loadMissing('lecturer.user');
+        $student->loadMissing('lecturer.user', 'activeInternship.lecturer.user');
         $query    = $student->guidances()->orderByDesc('date');
 
         if ($request->filled('search')) {
@@ -20,7 +20,8 @@ class BimbinganController extends Controller
         }
 
         $guidances = $query->get();
-        $lecturer  = $student->lecturer;
+        // Dospem dari students.lecturer_id; fallback ke dospem yang menempel di internship.
+        $lecturer  = $student->lecturer ?? $student->activeInternship?->lecturer;
 
         return view('mahasiswa.bimbingan.index', compact('guidances', 'lecturer'));
     }

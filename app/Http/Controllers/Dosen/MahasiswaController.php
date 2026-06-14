@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dosen;
 use App\Http\Controllers\Controller;
 use App\Models\AssessmentComponent;
 use App\Models\Guidance;
+use App\Models\InternshipReport;
 use App\Models\LogBook;
 use App\Models\Student;
 use App\Models\StudentScore;
@@ -39,6 +40,7 @@ class MahasiswaController extends Controller
         $student->load([
             'user',
             'guidances'  => fn($q) => $q->orderByDesc('date'),
+            'report',
         ]);
 
         $assessments = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
@@ -116,6 +118,42 @@ class MahasiswaController extends Controller
         ]);
 
         return back()->with('success', 'Bimbingan ditandai untuk revisi.');
+    }
+
+    public function approveLaporan(Request $request, Student $student, InternshipReport $report)
+    {
+        $lecturer = $this->getLecturer();
+        $this->getInternship($student, $lecturer);
+
+        if ($report->student_id !== $student->id) abort(404);
+
+        $report->update([
+            'status'        => 'approved',
+            'lecturer_note' => $request->input('note'),
+            'reviewed_at'   => now(),
+        ]);
+
+        return back()->with('success', 'Laporan akhir berhasil disetujui.');
+    }
+
+    public function revisiLaporan(Request $request, Student $student, InternshipReport $report)
+    {
+        $lecturer = $this->getLecturer();
+        $this->getInternship($student, $lecturer);
+
+        if ($report->student_id !== $student->id) abort(404);
+
+        $request->validate(['note' => 'required|string'], [
+            'note.required' => 'Catatan revisi wajib diisi.',
+        ]);
+
+        $report->update([
+            'status'        => 'rejected',
+            'lecturer_note' => $request->note,
+            'reviewed_at'   => now(),
+        ]);
+
+        return back()->with('success', 'Laporan ditandai untuk revisi.');
     }
 
     public function logBookNote(Request $request, Student $student, LogBook $logBook)

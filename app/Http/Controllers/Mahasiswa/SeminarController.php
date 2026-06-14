@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Seminar;
 use App\Models\SeminarRegistration;
+use App\Models\StudentScore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,16 +23,79 @@ class SeminarController extends Controller
             ? Seminar::where('student_id', $student->id)->with('registrations')->orderByDesc('date')->get()
             : collect();
 
+        // Seminar hasil magang mahasiswa lain (untuk didaftari sebagai audiens)
+        $peerSeminars = $student
+            ? Seminar::whereNotNull('student_id')
+                ->where('student_id', '!=', $student->id)
+                ->where('status', 'scheduled')
+                ->with(['registrations', 'student.user'])
+                ->orderByDesc('date')
+                ->get()
+            : collect();
+
         $registeredIds = $student
             ? SeminarRegistration::where('student_id', $student->id)->pluck('seminar_id')->toArray()
             : [];
 
-        return view('mahasiswa.seminar.index', compact('seminars', 'mySeminars', 'registeredIds'));
+        $requirements = $this->seminarRequirements($student);
+        $canSubmit    = !in_array(false, array_column($requirements, 'met'), true);
+
+        return view('mahasiswa.seminar.index', compact(
+            'seminars', 'mySeminars', 'peerSeminars', 'registeredIds', 'requirements', 'canSubmit'
+        ));
+    }
+
+    /**
+     * Syarat kelayakan sebelum mahasiswa boleh mengajukan jadwal seminar magang
+     * (dari bimbingan dosen 2026-06-11).
+     */
+    private function seminarRequirements($student): array
+    {
+        $internship = $student?->activeInternship()->first();
+        $report     = $student?->report;
+
+        $hasIndustryScore = $internship
+            ? StudentScore::where('internship_id', $internship->id)
+                ->where('scorer_type', 'lecturer_industry')->exists()
+            : false;
+
+        return [
+            [
+                'key'   => 'is_finished',
+                'label' => 'Magang sudah ditandai selesai oleh Kaprodi',
+                'met'   => (bool) ($internship?->is_finished),
+                'hint'  => 'Hubungi Kaprodi untuk menandai magang Anda selesai.',
+            ],
+            [
+                'key'   => 'industry_score',
+                'label' => 'Nilai dari pembimbing industri sudah diisi',
+                'met'   => $hasIndustryScore,
+                'hint'  => 'Nilai akhir dari pembimbing industri belum masuk.',
+            ],
+            [
+                'key'   => 'certificate',
+                'label' => 'Sertifikat magang sudah diunggah',
+                'met'   => (bool) ($internship?->certificate_path),
+                'hint'  => 'Unggah sertifikat di halaman Magang Saya.',
+            ],
+            [
+                'key'   => 'report_approved',
+                'label' => 'Laporan akhir sudah disetujui dosen',
+                'met'   => $report && $report->status === 'approved',
+                'hint'  => 'Unggah & tunggu persetujuan laporan di halaman Laporan Akhir.',
+            ],
+        ];
     }
 
     public function store(Request $request)
     {
         $student = Auth::user()->student;
+
+        // Gating: semua syarat kelayakan wajib terpenuhi sebelum boleh mengajukan.
+        $requirements = $this->seminarRequirements($student);
+        if (in_array(false, array_column($requirements, 'met'), true)) {
+            return back()->with('error', 'Anda belum memenuhi semua syarat untuk mengajukan jadwal seminar.');
+        }
 
         $request->validate([
             'title'    => 'required|string|max:255',

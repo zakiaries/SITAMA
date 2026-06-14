@@ -74,6 +74,42 @@
     </div>
   </div>
 
+  {{-- Sertifikat Magang --}}
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header" style="margin-bottom:12px;">
+      <div class="card-title">Sertifikat Magang</div>
+      @if($internship->certificate_path)
+        <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">✓ Sudah diunggah</span>
+      @else
+        <span style="background:#fef9c3;color:#854f0b;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Belum ada</span>
+      @endif
+    </div>
+
+    @if($internship->certificate_path)
+      <div class="file-badge" style="margin-bottom:14px;">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <a href="{{ Storage::url($internship->certificate_path) }}" target="_blank">Lihat Sertifikat</a>
+      </div>
+    @endif
+
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+      Unggah sertifikat magang dari perusahaan (PDF/JPG/PNG, maks 10 MB).
+      {{ $internship->certificate_path ? 'Mengunggah ulang akan menggantikan file lama.' : '' }}
+    </div>
+
+    <form method="POST" action="{{ route('mahasiswa.magang-saya.sertifikat') }}" enctype="multipart/form-data"
+          style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      @csrf
+      <input type="file" name="certificate" accept=".pdf,.jpg,.jpeg,.png" required>
+      <button type="submit" class="btn btn-primary btn-sm">
+        {{ $internship->certificate_path ? 'Ganti Sertifikat' : 'Unggah Sertifikat' }}
+      </button>
+    </form>
+    @error('certificate')
+      <div style="color:#dc2626;font-size:12px;margin-top:8px;">{{ $message }}</div>
+    @enderror
+  </div>
+
   {{-- Log Book Terbaru --}}
   <div class="card" style="margin-bottom:20px;">
     <div class="card-header" style="margin-bottom:12px;">

@@ -62,20 +62,48 @@
     </div>
 
     <div class="card">
+      @php
+        $aud = $seminar->audienceCount();
+        $min = \App\Models\Seminar::MIN_AUDIENCE;
+        $met = $aud >= $min;
+      @endphp
+
+      {{-- Progress audiens (hanya relevan untuk seminar hasil magang mahasiswa) --}}
+      @if($seminar->student_id)
+      <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;font-weight:700;color:var(--primary);">Kuota Audiens</span>
+          <span style="font-size:13px;font-weight:800;color:{{ $met ? '#16a34a' : '#854f0b' }};">{{ $aud }}/{{ $min }} {{ $met ? '✓' : '' }}</span>
+        </div>
+        <div style="height:8px;background:#e5e7eb;border-radius:20px;overflow:hidden;">
+          <div style="height:100%;width:{{ min(100, $aud / $min * 100) }}%;background:{{ $met ? '#16a34a' : '#f59e0b' }};"></div>
+        </div>
+        <div style="font-size:11px;color:{{ $met ? '#16a34a' : 'var(--text-muted)' }};margin-top:6px;">
+          {{ $met ? 'Kuota audiens minimal sudah terpenuhi.' : 'Butuh ' . ($min - $aud) . ' audiens lagi (minimal ' . $min . ').' }}
+        </div>
+      </div>
+      @endif
+
       <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:14px;">
         Peserta Terdaftar ({{ $seminar->registrations->count() }})
       </div>
       @forelse($seminar->registrations as $reg)
       @php
         $initials = collect(explode(' ', $reg->student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
+        $isPresenter = $seminar->student_id && $reg->student_id === $seminar->student_id;
       @endphp
       <div class="audience-row">
         <div class="avatar" style="width:32px;height:32px;font-size:11px;background:var(--primary-light);color:var(--primary-text);">
           {{ $initials }}
         </div>
         <div style="flex:1;">
-          <div style="font-size:13px;font-weight:600;">{{ $reg->student->user->name ?? '-' }}</div>
-          <div style="font-size:11px;color:var(--text-muted);">{{ ucfirst($reg->status) }}</div>
+          <div style="font-size:13px;font-weight:600;">
+            {{ $reg->student->user->name ?? '-' }}
+            @if($isPresenter)
+              <span style="font-size:10px;background:#eff6ff;color:#2563eb;padding:1px 7px;border-radius:20px;margin-left:4px;">Penyaji</span>
+            @endif
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);">{{ $isPresenter ? 'Mahasiswa penyaji' : 'Audiens' }} · {{ ucfirst($reg->status) }}</div>
         </div>
       </div>
       @empty
