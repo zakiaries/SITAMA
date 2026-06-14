@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Industri;
 
 use App\Http\Controllers\Controller;
-use App\Models\Application;
-use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -16,18 +14,16 @@ class DashboardController extends Controller
 
         if (!$company) abort(403, 'Akun ini tidak terhubung dengan data perusahaan.');
 
-        $lowonganAktif = $company->jobListings()->where('status', 'active')->count();
-        $totalLowongan = $company->jobListings()->count();
-        $magangAktif   = $company->internships()->where('is_finished', false)->count();
+        $internships = $company->internships()
+            ->with(['student.user', 'lecturerIndustry.user'])
+            ->latest()
+            ->get();
 
-        $pelamarPending = Application::whereHas('jobListing', fn($q) => $q->where('company_id', $company->id))
-            ->where('status', 'pending')->count();
-        $pelamarDiterima = Application::whereHas('jobListing', fn($q) => $q->where('company_id', $company->id))
-            ->where('status', 'accepted')->count();
+        $magangAktif   = $internships->where('is_finished', false)->count();
+        $magangSelesai = $internships->where('is_finished', true)->count();
 
         return view('industri.dashboard.index', compact(
-            'user', 'company', 'lowonganAktif', 'totalLowongan',
-            'magangAktif', 'pelamarPending', 'pelamarDiterima'
+            'user', 'company', 'internships', 'magangAktif', 'magangSelesai'
         ));
     }
 }

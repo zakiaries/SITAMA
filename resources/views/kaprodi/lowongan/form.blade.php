@@ -1,9 +1,9 @@
-@extends('layouts.industri')
-@section('title', $lowongan ? 'Edit Lowongan' : 'Buat Lowongan')
+@extends('layouts.kaprodi')
+@section('title', $lowongan ? 'Edit Pengumuman' : 'Tambah Pengumuman')
 @php
-  $title    = $lowongan ? 'Edit Lowongan' : 'Buat Lowongan';
+  $title    = $lowongan ? 'Edit Pengumuman' : 'Tambah Pengumuman';
   $isEdit   = (bool) $lowongan;
-  $action   = $isEdit ? route('industri.lowongan.update', $lowongan) : route('industri.lowongan.store');
+  $action   = $isEdit ? route('kaprodi.lowongan.update', $lowongan) : route('kaprodi.lowongan.store');
   $skillStr = $isEdit ? implode(', ', $lowongan->skills ?? []) : old('skills');
 @endphp
 
@@ -27,8 +27,8 @@
 @section('content')
 
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-  <a href="{{ route('industri.lowongan.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
-  <div class="page-title">{{ $isEdit ? 'Edit Lowongan' : 'Buat Lowongan Baru' }}</div>
+  <a href="{{ route('kaprodi.lowongan.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
+  <div class="page-title">{{ $isEdit ? 'Edit Pengumuman Lowongan' : 'Tambah Pengumuman Lowongan' }}</div>
 </div>
 
 <div class="form-card">
@@ -36,10 +36,17 @@
     @csrf
     @if($isEdit) @method('PUT') @endif
 
-    <div class="fg">
-      <label>Judul Posisi <span style="color:#dc2626;">*</span></label>
-      <input type="text" name="title" value="{{ old('title', $lowongan->title ?? '') }}" placeholder="Contoh: Frontend Developer Intern" required>
-      @error('title')<div class="err">{{ $message }}</div>@enderror
+    <div class="fg-row">
+      <div class="fg">
+        <label>Judul Posisi <span style="color:#dc2626;">*</span></label>
+        <input type="text" name="title" value="{{ old('title', $lowongan->title ?? '') }}" placeholder="Contoh: Frontend Developer Intern" required>
+        @error('title')<div class="err">{{ $message }}</div>@enderror
+      </div>
+      <div class="fg">
+        <label>Nama Perusahaan <span style="color:#dc2626;">*</span></label>
+        <input type="text" name="company_name" value="{{ old('company_name', $lowongan->company_name ?? '') }}" placeholder="Contoh: PT Telkom Indonesia" required>
+        @error('company_name')<div class="err">{{ $message }}</div>@enderror
+      </div>
     </div>
 
     <div class="fg-row">
@@ -73,22 +80,22 @@
       </div>
     </div>
 
-    <div class="fg-row">
-      <div class="fg">
-        <label>Jumlah Posisi (Kuota) <span style="color:#dc2626;">*</span></label>
-        <input type="number" name="quota" value="{{ old('quota', $lowongan->quota ?? 1) }}" min="1" max="100" required>
-        @error('quota')<div class="err">{{ $message }}</div>@enderror
-      </div>
-      <div class="fg">
-        <label>Durasi Magang (bulan) <span style="color:#dc2626;">*</span></label>
-        <input type="number" name="duration_months" value="{{ old('duration_months', $lowongan->duration_months ?? 3) }}" min="1" max="12" required>
-        @error('duration_months')<div class="err">{{ $message }}</div>@enderror
-      </div>
-    </div>
-
     <div class="fg">
       <label>Kategori Skill <span class="hint">(pisahkan dengan koma)</span></label>
       <input type="text" name="skills" value="{{ $skillStr }}" placeholder="Laravel, PHP, MySQL">
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:var(--primary);margin:4px 0 12px;">Kontak (PIC)</div>
+
+    <div class="fg-row">
+      <div class="fg">
+        <label>Nama PIC</label>
+        <input type="text" name="pic_name" value="{{ old('pic_name', $lowongan->pic_name ?? '') }}" placeholder="Contoh: Bpk. Andi">
+      </div>
+      <div class="fg">
+        <label>No. Telp / WA PIC</label>
+        <input type="text" name="pic_phone" value="{{ old('pic_phone', $lowongan->pic_phone ?? '') }}" placeholder="Contoh: 0812xxxxxxx">
+      </div>
     </div>
 
     <div class="fg">
@@ -99,12 +106,12 @@
 
     <div class="fg">
       <label>Deskripsi &amp; Persyaratan</label>
-      <textarea name="description" placeholder="Jelaskan tanggung jawab dan persyaratan posisi...">{{ old('description', $lowongan->description ?? '') }}</textarea>
+      <textarea name="description" placeholder="Jelaskan posisi, persyaratan, dan cara melamar...">{{ old('description', $lowongan->description ?? '') }}</textarea>
     </div>
 
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
-      <a href="{{ route('industri.lowongan.index') }}" class="btn btn-outline">Batal</a>
-      <button type="submit" class="btn btn-primary">{{ $isEdit ? 'Simpan Perubahan' : 'Terbitkan Lowongan' }}</button>
+      <a href="{{ route('kaprodi.lowongan.index') }}" class="btn btn-outline">Batal</a>
+      <button type="submit" class="btn btn-primary">{{ $isEdit ? 'Simpan Perubahan' : 'Terbitkan Pengumuman' }}</button>
     </div>
   </form>
 </div>

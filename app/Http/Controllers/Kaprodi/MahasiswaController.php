@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Kaprodi;
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
+use App\Models\Internship;
 use App\Models\Lecturer;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -86,7 +88,43 @@ class MahasiswaController extends Controller
 
         $nilai = $internship?->nilaiSummary();
 
-        return view('kaprodi.mahasiswa.detail', compact('student', 'internship', 'nilai'));
+        // Untuk form "Catat Magang" saat mahasiswa belum punya data magang.
+        $companies = $internship ? collect() : Company::orderBy('name')->get();
+        $industriLecturers = $internship ? collect()
+            : Lecturer::whereHas('user', fn($q) => $q->where('role', 'lecturer_industry'))->with('user')->get();
+
+        return view('kaprodi.mahasiswa.detail', compact(
+            'student', 'internship', 'nilai', 'companies', 'industriLecturers'
+        ));
+    }
+
+    public function storeInternship(Request $request, Student $student)
+    {
+        if ($student->internships()->exists()) {
+            return back()->with('error', 'Mahasiswa sudah memiliki data magang.');
+        }
+
+        $request->validate([
+            'company_id'           => 'required|exists:companies,id',
+            'lecturer_industry_id' => 'nullable|exists:lecturers,id',
+            'position'             => 'nullable|string|max:255',
+            'start_date'           => 'required|date',
+        ], [
+            'company_id.required' => 'Silakan pilih perusahaan tempat magang.',
+            'start_date.required' => 'Tanggal mulai magang wajib diisi.',
+        ]);
+
+        Internship::create([
+            'student_id'           => $student->id,
+            'lecturer_id'          => $student->lecturer_id, // dospem kampus (jika sudah di-plot)
+            'company_id'           => $request->company_id,
+            'lecturer_industry_id' => $request->lecturer_industry_id,
+            'position'             => $request->position,
+            'start_date'           => $request->start_date,
+            'is_finished'          => false,
+        ]);
+
+        return back()->with('success', "Data magang berhasil dicatat untuk {$student->user->name}.");
     }
 
     public function toggleFinished(Student $student)

@@ -17,18 +17,15 @@
 .hero-name { font-size:20px;font-weight:800;color:#fff;margin-bottom:3px; }
 .hero-addr { font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:6px; }
 
-.stat-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
+.stat-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px; }
 .stat-card-i { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px; }
 .stat-card-i .sc-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:10px; }
 .stat-card-i .sc-val { font-size:28px;font-weight:800;color:var(--text);line-height:1; }
 .stat-card-i .sc-lbl { font-size:12px;color:var(--text-muted);margin-top:4px; }
 
-.qa-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:14px; }
-.qa-card { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;text-decoration:none;transition:all .15s; }
-.qa-card:hover { border-color:var(--primary);box-shadow:0 2px 12px rgba(45,62,110,0.08);transform:translateY(-1px); }
-.qa-icon { width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
-.qa-title { font-size:14px;font-weight:700;color:var(--text); }
-.qa-sub { font-size:12px;color:var(--text-muted);margin-top:2px; }
+.intern-row { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border); }
+.intern-row:last-child { border-bottom:none; }
+.intern-av { width:38px;height:38px;border-radius:50%;background:var(--primary-light);color:var(--primary-text);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0; }
 </style>
 @endpush
 
@@ -48,65 +45,48 @@
   </div>
 </div>
 
+<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:20px;">
+  Pengelolaan lowongan & rekrutmen magang ditangani oleh pihak kampus (Polines). Akun ini digunakan
+  untuk memantau mahasiswa yang sedang magang di perusahaan Anda.
+</div>
+
 {{-- Statistik --}}
 <div class="stat-grid">
   <div class="stat-card-i">
-    <div class="sc-icon" style="background:#e8eef8;">📋</div>
-    <div class="sc-val">{{ $lowonganAktif }}</div>
-    <div class="sc-lbl">Lowongan Aktif</div>
-  </div>
-  <div class="stat-card-i">
-    <div class="sc-icon" style="background:#fef9c3;">⏳</div>
-    <div class="sc-val">{{ $pelamarPending }}</div>
-    <div class="sc-lbl">Pelamar Menunggu</div>
-  </div>
-  <div class="stat-card-i">
-    <div class="sc-icon" style="background:#dcfce7;">✓</div>
-    <div class="sc-val">{{ $pelamarDiterima }}</div>
-    <div class="sc-lbl">Pelamar Diterima</div>
-  </div>
-  <div class="stat-card-i">
-    <div class="sc-icon" style="background:#f3e8ff;">👨‍💼</div>
+    <div class="sc-icon" style="background:#e8eef8;">👨‍💼</div>
     <div class="sc-val">{{ $magangAktif }}</div>
     <div class="sc-lbl">Magang Aktif</div>
   </div>
+  <div class="stat-card-i">
+    <div class="sc-icon" style="background:#dcfce7;">✓</div>
+    <div class="sc-val">{{ $magangSelesai }}</div>
+    <div class="sc-lbl">Magang Selesai</div>
+  </div>
 </div>
 
-{{-- Quick Actions --}}
-<div class="card-title" style="margin-bottom:14px;">Aksi Cepat</div>
-<div class="qa-grid">
-  <a href="{{ route('industri.lowongan.create') }}" class="qa-card">
-    <div class="qa-icon" style="background:#e8eef8;">➕</div>
+{{-- Daftar mahasiswa magang --}}
+<div class="card-title" style="margin-bottom:14px;">Mahasiswa Magang</div>
+<div class="card">
+  @forelse($internships as $it)
+  @php $nm = $it->student->user->name ?? '-'; $init = collect(explode(' ', $nm))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
+  <div class="intern-row">
+    <div class="intern-av">{{ $init }}</div>
     <div style="flex:1;">
-      <div class="qa-title">Buat Lowongan</div>
-      <div class="qa-sub">Terbitkan lowongan magang baru</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $nm }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">
+        {{ $it->position ?? 'Posisi belum diisi' }}
+        @if($it->lecturerIndustry && $it->lecturerIndustry->user) · Pembimbing: {{ $it->lecturerIndustry->user->name }} @endif
+      </div>
     </div>
-    <span style="color:var(--text-muted);">›</span>
-  </a>
-  <a href="{{ route('industri.pelamar.index') }}" class="qa-card">
-    <div class="qa-icon" style="background:#fef9c3;">👥</div>
-    <div style="flex:1;">
-      <div class="qa-title">Review Pelamar</div>
-      <div class="qa-sub">{{ $pelamarPending }} menunggu keputusan</div>
-    </div>
-    <span style="color:var(--text-muted);">›</span>
-  </a>
-  <a href="{{ route('industri.lowongan.index') }}" class="qa-card">
-    <div class="qa-icon" style="background:#dcfce7;">📋</div>
-    <div style="flex:1;">
-      <div class="qa-title">Kelola Lowongan</div>
-      <div class="qa-sub">{{ $totalLowongan }} lowongan total</div>
-    </div>
-    <span style="color:var(--text-muted);">›</span>
-  </a>
-  <a href="{{ route('industri.profile') }}" class="qa-card">
-    <div class="qa-icon" style="background:#f3e8ff;">🏢</div>
-    <div style="flex:1;">
-      <div class="qa-title">Profil Perusahaan</div>
-      <div class="qa-sub">Kelola data perusahaan</div>
-    </div>
-    <span style="color:var(--text-muted);">›</span>
-  </a>
+    @if($it->is_finished)
+      <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Selesai</span>
+    @else
+      <span style="background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
+    @endif
+  </div>
+  @empty
+  <p style="color:var(--text-muted);font-size:13px;padding:8px 0;">Belum ada mahasiswa yang magang di perusahaan Anda.</p>
+  @endforelse
 </div>
 
 @endsection

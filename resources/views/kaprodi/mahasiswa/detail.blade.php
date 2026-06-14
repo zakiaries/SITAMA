@@ -102,6 +102,56 @@
     Mahasiswa ini belum memiliki data magang, sehingga belum ada nilai untuk ditampilkan.
   </p>
 
+  {{-- Catat Magang (item 27): kaprodi mencatat magang di perusahaan yang sudah terdaftar --}}
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title" style="margin-bottom:6px;">Catat Magang</div>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+      Catat magang mahasiswa di perusahaan yang sudah terdaftar (mahasiswa diterima di luar aplikasi).
+      Untuk perusahaan baru yang belum punya akun, gunakan alur
+      <strong>Akun Industri</strong> (dari permintaan mahasiswa).
+    </p>
+
+    @if($companies->isEmpty())
+      <div style="background:#fef9c3;border:1px solid #fde047;color:#854f0b;padding:10px 14px;border-radius:8px;font-size:12.5px;">
+        Belum ada perusahaan terdaftar. Buat akun perusahaan terlebih dahulu lewat menu
+        <strong>Akun Industri</strong>.
+      </div>
+    @else
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.internship.store', $student) }}">
+      @csrf
+      <div class="form-group" style="margin-bottom:12px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Perusahaan <span style="color:#dc2626;">*</span></label>
+        <select name="company_id" required style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <option value="">— Pilih perusahaan —</option>
+          @foreach($companies as $c)
+            <option value="{{ $c->id }}">{{ $c->name }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Pembimbing Industri</label>
+        <select name="lecturer_industry_id" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <option value="">— Belum ditentukan —</option>
+          @foreach($industriLecturers as $l)
+            <option value="{{ $l->id }}">{{ $l->user->name ?? '-' }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Posisi / Bidang</label>
+        <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Frontend Developer"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Tanggal Mulai <span style="color:#dc2626;">*</span></label>
+        <input type="date" name="start_date" value="{{ old('start_date', now()->toDateString()) }}" required
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">+ Catat Magang</button>
+    </form>
+    @endif
+  </div>
+
 @else
 
 <div class="grid-2" style="gap:16px;align-items:start;">

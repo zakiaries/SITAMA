@@ -30,6 +30,12 @@
       </svg>
       Akun Industri
     </a>
+    <a class="nav-item {{ request()->routeIs('kaprodi.lowongan.*') ? 'active' : '' }}" href="{{ route('kaprodi.lowongan.index') }}">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+      </svg>
+      Lowongan
+    </a>
   </nav>
 
   <a class="sb-user {{ request()->routeIs('kaprodi.profile') ? 'sb-user-active' : '' }}"
