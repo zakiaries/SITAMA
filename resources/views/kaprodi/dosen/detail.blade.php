@@ -20,12 +20,24 @@
 
 @section('content')
 
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-  <a href="{{ route('kaprodi.dosen.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
-  <div>
-    <div class="page-title" style="margin-bottom:2px;">{{ $lecturer->user->name ?? '-' }}</div>
-    <div style="font-size:12px;color:var(--text-muted);">Bimbingan {{ $students->count() }} Mahasiswa</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <a href="{{ route('kaprodi.dosen.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
+    <div>
+      <div class="page-title" style="margin-bottom:2px;">{{ $lecturer->user->name ?? '-' }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">
+        {{ $lecturer->user->username ?? '-' }}
+        <span style="margin-left:6px;background:{{ $isIndustry ? '#fef9c3' : '#eff6ff' }};color:{{ $isIndustry ? '#92400e' : '#2563eb' }};font-size:10px;font-weight:600;padding:1px 8px;border-radius:12px;">
+          {{ $isIndustry ? 'Pembimbing Industri' : 'Dosen Kampus' }}
+        </span>
+        &middot; {{ $students->count() }} mahasiswa{{ $isIndustry ? ' yang dibimbing di industri' : ' bimbingan' }}
+      </div>
+    </div>
   </div>
+  <button type="button" class="btn btn-outline btn-sm"
+    onclick="document.getElementById('modal-reset-pw').style.display='flex'">
+    🔑 Reset Password
+  </button>
 </div>
 
 @forelse($students as $student)
@@ -53,5 +65,37 @@
 @empty
 <div style="text-align:center;padding:40px;color:var(--text-muted);"><p>Dosen ini belum membimbing mahasiswa.</p></div>
 @endforelse
+
+{{-- Modal Reset Password --}}
+<div id="modal-reset-pw" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;width:100%;max-width:400px;margin:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:4px;">Reset Password</div>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+      Reset password akun <strong>{{ $lecturer->user->name ?? '-' }}</strong>
+      <span style="font-size:11.5px;color:var(--text-muted);">({{ $lecturer->user->username ?? '-' }})</span>
+    </p>
+    <form method="POST" action="{{ route('kaprodi.dosen.reset-password', $lecturer) }}">
+      @csrf
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Password Baru <span style="color:#dc2626;">*</span></label>
+          <input type="password" name="new_password" required minlength="6"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"
+            placeholder="Minimal 6 karakter">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Konfirmasi Password <span style="color:#dc2626;">*</span></label>
+          <input type="password" name="new_password_confirmation" required minlength="6"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="submit" class="btn btn-primary btn-sm">Simpan Password</button>
+        <button type="button" class="btn btn-outline btn-sm"
+          onclick="document.getElementById('modal-reset-pw').style.display='none'">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 @endsection

@@ -10,7 +10,6 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class MahasiswaController extends Controller
 {
@@ -112,6 +111,7 @@ class MahasiswaController extends Controller
             'lecturer_industry_id' => 'nullable|exists:lecturers,id',
             'pic_name'             => 'required_without:lecturer_industry_id|nullable|string|max:255',
             'pic_username'         => 'required_without:lecturer_industry_id|nullable|string|max:50|unique:users,username',
+            'pic_password'         => 'required_without:lecturer_industry_id|nullable|string|min:6',
             'pic_phone'            => 'nullable|string|max:50',
             'position'             => 'nullable|string|max:255',
             'start_date'           => 'required|date',
@@ -120,6 +120,8 @@ class MahasiswaController extends Controller
             'pic_name.required_without'       => 'Pilih pembimbing yang ada atau isi nama pembimbing baru.',
             'pic_username.required_without'   => 'Username pembimbing industri wajib diisi.',
             'pic_username.unique'             => 'Username sudah dipakai, gunakan username lain.',
+            'pic_password.required_without'   => 'Password pembimbing industri wajib diisi.',
+            'pic_password.min'                => 'Password minimal 6 karakter.',
             'start_date.required'             => 'Tanggal mulai magang wajib diisi.',
         ]);
 
@@ -138,12 +140,11 @@ class MahasiswaController extends Controller
         if ($request->filled('lecturer_industry_id')) {
             $lecturerIndustryId = $request->lecturer_industry_id;
         } else {
-            $password = Str::random(8);
             $picUser  = User::create([
                 'name'     => $request->pic_name,
                 'username' => $request->pic_username,
                 'email'    => $request->pic_username . '@sitama.local',
-                'password' => Hash::make($password),
+                'password' => Hash::make($request->pic_password),
                 'role'     => 'lecturer_industry',
             ]);
             $lecturer           = Lecturer::create(['user_id' => $picUser->id]);
@@ -152,7 +153,7 @@ class MahasiswaController extends Controller
             $credentials = [
                 'name'     => $request->pic_name,
                 'username' => $request->pic_username,
-                'password' => $password,
+                'password' => $request->pic_password,
             ];
         }
 
@@ -186,6 +187,21 @@ class MahasiswaController extends Controller
         $internship->update(['is_finished' => true, 'finish_requested' => false]);
 
         return back()->with('success', "Magang {$student->user->name} berhasil ditandai selesai.");
+    }
+
+    public function resetPassword(Request $request, Student $student)
+    {
+        $request->validate([
+            'new_password' => 'required|string|min:6|confirmed',
+        ], [
+            'new_password.required'  => 'Password baru wajib diisi.',
+            'new_password.min'       => 'Password minimal 6 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $student->user->update(['password' => Hash::make($request->new_password)]);
+
+        return back()->with('success', "Password {$student->user->name} berhasil direset.");
     }
 
     public function assignLecturer(Request $request, Student $student)

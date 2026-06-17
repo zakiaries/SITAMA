@@ -66,8 +66,11 @@
 @endif
 
 {{-- Back Button --}}
-<div style="margin-bottom:16px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
   <a href="{{ route('kaprodi.mahasiswa.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
+  <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('modal-reset-pw').style.display='flex'">
+    🔑 Reset Password
+  </button>
 </div>
 
 {{-- Hero --}}
@@ -173,9 +176,10 @@
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <input type="text" name="pic_username" value="{{ old('pic_username') }}" placeholder="Username (untuk login)"
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <input type="password" name="pic_password" placeholder="Password (min. 6 karakter)"
+            style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <input type="text" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP (opsional)"
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-          <p style="font-size:11.5px;color:var(--text-muted);margin:0;">Password akan di-generate otomatis dan ditampilkan setelah disimpan.</p>
         </div>
       </div>
 
@@ -286,5 +290,37 @@
 </div>
 
 @endif
+
+{{-- Modal Reset Password --}}
+<div id="modal-reset-pw" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;width:100%;max-width:400px;margin:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:4px;">Reset Password</div>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
+      Reset password akun <strong>{{ $student->user->name }}</strong>
+      <span style="font-size:11.5px;color:var(--text-muted);">({{ $student->user->username }})</span>
+    </p>
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.reset-password', $student) }}">
+      @csrf
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Password Baru <span style="color:#dc2626;">*</span></label>
+          <input type="password" name="new_password" required minlength="6"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"
+            placeholder="Minimal 6 karakter">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Konfirmasi Password <span style="color:#dc2626;">*</span></label>
+          <input type="password" name="new_password_confirmation" required minlength="6"
+            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button type="submit" class="btn btn-primary btn-sm">Simpan Password</button>
+        <button type="button" class="btn btn-outline btn-sm"
+          onclick="document.getElementById('modal-reset-pw').style.display='none'">Batal</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 @endsection

@@ -24,6 +24,16 @@
       </svg>
       Data Dosen
     </a>
+    <a class="nav-item {{ request()->routeIs('kaprodi.pengajuan-magang.*') ? 'active' : '' }}" href="{{ route('kaprodi.pengajuan-magang.index') }}">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+      </svg>
+      Pengajuan Magang
+      @php $pendingCount = \App\Models\CompanyRequest::where('status','pending')->count(); @endphp
+      @if($pendingCount > 0)
+        <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:auto;">{{ $pendingCount }}</span>
+      @endif
+    </a>
     <a class="nav-item {{ request()->routeIs('kaprodi.lowongan.*') ? 'active' : '' }}" href="{{ route('kaprodi.lowongan.index') }}">
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>

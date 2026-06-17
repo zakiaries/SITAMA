@@ -25,15 +25,31 @@
 
 @section('content')
 
+{{-- Tab --}}
+<div style="display:flex;gap:8px;margin-bottom:18px;border-bottom:1.5px solid var(--border);">
+  @foreach(['dosen' => 'Dosen Kampus', 'industri' => 'Pembimbing Industri'] as $key => $label)
+  <a href="{{ route('kaprodi.dosen.index', ['tab' => $key, 'search' => request('search')]) }}"
+     style="padding:10px 4px;margin-bottom:-1.5px;border-bottom:2.5px solid {{ $tab === $key ? 'var(--primary)' : 'transparent' }};
+            font-size:13px;font-weight:700;color:{{ $tab === $key ? 'var(--primary)' : 'var(--text-muted)' }};
+            text-decoration:none;display:flex;align-items:center;gap:8px;">
+    {{ $label }}
+    <span style="background:{{ $tab === $key ? 'var(--primary-light)' : '#f1f5f9' }};color:{{ $tab === $key ? 'var(--primary-text)' : 'var(--text-muted)' }};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">
+      {{ $counts[$key] }}
+    </span>
+  </a>
+  @endforeach
+</div>
+
 <form method="GET" action="{{ route('kaprodi.dosen.index') }}">
+  <input type="hidden" name="tab" value="{{ $tab }}">
   <div class="search-bar">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input name="search" placeholder="Cari nama dosen..." value="{{ request('search') }}">
+    <input name="search" placeholder="Cari nama {{ $tab === 'industri' ? 'pembimbing industri' : 'dosen' }}..." value="{{ request('search') }}">
   </div>
 </form>
 
 <div style="font-size:12px;color:var(--text-muted);margin-bottom:13px;">
-  Total <strong style="color:var(--text);">{{ $lecturers->count() }} dosen</strong>
+  Total <strong style="color:var(--text);">{{ $lecturers->count() }} {{ $tab === 'industri' ? 'pembimbing industri' : 'dosen' }}</strong>
 </div>
 
 @forelse($lecturers as $lec)
@@ -53,7 +69,7 @@
   <div class="dosen-info">
     <div class="dosen-name">{{ $lec->user->name ?? '-' }}</div>
     <div class="dosen-user">{{ $lec->user->username ?? '-' }}</div>
-    <div class="cap-bar-label"><span>Mahasiswa bimbingan</span><span>{{ $count }}/{{ $max }}</span></div>
+    <div class="cap-bar-label"><span>{{ $tab === 'industri' ? 'Mahasiswa dibimbing' : 'Mahasiswa bimbingan' }}</span><span>{{ $count }}/{{ $max }}</span></div>
     <div class="cap-bar-track"><div class="cap-bar-fill" style="width:{{ $pct }}%;"></div></div>
   </div>
   <div class="dosen-count">
