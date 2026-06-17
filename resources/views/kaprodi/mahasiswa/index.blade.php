@@ -119,6 +119,7 @@
     </div>
   @elseif(!$internship)
     <span class="st-badge st-belum">Belum Magang</span>
+    <a href="{{ route('kaprodi.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">Detail</a>
     <button type="button" class="btn btn-outline btn-sm"
       onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
       {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}

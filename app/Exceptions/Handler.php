@@ -69,7 +69,6 @@ class Handler extends ExceptionHandler
             'lecturer'          => route('dosen.dashboard'),
             'lecturer_industry' => route('dosen-industri.dashboard'),
             'kaprodi'           => route('kaprodi.dashboard'),
-            'industri'          => route('industri.dashboard'),
             default             => url('/'),
         };
     }

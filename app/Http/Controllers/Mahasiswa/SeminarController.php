@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Seminar;
 use App\Models\SeminarRegistration;
-use App\Models\StudentScore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,44 +44,16 @@ class SeminarController extends Controller
         ));
     }
 
-    /**
-     * Syarat kelayakan sebelum mahasiswa boleh mengajukan jadwal seminar magang
-     * (dari bimbingan dosen 2026-06-11).
-     */
     private function seminarRequirements($student): array
     {
         $internship = $student?->activeInternship()->first();
-        $report     = $student?->report;
-
-        $hasIndustryScore = $internship
-            ? StudentScore::where('internship_id', $internship->id)
-                ->where('scorer_type', 'lecturer_industry')->exists()
-            : false;
 
         return [
             [
                 'key'   => 'is_finished',
                 'label' => 'Magang sudah ditandai selesai oleh Kaprodi',
                 'met'   => (bool) ($internship?->is_finished),
-                'hint'  => 'Hubungi Kaprodi untuk menandai magang Anda selesai.',
-            ],
-            [
-                'key'   => 'industry_score',
-                'label' => 'Nilai dari pembimbing industri sudah diisi',
-                'met'   => $hasIndustryScore,
-                'hint'  => 'Nilai akhir dari pembimbing industri belum masuk.',
-            ],
-            [
-                'key'   => 'certificate',
-                'label' => 'Sertifikat magang sudah diunggah',
-                'met'   => (bool) ($internship?->certificate_path),
-                'hint'  => 'Unggah sertifikat di halaman Magang Saya.',
-            ],
-            [
-                'key'   => 'report_approved',
-                'label' => 'Laporan akhir sudah disetujui dosen',
-                'met'   => $report && $report->status === 'approved',
-                'hint'  => 'Unggah & tunggu persetujuan laporan di halaman Laporan Akhir.',
+                'hint'  => 'Ajukan selesai magang di halaman Magang Saya dan tunggu ACC Kaprodi.',
             ],
         ];
     }

@@ -97,12 +97,6 @@
     <div class="sc-sub">belum ada data magang</div>
   </div>
   <div class="stat-card-k">
-    <div class="sc-icon" style="background:#f3e8ff;">🏭</div>
-    <div class="sc-val">{{ $verifIndustri }}</div>
-    <div class="sc-lbl">Verifikasi Industri</div>
-    <div class="sc-sub">menunggu verifikasi</div>
-  </div>
-  <div class="stat-card-k">
     <div class="sc-icon" style="background:#dcfce7;">📅</div>
     <div class="sc-val">{{ $totalSeminar }}</div>
     <div class="sc-lbl">Seminar</div>
@@ -118,14 +112,6 @@
     <div class="qa-text">
       <div class="qa-title">Data Mahasiswa</div>
       <div class="qa-sub">{{ $totalMahasiswa }} mahasiswa terdaftar</div>
-    </div>
-    <span class="qa-arr">›</span>
-  </a>
-  <a href="{{ route('kaprodi.industri.index') }}" class="qa-card">
-    <div class="qa-icon" style="background:#f3e8ff;">🏭</div>
-    <div class="qa-text">
-      <div class="qa-title">Verifikasi Industri</div>
-      <div class="qa-sub">{{ $verifIndustri }} menunggu</div>
     </div>
     <span class="qa-arr">›</span>
   </a>

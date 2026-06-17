@@ -10,7 +10,6 @@ use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
 use App\Http\Controllers\Mahasiswa\NilaiController;
 use App\Http\Controllers\Mahasiswa\LaporanController;
-use App\Http\Controllers\Mahasiswa\IndustriRequestController;
 use App\Http\Controllers\Mahasiswa\NotificationController;
 use App\Http\Controllers\Mahasiswa\ProfileController;
 use App\Http\Controllers\Mahasiswa\SeminarController;
@@ -25,12 +24,8 @@ use App\Http\Controllers\DosenIndustri\ProfileController as IndustriProfileContr
 use App\Http\Controllers\Kaprodi\DashboardController as KaprodiDashboardController;
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
 use App\Http\Controllers\Kaprodi\DosenController as KaprodiDosenController;
-use App\Http\Controllers\Kaprodi\IndustriController as KaprodiIndustriController;
-use App\Http\Controllers\Kaprodi\IndustriRequestController as KaprodiIndustriRequestController;
 use App\Http\Controllers\Kaprodi\LowonganController as KaprodiLowonganController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
-use App\Http\Controllers\Industri\DashboardController as IndustriHomeController;
-use App\Http\Controllers\Industri\ProfileController as IndustriCompanyProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Root redirect ke login
@@ -76,14 +71,12 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
 
         Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
         Route::post('/magang-saya/sertifikat', [MagangSayaController::class, 'uploadCertificate'])->name('magang-saya.sertifikat');
+        Route::post('/magang-saya/ajukan-selesai', [MagangSayaController::class, 'requestFinish'])->name('magang-saya.ajukan-selesai');
 
         Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai');
 
         Route::get('/laporan',  [LaporanController::class, 'index'])->name('laporan');
         Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
-
-        Route::get('/permintaan-industri',  [IndustriRequestController::class, 'index'])->name('industri-request');
-        Route::post('/permintaan-industri', [IndustriRequestController::class, 'store'])->name('industri-request.store');
 
         Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
         Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
@@ -145,7 +138,7 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
 
     Route::get('/mahasiswa',                            [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
     Route::get('/mahasiswa/{student}',                  [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
-    Route::post('/mahasiswa/{student}/toggle-finished', [KaprodiMahasiswaController::class, 'toggleFinished'])->name('mahasiswa.toggle-finished');
+    Route::post('/mahasiswa/{student}/approve-finish', [KaprodiMahasiswaController::class, 'approveFinish'])->name('mahasiswa.approve-finish');
     Route::post('/mahasiswa/{student}/internship',      [KaprodiMahasiswaController::class, 'storeInternship'])->name('mahasiswa.internship.store');
     Route::post('/mahasiswa/{student}/assign-lecturer', [KaprodiMahasiswaController::class, 'assignLecturer'])->name('mahasiswa.assign');
     Route::post('/mahasiswa/{student}/approve',         [KaprodiMahasiswaController::class, 'approve'])->name('mahasiswa.approve');
@@ -153,13 +146,6 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
 
     Route::get('/dosen',            [KaprodiDosenController::class, 'index'])->name('dosen.index');
     Route::get('/dosen/{lecturer}', [KaprodiDosenController::class, 'detail'])->name('dosen.detail');
-
-    Route::get('/industri',                     [KaprodiIndustriController::class, 'index'])->name('industri.index');
-    Route::post('/industri/{company}/verify',   [KaprodiIndustriController::class, 'verify'])->name('industri.verify');
-    Route::post('/industri/{company}/reject',   [KaprodiIndustriController::class, 'reject'])->name('industri.reject');
-
-    Route::post('/industri-request/{companyRequest}/approve', [KaprodiIndustriRequestController::class, 'approve'])->name('industri-request.approve');
-    Route::post('/industri-request/{companyRequest}/reject',  [KaprodiIndustriRequestController::class, 'reject'])->name('industri-request.reject');
 
     Route::get('/lowongan',                       [KaprodiLowonganController::class, 'index'])->name('lowongan.index');
     Route::get('/lowongan/create',                [KaprodiLowonganController::class, 'create'])->name('lowongan.create');
@@ -173,14 +159,3 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::put('/profile',  [KaprodiProfileController::class, 'update'])->name('profile.update');
 });
 
-// ── Industri (Perusahaan/HR) Routes (protected) ───────────────────────────────
-Route::prefix('industri')->name('industri.')->middleware('auth')->group(function () {
-
-    Route::get('/dashboard', [IndustriHomeController::class, 'index'])->name('dashboard');
-
-    // Catatan: fitur kelola lowongan + review pelamar dipindah ke kaprodi
-    // (lowongan kini berupa pengumuman yang diinput admin/kampus - item 27).
-
-    Route::get('/profile',  [IndustriCompanyProfileController::class, 'index'])->name('profile');
-    Route::put('/profile',  [IndustriCompanyProfileController::class, 'update'])->name('profile.update');
-});

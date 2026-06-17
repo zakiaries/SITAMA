@@ -110,6 +110,54 @@
     @enderror
   </div>
 
+  {{-- Ajukan Selesai Magang --}}
+  @if(!$internship->is_finished)
+  <div class="card" style="margin-bottom:20px;border-left:4px solid {{ $canRequestFinish ? '#16a34a' : '#94a3b8' }};">
+    <div class="card-header" style="margin-bottom:12px;">
+      <div class="card-title">Selesai Magang</div>
+      @if($internship->finish_requested)
+        <span style="background:#fef9c3;color:#854f0b;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Menunggu ACC Kaprodi</span>
+      @endif
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+      @foreach($finishChecklist as $item)
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;">
+        @if($item['met'])
+          <span style="color:#16a34a;font-size:15px;margin-top:1px;">✓</span>
+          <span style="color:var(--text);">{{ $item['label'] }}</span>
+        @else
+          <span style="color:#dc2626;font-size:15px;margin-top:1px;">✗</span>
+          <span style="color:var(--text-muted);">{{ $item['label'] }}
+            <span style="font-size:11.5px;display:block;color:#dc2626;">{{ $item['hint'] }}</span>
+          </span>
+        @endif
+      </div>
+      @endforeach
+    </div>
+
+    @if(!$internship->finish_requested)
+      @if($canRequestFinish)
+        <form method="POST" action="{{ route('mahasiswa.magang-saya.ajukan-selesai') }}">
+          @csrf
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+            Ajukan Selesai Magang
+          </button>
+        </form>
+      @else
+        <button disabled class="btn" style="width:100%;justify-content:center;background:#f1f5f9;color:#94a3b8;cursor:not-allowed;">
+          Ajukan Selesai Magang
+        </button>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:8px;text-align:center;">Lengkapi semua syarat di atas terlebih dahulu.</p>
+      @endif
+    @else
+      <div style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#854f0b;">
+        Pengajuan selesai magang sudah dikirim ke Kaprodi. Kaprodi akan memeriksa dan memberikan ACC.
+      </div>
+    @endif
+  </div>
+  @endif
+
   {{-- Log Book Terbaru --}}
   <div class="card" style="margin-bottom:20px;">
     <div class="card-header" style="margin-bottom:12px;">

@@ -11,15 +11,18 @@ class Internship extends Model
 
     protected $fillable = [
         'student_id', 'lecturer_id', 'company_id', 'lecturer_industry_id',
-        'position', 'start_date', 'end_date', 'is_finished',
+        'position', 'start_date', 'end_date', 'is_finished', 'finish_requested',
         'performance_notes', 'performance_notes_by', 'performance_notes_date',
         'certificate_path',
     ];
 
+    const MIN_LOGBOOK = 20;
+
     protected $casts = [
-        'start_date' => 'date',
-        'end_date'   => 'date',
-        'is_finished' => 'boolean',
+        'start_date'       => 'date',
+        'end_date'         => 'date',
+        'is_finished'      => 'boolean',
+        'finish_requested' => 'boolean',
     ];
 
     public function student()

@@ -102,41 +102,84 @@
     Mahasiswa ini belum memiliki data magang, sehingga belum ada nilai untuk ditampilkan.
   </p>
 
-  {{-- Catat Magang (item 27): kaprodi mencatat magang di perusahaan yang sudah terdaftar --}}
+  {{-- Kredensial pembimbing industri baru --}}
+  @if(session('new_pic_credentials'))
+    @php $cred = session('new_pic_credentials'); @endphp
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-top:16px;">
+      <div style="font-weight:700;color:#15803d;margin-bottom:8px;">Akun Pembimbing Industri Berhasil Dibuat</div>
+      <p style="font-size:12px;color:#166534;margin-bottom:8px;">Simpan dan teruskan kredensial berikut ke pembimbing industri. Ini hanya ditampilkan sekali.</p>
+      <div style="font-size:13px;color:#14532d;">
+        <div><strong>Nama:</strong> {{ $cred['name'] }}</div>
+        <div><strong>Username:</strong> {{ $cred['username'] }}</div>
+        <div><strong>Password:</strong> <code style="background:#dcfce7;padding:1px 6px;border-radius:4px;">{{ $cred['password'] }}</code></div>
+      </div>
+    </div>
+  @endif
+
+  {{-- Form Catat Magang --}}
   <div class="card" style="margin-top:16px;">
     <div class="card-title" style="margin-bottom:6px;">Catat Magang</div>
     <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">
-      Catat magang mahasiswa di perusahaan yang sudah terdaftar (mahasiswa diterima di luar aplikasi).
-      Untuk perusahaan baru yang belum punya akun, gunakan alur
-      <strong>Akun Industri</strong> (dari permintaan mahasiswa).
+      Isi data magang mahasiswa. Jika perusahaan atau pembimbing belum ada, isi langsung di bawah.
     </p>
 
-    @if($companies->isEmpty())
-      <div style="background:#fef9c3;border:1px solid #fde047;color:#854f0b;padding:10px 14px;border-radius:8px;font-size:12.5px;">
-        Belum ada perusahaan terdaftar. Buat akun perusahaan terlebih dahulu lewat menu
-        <strong>Akun Industri</strong>.
-      </div>
-    @else
     <form method="POST" action="{{ route('kaprodi.mahasiswa.internship.store', $student) }}">
       @csrf
-      <div class="form-group" style="margin-bottom:12px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Perusahaan <span style="color:#dc2626;">*</span></label>
-        <select name="company_id" required style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+
+      {{-- PERUSAHAAN --}}
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">Perusahaan <span style="color:#dc2626;">*</span></div>
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="company_mode" value="existing" checked onchange="toggleCompanyMode(this.value)"> Pilih yang terdaftar
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="company_mode" value="new" onchange="toggleCompanyMode(this.value)"> Tambah baru
+        </label>
+      </div>
+      <div id="company-existing" style="margin-bottom:12px;">
+        <select name="company_id" id="company_id_select" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <option value="">— Pilih perusahaan —</option>
           @foreach($companies as $c)
-            <option value="{{ $c->id }}">{{ $c->name }}</option>
+            <option value="{{ $c->id }}" {{ old('company_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
           @endforeach
         </select>
       </div>
-      <div class="form-group" style="margin-bottom:12px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Pembimbing Industri</label>
+      <div id="company-new" style="display:none;margin-bottom:12px;">
+        <input type="text" name="company_name" value="{{ old('company_name') }}" placeholder="Nama perusahaan baru"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+      </div>
+
+      {{-- PEMBIMBING INDUSTRI --}}
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;margin-top:4px;">Pembimbing Industri <span style="color:#dc2626;">*</span></div>
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="pic_mode" value="existing" checked onchange="togglePicMode(this.value)"> Pilih yang terdaftar
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+          <input type="radio" name="pic_mode" value="new" onchange="togglePicMode(this.value)"> Buat akun baru
+        </label>
+      </div>
+      <div id="pic-existing" style="margin-bottom:12px;">
         <select name="lecturer_industry_id" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-          <option value="">— Belum ditentukan —</option>
+          <option value="">— Pilih pembimbing —</option>
           @foreach($industriLecturers as $l)
-            <option value="{{ $l->id }}">{{ $l->user->name ?? '-' }}</option>
+            <option value="{{ $l->id }}" {{ old('lecturer_industry_id') == $l->id ? 'selected' : '' }}>{{ $l->user->name ?? '-' }}</option>
           @endforeach
         </select>
       </div>
+      <div id="pic-new" style="display:none;margin-bottom:12px;">
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+          <input type="text" name="pic_name" value="{{ old('pic_name') }}" placeholder="Nama lengkap pembimbing"
+            style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <input type="text" name="pic_username" value="{{ old('pic_username') }}" placeholder="Username (untuk login)"
+            style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <input type="text" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP (opsional)"
+            style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <p style="font-size:11.5px;color:var(--text-muted);margin:0;">Password akan di-generate otomatis dan ditampilkan setelah disimpan.</p>
+        </div>
+      </div>
+
+      {{-- POSISI & TANGGAL --}}
       <div class="form-group" style="margin-bottom:12px;">
         <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Posisi / Bidang</label>
         <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Frontend Developer"
@@ -149,8 +192,19 @@
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">+ Catat Magang</button>
     </form>
-    @endif
   </div>
+
+  <script>
+    function toggleCompanyMode(mode) {
+      document.getElementById('company-existing').style.display = mode === 'existing' ? 'block' : 'none';
+      document.getElementById('company-new').style.display      = mode === 'new'      ? 'block' : 'none';
+      document.getElementById('company_id_select').required     = mode === 'existing';
+    }
+    function togglePicMode(mode) {
+      document.getElementById('pic-existing').style.display = mode === 'existing' ? 'block' : 'none';
+      document.getElementById('pic-new').style.display      = mode === 'new'      ? 'block' : 'none';
+    }
+  </script>
 
 @else
 
@@ -184,30 +238,26 @@
       </div>
     </div>
 
-    {{-- Aksi: Tandai Selesai / Aktif Kembali --}}
+    {{-- Aksi: ACC Selesai Magang --}}
     <div class="card">
       <div class="card-title" style="margin-bottom:12px;">Status Magang</div>
       @if($internship->is_finished)
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:13px;color:#16a34a;">
+          ✓ Magang ini sudah selesai.
+        </div>
+      @elseif($internship->finish_requested)
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
-          Magang ini sudah ditandai <strong style="color:#16a34a;">selesai</strong>.
-          Jika ditandai aktif kembali, status akan muncul sebagai "Aktif" di seluruh portal.
+          Mahasiswa mengajukan selesai magang. Periksa kelengkapan data, lalu ACC jika sudah sesuai.
         </p>
-        <form method="POST" action="{{ route('kaprodi.mahasiswa.toggle-finished', $student) }}"
-              data-confirm="Tandai magang {{ $student->user->name }} sebagai aktif kembali?">
+        <form method="POST" action="{{ route('kaprodi.mahasiswa.approve-finish', $student) }}"
+              data-confirm="ACC selesai magang {{ $student->user->name }}?">
           @csrf
-          <button type="submit" class="btn-reopen">↺ Tandai Aktif Kembali</button>
+          <button type="submit" class="btn-finish">✓ ACC Selesai Magang</button>
         </form>
       @else
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
-          Tandai magang ini sebagai <strong style="color:var(--text);">selesai</strong> setelah seluruh
-          proses bimbingan dan penilaian rampung. Status "Selesai" akan tampil di portal
-          mahasiswa, dosen, dan pembimbing industri.
-        </p>
-        <form method="POST" action="{{ route('kaprodi.mahasiswa.toggle-finished', $student) }}"
-              data-confirm="Tandai magang {{ $student->user->name }} sebagai selesai?">
-          @csrf
-          <button type="submit" class="btn-finish">✓ Tandai Selesai Magang</button>
-        </form>
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text-muted);">
+          Menunggu mahasiswa mengajukan selesai magang.
+        </div>
       @endif
     </div>
   </div>

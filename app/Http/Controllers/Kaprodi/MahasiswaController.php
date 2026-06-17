@@ -7,7 +7,10 @@ use App\Models\Company;
 use App\Models\Internship;
 use App\Models\Lecturer;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class MahasiswaController extends Controller
 {
@@ -88,7 +91,6 @@ class MahasiswaController extends Controller
 
         $nilai = $internship?->nilaiSummary();
 
-        // Untuk form "Catat Magang" saat mahasiswa belum punya data magang.
         $companies = $internship ? collect() : Company::orderBy('name')->get();
         $industriLecturers = $internship ? collect()
             : Lecturer::whereHas('user', fn($q) => $q->where('role', 'lecturer_industry'))->with('user')->get();
@@ -105,43 +107,85 @@ class MahasiswaController extends Controller
         }
 
         $request->validate([
-            'company_id'           => 'required|exists:companies,id',
+            'company_id'           => 'nullable|exists:companies,id',
+            'company_name'         => 'required_without:company_id|nullable|string|max:255',
             'lecturer_industry_id' => 'nullable|exists:lecturers,id',
+            'pic_name'             => 'required_without:lecturer_industry_id|nullable|string|max:255',
+            'pic_username'         => 'required_without:lecturer_industry_id|nullable|string|max:50|unique:users,username',
+            'pic_phone'            => 'nullable|string|max:50',
             'position'             => 'nullable|string|max:255',
             'start_date'           => 'required|date',
         ], [
-            'company_id.required' => 'Silakan pilih perusahaan tempat magang.',
-            'start_date.required' => 'Tanggal mulai magang wajib diisi.',
+            'company_name.required_without'   => 'Pilih perusahaan yang ada atau isi nama perusahaan baru.',
+            'pic_name.required_without'       => 'Pilih pembimbing yang ada atau isi nama pembimbing baru.',
+            'pic_username.required_without'   => 'Username pembimbing industri wajib diisi.',
+            'pic_username.unique'             => 'Username sudah dipakai, gunakan username lain.',
+            'start_date.required'             => 'Tanggal mulai magang wajib diisi.',
         ]);
+
+        // Resolve company
+        if ($request->filled('company_id')) {
+            $companyId = $request->company_id;
+        } else {
+            $company   = Company::create(['name' => $request->company_name, 'verification_status' => 'verified']);
+            $companyId = $company->id;
+        }
+
+        // Resolve pembimbing industri
+        $credentials         = null;
+        $lecturerIndustryId  = null;
+
+        if ($request->filled('lecturer_industry_id')) {
+            $lecturerIndustryId = $request->lecturer_industry_id;
+        } else {
+            $password = Str::random(8);
+            $picUser  = User::create([
+                'name'     => $request->pic_name,
+                'username' => $request->pic_username,
+                'email'    => $request->pic_username . '@sitama.local',
+                'password' => Hash::make($password),
+                'role'     => 'lecturer_industry',
+            ]);
+            $lecturer           = Lecturer::create(['user_id' => $picUser->id]);
+            $lecturerIndustryId = $lecturer->id;
+
+            $credentials = [
+                'name'     => $request->pic_name,
+                'username' => $request->pic_username,
+                'password' => $password,
+            ];
+        }
 
         Internship::create([
             'student_id'           => $student->id,
-            'lecturer_id'          => $student->lecturer_id, // dospem kampus (jika sudah di-plot)
-            'company_id'           => $request->company_id,
-            'lecturer_industry_id' => $request->lecturer_industry_id,
+            'lecturer_id'          => $student->lecturer_id,
+            'company_id'           => $companyId,
+            'lecturer_industry_id' => $lecturerIndustryId,
             'position'             => $request->position,
             'start_date'           => $request->start_date,
             'is_finished'          => false,
         ]);
 
-        return back()->with('success', "Data magang berhasil dicatat untuk {$student->user->name}.");
+        $response = back()->with('success', "Data magang berhasil dicatat untuk {$student->user->name}.");
+
+        if ($credentials) {
+            $response = $response->with('new_pic_credentials', $credentials);
+        }
+
+        return $response;
     }
 
-    public function toggleFinished(Student $student)
+    public function approveFinish(Student $student)
     {
         $internship = $student->internships()->latest()->first();
 
-        if (!$internship) {
-            return back()->with('error', 'Mahasiswa belum memiliki data magang.');
+        if (!$internship || $internship->is_finished) {
+            return back()->with('error', 'Tidak ada pengajuan selesai magang yang bisa di-ACC.');
         }
 
-        $internship->update(['is_finished' => !$internship->is_finished]);
+        $internship->update(['is_finished' => true, 'finish_requested' => false]);
 
-        $message = $internship->is_finished
-            ? "Magang {$student->user->name} ditandai selesai."
-            : "Magang {$student->user->name} ditandai aktif kembali.";
-
-        return back()->with('success', $message);
+        return back()->with('success', "Magang {$student->user->name} berhasil ditandai selesai.");
     }
 
     public function assignLecturer(Request $request, Student $student)

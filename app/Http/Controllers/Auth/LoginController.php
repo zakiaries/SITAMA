@@ -81,7 +81,6 @@ class LoginController extends Controller
             'lecturer'          => redirect()->route('dosen.dashboard'),
             'lecturer_industry' => redirect()->route('dosen-industri.dashboard'),
             'kaprodi'           => redirect()->route('kaprodi.dashboard'),
-            'industri'          => redirect()->route('industri.dashboard'),
             default             => redirect('/'),
         };
     }
