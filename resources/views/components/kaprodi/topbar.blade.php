@@ -5,8 +5,8 @@
 <div class="topbar">
   <div class="tb-title">{{ $title ?? 'Dashboard' }}</div>
   <div class="tb-right">
-    <span style="font-size:11px;color:#92400e;background:#fef9c3;border:1px solid #fde047;padding:3px 10px;border-radius:20px;font-weight:600;">
-      ⭐ Superadmin
+    <span style="font-size:11px;color:var(--warn-text);background:var(--warn-bg);border:1px solid #F3D9A0;padding:3px 10px;border-radius:20px;font-weight:600;display:inline-flex;align-items:center;gap:5px;">
+      <x-icon name="star" :size="12"/> Superadmin
     </span>
     <div class="avatar" style="width:34px;height:34px;font-size:11px;background:var(--primary-light);color:var(--primary-text);"
          title="{{ $authUser->name }}">

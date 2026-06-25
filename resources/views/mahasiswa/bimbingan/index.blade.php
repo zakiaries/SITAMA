@@ -4,7 +4,7 @@
 @section('content')
 
   @if(session('success'))
-    <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('success') }}
     </div>
   @endif
@@ -42,8 +42,8 @@
   <div class="exp-item {{ $loop->first ? 'open' : '' }}">
     <div class="exp-header" onclick="toggle(this)">
       <div class="status-dot {{ $g->status === 'approved' ? 'done' : ($g->status === 'rejected' ? 'rejected' : 'pending') }}">
-        @if($g->status === 'approved') ✓
-        @elseif($g->status === 'rejected') ✕
+        @if($g->status === 'approved')<x-icon name="check" :size="13"/>
+        @elseif($g->status === 'rejected')<x-icon name="x" :size="13"/>
         @else —
         @endif
       </div>
@@ -51,7 +51,7 @@
         <div class="exp-title">{{ $g->title }}</div>
         <div class="exp-date">{{ $g->date->format('d/m/Y') }}</div>
       </div>
-      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:{{ $g->status==='approved'?'#dcfce7':($g->status==='rejected'?'#fee2e2':'#fef9c3') }};color:{{ $g->status==='approved'?'#16a34a':($g->status==='rejected'?'#dc2626':'#854f0b') }};">
+      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:{{ $g->status==='approved'?'var(--success-bg)':($g->status==='rejected'?'var(--danger-bg)':'var(--warn-bg)') }};color:{{ $g->status==='approved'?'var(--success-text)':($g->status==='rejected'?'var(--danger)':'var(--warn-text)') }};">
         {{ ucfirst($g->status) }}
       </span>
       <div class="chevron">▾</div>
@@ -75,7 +75,7 @@
       <div style="margin-top:14px;">
         <button class="btn btn-primary btn-sm"
           onclick="openRevisi({{ $g->id }}, @js($g->title), '{{ $g->date->format('Y-m-d') }}', @js($g->activity))">
-          ↺ Revisi & Kirim Ulang
+          <x-icon name="refresh" :size="14"/> Revisi & Kirim Ulang
         </button>
       </div>
       @endif
@@ -92,7 +92,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <div class="modal-title">Revisi Bimbingan</div>
-        <button class="modal-close" onclick="document.getElementById('modal-revisi').classList.remove('open')">✕</button>
+        <button class="modal-close" onclick="document.getElementById('modal-revisi').classList.remove('open')"><x-icon name="x" :size="14"/></button>
       </div>
       <form method="POST" id="form-revisi" action="" enctype="multipart/form-data">
         @csrf

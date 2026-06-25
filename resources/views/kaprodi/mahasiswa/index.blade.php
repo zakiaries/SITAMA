@@ -16,13 +16,13 @@
   background:#fff;border:1.5px solid var(--border);border-radius:12px;
   padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;
 }
-.mhs-card.is-pending { border-color:#fdba74;background:#fffbf5;border-left:4px solid #ea580c; }
+.mhs-card.is-pending { border-color:#F3D9A0;background:var(--warn-bg);border-left:4px solid var(--warn-text); }
 .pending-actions { display:flex;gap:8px;flex-shrink:0; }
-.btn-setujui { background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
-.btn-setujui:hover { background:#15803d; }
-.btn-tolak { background:#fff;color:#dc2626;border:1.5px solid #dc2626;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
-.btn-tolak:hover { background:#fef2f2; }
-.info-note { background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:#1e40af;display:flex;gap:10px;align-items:flex-start; }
+.btn-setujui { background:var(--success-text);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
+.btn-setujui:hover { background:var(--success-text); }
+.btn-tolak { background:#fff;color:var(--danger);border:1.5px solid var(--danger);border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
+.btn-tolak:hover { background:var(--danger-bg); }
+.info-note { background:var(--blue-tint);border:1px solid #C7DCFF;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:var(--primary);display:flex;gap:10px;align-items:flex-start; }
 .mhs-av   { width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px; }
 .mhs-info { flex:1;min-width:0; }
 .mhs-name { font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px; }
@@ -30,20 +30,20 @@
 .mhs-dosen { font-size:11px;color:var(--text-muted);margin-top:4px; }
 .mhs-dosen strong { color:var(--primary); }
 .st-badge { font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0; }
-.st-aktif   { background:#eff6ff;color:#2563eb; }
-.st-selesai { background:#dcfce7;color:#16a34a; }
-.st-belum   { background:#fef9c3;color:#92400e; }
-.st-pending { background:#fff7ed;color:#c2410c; }
+.st-aktif   { background:var(--blue-tint);color:var(--primary); }
+.st-selesai { background:var(--success-bg);color:var(--success-text); }
+.st-belum   { background:var(--warn-bg);color:var(--warn-text); }
+.st-pending { background:var(--warn-bg);color:var(--warn-text); }
 </style>
 @endpush
 
 @section('content')
 
 @if(session('success'))
-  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 @if(session('error'))
-  <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('error') }}</div>
+  <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('error') }}</div>
 @endif
 
 {{-- Search --}}
@@ -83,9 +83,9 @@
   // Dospem dari students.lecturer_id; fallback ke dospem yang menempel di internship.
   $assignedLecturer = $student->lecturer ?? $internship?->lecturer;
   $colors = [
-    ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
-    ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#eeedfe','text'=>'#3c3489'],
-    ['bg'=>'#fcebeb','text'=>'#791f1f'],
+    ['bg'=>'var(--blue-tint)','text'=>'var(--primary)'],['bg'=>'var(--success-bg)','text'=>'var(--success-text)'],
+    ['bg'=>'var(--warn-bg)','text'=>'var(--warn-text)'],['bg'=>'var(--purple-bg)','text'=>'var(--purple-text)'],
+    ['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
   ];
   $color    = $colors[$student->id % count($colors)];
   $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
@@ -104,17 +104,17 @@
 
   @if($student->status === 'pending')
     {{-- Pendaftar baru: tunggu persetujuan --}}
-    <span class="st-badge st-pending">⏳ Menunggu</span>
+    <span class="st-badge st-pending" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="clock" :size="12"/> Menunggu</span>
     <div class="pending-actions">
       <form method="POST" action="{{ route('kaprodi.mahasiswa.approve', $student) }}"
         data-confirm="Setujui akun {{ $student->user->name }}? Mahasiswa akan bisa login.">
         @csrf
-        <button type="submit" class="btn-setujui">✓ Setujui</button>
+        <button type="submit" class="btn-setujui" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="check" :size="14"/> Setujui</button>
       </form>
       <form method="POST" action="{{ route('kaprodi.mahasiswa.reject', $student) }}"
         data-confirm="Tolak pendaftaran {{ $student->user->name }}?" data-confirm-danger>
         @csrf
-        <button type="submit" class="btn-tolak">✕ Tolak</button>
+        <button type="submit" class="btn-tolak" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="x" :size="14"/> Tolak</button>
       </form>
     </div>
   @elseif(!$internship)
@@ -138,11 +138,11 @@
 @empty
 <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
   @if($status === 'pending')
-    <div style="font-size:40px;margin-bottom:12px;">✅</div>
+    <div style="margin-bottom:12px;color:var(--success-text);display:flex;justify-content:center;"><x-icon name="check" :size="40"/></div>
     <p style="font-weight:600;color:var(--text);">Tidak ada pendaftar yang menunggu</p>
     <p style="font-size:13px;">Semua pendaftaran mahasiswa sudah ditinjau.</p>
   @else
-    <div style="font-size:40px;margin-bottom:12px;">👨‍🎓</div>
+    <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="cap" :size="40"/></div>
     <p>Tidak ada mahasiswa pada filter ini.</p>
   @endif
 </div>
@@ -153,7 +153,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <div class="modal-title">Tugaskan Dosen Pembimbing</div>
-      <button class="modal-close" onclick="document.getElementById('modal-assign').classList.remove('open')">✕</button>
+      <button class="modal-close" onclick="document.getElementById('modal-assign').classList.remove('open')"><x-icon name="x" :size="14"/></button>
     </div>
     <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
       Pilih dosen pembimbing untuk <strong id="assign-name" style="color:var(--text);"></strong>

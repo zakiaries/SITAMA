@@ -5,23 +5,19 @@
 @push('styles')
 <style>
 .kaprodi-hero {
-  background: #2d3e6e;
-  background-image: url('{{ asset("images/pattern.png") }}');
-  background-size: 200px;
-  border-radius: 14px; padding: 26px 24px; margin-bottom: 20px;
-  position: relative; overflow: hidden; display: flex; align-items: center; gap: 18px;
+  background: var(--warm);
+  border-radius: 14px; padding: 24px 26px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 18px;
 }
-.kaprodi-hero::before { content:''; position:absolute; inset:0; background:rgba(45,62,110,0.82); }
-.kaprodi-hero > * { position:relative; z-index:1; }
 .hero-av {
-  width:60px;height:60px;border-radius:50%;flex-shrink:0;
-  background:rgba(255,255,255,0.2);border:2.5px solid rgba(255,255,255,0.4);
-  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;
+  width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  background:var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;
 }
-.hero-role { font-size:12px;color:rgba(255,255,255,0.7);font-weight:600;margin-bottom:2px; }
-.hero-name { font-size:20px;font-weight:800;color:#fff;margin-bottom:4px; }
-.hero-prog { font-size:12px;color:rgba(255,255,255,0.75); }
-.hero-badge { display:inline-block;background:#fbbf24;color:#78350f;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:8px; }
+.hero-role { font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--primary);text-transform:uppercase;margin-bottom:2px; }
+.hero-name { font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.02em;line-height:1.1;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+.hero-prog { font-size:13px;color:var(--text-secondary); }
+.hero-badge { display:inline-flex;align-items:center;gap:5px;background:var(--blue-tint);color:var(--primary);font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px; }
 
 .stat-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
 .stat-card-k {
@@ -54,30 +50,30 @@
   <div class="hero-av">{{ $initials }}</div>
   <div style="flex:1;">
     <div class="hero-role">KETUA PROGRAM STUDI</div>
-    <div class="hero-name">{{ $user->name }}<span class="hero-badge">⭐ Superadmin</span></div>
+    <div class="hero-name">{{ $user->name }}<span class="hero-badge"><x-icon name="star" :size="12"/> Superadmin</span></div>
     <div class="hero-prog">Teknik Informatika · Politeknik</div>
   </div>
 </div>
 
 {{-- Banner Notifikasi: Mahasiswa Menunggu Persetujuan --}}
 @if($pendingMahasiswa > 0)
-<div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:14px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-  <div style="width:48px;height:48px;border-radius:12px;background:#fed7aa;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">
-    🔔
+<div style="background:var(--warn-bg);border:1.5px solid #F3D9A0;border-radius:14px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+  <div style="width:48px;height:48px;border-radius:12px;background:#FBEBC8;color:var(--warn-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+    <x-icon name="bell" :size="22"/>
   </div>
   <div style="flex:1;min-width:200px;">
-    <div style="font-size:15px;font-weight:800;color:#9a3412;margin-bottom:2px;">
+    <div style="font-size:15px;font-weight:800;color:var(--warn-text);margin-bottom:2px;">
       {{ $pendingMahasiswa }} pendaftar baru menunggu persetujuan
     </div>
-    <div style="font-size:12px;color:#c2410c;">
+    <div style="font-size:12px;color:var(--warn-text);">
       @foreach($pendingList as $p){{ $p->user->name }}@if(!$loop->last), @endif @endforeach
       @if($pendingMahasiswa > 3) dan {{ $pendingMahasiswa - 3 }} lainnya @endif
       perlu Anda tinjau sebelum bisa masuk ke sistem.
     </div>
   </div>
   <a href="{{ route('kaprodi.mahasiswa.index', ['status' => 'pending']) }}"
-     style="background:#ea580c;color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0;">
-    Tinjau Sekarang →
+     style="background:var(--warn-text);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;">
+    Tinjau Sekarang <x-icon name="arrow-right" :size="15"/>
   </a>
 </div>
 @endif
@@ -85,19 +81,19 @@
 {{-- Statistik --}}
 <div class="stat-grid">
   <div class="stat-card-k">
-    <div class="sc-icon" style="background:#e8eef8;">🎓</div>
+    <div class="sc-icon" style="background:var(--blue-tint);color:var(--primary);"><x-icon name="cap" :size="20"/></div>
     <div class="sc-val">{{ $totalMahasiswa }}</div>
     <div class="sc-lbl">Total Mahasiswa</div>
     <div class="sc-sub">{{ $aktif }} aktif · {{ $selesai }} selesai</div>
   </div>
   <div class="stat-card-k">
-    <div class="sc-icon" style="background:#fef9c3;">⚠️</div>
+    <div class="sc-icon" style="background:var(--warn-bg);color:var(--warn-text);"><x-icon name="alert" :size="20"/></div>
     <div class="sc-val">{{ $belumMagang }}</div>
     <div class="sc-lbl">Belum Magang</div>
     <div class="sc-sub">belum ada data magang</div>
   </div>
   <div class="stat-card-k">
-    <div class="sc-icon" style="background:#dcfce7;">📅</div>
+    <div class="sc-icon" style="background:var(--success-bg);color:var(--success-text);"><x-icon name="calendar" :size="20"/></div>
     <div class="sc-val">{{ $totalSeminar }}</div>
     <div class="sc-lbl">Seminar</div>
     <div class="sc-sub">total terjadwal</div>
@@ -108,28 +104,28 @@
 <div class="card-title" style="margin-bottom:14px;">Aksi Cepat</div>
 <div class="qa-grid">
   <a href="{{ route('kaprodi.mahasiswa.index') }}" class="qa-card">
-    <div class="qa-icon" style="background:#e8eef8;">👥</div>
+    <div class="qa-icon" style="background:var(--blue-tint);color:var(--primary);"><x-icon name="users" :size="22"/></div>
     <div class="qa-text">
       <div class="qa-title">Data Mahasiswa</div>
       <div class="qa-sub">{{ $totalMahasiswa }} mahasiswa terdaftar</div>
     </div>
-    <span class="qa-arr">›</span>
+    <span class="qa-arr"><x-icon name="chevron-right" :size="18"/></span>
   </a>
   <a href="{{ route('kaprodi.dosen.index') }}" class="qa-card">
-    <div class="qa-icon" style="background:#dcfce7;">👨‍🏫</div>
+    <div class="qa-icon" style="background:var(--success-bg);color:var(--success-text);"><x-icon name="cap" :size="22"/></div>
     <div class="qa-text">
       <div class="qa-title">Data Dosen</div>
       <div class="qa-sub">{{ $totalDosen }} dosen</div>
     </div>
-    <span class="qa-arr">›</span>
+    <span class="qa-arr"><x-icon name="chevron-right" :size="18"/></span>
   </a>
   <a href="{{ route('kaprodi.mahasiswa.index', ['status' => 'belum_magang']) }}" class="qa-card">
-    <div class="qa-icon" style="background:#fef9c3;">📝</div>
+    <div class="qa-icon" style="background:var(--warn-bg);color:var(--warn-text);"><x-icon name="pencil" :size="22"/></div>
     <div class="qa-text">
       <div class="qa-title">Tugaskan Dosen</div>
       <div class="qa-sub">kelola pembimbing mahasiswa</div>
     </div>
-    <span class="qa-arr">›</span>
+    <span class="qa-arr"><x-icon name="chevron-right" :size="18"/></span>
   </a>
 </div>
 

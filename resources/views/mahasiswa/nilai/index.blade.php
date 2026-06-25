@@ -5,7 +5,7 @@
 @push('styles')
 <style>
 .nilai-overall {
-  background: #2d3e6e;
+  background: var(--primary);
   background-image: url('{{ asset("images/pattern.png") }}');
   background-size: 200px;
   border-radius: 14px;
@@ -30,10 +30,10 @@
 .nilai-row  { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .nilai-row:last-child { border-bottom: none; }
 .nilai-badge {
-  background: #f1f5f9; color: var(--primary); font-weight: 700;
+  background: var(--warm); color: var(--primary); font-weight: 700;
   font-size: 13px; padding: 4px 14px; border-radius: 20px; min-width: 48px; text-align: center;
 }
-.nilai-badge.empty { background: #f8fafc; color: var(--text-muted); font-weight: 600; }
+.nilai-badge.empty { background: var(--warm); color: var(--text-muted); font-weight: 600; }
 </style>
 @endpush
 
@@ -41,7 +41,7 @@
 
 @if(!$internship)
   <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
-    <div style="font-size:40px;margin-bottom:12px;">📊</div>
+    <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="chart" :size="40"/></div>
     <p style="font-size:14px;margin-bottom:4px;font-weight:600;color:var(--text);">Belum ada data magang.</p>
     <p style="font-size:13px;">Nilai akan tampil di sini setelah Anda memiliki magang aktif.</p>
   </div>
@@ -65,9 +65,9 @@
     <div class="card-header" style="margin-bottom:12px;">
       <div class="card-title">Info Magang</div>
       @if($internship->is_finished)
-        <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">✓ Selesai</span>
+        <span style="background:var(--success-bg);color:var(--success-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Selesai</span>
       @else
-        <span style="background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
+        <span style="background:var(--blue-tint);color:var(--primary);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
       @endif
     </div>
     <div class="info-row"><div class="info-key">Perusahaan</div><div class="info-val" style="color:var(--primary);font-weight:600;">{{ $internship->company->name ?? '-' }}</div></div>

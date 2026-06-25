@@ -5,32 +5,25 @@
 @push('styles')
 <style>
 .dosen-hero {
-  background: #2d3e6e;
-  background-image: url('{{ asset("images/pattern.png") }}');
-  background-size: 200px;
+  background: var(--warm);
   border-radius: 14px;
-  padding: 28px 24px 24px;
+  padding: 24px 26px;
   margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
+  display: flex; align-items: center; gap: 18px;
 }
-.dosen-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(45,62,110,0.82);
-}
-.dosen-hero > * { position: relative; z-index: 1; }
-.hero-hello { font-size: 12px; color: rgba(255,255,255,0.7); letter-spacing: 1px; font-weight: 600; margin-bottom: 4px; }
-.hero-name  { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.3; }
+.hero-av { width:64px;height:64px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0; }
+.hero-role { font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--primary);text-transform:uppercase; }
+.hero-name  { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; line-height: 1.1; margin-top: 3px; }
 .hero-search {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(255,255,255,0.95); border-radius: 10px; padding: 10px 14px;
+  margin-top: 14px;
+  display: flex; align-items: center; gap: 9px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px;
+  color: var(--text-muted); max-width: 420px;
 }
-.hero-search svg { flex-shrink: 0; color: #9ca3af; }
+.hero-search svg { flex-shrink: 0; }
 .hero-search input {
   border: none; outline: none; background: transparent;
-  font-size: 13px; color: #1e2a4a; width: 100%; font-family: inherit;
+  font-size: 14px; color: var(--text); width: 100%; font-family: inherit;
 }
 .filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .filter-select {
@@ -54,13 +47,13 @@
 .student-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
 .student-nim  { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
 .student-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
-.student-meta span { background: #f1f5f9; padding: 2px 8px; border-radius: 20px; }
+.student-meta span { background: var(--warm); padding: 2px 8px; border-radius: 20px; }
 .student-stats { display: flex; gap: 12px; flex-shrink: 0; text-align: center; }
 .student-stat-item { font-size: 11px; color: var(--text-muted); }
 .student-stat-item strong { display: block; font-size: 15px; font-weight: 700; color: var(--primary); }
-.badge-selesai { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
-.badge-aktif   { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
-.badge-dinilai { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.badge-selesai { background: var(--success-bg); color: var(--success-text); border: 1px solid #A7E8CF; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.badge-aktif   { background: var(--blue-tint); color: var(--primary); border: 1px solid #C7DCFF; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+.badge-dinilai { background: var(--success-bg); color: var(--success-text); border: 1px solid #A7E8CF; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
 .dz-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .dz-tab {
   padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 20px;
@@ -74,17 +67,21 @@
 @section('content')
 
 {{-- Hero Header --}}
+@php $heroInit = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
 <div class="dosen-hero">
-  <div class="hero-hello">HELLO,</div>
-  <div class="hero-name">{{ $user->name }}</div>
-  <form method="GET" action="{{ route('dosen.dashboard') }}">
-    <div class="hero-search">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input name="search" placeholder="Pencarian nama atau jurusan..." value="{{ request('search') }}">
-    </div>
-  </form>
+  <div class="hero-av">{{ $heroInit }}</div>
+  <div style="flex:1;">
+    <div class="hero-role">Dosen Pembimbing</div>
+    <div class="hero-name">{{ $user->name }}</div>
+    <form method="GET" action="{{ route('dosen.dashboard') }}">
+      <div class="hero-search">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input name="search" placeholder="Pencarian nama atau jurusan..." value="{{ request('search') }}">
+      </div>
+    </form>
+  </div>
 </div>
 
 {{-- Section header --}}
@@ -132,9 +129,9 @@
   $isFinished = $internship?->is_finished ?? false;
   $graded     = ($internship?->scores_count ?? 0) > 0;
   $colors = [
-    ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
-    ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#eeedfe','text'=>'#3c3489'],
-    ['bg'=>'#fcebeb','text'=>'#791f1f'],
+    ['bg'=>'var(--blue-tint)','text'=>'var(--primary)'],['bg'=>'var(--success-bg)','text'=>'var(--success-text)'],
+    ['bg'=>'var(--warn-bg)','text'=>'var(--warn-text)'],['bg'=>'var(--purple-bg)','text'=>'var(--purple-text)'],
+    ['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
   ];
   $color    = $colors[$student->id % count($colors)];
   $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
@@ -165,7 +162,7 @@
     </div>
   </div>
   @if($graded)
-    <span class="badge-dinilai">✓ Dinilai</span>
+    <span class="badge-dinilai" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Dinilai</span>
   @elseif($isFinished)
     <span class="badge-selesai">Selesai</span>
   @else
@@ -174,7 +171,7 @@
 </a>
 @empty
 <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
-  <div style="font-size:40px;margin-bottom:12px;">👨‍🎓</div>
+  <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="cap" :size="40"/></div>
   <p>Belum ada mahasiswa bimbingan.</p>
 </div>
 @endforelse

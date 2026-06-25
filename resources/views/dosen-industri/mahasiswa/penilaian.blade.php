@@ -9,7 +9,7 @@
   margin-bottom:12px;overflow:hidden;
 }
 .assess-head {
-  display:flex;align-items:center;gap:12px;padding:14px 16px;background:#f8fafc;
+  display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--warm);
   border-bottom:1px solid var(--border);
 }
 .assess-icon { width:34px;height:34px;border-radius:9px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0; }
@@ -30,7 +30,7 @@
 .score-max { font-size:12px;color:var(--text-muted); }
 
 .avg-card {
-  background:#2d3e6e;border-radius:12px;
+  background:var(--primary);border-radius:12px;
   padding:20px;margin-bottom:16px;color:#fff;text-align:center;
 }
 .avg-val { font-size:42px;font-weight:800;line-height:1; }
@@ -50,13 +50,13 @@
 @section('content')
 
 @if(session('success'))
-  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
     {{ session('success') }}
   </div>
 @endif
 
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-  <a href="{{ route('dosen-industri.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">← Kembali</a>
+  <a href="{{ route('dosen-industri.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>
   <div>
     <div class="page-title" style="margin-bottom:2px;">Penilaian Akhir</div>
     <div style="font-size:12px;color:var(--text-muted);">{{ $student->user->name }} · {{ $internship->position }}</div>
@@ -66,12 +66,12 @@
 <form method="POST" action="{{ route('dosen-industri.mahasiswa.penilaian.simpan', $student) }}" id="form-penilaian">
   @csrf
 
-  @php $icons = ['📋','💻','🤝','💡']; $i = 0; @endphp
+  @php $icons = ['clipboard','code','handshake','bulb']; $i = 0; @endphp
   @foreach($components as $component)
   @php $icon = $icons[$i % count($icons)]; $i++; @endphp
   <div class="assess-card">
     <div class="assess-head">
-      <div class="assess-icon">{{ $icon }}</div>
+      <div class="assess-icon" style="color:var(--primary);"><x-icon :name="$icon" :size="18"/></div>
       <div class="assess-title">{{ $component->name }}</div>
     </div>
     <div class="assess-body">
@@ -113,7 +113,7 @@
   </div>
 
   <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
-    💾 Simpan &amp; Kirim Penilaian
+    <x-icon name="save" :size="16"/> Simpan &amp; Kirim Penilaian
   </button>
 </form>
 

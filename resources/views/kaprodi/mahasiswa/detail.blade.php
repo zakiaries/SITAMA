@@ -5,71 +5,60 @@
 @push('styles')
 <style>
 .student-hero {
-  background: #2d3e6e;
-  background-image: url('{{ asset("images/pattern.png") }}');
-  background-size: 200px;
+  background: var(--warm);
   border-radius: 14px;
-  padding: 28px 24px;
+  padding: 26px 28px;
   margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 20px;
 }
-.student-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(45,62,110,0.80);
-}
-.student-hero > * { position: relative; z-index: 1; }
 .hero-avatar {
   width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.4);
+  background: var(--primary); border: none;
   display: flex; align-items: center; justify-content: center;
   font-size: 22px; font-weight: 800; color: #fff;
 }
 .hero-detail { flex: 1; }
-.hero-sname  { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px; }
-.hero-nim    { display: inline-block; background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.9); font-size: 12px; padding: 2px 12px; border-radius: 20px; margin-bottom: 6px; }
-.hero-email  { font-size: 12px; color: rgba(255,255,255,0.7); }
+.hero-sname  { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; margin-bottom: 6px; }
+.hero-nim    { display: inline-block; background: var(--blue-tint); color: var(--primary); font-size: 12px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; margin-bottom: 6px; }
+.hero-email  { font-size: 13px; color: var(--text-secondary); }
 
 .nilai-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 18px; }
 .nilai-row  { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .nilai-row:last-child { border-bottom: none; }
 .nilai-row.total { border-top: 2px solid var(--border); margin-top: 4px; padding-top: 12px; font-weight: 700; }
 .nilai-badge {
-  background: #f1f5f9; color: var(--primary); font-weight: 700;
+  background: var(--warm); color: var(--primary); font-weight: 700;
   font-size: 13px; padding: 4px 14px; border-radius: 20px; min-width: 48px; text-align: center;
 }
-.nilai-badge.empty { background: #f8fafc; color: var(--text-muted); font-weight: 600; }
+.nilai-badge.empty { background: var(--warm); color: var(--text-muted); font-weight: 600; }
 
-.btn-finish { background: #16a34a; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
-.btn-finish:hover { background: #15803d; }
-.btn-reopen { background: #fff; color: #475569; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
-.btn-reopen:hover { background: #f8fafc; }
+.btn-finish { background: var(--success-text); color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
+.btn-finish:hover { background: var(--success-text); }
+.btn-reopen { background: #fff; color: var(--text-secondary); border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
+.btn-reopen:hover { background: var(--warm); }
 </style>
 @endpush
 
 @section('content')
 
 @if(session('success'))
-  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
     {{ session('success') }}
   </div>
 @endif
 @if(session('error'))
-  <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+  <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
     {{ session('error') }}
   </div>
 @endif
 
 {{-- Back Button --}}
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-  <a href="{{ route('kaprodi.mahasiswa.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
+  <a href="{{ route('kaprodi.mahasiswa.index') }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>
   <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('modal-reset-pw').style.display='flex'">
-    🔑 Reset Password
+    <x-icon name="key" :size="14"/> Reset Password
   </button>
 </div>
 
@@ -94,7 +83,7 @@
   <div class="card">
     <div class="card-header" style="margin-bottom:12px;">
       <div class="card-title">Info Mahasiswa</div>
-      <span style="background:#fef9c3;color:#92400e;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Belum Magang</span>
+      <span style="background:var(--warn-bg);color:var(--warn-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Belum Magang</span>
     </div>
     <div class="info-row"><div class="info-key">Kelas</div><div class="info-val">{{ $student->the_class }}</div></div>
     <div class="info-row"><div class="info-key">Jurusan</div><div class="info-val">{{ $student->major }}</div></div>
@@ -108,13 +97,13 @@
   {{-- Kredensial pembimbing industri baru --}}
   @if(session('new_pic_credentials'))
     @php $cred = session('new_pic_credentials'); @endphp
-    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px 16px;margin-top:16px;">
-      <div style="font-weight:700;color:#15803d;margin-bottom:8px;">Akun Pembimbing Industri Berhasil Dibuat</div>
-      <p style="font-size:12px;color:#166534;margin-bottom:8px;">Simpan dan teruskan kredensial berikut ke pembimbing industri. Ini hanya ditampilkan sekali.</p>
-      <div style="font-size:13px;color:#14532d;">
+    <div style="background:var(--success-bg);border:1px solid #A7E8CF;border-radius:10px;padding:14px 16px;margin-top:16px;">
+      <div style="font-weight:700;color:var(--success-text);margin-bottom:8px;">Akun Pembimbing Industri Berhasil Dibuat</div>
+      <p style="font-size:12px;color:var(--success-text);margin-bottom:8px;">Simpan dan teruskan kredensial berikut ke pembimbing industri. Ini hanya ditampilkan sekali.</p>
+      <div style="font-size:13px;color:var(--success-text);">
         <div><strong>Nama:</strong> {{ $cred['name'] }}</div>
         <div><strong>Username:</strong> {{ $cred['username'] }}</div>
-        <div><strong>Password:</strong> <code style="background:#dcfce7;padding:1px 6px;border-radius:4px;">{{ $cred['password'] }}</code></div>
+        <div><strong>Password:</strong> <code style="background:var(--success-bg);padding:1px 6px;border-radius:4px;">{{ $cred['password'] }}</code></div>
       </div>
     </div>
   @endif
@@ -130,7 +119,7 @@
       @csrf
 
       {{-- PERUSAHAAN --}}
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">Perusahaan <span style="color:#dc2626;">*</span></div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">Perusahaan <span style="color:var(--danger);">*</span></div>
       <div style="display:flex;gap:8px;margin-bottom:6px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
           <input type="radio" name="company_mode" value="existing" checked onchange="toggleCompanyMode(this.value)"> Pilih yang terdaftar
@@ -153,7 +142,7 @@
       </div>
 
       {{-- PEMBIMBING INDUSTRI --}}
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;margin-top:4px;">Pembimbing Industri <span style="color:#dc2626;">*</span></div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;margin-top:4px;">Pembimbing Industri <span style="color:var(--danger);">*</span></div>
       <div style="display:flex;gap:8px;margin-bottom:6px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
           <input type="radio" name="pic_mode" value="existing" checked onchange="togglePicMode(this.value)"> Pilih yang terdaftar
@@ -171,7 +160,7 @@
         </select>
       </div>
       <div id="pic-new" style="display:none;margin-bottom:12px;">
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;">
           <input type="text" name="pic_name" value="{{ old('pic_name') }}" placeholder="Nama lengkap pembimbing"
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <input type="text" name="pic_username" value="{{ old('pic_username') }}" placeholder="Username (untuk login)"
@@ -190,7 +179,7 @@
           style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
       </div>
       <div class="form-group" style="margin-bottom:16px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Tanggal Mulai <span style="color:#dc2626;">*</span></label>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Tanggal Mulai <span style="color:var(--danger);">*</span></label>
         <input type="date" name="start_date" value="{{ old('start_date', now()->toDateString()) }}" required
           style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
       </div>
@@ -220,9 +209,9 @@
       <div class="card-header" style="margin-bottom:12px;">
         <div class="card-title">Info Magang</div>
         @if($internship->is_finished)
-          <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">✓ Selesai</span>
+          <span style="background:var(--success-bg);color:var(--success-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Selesai</span>
         @else
-          <span style="background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
+          <span style="background:var(--blue-tint);color:var(--primary);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
         @endif
       </div>
       <div class="info-row"><div class="info-key">Perusahaan</div><div class="info-val" style="color:var(--primary);font-weight:600;">{{ $internship->company->name ?? '-' }}</div></div>
@@ -246,8 +235,8 @@
     <div class="card">
       <div class="card-title" style="margin-bottom:12px;">Status Magang</div>
       @if($internship->is_finished)
-        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:13px;color:#16a34a;">
-          ✓ Magang ini sudah selesai.
+        <div style="background:var(--success-bg);border:1px solid #A7E8CF;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--success-text);">
+          <x-icon name="check" :size="13"/> Magang ini sudah selesai.
         </div>
       @elseif($internship->finish_requested)
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
@@ -256,10 +245,10 @@
         <form method="POST" action="{{ route('kaprodi.mahasiswa.approve-finish', $student) }}"
               data-confirm="ACC selesai magang {{ $student->user->name }}?">
           @csrf
-          <button type="submit" class="btn-finish">✓ ACC Selesai Magang</button>
+          <button type="submit" class="btn-finish" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;"><x-icon name="check" :size="15"/> ACC Selesai Magang</button>
         </form>
       @else
-        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text-muted);">
+        <div style="background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text-muted);">
           Menunggu mahasiswa mengajukan selesai magang.
         </div>
       @endif
@@ -303,13 +292,13 @@
       @csrf
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Password Baru <span style="color:#dc2626;">*</span></label>
+          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Password Baru <span style="color:var(--danger);">*</span></label>
           <input type="password" name="new_password" required minlength="6"
             style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"
             placeholder="Minimal 6 karakter">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Konfirmasi Password <span style="color:#dc2626;">*</span></label>
+          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Konfirmasi Password <span style="color:var(--danger);">*</span></label>
           <input type="password" name="new_password_confirmation" required minlength="6"
             style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
         </div>

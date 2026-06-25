@@ -7,7 +7,7 @@
 
   <div class="page-header"><div class="page-title">Lowongan Magang</div></div>
 
-  <div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;">
+  <div style="background:var(--blue-tint);border:1px solid #C7DCFF;color:var(--primary);padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;">
     Lowongan di bawah adalah <strong>informasi/pengumuman</strong> dari kampus. Untuk melamar, hubungi
     kontak (PIC) yang tercantum secara langsung di luar aplikasi.
   </div>
@@ -28,24 +28,23 @@
     $companyName = $job->company_display_name;
     $initials    = collect(explode(' ', $companyName))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
     $colors = [
-      ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
-      ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#fcebeb','text'=>'#791f1f'],
-      ['bg'=>'#eeedfe','text'=>'#3c3489'],
+      ['bg'=>'var(--blue-tint)','text'=>'var(--primary)'],['bg'=>'var(--success-bg)','text'=>'var(--success-text)'],
+      ['bg'=>'var(--warn-bg)','text'=>'var(--warn-text)'],['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
+      ['bg'=>'var(--purple-bg)','text'=>'var(--purple-text)'],
     ];
     $color = $colors[$job->id % count($colors)];
     $hasContact = $job->pic_name || $job->pic_email || $job->pic_phone;
+    $ajukanUrl = $job->company_id
+      ? route('mahasiswa.ajukan-magang', ['company_id' => $job->company_id])
+      : route('mahasiswa.ajukan-magang', ['company_name' => $companyName]);
   @endphp
-  <div class="job-card">
+  <div class="job-card" style="cursor:pointer;" onclick="window.location.href='{{ $ajukanUrl }}'" title="Ajukan magang di perusahaan ini">
     <div class="job-top">
       <div class="job-logo" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};">{{ $initials }}</div>
       <div class="job-info">
         <div class="job-head">
           <div>
-            <div class="job-title">{{ $job->title }}</div>
-            <div class="job-company">
-              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:3px;"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-              {{ $companyName }}
-            </div>
+            <div class="job-title">{{ $companyName }}</div>
           </div>
           @if($job->created_at->diffInDays() <= 3)
             <span class="badge baru">Baru</span>
@@ -59,8 +58,8 @@
           @if(count($skills) > 3)
             <span style="font-size:11px;color:var(--primary);font-weight:600;cursor:pointer;text-decoration:underline;"
               data-skills='{{ json_encode($skills) }}'
-              data-title="{{ addslashes($job->title) }}"
-              onclick="openSkillsModal(this)">+{{ count($skills) - 3 }} keahlian lainnya</span>
+              data-title="{{ addslashes($companyName) }}"
+              onclick="event.stopPropagation(); openSkillsModal(this)">+{{ count($skills) - 3 }} keahlian lainnya</span>
           @endif
         </div>
       </div>
@@ -82,13 +81,13 @@
       <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">KONTAK UNTUK MELAMAR</div>
       <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--text);">
         @if($job->pic_name)
-          <span>👤 {{ $job->pic_name }}</span>
+          <span><x-icon name="user" :size="13"/> {{ $job->pic_name }}</span>
         @endif
         @if($job->pic_phone)
-          <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $job->pic_phone) }}" target="_blank" style="color:var(--primary);text-decoration:none;">📱 {{ $job->pic_phone }}</a>
+          <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $job->pic_phone) }}" target="_blank" onclick="event.stopPropagation()" style="color:var(--primary);text-decoration:none;"><x-icon name="phone-mobile" :size="13"/> {{ $job->pic_phone }}</a>
         @endif
         @if($job->pic_email)
-          <a href="mailto:{{ $job->pic_email }}" style="color:var(--primary);text-decoration:none;">✉ {{ $job->pic_email }}</a>
+          <a href="mailto:{{ $job->pic_email }}" onclick="event.stopPropagation()" style="color:var(--primary);text-decoration:none;"><x-icon name="mail" :size="13"/> {{ $job->pic_email }}</a>
         @endif
       </div>
     </div>
@@ -111,7 +110,7 @@
   <div class="modal-box" style="max-width:380px;padding:20px;">
     <div class="modal-header" style="margin-bottom:14px;">
       <div class="modal-title">Keahlian yang Dibutuhkan</div>
-      <button class="modal-close" onclick="closeSkillsModal()">✕</button>
+      <button class="modal-close" onclick="closeSkillsModal()"><x-icon name="x" :size="14"/></button>
     </div>
     <div id="skills-modal-job" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;"></div>
     <div id="skills-modal-list" class="job-tags" style="flex-wrap:wrap;"></div>

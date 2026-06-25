@@ -4,7 +4,7 @@
 @section('content')
 
   @if(session('success'))
-    <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('success') }}
     </div>
   @endif
@@ -34,14 +34,14 @@
       <div class="field-label">Aktivitas</div>
       <div class="field-value">{{ $lb->activity }}</div>
       @if($lb->lecturer_note)
-      <div class="field-group" style="border-left:3px solid #2563eb;padding-left:10px;margin-top:12px;">
-        <div class="field-label" style="color:#2563eb;">Catatan Dosen Pembimbing (Kampus)</div>
+      <div class="field-group" style="border-left:3px solid var(--primary);padding-left:10px;margin-top:12px;">
+        <div class="field-label" style="color:var(--primary);">Catatan Dosen Pembimbing (Kampus)</div>
         <div class="field-value">{{ $lb->lecturer_note }}</div>
       </div>
       @endif
       @if($lb->industry_note)
-      <div class="field-group" style="border-left:3px solid #16a34a;padding-left:10px;margin-top:12px;">
-        <div class="field-label" style="color:#16a34a;">Catatan Pembimbing Industri</div>
+      <div class="field-group" style="border-left:3px solid var(--success-text);padding-left:10px;margin-top:12px;">
+        <div class="field-label" style="color:var(--success-text);">Catatan Pembimbing Industri</div>
         <div class="field-value">{{ $lb->industry_note }}</div>
       </div>
       @endif
@@ -49,7 +49,7 @@
         <form method="POST" action="{{ route('mahasiswa.logbook.destroy', $lb->id) }}" data-confirm="Hapus log book ini?" data-confirm-danger>
           @csrf
           @method('DELETE')
-          <button type="submit" class="btn btn-danger btn-sm">🗑 Hapus</button>
+          <button type="submit" class="btn btn-danger btn-sm"><x-icon name="trash" :size="14"/> Hapus</button>
         </form>
       </div>
     </div>

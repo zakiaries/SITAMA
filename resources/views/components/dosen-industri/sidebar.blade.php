@@ -18,7 +18,7 @@
   <a class="sb-user {{ request()->routeIs('dosen-industri.profile') ? 'sb-user-active' : '' }}"
      href="{{ route('dosen-industri.profile') }}" style="text-decoration:none;">
     @php $initials = collect(explode(' ', $sbUser->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
-    <div class="avatar" style="width:36px;height:36px;font-size:12px;background:rgba(255,255,255,0.18);color:#fff;">
+    <div class="avatar" style="width:36px;height:36px;font-size:12px;">
       {{ $initials }}
     </div>
     <div>

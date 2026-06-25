@@ -33,6 +33,11 @@ use Illuminate\Support\Facades\Route;
 // Root redirect ke login
 Route::get('/', fn() => redirect()->route('login'));
 
+// Halaman publik (info)
+Route::view('/tentang', 'public.about')->name('about');
+Route::view('/bantuan', 'public.help')->name('bantuan');
+Route::view('/kontak', 'public.contact')->name('contact');
+
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

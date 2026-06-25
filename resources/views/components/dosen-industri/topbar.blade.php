@@ -5,8 +5,8 @@
 <div class="topbar">
   <div class="tb-title">{{ $title ?? 'Dashboard' }}</div>
   <div class="tb-right">
-    <span style="font-size:11px;color:var(--text-muted);background:var(--primary-light);border:1px solid var(--primary-light);padding:3px 10px;border-radius:20px;font-weight:600;">
-      🏭 Pembimbing Industri
+    <span style="font-size:11px;color:var(--primary);background:var(--primary-light);border:1px solid var(--primary-light);padding:3px 10px;border-radius:20px;font-weight:600;display:inline-flex;align-items:center;gap:5px;">
+      <x-icon name="factory" :size="12"/> Pembimbing Industri
     </span>
     <a class="notif-btn" href="{{ route('dosen-industri.notifikasi') }}" style="text-decoration:none;color:inherit;" title="Notifikasi">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

@@ -15,7 +15,7 @@
 .dosen-name { font-size:14px;font-weight:700;color:var(--text); }
 .dosen-user { font-size:12px;color:var(--text-muted);margin-bottom:8px; }
 .cap-bar-label { display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px; }
-.cap-bar-track { height:6px;background:#e5e7eb;border-radius:4px;overflow:hidden; }
+.cap-bar-track { height:6px;background:var(--border);border-radius:4px;overflow:hidden; }
 .cap-bar-fill  { height:100%;background:var(--primary);border-radius:4px; }
 .dosen-count { width:50px;height:50px;border-radius:12px;background:var(--primary-light);color:var(--primary-text);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0; }
 .dosen-count .n { font-size:20px;font-weight:800;line-height:1; }
@@ -33,7 +33,7 @@
             font-size:13px;font-weight:700;color:{{ $tab === $key ? 'var(--primary)' : 'var(--text-muted)' }};
             text-decoration:none;display:flex;align-items:center;gap:8px;">
     {{ $label }}
-    <span style="background:{{ $tab === $key ? 'var(--primary-light)' : '#f1f5f9' }};color:{{ $tab === $key ? 'var(--primary-text)' : 'var(--text-muted)' }};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">
+    <span style="background:{{ $tab === $key ? 'var(--primary-light)' : 'var(--warm)' }};color:{{ $tab === $key ? 'var(--primary-text)' : 'var(--text-muted)' }};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;">
       {{ $counts[$key] }}
     </span>
   </a>
@@ -58,8 +58,8 @@
   $max   = 20;
   $pct   = min(round($count / $max * 100), 100);
   $colors = [
-    ['bg'=>'#e8eef8','text'=>'#0c2a5c'],['bg'=>'#e1f5ee','text'=>'#085041'],
-    ['bg'=>'#faeeda','text'=>'#633806'],['bg'=>'#eeedfe','text'=>'#3c3489'],
+    ['bg'=>'var(--blue-tint)','text'=>'var(--primary)'],['bg'=>'var(--success-bg)','text'=>'var(--success-text)'],
+    ['bg'=>'var(--warn-bg)','text'=>'var(--warn-text)'],['bg'=>'var(--purple-bg)','text'=>'var(--purple-text)'],
   ];
   $color    = $colors[$lec->id % count($colors)];
   $initials = collect(explode(' ', $lec->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');

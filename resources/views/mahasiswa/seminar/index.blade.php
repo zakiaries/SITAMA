@@ -4,19 +4,19 @@
 @section('content')
 
   @if(session('success'))
-    <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('success') }}
     </div>
   @endif
 
   @if($errors->any())
-    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ $errors->first() }}
     </div>
   @endif
 
   @if(session('error'))
-    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('error') }}
     </div>
   @endif
@@ -31,25 +31,25 @@
     @endif
   </div>
   <div class="header-banner">
-    <h2>🎓 Seminar Wajib Magang</h2>
+    <h2><x-icon name="cap" :size="20"/> Seminar Wajib Magang</h2>
     <p>Ajukan jadwal seminar Anda sendiri, atau daftar pada seminar yang tersedia.</p>
   </div>
 
   {{-- Syarat kelayakan pengajuan seminar --}}
-  <div class="card" style="margin-bottom:16px;border-left:4px solid {{ $canSubmit ? '#16a34a' : '#f59e0b' }};">
+  <div class="card" style="margin-bottom:16px;border-left:4px solid {{ $canSubmit ? 'var(--success-text)' : 'var(--warning)' }};">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
       <div style="font-size:13px;font-weight:700;color:var(--text);">Syarat Pengajuan Seminar</div>
       @if($canSubmit)
-        <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">✓ Semua syarat terpenuhi</span>
+        <span style="background:var(--success-bg);color:var(--success-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Semua syarat terpenuhi</span>
       @else
-        <span style="background:#fef3c7;color:#854f0b;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Belum lengkap</span>
+        <span style="background:var(--warn-bg);color:var(--warn-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Belum lengkap</span>
       @endif
     </div>
     @foreach($requirements as $req)
     <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;{{ !$loop->last ? 'border-bottom:1px solid var(--border);' : '' }}">
       <div style="flex-shrink:0;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
-        background:{{ $req['met'] ? '#dcfce7' : '#fee2e2' }};color:{{ $req['met'] ? '#16a34a' : '#dc2626' }};">
-        {{ $req['met'] ? '✓' : '✕' }}
+        background:{{ $req['met'] ? 'var(--success-bg)' : 'var(--danger-bg)' }};color:{{ $req['met'] ? 'var(--success-text)' : 'var(--danger)' }};">
+        @if($req['met'])<x-icon name="check" :size="12"/>@else<x-icon name="x" :size="12"/>@endif
       </div>
       <div>
         <div style="font-size:13px;color:var(--text);font-weight:{{ $req['met'] ? '400' : '600' }};">{{ $req['label'] }}</div>
@@ -73,8 +73,8 @@
         <div class="sem-prog">{{ $seminar->program }}</div>
       </div>
       @php
-        $stBg = $seminar->status === 'completed' ? '#dcfce7' : ($seminar->status === 'cancelled' ? '#fee2e2' : '#eff6ff');
-        $stCol = $seminar->status === 'completed' ? '#16a34a' : ($seminar->status === 'cancelled' ? '#dc2626' : '#2563eb');
+        $stBg = $seminar->status === 'completed' ? 'var(--success-bg)' : ($seminar->status === 'cancelled' ? 'var(--danger-bg)' : 'var(--blue-tint)');
+        $stCol = $seminar->status === 'completed' ? 'var(--success-text)' : ($seminar->status === 'cancelled' ? 'var(--danger)' : 'var(--primary)');
       @endphp
       <span class="badge" style="background:{{ $stBg }};color:{{ $stCol }};">{{ ucfirst($seminar->status) }}</span>
     </div>
@@ -87,10 +87,10 @@
     <div style="margin-top:10px;" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
         <span style="color:var(--text-muted);">Audiens terdaftar</span>
-        <span style="font-weight:700;color:{{ $met ? '#16a34a' : '#854f0b' }};">{{ $aud }}/{{ \App\Models\Seminar::MIN_AUDIENCE }} {{ $met ? '✓' : '' }}</span>
+        <span style="font-weight:700;color:{{ $met ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $aud }}/{{ \App\Models\Seminar::MIN_AUDIENCE }} @if($met)<x-icon name="check" :size="11"/>@endif</span>
       </div>
-      <div style="height:6px;background:#e5e7eb;border-radius:20px;overflow:hidden;">
-        <div style="height:100%;width:{{ min(100, $aud / \App\Models\Seminar::MIN_AUDIENCE * 100) }}%;background:{{ $met ? '#16a34a' : '#f59e0b' }};"></div>
+      <div style="height:6px;background:var(--border);border-radius:20px;overflow:hidden;">
+        <div style="height:100%;width:{{ min(100, $aud / \App\Models\Seminar::MIN_AUDIENCE * 100) }}%;background:{{ $met ? 'var(--success-text)' : 'var(--warning)' }};"></div>
       </div>
       @unless($met)
         <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Butuh minimal {{ \App\Models\Seminar::MIN_AUDIENCE }} audiens sebelum seminar dapat dilaksanakan.</div>
@@ -99,12 +99,12 @@
     @if($seminar->status === 'scheduled')
     <div style="display:flex;gap:8px;margin-top:12px;" onclick="event.stopPropagation()">
       <button type="button" class="btn btn-outline btn-sm"
-        onclick="openEditSeminar({{ $seminar->id }}, @js($seminar->title), '{{ $seminar->date?->format('Y-m-d') }}', @js($seminar->time), @js($seminar->location), @js($seminar->description))">✏ Edit</button>
+        onclick="openEditSeminar({{ $seminar->id }}, @js($seminar->title), '{{ $seminar->date?->format('Y-m-d') }}', @js($seminar->time), @js($seminar->location), @js($seminar->description))"><x-icon name="pencil" :size="14"/> Edit</button>
       <form method="POST" action="{{ route('mahasiswa.seminar.destroy', $seminar->id) }}"
             data-confirm="Batalkan pengajuan seminar ini?" data-confirm-danger>
         @csrf
         @method('DELETE')
-        <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;">🗑 Batalkan</button>
+        <button type="submit" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:none;"><x-icon name="trash" :size="14"/> Batalkan</button>
       </form>
     </div>
     @else
@@ -137,7 +137,7 @@
         <div class="sem-prog">Penyaji: {{ $seminar->student->user->name ?? '-' }}</div>
       </div>
       @if($isReg)
-        <span class="badge" style="background:#dcfce7;color:#16a34a;">Terdaftar</span>
+        <span class="badge" style="background:var(--success-bg);color:var(--success-text);">Terdaftar</span>
       @else
         <span class="badge jadwal">Terjadwal</span>
       @endif
@@ -150,17 +150,17 @@
     <div style="margin-top:10px;">
       <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
         <span style="color:var(--text-muted);">Audiens terdaftar</span>
-        <span style="font-weight:700;color:{{ $met ? '#16a34a' : '#854f0b' }};">{{ $aud }}/{{ \App\Models\Seminar::MIN_AUDIENCE }} {{ $met ? '✓' : '' }}</span>
+        <span style="font-weight:700;color:{{ $met ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $aud }}/{{ \App\Models\Seminar::MIN_AUDIENCE }} @if($met)<x-icon name="check" :size="11"/>@endif</span>
       </div>
-      <div style="height:6px;background:#e5e7eb;border-radius:20px;overflow:hidden;">
-        <div style="height:100%;width:{{ min(100, $aud / \App\Models\Seminar::MIN_AUDIENCE * 100) }}%;background:{{ $met ? '#16a34a' : '#f59e0b' }};"></div>
+      <div style="height:6px;background:var(--border);border-radius:20px;overflow:hidden;">
+        <div style="height:100%;width:{{ min(100, $aud / \App\Models\Seminar::MIN_AUDIENCE * 100) }}%;background:{{ $met ? 'var(--success-text)' : 'var(--warning)' }};"></div>
       </div>
     </div>
     @unless($isReg)
     <div style="margin-top:12px;" onclick="event.stopPropagation()">
       <form method="POST" action="{{ route('mahasiswa.seminar.register', $seminar->id) }}">
         @csrf
-        <button type="submit" class="btn btn-primary btn-sm">✓ Daftar sebagai Audiens</button>
+        <button type="submit" class="btn btn-primary btn-sm"><x-icon name="check" :size="14"/> Daftar sebagai Audiens</button>
       </form>
     </div>
     @endunless
@@ -183,7 +183,7 @@
         <div class="sem-prog">{{ $seminar->program }}</div>
       </div>
       @if(in_array($seminar->id, $registeredIds))
-        <span class="badge" style="background:#dcfce7;color:#16a34a;">Terdaftar</span>
+        <span class="badge" style="background:var(--success-bg);color:var(--success-text);">Terdaftar</span>
       @else
         <span class="badge jadwal">Terjadwal</span>
       @endif
@@ -212,7 +212,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <div class="modal-title">Ajukan Jadwal Seminar</div>
-        <button class="modal-close" onclick="document.getElementById('modal-seminar').classList.remove('open')">✕</button>
+        <button class="modal-close" onclick="document.getElementById('modal-seminar').classList.remove('open')"><x-icon name="x" :size="14"/></button>
       </div>
       <form method="POST" action="{{ route('mahasiswa.seminar.store') }}">
         @csrf
@@ -249,7 +249,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <div class="modal-title">Edit Jadwal Seminar</div>
-        <button class="modal-close" onclick="document.getElementById('modal-edit-seminar').classList.remove('open')">✕</button>
+        <button class="modal-close" onclick="document.getElementById('modal-edit-seminar').classList.remove('open')"><x-icon name="x" :size="14"/></button>
       </div>
       <form method="POST" id="form-edit-seminar" action="">
         @csrf

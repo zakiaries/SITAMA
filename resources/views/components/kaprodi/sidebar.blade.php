@@ -31,7 +31,7 @@
       Pengajuan Magang
       @php $pendingCount = \App\Models\CompanyRequest::where('status','pending')->count(); @endphp
       @if($pendingCount > 0)
-        <span style="background:#dc2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:auto;">{{ $pendingCount }}</span>
+        <span style="background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:auto;">{{ $pendingCount }}</span>
       @endif
     </a>
     <a class="nav-item {{ request()->routeIs('kaprodi.lowongan.*') ? 'active' : '' }}" href="{{ route('kaprodi.lowongan.index') }}">
@@ -45,7 +45,7 @@
   <a class="sb-user {{ request()->routeIs('kaprodi.profile') ? 'sb-user-active' : '' }}"
      href="{{ route('kaprodi.profile') }}" style="text-decoration:none;">
     @php $initials = collect(explode(' ', $sbUser->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
-    <div class="avatar" style="width:36px;height:36px;font-size:12px;background:rgba(255,255,255,0.18);color:#fff;">
+    <div class="avatar" style="width:36px;height:36px;font-size:12px;">
       {{ $initials }}
     </div>
     <div>

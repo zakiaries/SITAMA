@@ -5,26 +5,19 @@
 @push('styles')
 <style>
 .industri-hero {
-  background: #2d3e6e;
-  background-image: url('{{ asset("images/pattern.png") }}');
-  background-size: 200px;
-  border-radius: 14px; padding: 28px 24px 24px;
-  margin-bottom: 20px; position: relative; overflow: hidden;
+  background: var(--warm);
+  border-radius: 14px; padding: 24px 26px;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 18px;
 }
-.industri-hero::before {
-  content:''; position:absolute; inset:0;
-  background:rgba(45,62,110,0.82);
-}
-.industri-hero > * { position:relative; z-index:1; }
-.hero-hello { font-size:12px;color:rgba(255,255,255,0.7);letter-spacing:1px;font-weight:600;margin-bottom:4px; }
-.hero-name  { font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;line-height:1.3; }
-.hero-sub   { font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:16px; }
+.hero-av { width:64px;height:64px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0; }
+.hero-role { font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--primary);text-transform:uppercase; }
+.hero-name  { font-size:26px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.1;letter-spacing:-0.02em; }
 .hero-search {
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,0.95);border-radius:10px;padding:10px 14px;
+  margin-top:14px;display:flex;align-items:center;gap:9px;
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text-muted);max-width:420px;
 }
-.hero-search svg { flex-shrink:0;color:#9ca3af; }
-.hero-search input { border:none;outline:none;background:transparent;font-size:13px;color:#1e2a4a;width:100%;font-family:inherit; }
+.hero-search svg { flex-shrink:0; }
+.hero-search input { border:none;outline:none;background:transparent;font-size:14px;color:var(--text);width:100%;font-family:inherit; }
 
 .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px; }
 .stat-industri {
@@ -46,49 +39,52 @@
 .student-name { font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px; }
 .student-nim  { font-size:12px;color:var(--text-muted);margin-bottom:4px; }
 .student-meta { font-size:11px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap; }
-.student-meta span { background:#f1f5f9;padding:2px 8px;border-radius:20px; }
+.student-meta span { background:var(--warm);padding:2px 8px;border-radius:20px; }
 
 .logbook-bar { margin-top:8px; }
 .logbook-bar-label { display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px; }
-.logbook-bar-track { height:5px;background:#e5e7eb;border-radius:4px;overflow:hidden; }
+.logbook-bar-track { height:5px;background:var(--border);border-radius:4px;overflow:hidden; }
 .logbook-bar-fill  { height:100%;background:var(--primary);border-radius:4px;transition:width .3s; }
 
-.badge-selesai { background:#f0fdf4;color:#16a34a;border:1px solid #86efac;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0; }
-.badge-aktif   { background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0; }
+.badge-selesai { background:var(--success-bg);color:var(--success-text);border:1px solid #A7E8CF;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0; }
+.badge-aktif   { background:var(--blue-tint);color:var(--primary);border:1px solid #C7DCFF;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0; }
 </style>
 @endpush
 
 @section('content')
 
 {{-- Hero --}}
+@php $heroInit = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
 <div class="industri-hero">
-  <div class="hero-hello">HELLO,</div>
-  <div class="hero-name">{{ $user->name }}</div>
-  <div class="hero-sub">🏭 Pembimbing Industri</div>
-  <form method="GET" action="{{ route('dosen-industri.dashboard') }}">
-    <div class="hero-search">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input name="search" placeholder="Cari nama mahasiswa atau jurusan..." value="{{ request('search') }}">
-    </div>
-  </form>
+  <div class="hero-av">{{ $heroInit }}</div>
+  <div style="flex:1;">
+    <div class="hero-role">Pembimbing Industri</div>
+    <div class="hero-name">{{ $user->name }}</div>
+    <form method="GET" action="{{ route('dosen-industri.dashboard') }}">
+      <div class="hero-search">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input name="search" placeholder="Cari nama mahasiswa atau jurusan..." value="{{ request('search') }}">
+      </div>
+    </form>
+  </div>
 </div>
 
 {{-- Statistik --}}
 <div class="stat-grid">
   <div class="stat-industri">
-    <div class="icon">👨‍🎓</div>
+    <div class="icon" style="color:var(--primary);"><x-icon name="cap" :size="24"/></div>
     <div class="val">{{ $totalMahasiswa }}</div>
     <div class="lbl">Total Mahasiswa</div>
   </div>
   <div class="stat-industri">
-    <div class="icon">🔄</div>
+    <div class="icon" style="color:var(--success-text);"><x-icon name="refresh" :size="24"/></div>
     <div class="val">{{ $aktif }}</div>
     <div class="lbl">Sedang Aktif</div>
   </div>
   <div class="stat-industri">
-    <div class="icon">💬</div>
+    <div class="icon" style="color:var(--primary);"><x-icon name="message" :size="24"/></div>
     <div class="val">{{ $belumDikomen }}</div>
     <div class="lbl">Belum Dikomen</div>
   </div>
@@ -112,9 +108,9 @@
   $dikomen     = $student->logBooks->whereNotNull('industry_note')->count();
   $pct         = $totalLog > 0 ? round($dikomen / $totalLog * 100) : 0;
   $colors = [
-    ['bg'=>'#d1fae5','text'=>'#065f46'],['bg'=>'#e0f2fe','text'=>'#075985'],
-    ['bg'=>'#fef9c3','text'=>'#713f12'],['bg'=>'#f3e8ff','text'=>'#6b21a8'],
-    ['bg'=>'#fee2e2','text'=>'#991b1b'],
+    ['bg'=>'var(--success-bg)','text'=>'var(--success-text)'],['bg'=>'var(--blue-tint)','text'=>'var(--primary)'],
+    ['bg'=>'var(--warn-bg)','text'=>'var(--warn-text)'],['bg'=>'var(--purple-bg)','text'=>'var(--purple-text)'],
+    ['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
   ];
   $color   = $colors[$student->id % count($colors)];
   $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
@@ -149,7 +145,7 @@
 </a>
 @empty
 <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
-  <div style="font-size:40px;margin-bottom:12px;">🏭</div>
+  <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="factory" :size="40"/></div>
   <p>Belum ada mahasiswa yang ditugaskan.</p>
 </div>
 @endforelse

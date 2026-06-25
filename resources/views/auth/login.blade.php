@@ -5,354 +5,207 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — SITAMA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --primary:#0061FF;--primary-dark:#0048BD;
+    --text:#1E1919;--text-secondary:#637282;--text-muted:#9EA9B2;
+    --bg:#FFFFFF;--warm:#F7F5F2;--warm-2:#F0EDE8;
+    --border:#D8D6D3;--border-subtle:#EDECEA;--blue-tint:#EAF1FF;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px;
+    font-family:'Archivo','Segoe UI',sans-serif;color:var(--text);
+    background:radial-gradient(1200px 600px at 50% -10%,#EAF1FF,#F2F4FF 45%,#EEF1F8);-webkit-font-smoothing:antialiased;}
+  a{text-decoration:none;}
+  @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes bgfade{from{opacity:0;}to{opacity:1;}}
+  .an{opacity:0;animation:rise .55s var(--ease) forwards;}
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
-      background: #f0ece3;
-    }
+  .shell{position:relative;z-index:1;width:100%;max-width:960px;display:flex;border-radius:28px;
+    background:var(--bg);box-shadow:0 30px 80px rgba(30,40,90,.18);}
+  .shell::before{content:'';position:absolute;width:120px;height:120px;border-radius:50%;
+    background:var(--primary);top:-34px;left:-34px;z-index:0;opacity:.9;}
+  .shell::after{content:'';position:absolute;width:120px;height:120px;border-radius:50%;
+    background:#E7ECFF;bottom:-34px;right:-34px;z-index:0;}
 
-    /* ── LEFT PANEL ── */
-    .left-panel {
-      width: 45%;
-      min-height: 100vh;
-      background: #2d3e6e;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 48px 40px;
-      position: relative;
-      overflow: hidden;
-    }
-    .left-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: url('{{ asset("images/pattern.png") }}');
-      background-size: 220px;
-      background-repeat: repeat;
-      opacity: 0.08;
-    }
-    .left-content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
-    .logo-wrap {
-      margin: 0 auto 24px;
-      width: 110px;
-      height: 110px;
-      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.25));
-    }
-    .logo-wrap img {
-      width: 110px;
-      height: 110px;
-      object-fit: contain;
-    }
-    .brand-name {
-      font-size: 36px;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: 3px;
-      margin-bottom: 12px;
-    }
-    .brand-tagline {
-      font-size: 18px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.9);
-      margin-bottom: 10px;
-    }
-    .brand-sub {
-      font-size: 13px;
-      color: rgba(255,255,255,0.6);
-      line-height: 1.6;
-      max-width: 280px;
-      margin: 0 auto;
-    }
-    .left-divider {
-      width: 40px;
-      height: 3px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 2px;
-      margin: 20px auto;
-    }
+  .pane-left{position:relative;z-index:2;flex:1;background:var(--bg);border-radius:28px 0 0 28px;
+    padding:54px 50px;display:flex;flex-direction:column;justify-content:center;}
+  .brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:22px;}
+  .brand .logo{width:40px;height:40px;border-radius:50%;object-fit:contain;}
+  .brand .bn{font-size:16px;font-weight:800;letter-spacing:1px;color:var(--text);}
+  .f-title{font-size:30px;font-weight:800;letter-spacing:-0.01em;text-align:center;}
+  .f-sub{font-size:13.5px;color:var(--text-secondary);text-align:center;margin-top:6px;margin-bottom:26px;}
 
-    /* ── RIGHT PANEL ── */
-    .right-panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #f0ece3;
-      padding: 40px 24px;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      background: #fff;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(45,62,110,0.10);
-    }
+  .alert{padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:16px;font-weight:500;}
+  .alert.err{background:#FBEAE8;border:1px solid #F0C4BE;color:#C0392B;}
+  .alert.ok{background:#E0F7EF;border:1px solid #A7E8CF;color:#07976A;}
 
-    /* Illustration block */
-    .illus-block {
-      background: #e8e4dc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 24px 24px;
-      min-height: 220px;
-    }
-    .illus-block img {
-      max-width: 240px;
-      max-height: 180px;
-      object-fit: contain;
-    }
+  .field{margin-bottom:15px;}
+  .iwrap{position:relative;}
+  .iwrap>.lead-ic{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
+  .iwrap input{width:100%;height:52px;padding:0 16px 0 46px;border:1.5px solid transparent;border-radius:12px;
+    font-size:14.5px;font-family:inherit;color:var(--text);background:var(--warm);outline:none;
+    transition:border-color .18s var(--ease),box-shadow .18s var(--ease),background .18s;}
+  .iwrap input::placeholder{color:var(--text-muted);}
+  /* Hide browser's built-in password reveal/clear (Edge/IE) so it doesn't
+     duplicate our custom eye button. */
+  .iwrap input::-ms-reveal,.iwrap input::-ms-clear{display:none;}
+  .iwrap input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(0,97,255,.12);}
+  .eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:6px;display:flex;border-radius:8px;}
+  .eye:hover{color:var(--primary);}
+  .frow{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 22px;}
+  .remember{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;user-select:none;}
+  .remember input{width:16px;height:16px;accent-color:var(--primary);}
+  .forgot{font-size:12.5px;color:var(--primary);font-weight:600;}
+  .forgot:hover{text-decoration:underline;}
 
-    /* Form block */
-    .form-block {
-      padding: 28px 32px 32px;
-    }
-    .form-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #1e2a4a;
-      margin-bottom: 6px;
-    }
-    .form-subtitle {
-      font-size: 13px;
-      color: #9ca3af;
-      margin-bottom: 24px;
-    }
+  .btn{display:block;margin:0 auto;min-width:170px;height:50px;padding:0 26px;background:var(--primary);color:#fff;border:none;border-radius:9999px;
+    font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:-0.01em;
+    box-shadow:0 12px 24px rgba(0,97,255,.3);transition:background .15s,transform .1s var(--ease),box-shadow .15s;}
+  .btn:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 16px 30px rgba(0,97,255,.36);}
+  .btn:active{transform:scale(.98);}
 
-    .alert-error {
-      background: #fef2f2;
-      border: 1px solid #fca5a5;
-      color: #dc2626;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      margin-bottom: 18px;
-    }
-    .alert-success {
-      background: #f0fdf4;
-      border: 1px solid #86efac;
-      color: #16a34a;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      margin-bottom: 18px;
-    }
+  .divider{display:flex;align-items:center;gap:12px;margin:26px 0 16px;color:var(--text-muted);font-size:12.5px;font-weight:600;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border-subtle);}
+  .signup{text-align:center;font-size:13.5px;color:var(--text-secondary);}
+  .signup a{color:var(--primary);font-weight:700;}
+  .signup a:hover{text-decoration:underline;}
 
-    .field {
-      margin-bottom: 16px;
-    }
-    .field label {
-      display: none;
-    }
-    .input-wrap {
-      position: relative;
-    }
-    .input-wrap > svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      pointer-events: none;
-    }
-    .input-wrap input {
-      width: 100%;
-      padding: 13px 14px 13px 42px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 14px;
-      font-family: inherit;
-      color: #1e2a4a;
-      background: #fafafa;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .input-wrap input::placeholder { color: #b0b7c3; }
-    .input-wrap input:focus {
-      border-color: #2d3e6e;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(45,62,110,0.08);
-    }
-    .eye-btn {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #9ca3af;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-    }
-    .eye-btn:hover { color: #2d3e6e; }
+  .pane-right{position:relative;z-index:2;flex:1;border-radius:0 28px 28px 0;overflow:hidden;
+    background:linear-gradient(150deg,#0061FF 0%,#2A78FF 55%,#0048BD 100%);
+    display:flex;align-items:center;justify-content:center;padding:40px;min-height:540px;}
+  .waves{position:absolute;inset:0;opacity:.5;}
+  .glass{position:relative;z-index:2;width:330px;max-width:90%;border-radius:22px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    box-shadow:0 20px 50px rgba(0,0,0,.2);padding:26px 22px;}
+  .glass img{display:block;width:100%;height:auto;}
+  .badge{position:absolute;z-index:3;left:calc(50% - 200px);top:calc(50% + 30px);
+    width:64px;height:64px;border-radius:18px;background:#fff;box-shadow:0 14px 30px rgba(0,0,0,.18);
+    display:flex;align-items:center;justify-content:center;color:var(--primary);}
+  .badge2{position:absolute;z-index:3;right:calc(50% - 196px);top:calc(50% - 150px);
+    width:54px;height:54px;border-radius:16px;background:#fff;box-shadow:0 14px 30px rgba(0,0,0,.18);
+    display:flex;align-items:center;justify-content:center;color:#0AC27D;}
 
-    .forgot {
-      text-align: right;
-      margin-bottom: 22px;
-    }
-    .forgot a {
-      font-size: 12px;
-      color: #2d3e6e;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .forgot a:hover { text-decoration: underline; }
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0;animation:bgfade .9s ease .1s forwards;}
+  .bg .orb{position:absolute;border-radius:50%;filter:blur(46px);opacity:.5;}
+  .bg .o1{width:360px;height:360px;background:#9DB8FF;left:-90px;top:-70px;}
+  .bg .o2{width:320px;height:320px;background:#CBD8FF;right:-80px;bottom:-60px;}
+  .bg .o3{width:200px;height:200px;background:#BFE0FF;right:16%;top:6%;}
+  .bg .o4{width:160px;height:160px;background:#D7E6FF;left:10%;bottom:8%;}
+  .bg .ring{position:absolute;border-radius:50%;border:2px solid rgba(0,97,255,.12);}
+  .bg .r1{width:130px;height:130px;left:8%;bottom:18%;}
+  .bg .r2{width:64px;height:64px;right:11%;top:22%;}
+  .bg .r3{width:38px;height:38px;left:22%;top:16%;border-color:rgba(0,97,255,.18);}
+  .bg .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(0,97,255,.12) 1.4px,transparent 1.4px);background-size:26px 26px;opacity:.6;
+    -webkit-mask-image:radial-gradient(circle at 50% 46%,transparent 340px,#000 600px);mask-image:radial-gradient(circle at 50% 46%,transparent 340px,#000 600px);}
 
-    .btn-login {
-      width: 100%;
-      padding: 14px;
-      background: #2d3e6e;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
-      letter-spacing: 0.3px;
-    }
-    .btn-login:hover { background: #3a52a0; }
-    .btn-login:active { transform: scale(0.99); }
+  .topmini{position:fixed;top:22px;left:0;right:0;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:0 32px;pointer-events:none;}
+  .topmini .tm-brand{font-weight:800;letter-spacing:1.5px;color:var(--text);font-size:15px;pointer-events:auto;}
+  .topmini .tm-help{font-size:13px;font-weight:600;color:var(--text-secondary);pointer-events:auto;}
+  .topmini .tm-help:hover{color:var(--primary);}
+  .footmini{position:fixed;bottom:18px;left:0;right:0;z-index:1;text-align:center;font-size:12px;color:var(--text-secondary);}
+  .footmini a{color:var(--text-secondary);font-weight:600;}
+  .footmini a:hover{color:var(--primary);}
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      body { flex-direction: column; }
-      .left-panel {
-        width: 100%;
-        min-height: auto;
-        padding: 32px 24px;
-      }
-      .logo-wrap { width: 72px; height: 72px; margin-bottom: 16px; }
-      .logo-wrap img { width: 44px; height: 44px; }
-      .brand-name { font-size: 26px; }
-      .brand-tagline { font-size: 15px; }
-      .right-panel { padding: 28px 16px 40px; }
-      .form-block { padding: 24px 24px 28px; }
-    }
+  @media (max-width:820px){
+    .pane-right{display:none;}
+    .pane-left{border-radius:28px;padding:44px 30px;}
+    .topmini .tm-help{display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .an{animation:none!important;opacity:1!important;}
+    .bg{animation:none!important;opacity:1!important;}
+  }
   </style>
 </head>
 <body>
 
-  {{-- LEFT: Branding --}}
-  <div class="left-panel">
-    <div class="left-content">
-      <div class="logo-wrap">
-        <img src="{{ asset('images/logo.png') }}" alt="SITAMA Logo">
-      </div>
-      <div class="brand-name">SITAMA</div>
-      <div class="left-divider"></div>
-      <div class="brand-tagline">Selamat Datang di SITAMA</div>
-      <div class="brand-sub">Bantu kegiatan magang dan bimbingan jadi lebih mudah!</div>
-    </div>
+  <div class="bg">
+    <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><span class="orb o4"></span>
+    <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <span class="dots"></span>
+  </div>
+  <div class="topmini">
+    <div class="tm-brand an" style="animation-delay:.08s">SITAMA</div>
+    <a class="tm-help an" style="animation-delay:.12s" href="{{ route('bantuan') }}">Butuh bantuan?</a>
   </div>
 
-  {{-- RIGHT: Login Form --}}
-  <div class="right-panel">
-    <div class="login-card">
-
-      {{-- Illustration --}}
-      <div class="illus-block">
-        <img src="{{ asset('images/login_vektor.png') }}" alt="Login Illustration">
+  <div class="shell">
+    {{-- LEFT: FORM --}}
+    <div class="pane-left">
+      <div class="brand an" style="animation-delay:.05s">
+        <img class="logo" src="{{ asset('images/logo.png') }}" alt="SITAMA logo">
+        <span class="bn">SITAMA</span>
       </div>
+      <div class="f-title an" style="animation-delay:.1s">LOGIN</div>
+      <div class="f-sub an" style="animation-delay:.14s">Masuk untuk melanjutkan ke sistem magang &amp; bimbingan.</div>
 
-      {{-- Form --}}
-      <div class="form-block">
-        <div class="form-title">Login</div>
-        <div class="form-subtitle">Masuk untuk melanjutkan</div>
+      @if(session('success'))
+        <div class="alert ok">{{ session('success') }}</div>
+      @endif
+      @if($errors->any())
+        <div class="alert err">{{ $errors->first() }}</div>
+      @endif
 
-        @if(session('success'))
-          <div class="alert-success">{{ session('success') }}</div>
-        @endif
-
-        @if($errors->any())
-          <div class="alert-error">{{ $errors->first() }}</div>
-        @endif
-
-        <form method="POST" action="{{ route('login') }}">
-          @csrf
-
-          {{-- NIM / NIP --}}
-          <div class="field">
-            <label for="username">NIM / NIP</label>
-            <div class="input-wrap">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-              </svg>
-              <input id="username" type="text" name="username"
-                value="{{ old('username') }}"
-                placeholder="NIM / NIP"
-                autocomplete="username">
-            </div>
+      <form method="POST" action="{{ route('login') }}">
+        @csrf
+        <div class="field an" style="animation-delay:.2s">
+          <div class="iwrap">
+            <span class="lead-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" name="username" value="{{ old('username') }}" placeholder="NIM / NIP" autocomplete="username" required>
           </div>
-
-          {{-- Kata Sandi --}}
-          <div class="field">
-            <label for="password">Kata Sandi</label>
-            <div class="input-wrap">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-              </svg>
-              <input id="password" type="password" name="password"
-                placeholder="Kata sandi"
-                autocomplete="current-password">
-              <button type="button" class="eye-btn" onclick="togglePassword()" title="Tampilkan/sembunyikan">
-                <svg id="eye-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
-                  <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
-                <svg id="eye-off-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none;">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="forgot">
-            <a href="#">Lupa Kata Sandi ?</a>
-          </div>
-
-          <button type="submit" class="btn-login">Login</button>
-        </form>
-
-        <div style="text-align:center;margin-top:16px;font-size:13px;color:#9ca3af;">
-          Belum punya akun? <a href="{{ route('register') }}" style="color:#2d3e6e;font-weight:700;text-decoration:none;">Daftar di sini</a>
         </div>
-      </div>
+        <div class="field an" style="animation-delay:.26s">
+          <div class="iwrap">
+            <span class="lead-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+            <input id="pw" type="password" name="password" placeholder="Kata sandi" autocomplete="current-password" required>
+            <button type="button" class="eye" onclick="togPw()" title="Tampilkan / sembunyikan">
+              <svg id="es" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg id="eh" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
 
+        <div class="frow an" style="animation-delay:.3s">
+          <label class="remember"><input type="checkbox" name="remember"> Ingat saya</label>
+          <a class="forgot" href="#">Lupa kata sandi?</a>
+        </div>
+
+        <button type="submit" class="btn an" style="animation-delay:.36s">Masuk Sekarang</button>
+      </form>
+
+      <div class="divider an" style="animation-delay:.42s">SITAMA Politeknik</div>
+      <div class="signup an" style="animation-delay:.46s">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></div>
+    </div>
+
+    {{-- RIGHT: VISUAL --}}
+    <div class="pane-right">
+      <svg class="waves" viewBox="0 0 400 540" preserveAspectRatio="xMidYMid slice" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2">
+        <path d="M-40 120 C80 60 140 200 260 150 S440 80 470 170"/>
+        <path d="M-40 220 C80 160 140 300 260 250 S440 180 470 270"/>
+        <path d="M-40 360 C80 300 140 440 260 390 S440 320 470 410"/>
+      </svg>
+
+      <div class="badge an" style="animation-delay:.5s"><svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+      <div class="badge2 an" style="animation-delay:.58s"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+
+      <div class="glass an" style="animation-delay:.34s">
+        <img src="{{ asset('images/login_vektor.png') }}" alt="Ilustrasi login">
+      </div>
     </div>
   </div>
+
+  <div class="footmini an" style="animation-delay:.55s">© {{ date('Y') }} SITAMA · Sistem Informasi Magang &nbsp;·&nbsp; <a href="{{ route('about') }}">Tentang</a> &nbsp;·&nbsp; <a href="{{ route('bantuan') }}">Bantuan</a> &nbsp;·&nbsp; <a href="{{ route('contact') }}">Kontak</a></div>
 
   <script>
-    function togglePassword() {
-      var input    = document.getElementById('password');
-      var eyeOn    = document.getElementById('eye-off-icon');
-      var eyeOff   = document.getElementById('eye-icon');
-      if (input.type === 'password') {
-        input.type = 'text';
-        eyeOn.style.display  = 'block';
-        eyeOff.style.display = 'none';
-      } else {
-        input.type = 'password';
-        eyeOn.style.display  = 'none';
-        eyeOff.style.display = 'block';
-      }
+    function togPw(){
+      var i=document.getElementById('pw'),s=document.getElementById('es'),h=document.getElementById('eh');
+      if(i.type==='password'){i.type='text';s.style.display='none';h.style.display='block';}
+      else{i.type='password';s.style.display='block';h.style.display='none';}
     }
   </script>
 </body>

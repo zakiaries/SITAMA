@@ -13,10 +13,10 @@
 .low-title { font-size:15px;font-weight:700;color:var(--text); }
 .low-meta { font-size:12px;color:var(--text-muted);margin-top:2px; }
 .st-badge { font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;flex-shrink:0; }
-.st-active { background:#dcfce7;color:#16a34a; }
-.st-closed { background:#f1f5f9;color:#64748b; }
+.st-active { background:var(--success-bg);color:var(--success-text); }
+.st-closed { background:var(--warm);color:var(--text-muted); }
 .low-tags { display:flex;gap:6px;flex-wrap:wrap;margin-top:10px; }
-.low-tag { background:#f1f5f9;color:var(--text);font-size:11px;padding:2px 9px;border-radius:6px; }
+.low-tag { background:var(--warm);color:var(--text);font-size:11px;padding:2px 9px;border-radius:6px; }
 .low-contact { font-size:12px;color:var(--text-muted);margin-top:10px; }
 .low-foot { display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border); }
 .low-actions { display:flex;gap:8px; }
@@ -26,10 +26,10 @@
 @section('content')
 
 @if(session('success'))
-  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 
-<div style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;">
+<div style="background:var(--blue-tint);border:1px solid #C7DCFF;color:var(--primary);padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;">
   Lowongan di sini bersifat <strong>pengumuman/informasi</strong> dari perusahaan (mis. via WA) yang Anda input.
   Mahasiswa hanya melihat info & kontak, lalu menghubungi pihak terkait sendiri di luar aplikasi.
 </div>
@@ -79,7 +79,7 @@
 
   @if($job->pic_name || $job->pic_email || $job->pic_phone)
   <div class="low-contact">
-    📞 Kontak:
+    <x-icon name="phone" :size="13"/> Kontak:
     {{ $job->pic_name ?: '-' }}
     @if($job->pic_email) · {{ $job->pic_email }} @endif
     @if($job->pic_phone) · {{ $job->pic_phone }} @endif
@@ -89,21 +89,21 @@
   <div class="low-foot">
     <div class="low-meta">Diposting {{ $job->created_at->format('d M Y') }}</div>
     <div class="low-actions">
-      <a href="{{ route('kaprodi.lowongan.edit', $job) }}" class="btn btn-outline btn-sm">✏ Edit</a>
+      <a href="{{ route('kaprodi.lowongan.edit', $job) }}" class="btn btn-outline btn-sm"><x-icon name="pencil" :size="14"/> Edit</a>
       <form method="POST" action="{{ route('kaprodi.lowongan.toggle', $job) }}">
         @csrf @method('PATCH')
-        <button type="submit" class="btn btn-outline btn-sm">{{ $job->status === 'active' ? '🔒 Tutup' : '🔓 Buka' }}</button>
+        <button type="submit" class="btn btn-outline btn-sm">@if($job->status === 'active')<x-icon name="lock" :size="14"/> Tutup @else<x-icon name="lock-open" :size="14"/> Buka @endif</button>
       </form>
       <form method="POST" action="{{ route('kaprodi.lowongan.destroy', $job) }}" data-confirm="Hapus pengumuman ini?" data-confirm-danger>
         @csrf @method('DELETE')
-        <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:none;">🗑</button>
+        <button type="submit" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:none;"><x-icon name="trash" :size="14"/></button>
       </form>
     </div>
   </div>
 </div>
 @empty
 <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
-  <div style="font-size:40px;margin-bottom:12px;">📋</div>
+  <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="clipboard" :size="40"/></div>
   <p style="margin-bottom:16px;">Belum ada pengumuman lowongan pada kategori ini.</p>
   <a href="{{ route('kaprodi.lowongan.create') }}" class="btn btn-primary">+ Tambah Pengumuman Pertama</a>
 </div>

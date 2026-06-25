@@ -2,7 +2,7 @@
   <div class="modal-box">
     <div class="modal-header">
       <div class="modal-title">Tambah Log Book</div>
-      <button class="modal-close" onclick="document.getElementById('modal-logbook').classList.remove('open')">✕</button>
+      <button class="modal-close" onclick="document.getElementById('modal-logbook').classList.remove('open')"><x-icon name="x" :size="14"/></button>
     </div>
     <form method="POST" action="{{ route('mahasiswa.logbook.store') }}">
       @csrf

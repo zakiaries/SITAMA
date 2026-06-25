@@ -4,11 +4,6 @@
 
 @push('styles')
 <style>
-.profile-hero {
-  background: #2d3e6e;
-  background-image: url('{{ asset("images/pattern.png") }}');
-  background-size: 200px;
-}
 .stat-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px; }
 .stat-mini { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center; }
 .stat-mini .val { font-size:24px;font-weight:800;color:var(--primary); }
@@ -19,7 +14,7 @@
 @section('content')
 
 @if(session('success'))
-  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
     {{ session('success') }}
   </div>
 @endif
@@ -33,9 +28,9 @@
     <div class="profile-role">Pembimbing Industri</div>
     <div class="profile-email">{{ $user->email }}</div>
   </div>
-  <button class="btn" onclick="document.getElementById('modal-edit-profile').classList.add('open')"
-    style="margin-left:auto;background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.25);">
-    ✏ Edit Profil
+  <button class="btn btn-ghost" onclick="document.getElementById('modal-edit-profile').classList.add('open')"
+    style="margin-left:auto;">
+    <x-icon name="pencil" :size="15"/> Edit Profil
   </button>
 </div>
 
@@ -60,16 +55,28 @@
 
   <div class="card">
     <div class="card-title" style="margin-bottom:14px;">Pengaturan Akun</div>
-    <div class="setting-row" onclick="document.getElementById('modal-edit-profile').classList.add('open')" style="cursor:pointer;">
-      <span>✏ Edit Profil</span><span class="setting-arr">›</span>
-    </div>
-    <div class="setting-row"><span>❓ Help &amp; Support</span><span class="setting-arr">›</span></div>
-    <div class="setting-row"><span>ℹ About App</span><span class="setting-arr">›</span></div>
-    <div class="setting-row" style="color:var(--danger);">
-      <form method="POST" action="{{ route('logout') }}" style="width:100%;">
+    <div class="settings">
+      <div class="setting-row" onclick="document.getElementById('modal-edit-profile').classList.add('open')">
+        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></div>
+        <div class="setting-main"><div class="setting-label">Edit Profil</div><div class="setting-desc">Ubah nama, email, atau password</div></div>
+        <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="setting-row">
+        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="setting-main"><div class="setting-label">Help &amp; Support</div><div class="setting-desc">Bantuan dan pusat dukungan</div></div>
+        <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="setting-row">
+        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+        <div class="setting-main"><div class="setting-label">About App</div><div class="setting-desc">Versi &amp; informasi aplikasi</div></div>
+        <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <form method="POST" action="{{ route('logout') }}">
         @csrf
-        <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;width:100%;text-align:left;display:flex;justify-content:space-between;font-family:inherit;">
-          <span>⎋ Log Out</span><span>›</span>
+        <button type="submit" class="setting-row danger">
+          <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+          <div class="setting-main"><div class="setting-label">Log Out</div><div class="setting-desc">Keluar dari akun ini</div></div>
+          <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </form>
     </div>

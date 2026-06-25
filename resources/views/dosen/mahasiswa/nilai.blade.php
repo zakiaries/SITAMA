@@ -12,7 +12,7 @@
   display: flex; align-items: center; gap: 14px; padding: 16px 18px;
   cursor: pointer; user-select: none; transition: background .15s;
 }
-.accordion-header:hover { background: #f8fafc; }
+.accordion-header:hover { background: var(--warm); }
 .accordion-icon-wrap {
   width: 38px; height: 38px; border-radius: 10px; background: var(--primary-light);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -37,21 +37,21 @@
   transition: border-color .15s;
 }
 .score-input:focus  { border-color: var(--primary); }
-.score-input:invalid { border-color: #dc2626; }
+.score-input:invalid { border-color: var(--danger); }
 </style>
 @endpush
 
 @section('content')
 
 @if(session('success'))
-  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
     {{ session('success') }}
   </div>
 @endif
 
 {{-- Header --}}
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-  <a href="{{ route('dosen.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">← Kembali</a>
+  <a href="{{ route('dosen.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>
   <div>
     <div class="page-title" style="margin-bottom:2px;">Input Nilai</div>
     <div style="font-size:12px;color:var(--text-muted);">{{ $student->user->name }} — {{ $student->user->username }}</div>
@@ -61,7 +61,7 @@
 {{-- Info Card --}}
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:14px;">
   @php $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
-  <div style="width:42px;height:42px;border-radius:50%;background:#e8eef8;color:#0c2a5c;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">
+  <div style="width:42px;height:42px;border-radius:50%;background:var(--blue-tint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">
     {{ $initials }}
   </div>
   <div style="flex:1;">
@@ -69,9 +69,9 @@
     <div style="font-size:12px;color:var(--text-muted);">{{ $internship->company->name ?? '-' }} · {{ $internship->position }}</div>
   </div>
   @if($internship->is_finished)
-    <span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">✓ Magang Selesai</span>
+    <span style="background:var(--success-bg);color:var(--success-text);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Magang Selesai</span>
   @else
-    <span style="background:#fef9c3;color:#854f0b;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">⚠ Magang Aktif</span>
+    <span style="background:var(--warn-bg);color:var(--warn-text);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="alert" :size="12"/> Magang Aktif</span>
   @endif
 </div>
 
@@ -80,7 +80,7 @@
   @csrf
 
   @php
-    $componentIcons = ['📋', '💻', '🤝', '💡'];
+    $componentIcons = ['clipboard', 'code', 'handshake', 'bulb'];
     $i = 0;
   @endphp
 
@@ -92,7 +92,7 @@
   <div class="accordion-section open">
     <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
       <div class="accordion-icon-wrap">
-        <span style="font-size:18px;">{{ $icon }}</span>
+        <span style="color:var(--primary);display:inline-flex;"><x-icon :name="$icon" :size="18"/></span>
       </div>
       <div class="accordion-title">{{ $component->name }}</div>
       <svg class="accordion-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

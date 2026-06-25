@@ -4,17 +4,17 @@
 @section('content')
 
   @if(session('success'))
-    <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('success') }}
     </div>
   @endif
   @if(session('error'))
-    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('error') }}
     </div>
   @endif
   @if($errors->any())
-    <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ $errors->first() }}
     </div>
   @endif
@@ -44,9 +44,9 @@
   @if($report)
     @php
       $badge = match($report->status) {
-        'approved' => ['#dcfce7', '#16a34a', 'Disetujui'],
-        'rejected' => ['#fee2e2', '#dc2626', 'Perlu Revisi'],
-        default    => ['#fef9c3', '#854f0b', 'Menunggu Persetujuan'],
+        'approved' => ['var(--success-bg)', 'var(--success-text)', 'Disetujui'],
+        'rejected' => ['var(--danger-bg)', 'var(--danger)', 'Perlu Revisi'],
+        default    => ['var(--warn-bg)', 'var(--warn-text)', 'Menunggu Persetujuan'],
       };
     @endphp
     <div class="card" style="margin-bottom:16px;">
@@ -68,15 +68,15 @@
       </div>
 
       @if($report->lecturer_note)
-        <div style="margin-top:14px;padding:12px 14px;border-radius:8px;background:{{ $report->status==='rejected' ? '#fef2f2' : '#f8fafc' }};border:1px solid {{ $report->status==='rejected' ? '#fecaca' : 'var(--border)' }};">
+        <div style="margin-top:14px;padding:12px 14px;border-radius:8px;background:{{ $report->status==='rejected' ? 'var(--danger-bg)' : 'var(--warm)' }};border:1px solid {{ $report->status==='rejected' ? '#F0C4BE' : 'var(--border)' }};">
           <div class="field-label" style="margin-bottom:4px;">Catatan Dosen</div>
           <div style="font-size:13px;color:var(--text);">{{ $report->lecturer_note }}</div>
         </div>
       @endif
 
       @if($report->status === 'approved')
-        <div style="margin-top:14px;font-size:13px;color:#16a34a;font-weight:600;">
-          ✓ Laporan akhir Anda telah disetujui dosen pembimbing.
+        <div style="margin-top:14px;font-size:13px;color:var(--success-text);font-weight:600;">
+          <x-icon name="check" :size="13"/> Laporan akhir Anda telah disetujui dosen pembimbing.
         </div>
       @endif
     </div>

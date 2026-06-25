@@ -20,14 +20,14 @@
 .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:var(--primary); }
 .fg textarea { resize:vertical;min-height:100px; }
 .fg-row { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
-.err { color:#dc2626;font-size:12px;margin-top:4px; }
+.err { color:var(--danger);font-size:12px;margin-top:4px; }
 </style>
 @endpush
 
 @section('content')
 
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-  <a href="{{ route('kaprodi.lowongan.index') }}" class="btn btn-outline btn-sm">← Kembali</a>
+  <a href="{{ route('kaprodi.lowongan.index') }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>
   <div class="page-title">{{ $isEdit ? 'Edit Pengumuman Lowongan' : 'Tambah Pengumuman Lowongan' }}</div>
 </div>
 
@@ -38,12 +38,12 @@
 
     <div class="fg-row">
       <div class="fg">
-        <label>Judul Posisi <span style="color:#dc2626;">*</span></label>
+        <label>Judul Posisi <span style="color:var(--danger);">*</span></label>
         <input type="text" name="title" value="{{ old('title', $lowongan->title ?? '') }}" placeholder="Contoh: Frontend Developer Intern" required>
         @error('title')<div class="err">{{ $message }}</div>@enderror
       </div>
       <div class="fg">
-        <label>Nama Perusahaan <span style="color:#dc2626;">*</span></label>
+        <label>Nama Perusahaan <span style="color:var(--danger);">*</span></label>
         <input type="text" name="company_name" value="{{ old('company_name', $lowongan->company_name ?? '') }}" placeholder="Contoh: PT Telkom Indonesia" required>
         @error('company_name')<div class="err">{{ $message }}</div>@enderror
       </div>
@@ -62,7 +62,7 @@
 
     <div class="fg-row">
       <div class="fg">
-        <label>Tipe Pekerjaan <span style="color:#dc2626;">*</span></label>
+        <label>Tipe Pekerjaan <span style="color:var(--danger);">*</span></label>
         @php $jt = old('job_type', $lowongan->job_type ?? 'On-site'); @endphp
         <select name="job_type" required>
           <option value="On-site" {{ $jt==='On-site'?'selected':'' }}>On-site</option>
@@ -71,7 +71,7 @@
         </select>
       </div>
       <div class="fg">
-        <label>Status <span style="color:#dc2626;">*</span></label>
+        <label>Status <span style="color:var(--danger);">*</span></label>
         @php $stt = old('status', $lowongan->status ?? 'active'); @endphp
         <select name="status" required>
           <option value="active" {{ $stt==='active'?'selected':'' }}>Aktif (tampil ke mahasiswa)</option>

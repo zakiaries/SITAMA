@@ -4,13 +4,13 @@
 @section('content')
 
   @if(session('success'))
-    <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('success') }}
     </div>
   @endif
 
   <div style="display:flex;align-items:center;gap:11px;margin-bottom:20px;">
-    <button class="btn btn-outline btn-sm" onclick="window.location='{{ route('mahasiswa.seminar') }}'">← Kembali</button>
+    <button class="btn btn-outline btn-sm" onclick="window.location='{{ route('mahasiswa.seminar') }}'"><x-icon name="arrow-left" :size="14"/> Kembali</button>
     <div class="page-title">Detail Seminar</div>
   </div>
 
@@ -50,12 +50,12 @@
         <form method="POST" action="{{ route('mahasiswa.seminar.register', $seminar->id) }}">
           @csrf
           <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
-            ✓ Daftar Seminar Ini
+            <x-icon name="check" :size="15"/> Daftar Seminar Ini
           </button>
         </form>
         @else
-        <div style="background:#dcfce7;color:#16a34a;padding:12px;border-radius:8px;text-align:center;font-weight:600;">
-          ✓ Anda sudah terdaftar
+        <div style="background:var(--success-bg);color:var(--success-text);padding:12px;border-radius:8px;text-align:center;font-weight:600;">
+          <x-icon name="check" :size="14"/> Anda sudah terdaftar
         </div>
         @endif
       </div>
@@ -73,12 +73,12 @@
       <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <span style="font-size:13px;font-weight:700;color:var(--primary);">Kuota Audiens</span>
-          <span style="font-size:13px;font-weight:800;color:{{ $met ? '#16a34a' : '#854f0b' }};">{{ $aud }}/{{ $min }} {{ $met ? '✓' : '' }}</span>
+          <span style="font-size:13px;font-weight:800;color:{{ $met ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $aud }}/{{ $min }} @if($met)<x-icon name="check" :size="12"/>@endif</span>
         </div>
-        <div style="height:8px;background:#e5e7eb;border-radius:20px;overflow:hidden;">
-          <div style="height:100%;width:{{ min(100, $aud / $min * 100) }}%;background:{{ $met ? '#16a34a' : '#f59e0b' }};"></div>
+        <div style="height:8px;background:var(--border);border-radius:20px;overflow:hidden;">
+          <div style="height:100%;width:{{ min(100, $aud / $min * 100) }}%;background:{{ $met ? 'var(--success-text)' : 'var(--warning)' }};"></div>
         </div>
-        <div style="font-size:11px;color:{{ $met ? '#16a34a' : 'var(--text-muted)' }};margin-top:6px;">
+        <div style="font-size:11px;color:{{ $met ? 'var(--success-text)' : 'var(--text-muted)' }};margin-top:6px;">
           {{ $met ? 'Kuota audiens minimal sudah terpenuhi.' : 'Butuh ' . ($min - $aud) . ' audiens lagi (minimal ' . $min . ').' }}
         </div>
       </div>
@@ -100,7 +100,7 @@
           <div style="font-size:13px;font-weight:600;">
             {{ $reg->student->user->name ?? '-' }}
             @if($isPresenter)
-              <span style="font-size:10px;background:#eff6ff;color:#2563eb;padding:1px 7px;border-radius:20px;margin-left:4px;">Penyaji</span>
+              <span style="font-size:10px;background:var(--blue-tint);color:var(--primary);padding:1px 7px;border-radius:20px;margin-left:4px;">Penyaji</span>
             @endif
           </div>
           <div style="font-size:11px;color:var(--text-muted);">{{ $isPresenter ? 'Mahasiswa penyaji' : 'Audiens' }} · {{ ucfirst($reg->status) }}</div>
