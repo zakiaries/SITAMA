@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Mahasiswa\BimbinganController;
 use App\Http\Controllers\Mahasiswa\DashboardController;
 use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
-use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
 use App\Http\Controllers\Mahasiswa\MagangRequestController;
 use App\Http\Controllers\Mahasiswa\NilaiController;
@@ -25,7 +25,6 @@ use App\Http\Controllers\DosenIndustri\ProfileController as IndustriProfileContr
 use App\Http\Controllers\Kaprodi\DashboardController as KaprodiDashboardController;
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
 use App\Http\Controllers\Kaprodi\DosenController as KaprodiDosenController;
-use App\Http\Controllers\Kaprodi\LowonganController as KaprodiLowonganController;
 use App\Http\Controllers\Kaprodi\MagangRequestController as KaprodiMagangRequestController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +36,10 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::view('/tentang', 'public.about')->name('about');
 Route::view('/bantuan', 'public.help')->name('bantuan');
 Route::view('/kontak', 'public.contact')->name('contact');
+
+// Aktivasi akun pembimbing industri (publik)
+Route::get('/aktivasi/{token}',  [ActivationController::class, 'show'])->name('aktivasi.show');
+Route::post('/aktivasi/{token}', [ActivationController::class, 'activate'])->name('aktivasi.submit');
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -63,8 +66,6 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::get('/logbook', [LogBookController::class, 'index'])->name('logbook');
         Route::post('/logbook', [LogBookController::class, 'store'])->name('logbook.store');
         Route::delete('/logbook/{logBook}', [LogBookController::class, 'destroy'])->name('logbook.destroy');
-
-        Route::get('/lowongan', [LowonganController::class, 'index'])->name('lowongan');
 
         Route::get('/seminar', [SeminarController::class, 'index'])->name('seminar');
         Route::post('/seminar', [SeminarController::class, 'store'])->name('seminar.store');
@@ -145,6 +146,7 @@ Route::prefix('dosen-industri')->name('dosen-industri.')->middleware('auth')->gr
 Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function () {
 
     Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/export-excel', [KaprodiDashboardController::class, 'exportExcel'])->name('dashboard.export-excel');
 
     Route::get('/mahasiswa',                              [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
     Route::get('/mahasiswa/{student}',                    [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
@@ -159,17 +161,10 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::get('/dosen/{lecturer}',                       [KaprodiDosenController::class, 'detail'])->name('dosen.detail');
     Route::post('/dosen/{lecturer}/reset-password',       [KaprodiDosenController::class, 'resetPassword'])->name('dosen.reset-password');
 
-    Route::get('/lowongan',                       [KaprodiLowonganController::class, 'index'])->name('lowongan.index');
-    Route::get('/lowongan/create',                [KaprodiLowonganController::class, 'create'])->name('lowongan.create');
-    Route::post('/lowongan',                      [KaprodiLowonganController::class, 'store'])->name('lowongan.store');
-    Route::get('/lowongan/{jobListing}/edit',     [KaprodiLowonganController::class, 'edit'])->name('lowongan.edit');
-    Route::put('/lowongan/{jobListing}',          [KaprodiLowonganController::class, 'update'])->name('lowongan.update');
-    Route::patch('/lowongan/{jobListing}/toggle', [KaprodiLowonganController::class, 'toggleStatus'])->name('lowongan.toggle');
-    Route::delete('/lowongan/{jobListing}',       [KaprodiLowonganController::class, 'destroy'])->name('lowongan.destroy');
-
     Route::get('/pengajuan-magang', [KaprodiMagangRequestController::class, 'index'])->name('pengajuan-magang.index');
     Route::post('/pengajuan-magang/{magangRequest}/approve', [KaprodiMagangRequestController::class, 'approve'])->name('pengajuan-magang.approve');
     Route::post('/pengajuan-magang/{magangRequest}/reject',  [KaprodiMagangRequestController::class, 'reject'])->name('pengajuan-magang.reject');
+    Route::post('/pengajuan-magang/{magangRequest}/resend',  [KaprodiMagangRequestController::class, 'resendInvitation'])->name('pengajuan-magang.resend');
 
     Route::get('/profile',  [KaprodiProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [KaprodiProfileController::class, 'update'])->name('profile.update');

@@ -57,6 +57,16 @@ class LoginController extends Controller
                 }
             }
 
+            // Cek akun pembimbing industri sudah diaktivasi
+            if ($user->role === 'lecturer_industry' && !$user->is_activated) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors([
+                    'username' => 'Akun Anda belum diaktivasi. Cek email Anda untuk link aktivasi.',
+                ])->withInput($request->only('username'));
+            }
+
             $request->session()->regenerate();
             return $this->redirectByRole($user->role);
         }

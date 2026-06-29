@@ -10,16 +10,22 @@
   <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('error') }}</div>
 @endif
 
-{{-- Kredensial akun baru --}}
-@if(session('new_pic_credentials'))
-  @php $cred = session('new_pic_credentials'); @endphp
-  <div style="background:var(--success-bg);border:1.5px solid #A7E8CF;border-radius:10px;padding:16px;margin-bottom:16px;">
-    <div style="font-weight:700;color:var(--success-text);margin-bottom:4px;">Akun Pembimbing Industri Berhasil Dibuat</div>
-    <div style="font-size:12px;color:var(--success-text);margin-bottom:10px;">Sampaikan kredensial berikut ke pembimbing industri. Ditampilkan hanya sekali.</div>
-    <div style="font-size:13px;color:var(--success-text);display:flex;flex-direction:column;gap:4px;">
-      <div><strong>Nama:</strong> {{ $cred['name'] }}</div>
-      <div><strong>Username:</strong> <code style="background:var(--success-bg);padding:1px 6px;border-radius:4px;">{{ $cred['username'] }}</code></div>
-      <div><strong>Password:</strong> <code style="background:var(--success-bg);padding:1px 6px;border-radius:4px;">{{ $cred['password'] }}</code></div>
+{{-- Info aktivasi setelah approve --}}
+@if(session('activation_info'))
+  @php $act = session('activation_info'); @endphp
+  <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;">
+    <div style="font-weight:700;color:#15803d;margin-bottom:6px;">Pengajuan Disetujui — Link Aktivasi Dibuat</div>
+    <div style="font-size:13px;color:#166534;margin-bottom:10px;">{!! $act['mail_status'] !!}</div>
+    <div style="font-size:12px;color:#14532d;margin-bottom:8px;">
+      <strong>Pembimbing:</strong> {{ $act['pic_name'] }} &middot; {{ $act['pic_email'] }}
+    </div>
+    <div style="font-size:11.5px;color:#166534;margin-bottom:6px;">Link aktivasi (bagikan jika email gagal):</div>
+    <div style="background:#dcfce7;border-radius:6px;padding:8px 12px;font-size:12px;word-break:break-all;display:flex;align-items:center;gap:10px;">
+      <code style="flex:1;">{{ $act['activation_url'] }}</code>
+      <button type="button" onclick="navigator.clipboard.writeText('{{ $act['activation_url'] }}')"
+        style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0;">
+        Salin
+      </button>
     </div>
   </div>
 @endif
@@ -94,10 +100,13 @@
   {{-- Aksi --}}
   @if($req->status === 'pending')
   <div style="display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--border);">
-    <button type="button" class="btn btn-primary btn-sm"
-      onclick="openApprove({{ $req->id }}, '{{ addslashes($req->pic_name) }}')">
-      <x-icon name="check" :size="14"/> Setujui
-    </button>
+    <form method="POST" action="{{ route('kaprodi.pengajuan-magang.approve', $req) }}"
+          onsubmit="return confirm('Setujui pengajuan magang {{ addslashes($student->user->name) }}?\nLink aktivasi akan dikirim ke email pembimbing industri.')">
+      @csrf
+      <button type="submit" class="btn btn-primary btn-sm">
+        <x-icon name="check" :size="14"/> Setujui & Kirim Link Aktivasi
+      </button>
+    </form>
     <button type="button" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:none;"
       onclick="openReject({{ $req->id }})">
       <x-icon name="x" :size="14"/> Tolak
@@ -108,22 +117,30 @@
       <strong>Ditolak:</strong> {{ $req->rejection_reason }}
     </div>
   @elseif($req->status === 'approved')
+    @php $activated = $req->createdLecturer?->user?->is_activated ?? false; @endphp
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
-      <div style="font-size:12px;color:var(--success-text);">
-        <x-icon name="check" :size="12"/> Disetujui &middot; Pembimbing industri:
+      <div style="font-size:12px;color:var(--success-text);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <x-icon name="check" :size="12"/> Disetujui &middot;
         <strong>{{ $req->createdLecturer?->user?->name ?? '-' }}</strong>
-        @if($req->createdLecturer?->user?->username)
-          <code style="background:var(--success-bg);color:var(--success-text);font-size:11px;padding:1px 7px;border-radius:6px;margin-left:4px;">
-            {{ $req->createdLecturer->user->username }}
-          </code>
+        @if($activated)
+          <span style="background:#dcfce7;color:#15803d;font-size:11px;padding:2px 8px;border-radius:12px;font-weight:600;">Akun Aktif</span>
+        @else
+          <span style="background:#fef9c3;color:#92400e;font-size:11px;padding:2px 8px;border-radius:12px;font-weight:600;">Menunggu Aktivasi</span>
         @endif
       </div>
-      @if($req->createdLecturer)
-        <a href="{{ route('kaprodi.dosen.detail', $req->createdLecturer) }}"
-           class="btn btn-outline btn-sm" style="flex-shrink:0;">
-          Kelola Akun <x-icon name="arrow-right" :size="14"/>
-        </a>
-      @endif
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        @if(!$activated && $req->createdLecturer)
+          <form method="POST" action="{{ route('kaprodi.pengajuan-magang.resend', $req) }}">
+            @csrf
+            <button type="submit" class="btn btn-outline btn-sm">Kirim Ulang Link</button>
+          </form>
+        @endif
+        @if($req->createdLecturer)
+          <a href="{{ route('kaprodi.dosen.detail', $req->createdLecturer) }}" class="btn btn-outline btn-sm">
+            Kelola Akun <x-icon name="arrow-right" :size="14"/>
+          </a>
+        @endif
+      </div>
     </div>
   @endif
 
@@ -134,40 +151,6 @@
   <p style="font-weight:600;color:var(--text);">Tidak ada pengajuan {{ $status === 'pending' ? 'yang menunggu' : ($status === 'approved' ? 'disetujui' : 'ditolak') }}</p>
 </div>
 @endforelse
-
-{{-- Modal Setujui --}}
-<div id="modal-approve" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:12px;padding:24px;width:100%;max-width:440px;margin:16px;">
-    <div style="font-weight:700;font-size:15px;margin-bottom:4px;">Setujui Pengajuan</div>
-    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">Buat akun pembimbing industri. Catat username & password sebelum menyimpan.</p>
-    <form id="form-approve" method="POST">
-      @csrf
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Username <span style="color:var(--danger);">*</span></label>
-          <input id="approve-username" type="text" name="username" required maxlength="50"
-            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-          <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">Hanya huruf, angka, dan underscore. Digunakan untuk login.</div>
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Password <span style="color:var(--danger);">*</span></label>
-          <input type="password" name="password" required minlength="6"
-            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"
-            placeholder="Minimal 6 karakter">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Konfirmasi Password <span style="color:var(--danger);">*</span></label>
-          <input type="password" name="password_confirmation" required minlength="6"
-            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:16px;">
-        <button type="submit" class="btn btn-primary btn-sm"><x-icon name="check" :size="14"/> Setujui & Buat Akun</button>
-        <button type="button" class="btn btn-outline btn-sm" onclick="closeApprove()">Batal</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 {{-- Modal Tolak --}}
 <div id="modal-reject" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center;">
@@ -186,17 +169,6 @@
 </div>
 
 <script>
-function slugify(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 20);
-}
-function openApprove(id, picName) {
-  document.getElementById('form-approve').action = '/kaprodi/pengajuan-magang/' + id + '/approve';
-  document.getElementById('approve-username').value = slugify(picName);
-  document.getElementById('modal-approve').style.display = 'flex';
-}
-function closeApprove() {
-  document.getElementById('modal-approve').style.display = 'none';
-}
 function openReject(id) {
   document.getElementById('form-reject').action = '/kaprodi/pengajuan-magang/' + id + '/reject';
   document.getElementById('modal-reject').style.display = 'flex';

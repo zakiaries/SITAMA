@@ -20,6 +20,25 @@
 
 @section('content')
 
+@if(session('success'))
+  <div style="background:#f0fdf4;border:1px solid #86efac;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
+@endif
+@if(session('error'))
+  <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('error') }}</div>
+@endif
+@if(session('activation_info'))
+  @php $act = session('activation_info'); @endphp
+  <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;">
+    <div style="font-weight:700;color:#15803d;margin-bottom:6px;">Link Aktivasi Baru Dibuat</div>
+    <div style="font-size:13px;color:#166534;margin-bottom:8px;">{!! $act['mail_status'] !!}</div>
+    <div style="background:#dcfce7;border-radius:6px;padding:8px 12px;font-size:12px;word-break:break-all;display:flex;align-items:center;gap:10px;">
+      <code style="flex:1;">{{ $act['activation_url'] }}</code>
+      <button type="button" onclick="navigator.clipboard.writeText('{{ $act['activation_url'] }}')"
+        style="background:#16a34a;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;flex-shrink:0;">Salin</button>
+    </div>
+  </div>
+@endif
+
 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
   <div style="display:flex;align-items:center;gap:12px;">
     <a href="{{ route('kaprodi.dosen.index') }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>

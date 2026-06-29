@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Kaprodi;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PembimbingIndustriInvitation;
 use App\Models\Company;
 use App\Models\CompanyRequest;
 use App\Models\Internship;
+use App\Models\InvitationToken;
 use App\Models\Lecturer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class MagangRequestController extends Controller
@@ -44,17 +47,6 @@ class MagangRequestController extends Controller
             return back()->with('error', 'Mahasiswa ini sudah memiliki magang aktif.');
         }
 
-        $request->validate([
-            'username' => 'required|string|max:50|unique:users,username',
-            'password' => 'required|string|min:6|confirmed',
-        ], [
-            'username.required' => 'Username wajib diisi.',
-            'username.unique'   => 'Username sudah digunakan, pilih yang lain.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min'      => 'Password minimal 6 karakter.',
-            'password.confirmed'=> 'Konfirmasi password tidak cocok.',
-        ]);
-
         // Resolve company
         if ($magangRequest->company_id) {
             $companyId = $magangRequest->company_id;
@@ -66,16 +58,25 @@ class MagangRequestController extends Controller
             $companyId = $company->id;
         }
 
-        // Buat akun dosen industri dengan kredensial manual
+        // Buat akun pembimbing industri — belum aktif, username/password diisi saat aktivasi
+        $tempUsername = 'pending_' . Str::random(10);
         $picUser = User::create([
-            'name'     => $magangRequest->pic_name,
-            'username' => $request->username,
-            'email'    => $this->uniqueEmail($magangRequest->pic_email, $request->username),
-            'password' => Hash::make($request->password),
-            'role'     => 'lecturer_industry',
+            'name'         => $magangRequest->pic_name,
+            'username'     => $tempUsername,
+            'email'        => $this->uniqueEmail($magangRequest->pic_email, $tempUsername),
+            'password'     => Hash::make(Str::random(32)),
+            'role'         => 'lecturer_industry',
+            'is_activated' => false,
         ]);
 
         $lecturer = Lecturer::create(['user_id' => $picUser->id]);
+
+        // Buat invitation token (berlaku 7 hari)
+        $token = InvitationToken::create([
+            'user_id'    => $picUser->id,
+            'token'      => Str::random(64),
+            'expires_at' => now()->addDays(7),
+        ]);
 
         // Catat internship
         Internship::create([
@@ -94,7 +95,23 @@ class MagangRequestController extends Controller
             'created_lecturer_id' => $lecturer->id,
         ]);
 
-        return back()->with('success', "Pengajuan {$student->user->name} disetujui. Akun pembimbing industri berhasil dibuat dengan username: {$request->username}");
+        // Kirim email aktivasi
+        $activationUrl = url('/aktivasi/' . $token->token);
+        try {
+            Mail::to($picUser->email)->send(new PembimbingIndustriInvitation($token, $student->user->name));
+            $mailStatus = "Email aktivasi terkirim ke <strong>{$picUser->email}</strong>.";
+        } catch (\Exception $e) {
+            $mailStatus = "Email gagal terkirim. Bagikan link aktivasi ini secara manual:";
+        }
+
+        return back()
+            ->with('success', "Pengajuan {$student->user->name} disetujui.")
+            ->with('activation_info', [
+                'mail_status'    => $mailStatus,
+                'activation_url' => $activationUrl,
+                'pic_name'       => $magangRequest->pic_name,
+                'pic_email'      => $picUser->email,
+            ]);
     }
 
     public function reject(Request $request, CompanyRequest $magangRequest)
@@ -123,5 +140,43 @@ class MagangRequestController extends Controller
             return $email;
         }
         return $fallback . '@sitama.local';
+    }
+
+    public function resendInvitation(CompanyRequest $magangRequest)
+    {
+        $lecturer = $magangRequest->createdLecturer;
+        if (!$lecturer || $lecturer->user->is_activated) {
+            return back()->with('error', 'Tidak bisa mengirim ulang — akun sudah aktif atau belum ada.');
+        }
+
+        // Invalidasi token lama, buat token baru
+        InvitationToken::where('user_id', $lecturer->user_id)
+            ->whereNull('used_at')
+            ->update(['expires_at' => now()]);
+
+        $token = InvitationToken::create([
+            'user_id'    => $lecturer->user_id,
+            'token'      => Str::random(64),
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        $student = $magangRequest->student;
+        $activationUrl = url('/aktivasi/' . $token->token);
+
+        try {
+            Mail::to($lecturer->user->email)->send(new PembimbingIndustriInvitation($token, $student->user->name));
+            $mailStatus = "Email aktivasi berhasil dikirim ulang ke <strong>{$lecturer->user->email}</strong>.";
+        } catch (\Exception $e) {
+            $mailStatus = "Email gagal terkirim. Bagikan link ini secara manual:";
+        }
+
+        return back()
+            ->with('success', 'Link aktivasi berhasil dibuat ulang.')
+            ->with('activation_info', [
+                'mail_status'    => $mailStatus,
+                'activation_url' => $activationUrl,
+                'pic_name'       => $lecturer->user->name,
+                'pic_email'      => $lecturer->user->email,
+            ]);
     }
 }
