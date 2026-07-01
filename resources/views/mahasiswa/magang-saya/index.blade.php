@@ -192,7 +192,7 @@
   {{-- Pendaftaran Saya --}}
   <div class="page-header">
     <div class="page-title">Pendaftaran Saya</div>
-    <a href="{{ route('mahasiswa.lowongan') }}" class="btn btn-primary btn-sm">+ Cari Lowongan</a>
+    <a href="{{ route('mahasiswa.ajukan-magang') }}" class="btn btn-primary btn-sm">+ Ajukan Magang</a>
   </div>
 
   @forelse($applications as $app)
@@ -264,7 +264,7 @@
   <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
     <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="clipboard" :size="40"/></div>
     <p style="font-size:14px;margin-bottom:16px;">Belum ada pendaftaran magang.</p>
-    <a href="{{ route('mahasiswa.lowongan') }}" class="btn btn-primary">Cari Lowongan <x-icon name="arrow-right" :size="14"/></a>
+    <a href="{{ route('mahasiswa.ajukan-magang') }}" class="btn btn-primary">Ajukan Magang <x-icon name="arrow-right" :size="14"/></a>
   </div>
   @endforelse
 
