@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sitama/features/student/ui/guidance/pages/guidance.dart';
 import 'package:sitama/features/student/ui/home/widgets/home_content.dart';
 import 'package:sitama/features/student/ui/logbook/pages/logbook.dart';
+import 'package:sitama/features/student/ui/nilai/pages/nilai_page.dart';
 import 'package:sitama/features/student/ui/profile/pages/profile.dart';
-import 'package:sitama/features/student/ui/job_listing/pages/job_listing.dart';
 import 'package:sitama/features/student/ui/seminar/pages/seminar_listing.dart';
 
 /// A stateful widget that serves as the main navigation hub for the student interface.
@@ -52,8 +52,8 @@ class _HomePageState extends State<HomePage>
       _buildHomeContent(),
       const GuidancePage(),
       const LogBookPage(),
-      const JobListingPage(),
       const SeminarListingPage(),
+      const NilaiPage(),
       const StudentProfilePage(),
     ];
 
@@ -121,17 +121,17 @@ class _HomePageState extends State<HomePage>
               BottomNavigationBarItem(
                 icon:
                     Icon(_currentIndex == 2 ? Icons.book : Icons.book_outlined),
-                label: 'Log book',
-              ),
-              BottomNavigationBarItem(
-                icon:
-                    Icon(_currentIndex == 3 ? Icons.work : Icons.work_outlined),
-                label: 'Lowongan',
+                label: 'Log Book',
               ),
               BottomNavigationBarItem(
                 icon: Icon(
-                    _currentIndex == 4 ? Icons.event : Icons.event_outlined),
+                    _currentIndex == 3 ? Icons.event : Icons.event_outlined),
                 label: 'Seminar',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                    _currentIndex == 4 ? Icons.star : Icons.star_border_rounded),
+                label: 'Nilai',
               ),
               BottomNavigationBarItem(
                 icon: Icon(

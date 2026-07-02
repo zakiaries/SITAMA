@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FinalReport;
 use App\Models\Guidance;
+use App\Models\InternshipApplication;
 use App\Models\LogBook;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -228,6 +230,200 @@ class StudentController extends Controller
                 : null,
             'internships'   => $internships ?? [],
         ]);
+    }
+
+    // ─── Ajukan Magang ───────────────────────────────────────────────────────
+
+    public function getAjukanMagang(Request $request)
+    {
+        $student          = $request->user()->student;
+        $hasActiveInternship = $student->internships()->where('is_finished', false)->exists();
+        $hasPending       = InternshipApplication::where('student_id', $student->id)
+            ->where('status', 'pending')->exists();
+
+        $applications = InternshipApplication::where('student_id', $student->id)
+            ->latest()->get()->map(fn($a) => [
+                'id'               => $a->id,
+                'company_name'     => $a->company_name,
+                'position'         => $a->position,
+                'start_date'       => $a->start_date->format('Y-m-d'),
+                'pic_name'         => $a->pic_name,
+                'pic_phone'        => $a->pic_phone,
+                'status'           => $a->status,
+                'rejection_reason' => $a->rejection_reason,
+                'proof_file'       => asset('storage/' . $a->proof_file),
+                'created_at'       => $a->created_at->format('d M Y H:i'),
+            ]);
+
+        return response()->json([
+            'has_active_internship' => $hasActiveInternship,
+            'has_pending'           => $hasPending,
+            'applications'          => $applications,
+        ]);
+    }
+
+    public function storeAjukanMagang(Request $request)
+    {
+        $request->validate([
+            'proof_file'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'company_name' => 'required|string|max:255',
+            'pic_name'    => 'required|string|max:255',
+            'pic_phone'   => 'nullable|string|max:20',
+            'pic_email'   => 'nullable|email|max:255',
+            'position'    => 'nullable|string|max:255',
+            'start_date'  => 'required|date',
+        ]);
+
+        $student = $request->user()->student;
+
+        if ($student->internships()->where('is_finished', false)->exists()) {
+            return response()->json(['message' => 'Kamu sudah memiliki magang aktif'], 422);
+        }
+
+        if (InternshipApplication::where('student_id', $student->id)->where('status', 'pending')->exists()) {
+            return response()->json(['message' => 'Pengajuan sebelumnya masih diproses'], 422);
+        }
+
+        $filePath = $request->file('proof_file')->store('internship_proofs', 'public');
+
+        InternshipApplication::create([
+            'student_id'   => $student->id,
+            'company_name' => $request->company_name,
+            'pic_name'     => $request->pic_name,
+            'pic_phone'    => $request->pic_phone,
+            'pic_email'    => $request->pic_email,
+            'position'     => $request->position,
+            'start_date'   => $request->start_date,
+            'proof_file'   => $filePath,
+            'status'       => 'pending',
+        ]);
+
+        return response()->json(['message' => 'Pengajuan berhasil dikirim'], 201);
+    }
+
+    // ─── Internship (Magang Saya) ─────────────────────────────────────────────
+
+    public function internship(Request $request)
+    {
+        $student    = $request->user()->student;
+        $internship = $student->internships()
+            ->with(['company', 'lecturer.user', 'lecturerIndustry.user'])
+            ->latest('start_date')
+            ->first();
+
+        if (!$internship) {
+            return response()->json(['data' => null]);
+        }
+
+        return response()->json([
+            'data' => [
+                'id'                 => $internship->id,
+                'company'            => $internship->company->name ?? '-',
+                'position'           => $internship->position ?? '-',
+                'start_date'         => $internship->start_date->format('Y-m-d'),
+                'end_date'           => $internship->end_date?->format('Y-m-d'),
+                'is_finished'        => $internship->is_finished,
+                'lecturer'           => $internship->lecturer?->user?->name ?? 'Belum ditugaskan',
+                'lecturer_industry'  => $internship->lecturerIndustry?->user?->name ?? 'Belum ditugaskan',
+            ],
+        ]);
+    }
+
+    // ─── Nilai ───────────────────────────────────────────────────────────────
+
+    public function nilai(Request $request)
+    {
+        $student    = $request->user()->student;
+        $internship = $student->internships()
+            ->with(['company', 'scores.detailedComponent.component'])
+            ->latest('start_date')
+            ->first();
+
+        if (!$internship) {
+            return response()->json(['data' => null]);
+        }
+
+        $scores  = $internship->scores;
+        $overall = $scores->isNotEmpty() ? round($scores->avg('score'), 1) : null;
+
+        $grouped = $scores->groupBy(fn($s) => $s->detailedComponent->component->name ?? 'Lainnya');
+
+        $items = $grouped->map(function ($componentScores, $componentName) {
+            $subItems = $componentScores->groupBy(fn($s) => $s->detailedComponent->name)
+                ->map(fn($sub, $name) => [
+                    'name' => $name,
+                    'avg'  => $sub->isNotEmpty() ? round($sub->avg('score'), 1) : null,
+                ])->values();
+
+            return ['component' => $componentName, 'items' => $subItems];
+        })->values();
+
+        return response()->json([
+            'data' => [
+                'overall'    => $overall,
+                'internship' => [
+                    'company'     => $internship->company->name ?? '-',
+                    'is_finished' => $internship->is_finished,
+                ],
+                'items' => $items,
+            ],
+        ]);
+    }
+
+    // ─── Laporan Akhir ───────────────────────────────────────────────────────
+
+    public function getLaporan(Request $request)
+    {
+        $student = $request->user()->student;
+        $report  = FinalReport::where('student_id', $student->id)->latest()->first();
+
+        if (!$report) {
+            return response()->json(['data' => null]);
+        }
+
+        return response()->json([
+            'data' => [
+                'id'          => $report->id,
+                'title'       => $report->title,
+                'status'      => $report->status,
+                'file_url'    => asset('storage/' . $report->file_path),
+                'lecturer_note' => $report->lecturer_note,
+                'uploaded_at' => $report->updated_at->format('Y-m-d H:i'),
+            ],
+        ]);
+    }
+
+    public function storeLaporan(Request $request)
+    {
+        $request->validate([
+            'file'  => 'required|file|mimes:pdf,doc,docx|max:10240',
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $student  = $request->user()->student;
+        $filePath = $request->file('file')->store('final_reports', 'public');
+
+        $existing = FinalReport::where('student_id', $student->id)->latest()->first();
+
+        if ($existing && $existing->status === 'rejected') {
+            Storage::disk('public')->delete($existing->file_path);
+            $existing->update([
+                'title'         => $request->title ?? $existing->title,
+                'file_path'     => $filePath,
+                'status'        => 'pending',
+                'lecturer_note' => null,
+            ]);
+            return response()->json(['message' => 'Laporan berhasil dikirim ulang']);
+        }
+
+        FinalReport::create([
+            'student_id' => $student->id,
+            'title'      => $request->title ?? 'Laporan Akhir Magang',
+            'file_path'  => $filePath,
+            'status'     => 'pending',
+        ]);
+
+        return response()->json(['message' => 'Laporan berhasil diunggah'], 201);
     }
 
     // ─── File Download ───────────────────────────────────────────────────────

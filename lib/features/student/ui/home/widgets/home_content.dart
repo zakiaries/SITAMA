@@ -11,6 +11,9 @@ import 'package:sitama/features/student/domain/entities/student_home_entity.dart
 import 'package:sitama/features/student/ui/guidance/widgets/student_guidance_card.dart';
 import 'package:sitama/features/student/ui/home/bloc/student_display_cubit.dart';
 import 'package:sitama/features/student/ui/home/bloc/student_display_state.dart';
+import 'package:sitama/features/student/ui/ajukan_magang/pages/ajukan_magang.dart';
+import 'package:sitama/features/student/ui/internship/pages/magang_saya.dart';
+import 'package:sitama/features/student/ui/laporan/pages/laporan_akhir_page.dart';
 import 'package:sitama/service_locator.dart';
 import 'package:sitama/features/student/ui/home/widgets/load_notification.dart';
 import 'package:sitama/features/student/ui/home/widgets/notification_badge.dart';
@@ -113,6 +116,7 @@ class _HomeContentState extends State<HomeContent>
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           _header(context, state),
+          _buildQuickAccess(context),
           _buildSectionHeader(
               context, 'Bimbingan Terbaru', widget.allGuidances),
           _guidancesList(state.studentHomeEntity),
@@ -120,6 +124,87 @@ class _HomeContentState extends State<HomeContent>
           _logBooksList(state.studentHomeEntity),
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
         ],
+      ),
+    );
+  }
+
+  SliverToBoxAdapter _buildQuickAccess(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Akses Cepat',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: _quickCard(
+                  context,
+                  icon: Icons.business_center,
+                  label: 'Magang Saya',
+                  color: const Color(0xFF1E3A8A),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const MagangSayaPage())),
+                )),
+                const SizedBox(width: 10),
+                Expanded(child: _quickCard(
+                  context,
+                  icon: Icons.description_outlined,
+                  label: 'Laporan Akhir',
+                  color: const Color(0xFF7C3AED),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const LaporanAkhirPage())),
+                )),
+                const SizedBox(width: 10),
+                Expanded(child: _quickCard(
+                  context,
+                  icon: Icons.work_outline,
+                  label: 'Ajukan Magang',
+                  color: const Color(0xFF0891B2),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const AjukanMagangPage())),
+                )),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _quickCard(BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 42, height: 42,
+              decoration: BoxDecoration(color: color.withAlpha(20), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(height: 8),
+            Text(label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF1A1A3E)),
+              maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+        ),
       ),
     );
   }

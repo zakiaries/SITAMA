@@ -51,10 +51,6 @@ import 'package:sitama/features/student/ui/home/bloc/student_display_cubit.dart'
 import 'package:sitama/features/student/ui/job_listing/bloc/job_listing_cubit.dart';
 import 'package:sitama/features/student/ui/logbook/bloc/log_book_student_cubit.dart';
 import 'package:sitama/features/student/ui/seminar/bloc/seminar_cubit.dart';
-import 'package:sitama/features/kaprodi/data/kaprodi_api_service.dart';
-import 'package:sitama/features/kaprodi/ui/bloc/kaprodi_cubit.dart';
-import 'package:sitama/features/industri/data/industri_api_service.dart';
-import 'package:sitama/features/industri/ui/bloc/industri_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -69,8 +65,6 @@ void setupServiceLocator(SharedPreferences prefs) {
   sl.registerSingleton<LecturerApiService>(LecturerApiServiceImpl());
   sl.registerSingleton<LecturerIndustryApiService>(LecturerIndustryApiServiceImpl());
   sl.registerSingleton<JobListingApiService>(JobListingApiServiceImpl());
-  sl.registerSingleton<KaprodiApiService>(KaprodiApiService());
-  sl.registerSingleton<IndustriApiService>(IndustriApiService());
 
   // Repositories
   sl.registerSingleton<AuthRepostory>(AuthRepostoryImpl());
@@ -136,6 +130,4 @@ void setupServiceLocator(SharedPreferences prefs) {
 
   sl.registerLazySingleton<JobListingCubit>(() => JobListingCubit());
   sl.registerLazySingleton<SeminarCubit>(() => SeminarCubit());
-  sl.registerLazySingleton<KaprodiCubit>(() => KaprodiCubit());
-  sl.registerLazySingleton<IndustriCubit>(() => IndustriCubit());
 }

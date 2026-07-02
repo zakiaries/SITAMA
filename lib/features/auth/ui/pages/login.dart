@@ -5,11 +5,10 @@ import 'package:sitama/core/config/themes/app_color.dart';
 import 'package:sitama/core/shared/widgets/alert/custom_snackbar.dart';
 import 'package:sitama/features/auth/data/models/signin_req_params.dart';
 import 'package:sitama/features/auth/domain/usecases/signin.dart';
-import 'package:sitama/features/industri/ui/industri_shell.dart';
-import 'package:sitama/features/kaprodi/ui/kaprodi_shell.dart';
 import 'package:sitama/features/lecturer/ui/home/pages/lecturer_home.dart';
 import 'package:sitama/features/lecturer_industry/ui/lecturer_industry_shell.dart';
 import 'package:sitama/features/student/ui/home/pages/home.dart';
+import 'package:sitama/features/student/ui/home/pages/pending_approval.dart';
 import 'package:sitama/service_locator.dart';
 
 class LoginPage extends StatefulWidget {
@@ -74,22 +73,32 @@ class _LoginPageState extends State<LoginPage> {
 
           if (!mounted) return;
 
+          // Kaprodi dan Industri tidak diizinkan di mobile
+          if (role == 'Kaprodi' || role == 'Industri') {
+            prefs.clear();
+            _showErrorSnackbar(
+              'Aplikasi mobile tidak tersedia untuk role ini. '
+              'Gunakan versi web.',
+            );
+            return;
+          }
+
           switch (role) {
             case 'Student':
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => HomePage()));
+              final status = prefs.getString('student_status') ?? 'active';
+              if (status == 'pending' || status == 'rejected') {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (_) => PendingApprovalPage(isRejected: status == 'rejected')));
+              } else {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (_) => HomePage()));
+              }
             case 'Lecturer':
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (_) => LecturerHomePage()));
             case 'Lecturer Industry':
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (_) => LecturerIndustryShell()));
-            case 'Kaprodi':
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const KaprodiShell()));
-            case 'Industri':
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const IndustriShell()));
             default:
               _showErrorSnackbar('Role tidak dikenali: $role');
           }

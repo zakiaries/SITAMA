@@ -7,24 +7,38 @@ import 'package:sitama/service_locator.dart';
 class AuthStateCubit extends Cubit<AuthState>{
   AuthStateCubit() : super(AppInitialState());
 
-  void appStarted() async{
-    var isLoggedIn = await sl<IsLoggedInUseCase>().call();
+  void appStarted() async {
+    final isLoggedIn = await sl<IsLoggedInUseCase>().call();
 
-    if (isLoggedIn){
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      var role = sharedPreferences.getString('role');
+    if (isLoggedIn) {
+      final prefs = await SharedPreferences.getInstance();
+      final role = prefs.getString('role');
 
-      if (role == 'Student'){
-        emit(AuthenticatedStudent());
-      } else if (role == 'Lecturer Industry'){
-        emit(AuthenticatedLecturerIndustry());
-      } else if (role == 'Kaprodi'){
-        emit(AuthenticatedKaprodi());
-      } else {
+      if (role == 'Student') {
+        final status = prefs.getString('student_status') ?? 'active';
+        emit(_studentStateFor(status));
+      } else if (role == 'Lecturer') {
         emit(AuthenticatedLecturer());
+      } else if (role == 'Lecturer Industry') {
+        emit(AuthenticatedLecturerIndustry());
+      } else {
+        // Kaprodi dan Industri tidak diizinkan di mobile
+        prefs.clear();
+        emit(UnAuthenticated());
       }
-    } else{
+    } else {
       emit(UnAuthenticated());
+    }
+  }
+
+  AuthState _studentStateFor(String status) {
+    switch (status) {
+      case 'pending':
+        return AuthenticatedStudentPending();
+      case 'rejected':
+        return AuthenticatedStudentRejected();
+      default:
+        return AuthenticatedStudent();
     }
   }
 

@@ -49,6 +49,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/logBook/{id}', [StudentController::class, 'deleteLogBook']);
 
             Route::get('/notification', [StudentController::class, 'getNotifications']);
+
+            Route::get('/internship', [StudentController::class, 'internship']);
+            Route::get('/nilai', [StudentController::class, 'nilai']);
+            Route::get('/laporan', [StudentController::class, 'getLaporan']);
+            Route::post('/laporan', [StudentController::class, 'storeLaporan']);
+            Route::get('/ajukan-magang', [StudentController::class, 'getAjukanMagang']);
+            Route::post('/ajukan-magang', [StudentController::class, 'storeAjukanMagang']);
         });
 
         Route::put('/notification/markAsRead', [StudentController::class, 'markAllAsRead']);

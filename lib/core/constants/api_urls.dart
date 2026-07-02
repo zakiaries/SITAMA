@@ -1,7 +1,7 @@
 class ApiUrls {
   // Base URL for the API
   // 10.0.2.2 = host machine from Android emulator
-  static const baseUrl = 'http://localhost:8000/api/';
+  static const baseUrl = 'http://10.0.2.2:8000/api/';
 
   // Authentication endpoints
   static const login = '${baseUrl}login';
@@ -12,6 +12,10 @@ class ApiUrls {
   static const studentGuidance = '${baseUrl}student/guidance';
   static const studentLogBook = '${baseUrl}student/logBook';
   static const studentProfile = '${baseUrl}student/profile';
+  static const studentInternship = '${baseUrl}student/internship';
+  static const studentNilai = '${baseUrl}student/nilai';
+  static const studentLaporan = '${baseUrl}student/laporan';
+  static const studentAjukanMagang = '${baseUrl}student/ajukan-magang';
   static const notification = '${baseUrl}student/notification';
   static const notificationMarkAsRead = '${baseUrl}notification/markAsRead';
 
