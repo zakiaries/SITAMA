@@ -180,6 +180,7 @@
 
       <div class="divider an" style="animation-delay:.42s">SITAMA Politeknik</div>
       <div class="signup an" style="animation-delay:.46s">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></div>
+      <div class="signup an" style="animation-delay:.5s;margin-top:6px;">Pembimbing industri? <a href="{{ route('aktivasi.entry') }}">Aktivasi akun di sini</a></div>
     </div>
 
     {{-- RIGHT: VISUAL --}}

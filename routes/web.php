@@ -38,6 +38,7 @@ Route::view('/bantuan', 'public.help')->name('bantuan');
 Route::view('/kontak', 'public.contact')->name('contact');
 
 // Aktivasi akun pembimbing industri (publik)
+Route::view('/aktivasi', 'auth.aktivasi-entry')->name('aktivasi.entry');
 Route::get('/aktivasi/{token}',  [ActivationController::class, 'show'])->name('aktivasi.show');
 Route::post('/aktivasi/{token}', [ActivationController::class, 'activate'])->name('aktivasi.submit');
 
