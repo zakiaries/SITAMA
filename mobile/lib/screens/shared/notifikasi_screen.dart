@@ -49,12 +49,19 @@ class _NotifikasiScreenState extends State<NotifikasiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifikasi'),
-        actions: [TextButton(onPressed: _markAll, child: const Text('Tandai semua'))],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        DetailHeader(
+          title: 'Notifikasi',
+          subtitle: 'Pemberitahuan terbaru',
+          trailing: TextButton(
+            onPressed: _markAll,
+            child: const Text('Tandai semua', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snap) {
@@ -101,8 +108,10 @@ class _NotifikasiScreenState extends State<NotifikasiScreen> {
               }).toList(),
             );
           },
+          ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

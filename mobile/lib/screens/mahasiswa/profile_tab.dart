@@ -36,9 +36,12 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Profil Saya', subtitle: 'Data akun & magang'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snap) {
@@ -58,20 +61,26 @@ class _ProfileTabState extends State<ProfileTab> {
               padding: const EdgeInsets.all(16),
               children: [
                 Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(color: AppColors.warm, borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: AppColors.bg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderSubtle),
+                    boxShadow: kSoftShadow,
+                  ),
                   child: Row(children: [
-                    CircleAvatar(radius: 34, backgroundColor: AppColors.primary, child: Text(_initials(name), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800))),
-                    const SizedBox(width: 16),
+                    CircleAvatar(radius: 32, backgroundColor: AppColors.primary,
+                        child: Text(_initials(name), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800))),
+                    const SizedBox(width: 14),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 4),
+                      Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 5),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(999)),
                         child: const Text('Mahasiswa', style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       Text(user['email'] ?? '', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
                     ])),
                   ]),
@@ -121,8 +130,10 @@ class _ProfileTabState extends State<ProfileTab> {
               ],
             );
           },
+          ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

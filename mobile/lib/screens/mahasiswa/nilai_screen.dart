@@ -29,10 +29,13 @@ class _NilaiScreenState extends State<NilaiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nilai')),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _future,
-        builder: (context, snap) {
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Nilai Akhir', subtitle: 'Rekap penilaian magang'),
+        Expanded(
+          child: FutureBuilder<Map<String, dynamic>>(
+            future: _future,
+            builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -63,8 +66,10 @@ class _NilaiScreenState extends State<NilaiScreen> {
                   ]))),
             ],
           );
-        },
-      ),
+            },
+          ),
+        ),
+      ]),
     );
   }
 }

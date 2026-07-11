@@ -49,91 +49,112 @@ class _LecturerProfileScreenState extends State<LecturerProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
-        child: FutureBuilder<Map<String, dynamic>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return ErrorRetry(message: '${snap.error}', onRetry: _reload);
-            }
-            final user = Map<String, dynamic>.from(snap.data!['user'] ?? {});
-            final stats = Map<String, dynamic>.from(snap.data!['stats'] ?? {});
-            final name = user['name'] ?? '';
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        DetailHeader(title: 'Profil Saya', subtitle: widget.roleLabel, showBack: false),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: _future,
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snap.hasError) {
+                  return ErrorRetry(message: '${snap.error}', onRetry: _reload);
+                }
+                final user = Map<String, dynamic>.from(snap.data!['user'] ?? {});
+                final stats = Map<String, dynamic>.from(snap.data!['stats'] ?? {});
+                final name = user['name'] ?? '';
 
-            final statItems = <StatItem>[
-              StatItem('${stats['total_mahasiswa'] ?? 0}', 'Mahasiswa', accent: true),
-              if (stats.containsKey('aktif')) StatItem('${stats['aktif'] ?? 0}', 'Aktif'),
-              if (stats.containsKey('selesai')) StatItem('${stats['selesai'] ?? 0}', 'Selesai'),
-            ];
-
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(color: AppColors.warm, borderRadius: BorderRadius.circular(14)),
-                  child: Row(children: [
-                    CircleAvatar(radius: 34, backgroundColor: AppColors.primary, child: Text(_initials(name), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800))),
-                    const SizedBox(width: 16),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                        decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(999)),
-                        child: Text(widget.roleLabel, style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.bg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.borderSubtle),
+                        boxShadow: kSoftShadow,
                       ),
-                      const SizedBox(height: 4),
-                      Text(user['email'] ?? '', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                      child: Row(children: [
+                        CircleAvatar(radius: 28, backgroundColor: AppColors.primary,
+                            child: Text(_initials(name), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800))),
+                        const SizedBox(width: 14),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(999)),
+                            child: Text(widget.roleLabel, style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(user['email'] ?? '', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                        ])),
+                      ]),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: AppColors.primary.withAlpha(64), blurRadius: 20, offset: const Offset(0, 10))],
+                      ),
+                      child: Column(children: [
+                        Text('${stats['total_mahasiswa'] ?? 0}',
+                            style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800, height: 1)),
+                        const SizedBox(height: 3),
+                        const Text('Mahasiswa Bimbingan', style: TextStyle(color: Colors.white70, fontSize: 11.5)),
+                      ]),
+                    ),
+                    const SectionTitle('Informasi Akun'),
+                    AppCard(child: Column(children: [
+                      InfoRow('Nama', user['name'] ?? '-'),
+                      InfoRow('Username', user['username'] ?? '-'),
+                      InfoRow('Email', user['email'] ?? '-'),
                     ])),
-                  ]),
-                ),
-                const SizedBox(height: 16),
-                StatStrip(statItems),
-                const SectionTitle('Informasi Akun'),
-                AppCard(child: Column(children: [
-                  InfoRow('Nama', user['name'] ?? '-'),
-                  InfoRow('Username', user['username'] ?? '-'),
-                  InfoRow('Email', user['email'] ?? '-'),
-                ])),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: () => _editProfile(user),
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text('Edit Profil'),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    minimumSize: const Size.fromHeight(48),
-                    side: const BorderSide(color: AppColors.error),
-                  ),
-                  onPressed: () async {
-                    final ok = await showDialog<bool>(context: context, builder: (c) => AlertDialog(
-                      title: const Text('Keluar?'),
-                      content: const Text('Anda yakin ingin keluar?'),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
-                        TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Keluar')),
-                      ],
-                    ));
-                    if (ok == true && context.mounted) context.read<AuthProvider>().logout();
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Log Out'),
-                ),
-                const SizedBox(height: 24),
-              ],
-            );
-          },
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48), shape: const StadiumBorder()),
+                      onPressed: () => _editProfile(user),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit Profil'),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.error,
+                        minimumSize: const Size.fromHeight(48),
+                        side: const BorderSide(color: AppColors.error),
+                        shape: const StadiumBorder(),
+                      ),
+                      onPressed: () async {
+                        final ok = await showDialog<bool>(context: context, builder: (c) => AlertDialog(
+                          title: const Text('Keluar?'),
+                          content: const Text('Anda yakin ingin keluar?'),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
+                            TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Keluar')),
+                          ],
+                        ));
+                        if (ok == true && context.mounted) context.read<AuthProvider>().logout();
+                      },
+                      icon: const Icon(Icons.logout),
+                      label: const Text('Log Out'),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

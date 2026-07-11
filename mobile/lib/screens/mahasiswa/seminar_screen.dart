@@ -71,9 +71,12 @@ class _SeminarScreenState extends State<SeminarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Seminar')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Seminar', subtitle: 'Jadwal & pendaftaran seminar'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snap) {
@@ -119,8 +122,10 @@ class _SeminarScreenState extends State<SeminarScreen> {
               ],
             );
           },
+          ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 

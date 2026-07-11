@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
+/// Bayangan lembut ala Dropbox.
+const List<BoxShadow> kSoftShadow = [
+  BoxShadow(color: Color(0x0F1E1E2D), blurRadius: 16, offset: Offset(0, 6)),
+];
+
+/// Petakan status → jenis StatusDot.
+String statusDotKind(String status) {
+  final s = status.toLowerCase();
+  if (s == 'approved' || s == 'selesai' || s == 'dinilai') return 'done';
+  if (s == 'rejected') return 'rejected';
+  if (s == 'aktif' || s == 'scheduled' || s == 'terdaftar') return 'blue';
+  return 'pending';
+}
+
 /// Kartu putih dengan border subtle.
 class AppCard extends StatelessWidget {
   final Widget child;
@@ -14,13 +28,14 @@ class AppCard extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.bg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: kSoftShadow,
       ),
       child: child,
     );
     if (onTap == null) return card;
-    return InkWell(borderRadius: BorderRadius.circular(12), onTap: onTap, child: card);
+    return InkWell(borderRadius: BorderRadius.circular(14), onTap: onTap, child: card);
   }
 }
 
@@ -88,16 +103,35 @@ class ErrorRetry extends StatelessWidget {
 class EmptyState extends StatelessWidget {
   final String message;
   final IconData icon;
-  const EmptyState(this.message, {super.key, this.icon = Icons.inbox_outlined});
+  final String? hint;
+  const EmptyState(this.message, {super.key, this.icon = Icons.inbox_outlined, this.hint});
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 60),
-        child: Column(children: [
-          Icon(icon, size: 40, color: AppColors.textMuted),
-          const SizedBox(height: 10),
-          Text(message, style: const TextStyle(color: AppColors.textMuted)),
-        ]),
-      );
+  Widget build(BuildContext context) {
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 78, height: 78,
+          decoration: const BoxDecoration(color: AppColors.blueTint, shape: BoxShape.circle),
+          child: Icon(icon, size: 34, color: AppColors.primary),
+        ),
+        const SizedBox(height: 16),
+        Text(message, textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.text)),
+        if (hint != null) ...[
+          const SizedBox(height: 5),
+          Text(hint!, textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12.5, color: AppColors.textMuted, height: 1.4)),
+        ],
+      ],
+    );
+    return LayoutBuilder(builder: (ctx, cons) {
+      if (cons.maxHeight.isFinite) {
+        return Center(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: content));
+      }
+      return Padding(padding: const EdgeInsets.fromLTRB(32, 48, 32, 36), child: content);
+    });
+  }
 }
 
 void showMessage(BuildContext context, String message, {bool error = false}) {
@@ -254,6 +288,7 @@ class AppListTile extends StatelessWidget {
           color: AppColors.bg,
           borderRadius: BorderRadius.circular(13),
           border: Border.all(color: AppColors.borderSubtle),
+          boxShadow: kSoftShadow,
         ),
         child: ListTile(
           onTap: onTap,
@@ -290,8 +325,10 @@ class MenuTile extends StatelessWidget {
           onTap: onTap,
           child: Ink(
             decoration: BoxDecoration(
+              color: AppColors.bg,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.borderSubtle),
+              boxShadow: kSoftShadow,
             ),
             child: Stack(children: [
               Center(
@@ -496,4 +533,171 @@ class SegTabs extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Header band biru (judul + subjudul + aksi kanan + slot bawah untuk search).
+class AppHeader extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Widget? bottom;
+  const AppHeader({super.key, required this.title, this.subtitle, this.trailing, this.bottom});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(18, MediaQuery.of(context).padding.top + 16, 18, 16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primary, Color(0xFF2F78FF)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w800)),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(subtitle!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                    ],
+                  ],
+                ),
+              ),
+              ?trailing,
+            ],
+          ),
+          if (bottom != null) ...[const SizedBox(height: 14), bottom!],
+        ],
+      ),
+    );
+  }
+}
+
+/// Tombol lingkaran putih semi-transparan untuk aksi di header (mis. tambah).
+class HeaderAction extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const HeaderAction(this.icon, this.onTap, {super.key});
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.white.withAlpha(46),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: SizedBox(width: 38, height: 38, child: Icon(icon, color: Colors.white, size: 20)),
+        ),
+      );
+}
+
+/// Kolom pencarian putih untuk slot bawah header biru.
+Widget headerSearch({required String hint, ValueChanged<String>? onChanged}) {
+  return TextField(
+    onChanged: onChanged,
+    decoration: InputDecoration(
+      hintText: hint,
+      prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textMuted),
+      filled: true,
+      fillColor: Colors.white,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+    ),
+  );
+}
+
+/// Kartu statistik dengan badge ikon berwarna.
+class StatCard extends StatelessWidget {
+  final IconData icon;
+  final Color bg;
+  final Color fg;
+  final String value;
+  final String label;
+  const StatCard({super.key, required this.icon, required this.bg, required this.fg, required this.value, required this.label});
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.bg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.borderSubtle),
+          boxShadow: kSoftShadow,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+              child: Icon(icon, color: fg, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, height: 1.1)),
+                Text(label, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
+              ],
+            ),
+          ],
+        ),
+      );
+}
+
+/// Header band biru untuk layar detail (dengan tombol kembali opsional).
+class DetailHeader extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final bool showBack;
+  const DetailHeader({super.key, required this.title, this.subtitle, this.trailing, this.showBack = true});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.fromLTRB(showBack ? 6 : 18, MediaQuery.of(context).padding.top + (showBack ? 6 : 16), 14, 20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primary, Color(0xFF2F78FF)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: Row(
+        children: [
+          if (showBack)
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.maybePop(context),
+            ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle!, style: const TextStyle(color: Colors.white70, fontSize: 11.5)),
+                ],
+              ],
+            ),
+          ),
+          ?trailing,
+          const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
 }

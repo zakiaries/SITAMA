@@ -13,6 +13,7 @@ class LogbookScreen extends StatefulWidget {
 
 class _LogbookScreenState extends State<LogbookScreen> {
   late Future<List<Map<String, dynamic>>> _future;
+  String _q = '';
 
   String get _token => context.read<AuthProvider>().token ?? '';
 
@@ -63,57 +64,85 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Log Book')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openAdd,
-        icon: const Icon(Icons.add),
-        label: const Text('Tambah'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return ErrorRetry(message: '${snap.error}', onRetry: _reload);
-            }
-            final items = snap.data!;
-            if (items.isEmpty) {
-              return ListView(children: const [EmptyState('Belum ada log book.', icon: Icons.book_outlined)]);
-            }
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-              children: items.map((l) {
-                return AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(children: [
-                        Expanded(child: Text(l['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
-                        Text(l['date'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                      ]),
-                      const SizedBox(height: 6),
-                      Text(l['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
-                      if ((l['lecturer_note'] ?? '').toString().isNotEmpty) _Note('Catatan Dosen', l['lecturer_note'], AppColors.primary),
-                      if ((l['industry_note'] ?? '').toString().isNotEmpty) _Note('Catatan Pembimbing Industri', l['industry_note'], AppColors.success),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: () => _delete(l['id']),
-                          icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
-                          label: const Text('Hapus', style: TextStyle(color: AppColors.error)),
+      backgroundColor: AppColors.warm,
+      body: Column(
+        children: [
+          AppHeader(
+            title: 'Log Book',
+            subtitle: 'Catatan kegiatan harian magang',
+            trailing: HeaderAction(Icons.add, _openAdd),
+            bottom: headerSearch(hint: 'Cari kegiatan', onChanged: (v) => setState(() => _q = v)),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async => _reload(),
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _future,
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snap.hasError) {
+                    return ErrorRetry(message: '${snap.error}', onRetry: _reload);
+                  }
+                  final all = snap.data!;
+                  final items = _q.trim().isEmpty
+                      ? all
+                      : all.where((l) => '${l['title']} ${l['activity']}'.toLowerCase().contains(_q.toLowerCase())).toList();
+                  if (items.isEmpty) {
+                    return ListView(children: const [
+                      EmptyState('Belum ada log book',
+                          icon: Icons.book_outlined,
+                          hint: 'Tambah kegiatan lewat tombol + di kanan atas.'),
+                    ]);
+                  }
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                    children: items.map((l) {
+                      return AppCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                                  decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(999)),
+                                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                    const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.primary),
+                                    const SizedBox(width: 5),
+                                    Text(l['date'] ?? '', style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
+                                  ]),
+                                ),
+                                const Spacer(),
+                                InkWell(
+                                  onTap: () => _delete(l['id']),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(Icons.delete_outline, size: 19, color: AppColors.error),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(l['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 3),
+                            Text(l['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
+                            if ((l['lecturer_note'] ?? '').toString().isNotEmpty)
+                              _Note('Catatan Dosen', l['lecturer_note'], AppColors.primary),
+                            if ((l['industry_note'] ?? '').toString().isNotEmpty)
+                              _Note('Catatan Pembimbing Industri', l['industry_note'], AppColors.success),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

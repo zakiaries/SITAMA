@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
+import 'auth_ui.dart';
 
 class ActivationScreen extends StatefulWidget {
   const ActivationScreen({super.key});
@@ -76,56 +77,46 @@ class _ActivationScreenState extends State<ActivationScreen> {
   @override
   Widget build(BuildContext context) {
     final ready = _token != null;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Aktivasi Akun')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Center(
-            child: Container(
-              width: 76, height: 76,
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: Color(0x22000000), blurRadius: 16, offset: Offset(0, 8))]),
-              child: ClipOval(child: Image.asset('assets/images/logo.png', fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => Container(color: AppColors.primary,
-                  child: const Icon(Icons.school_rounded, color: Colors.white, size: 34)))),
+    return AuthShell(
+      showBack: true,
+      badge: const AuthBadge(icon: Icons.verified_user_outlined),
+      children: [
+        authTitle('Aktivasi Akun',
+            subtitle: 'Untuk pembimbing industri. Tempel token atau link aktivasi dari email.'),
+        if (_error != null) ...[const SizedBox(height: 16), authErrorBox(_error!)],
+        const SizedBox(height: 16),
+        TextField(
+          controller: _tokenInput,
+          enabled: !ready,
+          decoration: authField('Token / Link Aktivasi', Icons.key_outlined),
+        ),
+        const SizedBox(height: 12),
+        if (!ready)
+          authPrimaryButton('Cek Token', _checking ? null : _check, loading: _checking)
+        else ...[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.successBg,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text('Untuk pembimbing industri. Tempel token atau link aktivasi dari email.', style: TextStyle(color: AppColors.textSecondary)),
-          const SizedBox(height: 16),
-          if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
-          TextField(controller: _tokenInput, enabled: !ready, decoration: const InputDecoration(labelText: 'Token / Link Aktivasi')),
-          const SizedBox(height: 12),
-          if (!ready)
-            ElevatedButton(
-              onPressed: _checking ? null : _check,
-              child: _checking
-                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                  : const Text('Cek Token'),
-            )
-          else ...[
-            AppCard(child: Row(children: [
-              const Icon(Icons.verified_user_outlined, color: AppColors.success),
+            child: Row(children: [
+              const Icon(Icons.verified_user_outlined, color: AppColors.success, size: 20),
               const SizedBox(width: 10),
-              Expanded(child: Text('Akun: ${_userName ?? '-'}', style: const TextStyle(fontWeight: FontWeight.w700))),
-            ])),
-            const SizedBox(height: 8),
-            TextField(controller: _username, decoration: const InputDecoration(labelText: 'Buat Username')),
-            const SizedBox(height: 12),
-            TextField(controller: _password, obscureText: true, decoration: const InputDecoration(labelText: 'Buat Password (min. 6)')),
-            const SizedBox(height: 12),
-            TextField(controller: _passwordConfirm, obscureText: true, decoration: const InputDecoration(labelText: 'Konfirmasi Password')),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saving ? null : _activate,
-              child: _saving
-                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                  : const Text('Aktivasi Akun'),
-            ),
-          ],
+              Expanded(child: Text('Akun: ${_userName ?? '-'}',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
+            ]),
+          ),
+          const SizedBox(height: 14),
+          TextField(controller: _username, decoration: authField('Buat Username', Icons.person_outline)),
+          const SizedBox(height: 10),
+          TextField(controller: _password, obscureText: true, decoration: authField('Buat Password (min. 6)', Icons.lock_outline)),
+          const SizedBox(height: 10),
+          TextField(controller: _passwordConfirm, obscureText: true, decoration: authField('Konfirmasi Password', Icons.lock_outline)),
+          const SizedBox(height: 14),
+          authPrimaryButton('Aktivasi Akun', _saving ? null : _activate, loading: _saving),
         ],
-      ),
+      ],
     );
   }
 }

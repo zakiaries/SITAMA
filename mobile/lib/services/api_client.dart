@@ -19,11 +19,19 @@ class ApiClient {
   static Map<String, String> _headers(String? token) => {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+        'Pragma': 'no-cache',
         if (token != null) 'Authorization': 'Bearer $token',
       };
 
   static Future<dynamic> get(String path, {String? token}) async {
-    final res = await http.get(_uri(path), headers: _headers(token));
+    // Cache-buster: di Flutter Web, browser bisa meng-cache respons GET sehingga
+    // data setelah aksi (approve/komentar/dll) tampak belum ter-update sampai
+    // navigasi ulang. Query unik memaksa fetch baru tiap kali. Aman untuk backend
+    // (parameter tak dikenal diabaikan) & tak berpengaruh di Android/iOS.
+    final sep = path.contains('?') ? '&' : '?';
+    final bustedPath = '$path${sep}_ts=${DateTime.now().millisecondsSinceEpoch}';
+    final res = await http.get(_uri(bustedPath), headers: _headers(token));
     return _decode(res);
   }
 

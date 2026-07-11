@@ -48,9 +48,12 @@ class _LaporanScreenState extends State<LaporanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Laporan Akhir')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Laporan Akhir', subtitle: 'Unggah & pantau laporan'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snap) {
@@ -97,8 +100,10 @@ class _LaporanScreenState extends State<LaporanScreen> {
               ],
             );
           },
+          ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

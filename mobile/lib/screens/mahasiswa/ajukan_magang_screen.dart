@@ -32,9 +32,12 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajukan Magang')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Ajukan Magang', subtitle: 'Pengajuan tempat magang'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snap) {
@@ -87,8 +90,10 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
               ],
             );
           },
+          ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }
@@ -151,11 +156,14 @@ class _AjukanFormState extends State<_AjukanForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Form Ajukan Magang')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Form Ajukan Magang'),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
           DropdownButtonFormField<int?>(
             initialValue: _companyId,
             decoration: const InputDecoration(labelText: 'Perusahaan'),
@@ -201,8 +209,10 @@ class _AjukanFormState extends State<_AjukanForm> {
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
                 : const Text('Kirim Pengajuan'),
           ),
-        ],
-      ),
+            ],
+          ),
+        ),
+      ]),
     );
   }
 }

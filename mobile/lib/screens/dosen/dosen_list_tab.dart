@@ -4,7 +4,6 @@ import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
-import '../widgets/logout_button.dart';
 import '../shared/notifikasi_screen.dart';
 import 'mahasiswa_detail_screen.dart';
 
@@ -40,64 +39,73 @@ class _DosenListTabState extends State<DosenListTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mahasiswa Bimbingan'), actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotifikasiScreen(basePath: '/dosen'))),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        DetailHeader(
+          title: 'Mahasiswa Bimbingan',
+          subtitle: 'Daftar mahasiswa bimbingan Anda',
+          showBack: false,
+          trailing: IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotifikasiScreen(basePath: '/dosen'))),
+          ),
         ),
-        const LogoutButton(),
-      ]),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
-        child: FutureBuilder<Map<String, dynamic>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return ErrorRetry(message: '${snap.error}', onRetry: _reload);
-            }
-            final counts = Map<String, dynamic>.from(snap.data!['counts'] ?? {});
-            var students = List<Map<String, dynamic>>.from(snap.data!['students'] ?? []);
-            if (_search.isNotEmpty) {
-              final q = _search.toLowerCase();
-              students = students.where((s) =>
-                  '${s['name'] ?? ''}'.toLowerCase().contains(q) ||
-                  '${s['username'] ?? ''}'.toLowerCase().contains(q)).toList();
-            }
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: _future,
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snap.hasError) {
+                  return ErrorRetry(message: '${snap.error}', onRetry: _reload);
+                }
+                final counts = Map<String, dynamic>.from(snap.data!['counts'] ?? {});
+                var students = List<Map<String, dynamic>>.from(snap.data!['students'] ?? []);
+                if (_search.isNotEmpty) {
+                  final q = _search.toLowerCase();
+                  students = students.where((s) =>
+                      '${s['name'] ?? ''}'.toLowerCase().contains(q) ||
+                      '${s['username'] ?? ''}'.toLowerCase().contains(q)).toList();
+                }
 
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                StatStrip([
-                  StatItem('${counts['semua'] ?? 0}', 'Semua', accent: true),
-                  StatItem('${counts['belum'] ?? 0}', 'Belum Dinilai'),
-                  StatItem('${counts['dinilai'] ?? 0}', 'Sudah Dinilai'),
-                ]),
-                SearchFilterBar(hint: 'Cari nama / NIM...', onChanged: (v) => setState(() => _search = v)),
-                if (students.isEmpty)
-                  const EmptyState('Belum ada mahasiswa bimbingan.', icon: Icons.people_outline)
-                else
-                  ...students.map((s) => AppListTile(
-                        leading: CircleAvatar(
-                          radius: 22, backgroundColor: AppColors.blueTint,
-                          child: Text(_initials(s['name'] ?? '-'), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13)),
-                        ),
-                        title: s['name'] ?? '-',
-                        subtitle: '${s['username'] ?? ''} · ${s['company'] ?? '-'}\n${s['guidances_count'] ?? 0} bimbingan · ${s['logbooks_count'] ?? 0} log',
-                        trailing: StatusChip(s['status'] ?? ''),
-                        onTap: () async {
-                          await Navigator.push(context, MaterialPageRoute(builder: (_) => DosenMahasiswaDetail(studentId: s['id'])));
-                          if (context.mounted) _reload();
-                        },
-                      )),
-                const SizedBox(height: 24),
-              ],
-            );
-          },
+                return ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    StatStrip([
+                      StatItem('${counts['semua'] ?? 0}', 'Semua', accent: true),
+                      StatItem('${counts['belum'] ?? 0}', 'Belum Dinilai'),
+                      StatItem('${counts['dinilai'] ?? 0}', 'Sudah Dinilai'),
+                    ]),
+                    SearchFilterBar(hint: 'Cari nama / NIM...', onChanged: (v) => setState(() => _search = v)),
+                    if (students.isEmpty)
+                      const EmptyState('Belum ada mahasiswa bimbingan',
+                          icon: Icons.people_outline,
+                          hint: 'Mahasiswa yang Anda bimbing akan muncul di sini.')
+                    else
+                      ...students.map((s) => AppListTile(
+                            leading: CircleAvatar(
+                              radius: 22, backgroundColor: AppColors.blueTint,
+                              child: Text(_initials(s['name'] ?? '-'), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13)),
+                            ),
+                            title: s['name'] ?? '-',
+                            subtitle: '${s['username'] ?? ''} · ${s['company'] ?? '-'}\n${s['guidances_count'] ?? 0} bimbingan · ${s['logbooks_count'] ?? 0} log',
+                            trailing: StatusChip(s['status'] ?? ''),
+                            onTap: () async {
+                              await Navigator.push(context, MaterialPageRoute(builder: (_) => DosenMahasiswaDetail(studentId: s['id'])));
+                              if (context.mounted) _reload();
+                            },
+                          )),
+                    const SizedBox(height: 24),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

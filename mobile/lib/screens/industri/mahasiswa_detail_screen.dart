@@ -14,7 +14,9 @@ class IndustriMahasiswaDetail extends StatefulWidget {
 }
 
 class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
-  late Future<Map<String, dynamic>> _future;
+  Map<String, dynamic>? _data;
+  bool _loading = true;
+  Object? _error;
   String get _token => context.read<AuthProvider>().token ?? '';
   int get _sid => widget.studentId;
   int _filter = 0; // 0 Semua, 1 Belum Dikomen, 2 Sudah Dikomen
@@ -22,21 +24,26 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _reload();
   }
 
-  Future<Map<String, dynamic>> _load() async {
-    final data = await ApiClient.get('/dosen-industri/mahasiswa/$_sid', token: _token);
-    return Map<String, dynamic>.from(data);
+  Future<void> _reload() async {
+    setState(() { _loading = _data == null; _error = null; });
+    try {
+      final data = await ApiClient.get('/dosen-industri/mahasiswa/$_sid', token: _token);
+      if (!mounted) return;
+      setState(() { _data = Map<String, dynamic>.from(data); _loading = false; });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _error = e; _loading = false; });
+    }
   }
-
-  void _reload() => setState(() => _future = _load());
 
   Future<void> _action(Future<void> Function() run) async {
     try {
       await run();
       if (mounted) showMessage(context, 'Berhasil.');
-      _reload();
+      await _reload();
     } on ApiException catch (e) {
       if (mounted) showMessage(context, e.message, error: true);
     }
@@ -70,22 +77,32 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Mahasiswa')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
-        child: FutureBuilder<Map<String, dynamic>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Detail Mahasiswa'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _reload,
+            child: Builder(builder: (context) {
+            // Spinner hanya saat load PERTAMA (belum ada data). Saat reload, data
+            // lama tetap tampil lalu di-update di tempat (tanpa kedip/lompat scroll).
+            if (_data == null && _loading) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snap.hasError) {
-              return ErrorRetry(message: '${snap.error}', onRetry: _reload);
+            if (_data == null && _error != null) {
+              return ErrorRetry(message: '$_error', onRetry: _reload);
             }
-            final d = snap.data!;
+            final d = _data!;
             final student = Map<String, dynamic>.from(d['student'] ?? {});
             final internship = Map<String, dynamic>.from(d['internship'] ?? {});
-            final logbooks = List<Map<String, dynamic>>.from(d['logbooks'] ?? []);
+            final logbooks = List<Map<String, dynamic>>.from(d['logbooks'] ?? [])
+              // Urutan stabil (tanggal terbaru dulu, seri di-tie-break dengan id) supaya
+              // item TIDAK pindah posisi saat baru dikomentari — komentar langsung tampil di tempatnya.
+              ..sort((a, b) {
+                final byDate = '${b['date'] ?? ''}'.compareTo('${a['date'] ?? ''}');
+                if (byDate != 0) return byDate;
+                return ((b['id'] ?? 0) as num).compareTo((a['id'] ?? 0) as num);
+              });
             final name = student['name'] ?? '';
 
             final belum = logbooks.where((l) => (l['industry_note'] ?? '').toString().isEmpty).toList();
@@ -98,7 +115,12 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
                 // Header
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: AppColors.warm, borderRadius: BorderRadius.circular(14)),
+                  decoration: BoxDecoration(
+                    color: AppColors.bg,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: AppColors.borderSubtle),
+                    boxShadow: kSoftShadow,
+                  ),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                     if ((student['username'] ?? '').toString().isNotEmpty)
@@ -168,9 +190,10 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
                 const SizedBox(height: 24),
               ],
             );
-          },
+          }),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

@@ -14,6 +14,7 @@ class BimbinganScreen extends StatefulWidget {
 class _BimbinganScreenState extends State<BimbinganScreen> {
   late Future<Map<String, dynamic>> _future;
   String get _token => context.read<AuthProvider>().token ?? '';
+  String _q = '';
 
   @override
   void initState() {
@@ -40,85 +41,102 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Bimbingan')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openForm(),
-        icon: const Icon(Icons.add),
-        label: const Text('Ajukan'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
-        child: FutureBuilder<Map<String, dynamic>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return ErrorRetry(message: '${snap.error}', onRetry: _reload);
-            }
-            final d = snap.data!;
-            final items = List<Map<String, dynamic>>.from(d['guidances'] ?? []);
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-              children: [
-                if (d['lecturer'] != null)
-                  AppCard(child: Row(children: [
-                    const Icon(Icons.person_outline, color: AppColors.primary),
-                    const SizedBox(width: 10),
-                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Text('Dosen Pembimbing', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                      Text('${d['lecturer']}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                    ])),
-                  ])),
-                if (items.isEmpty)
-                  const EmptyState('Belum ada data bimbingan.', icon: Icons.menu_book_outlined)
-                else
-                  ...items.map((g) {
-                    final status = (g['status'] ?? '').toString();
-                    return AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(children: [
-                            Expanded(child: Text(g['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
-                            StatusChip(status),
-                          ]),
-                          const SizedBox(height: 4),
-                          Text(g['date'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                          const SizedBox(height: 8),
-                          Text(g['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
-                          if ((g['lecturer_note'] ?? '').toString().isNotEmpty)
-                            Container(
-                              margin: const EdgeInsets.only(top: 10),
-                              padding: const EdgeInsets.only(left: 10),
-                              decoration: const BoxDecoration(border: Border(left: BorderSide(color: AppColors.primary, width: 3))),
-                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const Text('Catatan Dosen', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w700)),
-                                Text('${g['lecturer_note']}', style: const TextStyle(fontSize: 13)),
-                              ]),
-                            ),
-                          if (status == 'rejected')
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(minimumSize: const Size(0, 40)),
-                                  onPressed: () => _openForm(revisi: g),
-                                  icon: const Icon(Icons.refresh, size: 18),
-                                  label: const Text('Revisi & Kirim Ulang'),
+      backgroundColor: AppColors.warm,
+      body: Column(
+        children: [
+          AppHeader(
+            title: 'Bimbingan',
+            subtitle: 'Riwayat catatan bimbingan kamu',
+            trailing: HeaderAction(Icons.add, () => _openForm()),
+            bottom: headerSearch(hint: 'Cari bimbingan', onChanged: (v) => setState(() => _q = v)),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async => _reload(),
+              child: FutureBuilder<Map<String, dynamic>>(
+                future: _future,
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snap.hasError) {
+                    return ErrorRetry(message: '${snap.error}', onRetry: _reload);
+                  }
+                  final d = snap.data!;
+                  final all = List<Map<String, dynamic>>.from(d['guidances'] ?? []);
+                  final items = _q.trim().isEmpty
+                      ? all
+                      : all.where((g) => '${g['title']} ${g['activity']}'.toLowerCase().contains(_q.toLowerCase())).toList();
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                    children: [
+                      if (d['lecturer'] != null)
+                        AppCard(child: Row(children: [
+                          Container(
+                            width: 34, height: 34,
+                            decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(10)),
+                            child: const Icon(Icons.person_outline, color: AppColors.primary, size: 18),
+                          ),
+                          const SizedBox(width: 11),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            const Text('Dosen Pembimbing', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+                            Text('${d['lecturer']}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                          ])),
+                        ])),
+                      if (items.isEmpty)
+                        const EmptyState('Belum ada bimbingan',
+                            icon: Icons.menu_book_outlined,
+                            hint: 'Ajukan bimbingan lewat tombol + di kanan atas.')
+                      else
+                        ...items.map((g) {
+                          final status = (g['status'] ?? '').toString();
+                          return AppCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    StatusDot(statusDotKind(status)),
+                                    const SizedBox(width: 11),
+                                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                      Text(g['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700)),
+                                      const SizedBox(height: 2),
+                                      Text(g['date'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                                    ])),
+                                    if (status.isNotEmpty) StatusChip(status),
+                                  ],
                                 ),
-                              ),
+                                if ((g['activity'] ?? '').toString().isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Text(g['activity'], style: const TextStyle(fontSize: 13, height: 1.5)),
+                                ],
+                                if ((g['lecturer_note'] ?? '').toString().isNotEmpty)
+                                  NoteBlock(label: 'Catatan Dosen', value: '${g['lecturer_note']}'),
+                                if (status == 'rejected')
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(minimumSize: const Size(0, 40)),
+                                        onPressed: () => _openForm(revisi: g),
+                                        icon: const Icon(Icons.refresh, size: 18),
+                                        label: const Text('Revisi & Kirim Ulang'),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
-                    );
-                  }),
-              ],
-            );
-          },
-        ),
+                          );
+                        }),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

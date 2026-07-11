@@ -20,41 +20,48 @@ class MenuTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Menu')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      backgroundColor: AppColors.warm,
+      body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 2, bottom: 10),
-            child: Text('KAMPUS & INDUSTRI',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: .6)),
+          const AppHeader(title: 'Menu', subtitle: 'Semua fitur & pengaturan akun'),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 2, bottom: 10),
+                  child: Text('KAMPUS & INDUSTRI',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: .6)),
+                ),
+                GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.86,
+                  children: [
+                    MenuTile(Icons.event_outlined, 'Seminar', onTap: () => _open(context, const SeminarScreen())),
+                    MenuTile(Icons.star_border_rounded, 'Nilai', onTap: () => _open(context, const NilaiScreen())),
+                    MenuTile(Icons.business_center_outlined, 'Magang Saya', onTap: () => _open(context, const MagangSayaScreen())),
+                    MenuTile(Icons.note_add_outlined, 'Ajukan Magang', onTap: () => _open(context, const AjukanMagangScreen())),
+                    MenuTile(Icons.description_outlined, 'Laporan Akhir', onTap: () => _open(context, const LaporanScreen())),
+                    MenuTile(Icons.notifications_none_rounded, 'Notifikasi', onTap: () => _open(context, const NotifikasiScreen(basePath: '/mahasiswa'))),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Padding(
+                  padding: EdgeInsets.only(left: 2, bottom: 10),
+                  child: Text('AKUN',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: .6)),
+                ),
+                _accountTile(context, Icons.person_outline, 'Profil Saya', () => _open(context, const ProfileTab())),
+                _accountTile(context, Icons.help_outline_rounded, 'Bantuan & FAQ', () {}),
+                const SizedBox(height: 4),
+                _LogoutTile(),
+              ],
+            ),
           ),
-          GridView.count(
-            crossAxisCount: 3,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.86,
-            children: [
-              MenuTile(Icons.event_outlined, 'Seminar', onTap: () => _open(context, const SeminarScreen())),
-              MenuTile(Icons.star_border_rounded, 'Nilai', onTap: () => _open(context, const NilaiScreen())),
-              MenuTile(Icons.business_center_outlined, 'Magang Saya', onTap: () => _open(context, const MagangSayaScreen())),
-              MenuTile(Icons.note_add_outlined, 'Ajukan Magang', onTap: () => _open(context, const AjukanMagangScreen())),
-              MenuTile(Icons.description_outlined, 'Laporan Akhir', onTap: () => _open(context, const LaporanScreen())),
-              MenuTile(Icons.notifications_none_rounded, 'Notifikasi', onTap: () => _open(context, const NotifikasiScreen(basePath: '/mahasiswa'))),
-            ],
-          ),
-          const SizedBox(height: 20),
-          const Padding(
-            padding: EdgeInsets.only(left: 2, bottom: 10),
-            child: Text('AKUN',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: .6)),
-          ),
-          _accountTile(context, Icons.person_outline, 'Profil Saya', () => _open(context, const ProfileTab())),
-          _accountTile(context, Icons.help_outline_rounded, 'Bantuan & FAQ', () {}),
-          const SizedBox(height: 4),
-          _LogoutTile(),
         ],
       ),
     );
@@ -66,6 +73,7 @@ class MenuTab extends StatelessWidget {
           color: AppColors.bg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.borderSubtle),
+          boxShadow: kSoftShadow,
         ),
         child: ListTile(
           onTap: onTap,

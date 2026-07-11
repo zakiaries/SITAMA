@@ -61,9 +61,12 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Magang Saya')),
-      body: RefreshIndicator(
-        onRefresh: () async => _reload(),
+      backgroundColor: AppColors.warm,
+      body: Column(children: [
+        const DetailHeader(title: 'Magang Saya', subtitle: 'Status magang & syarat selesai'),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async => _reload(),
         child: FutureBuilder<Map<String, dynamic>>(
           future: _future,
           builder: (context, snap) {
@@ -95,29 +98,57 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
                 ])),
 
                 const SectionTitle('Sertifikat Magang'),
-                AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(hasCert ? '✓ Sertifikat sudah diunggah.' : 'Belum ada sertifikat.',
-                      style: TextStyle(color: hasCert ? AppColors.success : AppColors.textMuted)),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
+                AppCard(child: Row(children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: hasCert ? AppColors.successBg : AppColors.warnBg,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Icon(Icons.workspace_premium_outlined, size: 20,
+                        color: hasCert ? AppColors.success : AppColors.warnText),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(hasCert ? 'Sertifikat sudah diunggah' : 'Belum ada sertifikat',
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                    const Text('Format PDF/JPG/PNG.', style: TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                  ])),
+                  TextButton(
                     onPressed: _busy ? null : _uploadCertificate,
-                    icon: const Icon(Icons.upload_file, size: 18),
-                    label: Text(hasCert ? 'Ganti Sertifikat' : 'Unggah Sertifikat'),
+                    child: Text(hasCert ? 'Ganti' : 'Unggah'),
                   ),
                 ])),
 
                 if (internship['is_finished'] != true) ...[
                   const SectionTitle('Selesai Magang'),
                   AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    ...checklist.map((c) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Icon(c['met'] == true ? Icons.check_circle : Icons.cancel,
-                                size: 18, color: c['met'] == true ? AppColors.success : AppColors.error),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(c['label'] ?? '', style: const TextStyle(fontSize: 13))),
-                          ]),
-                        )),
+                    ...checklist.map((c) {
+                      final met = c['met'] == true;
+                      final hint = (c['hint'] ?? c['note'] ?? c['detail'] ?? '').toString();
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Container(
+                            width: 22, height: 22,
+                            decoration: BoxDecoration(
+                              color: met ? AppColors.successBg : AppColors.errorBg,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(met ? Icons.check : Icons.close, size: 13,
+                                color: met ? AppColors.success : AppColors.error),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(c['label'] ?? '', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                            if (hint.isNotEmpty) ...[
+                              const SizedBox(height: 1),
+                              Text(hint, style: TextStyle(fontSize: 10.5, color: met ? AppColors.textMuted : AppColors.error)),
+                            ],
+                          ])),
+                        ]),
+                      );
+                    }),
                     const SizedBox(height: 12),
                     if (finishRequested)
                       Container(
@@ -142,8 +173,10 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
               ],
             );
           },
+          ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }
