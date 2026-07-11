@@ -26,7 +26,9 @@ use App\Http\Controllers\Kaprodi\DashboardController as KaprodiDashboardControll
 use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaController;
 use App\Http\Controllers\Kaprodi\DosenController as KaprodiDosenController;
 use App\Http\Controllers\Kaprodi\MagangRequestController as KaprodiMagangRequestController;
+use App\Http\Controllers\Kaprodi\SeminarController as KaprodiSeminarController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
+use App\Http\Controllers\BeritaAcaraController;
 use Illuminate\Support\Facades\Route;
 
 // Root redirect ke login
@@ -36,6 +38,10 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::view('/tentang', 'public.about')->name('about');
 Route::view('/bantuan', 'public.help')->name('bantuan');
 Route::view('/kontak', 'public.contact')->name('contact');
+
+// Berita acara seminar (publik) — tamu isi identitas + tanda tangan via scan QR
+Route::get('/seminar/hadir/{token}',  [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
+Route::post('/seminar/hadir/{token}', [BeritaAcaraController::class, 'store'])->name('berita-acara.store');
 
 // Aktivasi akun pembimbing industri (publik)
 Route::view('/aktivasi', 'auth.aktivasi-entry')->name('aktivasi.entry');
@@ -72,6 +78,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::post('/seminar', [SeminarController::class, 'store'])->name('seminar.store');
         Route::put('/seminar/{seminar}', [SeminarController::class, 'update'])->name('seminar.update');
         Route::delete('/seminar/{seminar}', [SeminarController::class, 'destroy'])->name('seminar.destroy');
+        Route::get('/seminar/{seminar}/berita-acara', [SeminarController::class, 'beritaAcaraPdf'])->name('seminar.berita-acara');
         Route::get('/seminar/{seminar}', [SeminarController::class, 'detail'])->name('seminar.detail');
         Route::post('/seminar/{seminar}/register', [SeminarController::class, 'register'])->name('seminar.register');
 
@@ -166,6 +173,10 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::post('/pengajuan-magang/{magangRequest}/approve', [KaprodiMagangRequestController::class, 'approve'])->name('pengajuan-magang.approve');
     Route::post('/pengajuan-magang/{magangRequest}/reject',  [KaprodiMagangRequestController::class, 'reject'])->name('pengajuan-magang.reject');
     Route::post('/pengajuan-magang/{magangRequest}/resend',  [KaprodiMagangRequestController::class, 'resendInvitation'])->name('pengajuan-magang.resend');
+
+    Route::get('/seminar', [KaprodiSeminarController::class, 'index'])->name('seminar.index');
+    Route::post('/seminar/{seminar}/approve', [KaprodiSeminarController::class, 'approve'])->name('seminar.approve');
+    Route::post('/seminar/{seminar}/reject',  [KaprodiSeminarController::class, 'reject'])->name('seminar.reject');
 
     Route::get('/profile',  [KaprodiProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [KaprodiProfileController::class, 'update'])->name('profile.update');
