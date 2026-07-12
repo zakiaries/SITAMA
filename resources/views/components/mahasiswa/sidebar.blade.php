@@ -73,6 +73,12 @@
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a4 4 0 100-8 4 4 0 000 8z"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>
       Nilai
     </a>
+
+    {{-- Chatbot rekomendasi (TF-IDF + Cosine Similarity) --}}
+    <a class="nav-item {{ request()->routeIs('mahasiswa.chatbot') ? 'active' : '' }}" href="{{ route('mahasiswa.chatbot') }}">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chatbot
+    </a>
   </nav>
 
   <a class="sb-user {{ request()->routeIs('mahasiswa.profile') ? 'sb-user-active' : '' }}"

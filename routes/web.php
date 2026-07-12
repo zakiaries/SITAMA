@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Mahasiswa\BimbinganController;
+use App\Http\Controllers\Mahasiswa\ChatbotController;
 use App\Http\Controllers\Mahasiswa\DashboardController;
 use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
@@ -93,6 +94,9 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::post('/magang-saya/ajukan-selesai', [MagangSayaController::class, 'requestFinish'])->name('magang-saya.ajukan-selesai');
 
         Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai');
+
+        Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
+        Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('chatbot.ask');
 
         Route::get('/laporan',  [LaporanController::class, 'index'])->name('laporan');
         Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
