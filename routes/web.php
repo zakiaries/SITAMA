@@ -28,6 +28,7 @@ use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaControll
 use App\Http\Controllers\Kaprodi\DosenController as KaprodiDosenController;
 use App\Http\Controllers\Kaprodi\MagangRequestController as KaprodiMagangRequestController;
 use App\Http\Controllers\Kaprodi\SeminarController as KaprodiSeminarController;
+use App\Http\Controllers\Kaprodi\ChatbotController as KaprodiChatbotController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
 use App\Http\Controllers\BeritaAcaraController;
 use Illuminate\Support\Facades\Route;
@@ -181,6 +182,15 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::get('/seminar', [KaprodiSeminarController::class, 'index'])->name('seminar.index');
     Route::post('/seminar/{seminar}/approve', [KaprodiSeminarController::class, 'approve'])->name('seminar.approve');
     Route::post('/seminar/{seminar}/reject',  [KaprodiSeminarController::class, 'reject'])->name('seminar.reject');
+
+    Route::get('/chatbot',                          [KaprodiChatbotController::class, 'index'])->name('chatbot.index');
+    Route::get('/chatbot/logs',                     [KaprodiChatbotController::class, 'logs'])->name('chatbot.logs');
+    Route::get('/chatbot/create',                   [KaprodiChatbotController::class, 'create'])->name('chatbot.create');
+    Route::post('/chatbot',                         [KaprodiChatbotController::class, 'store'])->name('chatbot.store');
+    Route::get('/chatbot/{chatbotKnowledge}/edit',  [KaprodiChatbotController::class, 'edit'])->name('chatbot.edit');
+    Route::put('/chatbot/{chatbotKnowledge}',       [KaprodiChatbotController::class, 'update'])->name('chatbot.update');
+    Route::post('/chatbot/{chatbotKnowledge}/toggle', [KaprodiChatbotController::class, 'toggle'])->name('chatbot.toggle');
+    Route::delete('/chatbot/{chatbotKnowledge}',    [KaprodiChatbotController::class, 'destroy'])->name('chatbot.destroy');
 
     Route::get('/profile',  [KaprodiProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [KaprodiProfileController::class, 'update'])->name('profile.update');

@@ -52,6 +52,26 @@ class TfIdfVectorizer
     }
 
     /**
+     * Ekspor bobot IDF hasil pelatihan (untuk disimpan ke cache).
+     *
+     * @return array<string, float>
+     */
+    public function export(): array
+    {
+        return $this->idf;
+    }
+
+    /**
+     * Muat kembali bobot IDF dari cache tanpa perlu melatih ulang.
+     *
+     * @param array<string, float> $idf
+     */
+    public function import(array $idf): void
+    {
+        $this->idf = $idf;
+    }
+
+    /**
      * Ubah daftar token menjadi vektor bobot TF-IDF.
      * Term yang tidak dikenal (tidak ada di korpus) diabaikan.
      *

@@ -2,6 +2,8 @@
 
 namespace App\Services\Chatbot;
 
+use Illuminate\Support\Facades\Cache;
+
 /**
  * Mesin chatbot rekomendasi SITAMA.
  *
@@ -63,21 +65,36 @@ class ChatbotService
 
     /**
      * Bangun korpus terpraproses, latih IDF, lalu vektorkan tiap dokumen.
+     *
+     * Hasil pelatihan (IDF + vektor dokumen) di-cache dengan kunci berbasis
+     * hash isi KB, sehingga praproses + vektorisasi hanya dijalankan sekali
+     * dan otomatis dilatih ulang ketika isi basis pengetahuan berubah.
      */
     private function fit(): void
     {
-        $documents = [];
-        foreach ($this->entries as $entry) {
-            $documents[] = $this->preprocessor->process(
-                $entry['pertanyaan'] . ' ' . $entry['kata_kunci']
-            );
-        }
+        $signature = md5(json_encode($this->entries));
+        $cacheKey  = 'chatbot.tfidf.' . $signature;
 
-        $this->vectorizer->fit($documents);
+        $model = Cache::remember($cacheKey, now()->addDay(), function () {
+            $documents = [];
+            foreach ($this->entries as $entry) {
+                $documents[] = $this->preprocessor->process(
+                    $entry['pertanyaan'] . ' ' . $entry['kata_kunci']
+                );
+            }
 
-        foreach ($documents as $tokens) {
-            $this->documentVectors[] = $this->vectorizer->transform($tokens);
-        }
+            $this->vectorizer->fit($documents);
+
+            $vectors = [];
+            foreach ($documents as $tokens) {
+                $vectors[] = $this->vectorizer->transform($tokens);
+            }
+
+            return ['idf' => $this->vectorizer->export(), 'vectors' => $vectors];
+        });
+
+        $this->vectorizer->import($model['idf']);
+        $this->documentVectors = $model['vectors'];
     }
 
     /**

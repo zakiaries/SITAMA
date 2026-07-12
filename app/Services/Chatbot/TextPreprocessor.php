@@ -17,6 +17,21 @@ namespace App\Services\Chatbot;
 class TextPreprocessor
 {
     /**
+     * Stemmer Sastrawi (algoritma Nazief-Adriani) bila library tersedia,
+     * atau null → fallback ke stemmer ringan bawaan.
+     *
+     * @var \Sastrawi\Stemmer\Stemmer|null
+     */
+    private $stemmer = null;
+
+    public function __construct()
+    {
+        if (class_exists(\Sastrawi\Stemmer\StemmerFactory::class)) {
+            $this->stemmer = (new \Sastrawi\Stemmer\StemmerFactory())->createStemmer();
+        }
+    }
+
+    /**
      * Daftar stopword Bahasa Indonesia (kata umum tanpa makna pembeda).
      *
      * @var string[]
@@ -42,6 +57,27 @@ class TextPreprocessor
         // "hari" penting: stemmer meringkas "harian" -> "hari", sehingga tanpa
         // ini kueri seperti "cuaca hari ini" salah cocok ke entri logbook.
         'hari', 'ini', 'now', 'sekarang', 'tadi', 'nanti', 'kemarin',
+    ];
+
+    /**
+     * Normalisasi singkatan & salah ketik umum → bentuk baku.
+     * Diterapkan per token sebelum stopword removal & stemming, agar variasi
+     * penulisan mahasiswa tetap cocok dengan basis pengetahuan.
+     *
+     * @var array<string, string>
+     */
+    private const ALIASES = [
+        'pw' => 'password', 'pass' => 'password', 'pwd' => 'password',
+        'logbok' => 'logbook', 'logbuk' => 'logbook',
+        'sertipikat' => 'sertifikat', 'sertif' => 'sertifikat',
+        'magan' => 'magang', 'magng' => 'magang',
+        'bimbngan' => 'bimbingan', 'bimbngn' => 'bimbingan', 'bmbingan' => 'bimbingan',
+        'seminr' => 'seminar', 'seminars' => 'seminar',
+        'nilay' => 'nilai', 'nilé' => 'nilai',
+        'laporn' => 'laporan', 'lapran' => 'laporan',
+        'daftr' => 'daftar', 'dftar' => 'daftar',
+        'profl' => 'profil', 'propil' => 'profil',
+        'notif' => 'notifikasi', 'notip' => 'notifikasi',
     ];
 
     /**
@@ -80,6 +116,9 @@ class TextPreprocessor
 
         $result = [];
         foreach ($tokens as $token) {
+            // Normalisasi singkatan / salah ketik umum ke bentuk baku.
+            $token = self::ALIASES[$token] ?? $token;
+
             // Buang token yang terlalu pendek (1 huruf) atau angka murni.
             if (mb_strlen($token) < 2 || ctype_digit($token)) {
                 continue;
@@ -90,20 +129,23 @@ class TextPreprocessor
                 continue;
             }
 
-            // 5. Stemming ringan
-            $result[] = $this->stem($token);
+            // 5. Stemming — Sastrawi (Nazief-Adriani) bila ada, jika tidak
+            //    pakai stemmer ringan bawaan.
+            $result[] = $this->stemmer
+                ? $this->stemmer->stem($token)
+                : $this->lightStem($token);
         }
 
         return $result;
     }
 
     /**
-     * Stemming ringan: buang satu awalan + satu akhiran yang umum.
+     * Stemming ringan (fallback): buang satu awalan + satu akhiran yang umum.
      *
      * Konservatif — hanya membuang imbuhan bila akar yang tersisa masih
      * cukup panjang (>= 3 huruf), sehingga kata pendek tidak rusak.
      */
-    private function stem(string $word): string
+    private function lightStem(string $word): string
     {
         // Kata pendek dibiarkan apa adanya.
         if (mb_strlen($word) <= 4) {

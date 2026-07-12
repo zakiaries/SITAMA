@@ -2,6 +2,9 @@
 
 namespace App\Services\Chatbot;
 
+use App\Models\ChatbotKnowledge;
+use Illuminate\Support\Facades\Schema;
+
 /**
  * Basis pengetahuan (knowledge base) chatbot SITAMA.
  *
@@ -13,14 +16,48 @@ namespace App\Services\Chatbot;
  *   - kategori   : label pengelompokan untuk ditampilkan.
  *
  * Dokumen korpus yang divektorkan = gabungan "pertanyaan" + "kata_kunci".
- * Untuk menambah cakupan chatbot, cukup tambah entri baru di sini.
+ *
+ * Sumber data: tabel `chatbot_knowledges` (dikelola Kaprodi). Bila tabel belum
+ * ada atau masih kosong, dipakai daftar bawaan (defaultEntries) sebagai
+ * fallback sekaligus sumber data untuk seeder.
  */
 class KnowledgeBase
 {
     /**
+     * Entri aktif untuk melatih chatbot — dari DB, fallback ke bawaan.
+     *
      * @return array<int, array{pertanyaan:string, kata_kunci:string, jawaban:string, kategori:string}>
      */
     public static function entries(): array
+    {
+        try {
+            if (Schema::hasTable('chatbot_knowledges')) {
+                $rows = ChatbotKnowledge::where('is_active', true)
+                    ->orderBy('id')
+                    ->get(['pertanyaan', 'kata_kunci', 'jawaban', 'kategori']);
+
+                if ($rows->isNotEmpty()) {
+                    return $rows->map(fn ($r) => [
+                        'pertanyaan' => $r->pertanyaan,
+                        'kata_kunci' => $r->kata_kunci,
+                        'jawaban'    => $r->jawaban,
+                        'kategori'   => $r->kategori,
+                    ])->all();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Abaikan (mis. DB belum siap) dan pakai fallback bawaan.
+        }
+
+        return self::defaultEntries();
+    }
+
+    /**
+     * Daftar FAQ bawaan (fallback + sumber seeder awal).
+     *
+     * @return array<int, array{pertanyaan:string, kata_kunci:string, jawaban:string, kategori:string}>
+     */
+    public static function defaultEntries(): array
     {
         return [
             [

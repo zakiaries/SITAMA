@@ -44,6 +44,12 @@
         <span style="background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:auto;">{{ $pendingSeminar }}</span>
       @endif
     </a>
+    <a class="nav-item {{ request()->routeIs('kaprodi.chatbot.*') ? 'active' : '' }}" href="{{ route('kaprodi.chatbot.index') }}">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      FAQ Chatbot
+    </a>
   </nav>
 
   <a class="sb-user {{ request()->routeIs('kaprodi.profile') ? 'sb-user-active' : '' }}"
