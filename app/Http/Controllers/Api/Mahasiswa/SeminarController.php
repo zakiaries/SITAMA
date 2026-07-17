@@ -16,7 +16,7 @@ class SeminarController extends ApiController
         $seminars = Seminar::whereNull('student_id')->with('registrations')
             ->orderByDesc('date')->get();
 
-        $mySeminars = Seminar::where('student_id', $student->id)->with('registrations')
+        $mySeminars = Seminar::where('student_id', $student->id)->with('registrations', 'attendances')
             ->orderByDesc('date')->get();
 
         $peerSeminars = Seminar::whereNotNull('student_id')
@@ -34,7 +34,7 @@ class SeminarController extends ApiController
         return response()->json([
             'can_submit'     => $canSubmit,
             'requirements'   => $requirements,
-            'my_seminars'    => $mySeminars->map(fn ($s) => $this->card($s, $registeredIds)),
+            'my_seminars'    => $mySeminars->map(fn ($s) => $this->ownerCard($s, $registeredIds)),
             'peer_seminars'  => $peerSeminars->map(fn ($s) => $this->card($s, $registeredIds)),
             'seminars'       => $seminars->map(fn ($s) => $this->card($s, $registeredIds)),
         ]);
@@ -84,6 +84,8 @@ class SeminarController extends ApiController
             'description' => 'nullable|string',
         ], ['date.after_or_equal' => 'Tanggal seminar tidak boleh sebelum hari ini.']);
 
+        // Sama seperti web: diajukan sebagai 'pending', menunggu ACC Kaprodi.
+        // access_token & QR absensi dibuat otomatis oleh Kaprodi saat menyetujui.
         $seminar = Seminar::create([
             'title'       => $request->title,
             'program'     => $student->study_program ?: 'Magang',
@@ -92,21 +94,20 @@ class SeminarController extends ApiController
             'location'    => $request->location,
             'organizer'   => $request->user()->name,
             'description' => $request->description,
-            'status'      => 'scheduled',
+            'status'      => 'pending',
             'student_id'  => $student->id,
         ]);
 
-        SeminarRegistration::firstOrCreate(
-            ['student_id' => $student->id, 'seminar_id' => $seminar->id],
-            ['status' => 'registered']
-        );
-
-        return response()->json(['message' => 'Jadwal seminar berhasil diajukan.', 'id' => $seminar->id], 201);
+        return response()->json(['message' => 'Jadwal seminar berhasil diajukan. Menunggu persetujuan Kaprodi.', 'id' => $seminar->id], 201);
     }
 
     public function update(Request $request, Seminar $seminar)
     {
         $this->authorizeOwn($request, $seminar);
+
+        if (! in_array($seminar->status, ['pending', 'rejected'], true)) {
+            return response()->json(['message' => 'Seminar yang sudah disetujui tidak dapat diubah.'], 422);
+        }
 
         $request->validate([
             'title'       => 'required|string|max:255',
@@ -116,15 +117,30 @@ class SeminarController extends ApiController
             'description' => 'nullable|string',
         ], ['date.after_or_equal' => 'Tanggal seminar tidak boleh sebelum hari ini.']);
 
-        $seminar->update($request->only('title', 'date', 'time', 'location', 'description'));
+        // Mengajukan ulang → kembali menunggu & bersihkan alasan penolakan (seperti web).
+        $seminar->update([
+            'title'            => $request->title,
+            'date'             => $request->date,
+            'time'             => $request->time,
+            'location'         => $request->location,
+            'description'      => $request->description,
+            'status'           => 'pending',
+            'rejection_reason' => null,
+        ]);
 
-        return response()->json(['message' => 'Jadwal seminar berhasil diperbarui.']);
+        return response()->json(['message' => 'Jadwal seminar berhasil diperbarui. Menunggu persetujuan Kaprodi.']);
     }
 
     public function destroy(Request $request, Seminar $seminar)
     {
         $this->authorizeOwn($request, $seminar);
+
+        if (! in_array($seminar->status, ['pending', 'rejected'], true)) {
+            return response()->json(['message' => 'Seminar yang sudah disetujui tidak dapat dibatalkan.'], 422);
+        }
+
         $seminar->registrations()->delete();
+        $seminar->attendances()->delete();
         $seminar->delete();
 
         return response()->json(['message' => 'Pengajuan seminar dibatalkan.']);
@@ -174,5 +190,20 @@ class SeminarController extends ApiController
             'min_audience' => Seminar::MIN_AUDIENCE,
             'is_registered'=> in_array($s->id, $registeredIds, true),
         ];
+    }
+
+    /** Kartu untuk seminar milik sendiri: tambahan info QR absensi tamu + alasan tolak. */
+    private function ownerCard(Seminar $s, array $registeredIds): array
+    {
+        return array_merge($this->card($s, $registeredIds), [
+            'is_owner'         => true,
+            'rejection_reason' => $s->rejection_reason,
+            'guest_count'      => $s->attendances->count(),
+            'min_guests'       => Seminar::MIN_GUESTS,
+            // QR absensi tamu hanya aktif untuk seminar yang sudah di-ACC Kaprodi (punya token).
+            'hadir_url'        => ($s->status === 'scheduled' && $s->access_token)
+                ? url('/seminar/hadir/' . $s->access_token)
+                : null,
+        ]);
     }
 }

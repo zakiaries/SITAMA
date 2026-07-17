@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Mahasiswa\BimbinganController as MhsBimbingan;
+use App\Http\Controllers\Api\Mahasiswa\ChatbotController as MhsChatbot;
 use App\Http\Controllers\Api\Mahasiswa\DashboardController as MhsDashboard;
 use App\Http\Controllers\Api\Mahasiswa\LaporanController as MhsLaporan;
 use App\Http\Controllers\Api\Mahasiswa\LogBookController as MhsLogBook;
@@ -77,6 +78,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/profile', [MhsProfile::class, 'index']);
         Route::put('/profile', [MhsProfile::class, 'update']);
+
+        Route::get('/chatbot', [MhsChatbot::class, 'index']);
+        Route::post('/chatbot', [MhsChatbot::class, 'ask']);
     });
 
     // ══════════ DOSEN ══════════

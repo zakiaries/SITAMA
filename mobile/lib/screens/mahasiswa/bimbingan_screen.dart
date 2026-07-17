@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
+import '../../services/file_helper.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
 
@@ -36,6 +39,12 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
       builder: (_) => _BimbinganForm(token: _token, revisi: revisi),
     );
     if (saved == true) _reload();
+  }
+
+  Future<void> _openFile(String url) async {
+    final uri = Uri.parse(AppConfig.absoluteFileUrl(url));
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showMessage(context, 'Tidak bisa membuka file.', error: true);
   }
 
   @override
@@ -113,6 +122,16 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
                                 ],
                                 if ((g['lecturer_note'] ?? '').toString().isNotEmpty)
                                   NoteBlock(label: 'Catatan Dosen', value: '${g['lecturer_note']}'),
+                                if ((g['file_url'] ?? '').toString().isNotEmpty)
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: TextButton.icon(
+                                      onPressed: () => _openFile('${g['file_url']}'),
+                                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                                      icon: const Icon(Icons.description_outlined, size: 18),
+                                      label: const Text('Lihat File Bimbingan'),
+                                    ),
+                                  ),
                                 if (status == 'rejected')
                                   Align(
                                     alignment: Alignment.centerLeft,
@@ -156,6 +175,7 @@ class _BimbinganFormState extends State<_BimbinganForm> {
   late DateTime _date;
   bool _saving = false;
   String? _error;
+  String? _filePath; // file lampiran (opsional)
 
   bool get _isRevisi => widget.revisi != null;
 
@@ -182,16 +202,29 @@ class _BimbinganFormState extends State<_BimbinganForm> {
       return;
     }
     setState(() { _saving = true; _error = null; });
-    final body = {'title': _title.text.trim(), 'activity': _activity.text.trim(), 'date': _dateStr};
+    final fields = {'title': _title.text.trim(), 'activity': _activity.text.trim(), 'date': _dateStr};
     try {
-      if (_isRevisi) {
-        await ApiClient.put('/mahasiswa/bimbingan/${widget.revisi!['id']}', token: widget.token, body: body);
+      if (_filePath != null) {
+        // Ada file → kirim multipart. Untuk revisi pakai spoof _method=PUT
+        // (PHP tidak mengurai file pada request PUT asli).
+        final path = _isRevisi ? '/mahasiswa/bimbingan/${widget.revisi!['id']}' : '/mahasiswa/bimbingan';
+        await ApiClient.upload(
+          path,
+          fileField: 'file',
+          filePath: _filePath!,
+          fields: _isRevisi ? {...fields, '_method': 'PUT'} : fields,
+          token: widget.token,
+        );
+      } else if (_isRevisi) {
+        await ApiClient.put('/mahasiswa/bimbingan/${widget.revisi!['id']}', token: widget.token, body: fields);
       } else {
-        await ApiClient.post('/mahasiswa/bimbingan', token: widget.token, body: body);
+        await ApiClient.post('/mahasiswa/bimbingan', token: widget.token, body: fields);
       }
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       setState(() => _error = e.message);
+    } catch (_) {
+      setState(() => _error = 'Tidak dapat terhubung ke server. Coba lagi.');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -219,6 +252,25 @@ class _BimbinganFormState extends State<_BimbinganForm> {
             },
             child: InputDecorator(decoration: const InputDecoration(labelText: 'Tanggal'), child: Text(_dateStr)),
           ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _saving ? null : () async {
+              final p = await pickFilePath(extensions: ['pdf', 'doc', 'docx']);
+              if (p != null) setState(() => _filePath = p);
+            },
+            icon: const Icon(Icons.attach_file, size: 18),
+            label: Text(_filePath == null ? 'Lampirkan File (PDF/Word, opsional)' : fileName(_filePath!),
+                maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+          if (_filePath != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _saving ? null : () => setState(() => _filePath = null),
+                icon: const Icon(Icons.close, size: 16, color: AppColors.error),
+                label: const Text('Hapus lampiran', style: TextStyle(color: AppColors.error, fontSize: 12)),
+              ),
+            ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _saving ? null : _save,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
@@ -133,10 +135,15 @@ class _SeminarScreenState extends State<SeminarScreen> {
     final aud = s['audience'] ?? 0;
     final minA = s['min_audience'] ?? 0;
     final registered = s['is_registered'] == true;
+    final status = (s['status'] ?? '').toString();
+    final hadirUrl = (s['hadir_url'] ?? '').toString();
+    final rejection = (s['rejection_reason'] ?? '').toString();
+    final guest = s['guest_count'] ?? 0;
+    final minGuest = s['min_guests'] ?? 0;
     return AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Expanded(child: Text(s['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
-        StatusChip(s['status'] ?? ''),
+        StatusChip(status),
       ]),
       const SizedBox(height: 2),
       Text(s['program'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
@@ -148,14 +155,34 @@ class _SeminarScreenState extends State<SeminarScreen> {
       ]),
       const SizedBox(height: 8),
       Text('Audiens: $aud/$minA', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-      if (mine)
-        Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-          Expanded(child: OutlinedButton(onPressed: () => _openForm(edit: s), child: const Text('Edit'))),
-          const SizedBox(width: 8),
-          Expanded(child: OutlinedButton(
-            style: OutlinedButton.styleFrom(foregroundColor: AppColors.error, side: const BorderSide(color: AppColors.error)),
-            onPressed: () => _cancel(s['id']), child: const Text('Batalkan'))),
-        ]))
+      if (mine) ...[
+        if (status == 'scheduled')
+          Padding(padding: const EdgeInsets.only(top: 4),
+              child: Text('Tamu hadir: $guest/$minGuest', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
+        if (status == 'rejected' && rejection.isNotEmpty)
+          NoteBlock(label: 'Alasan Ditolak', value: rejection),
+        if (status == 'pending')
+          const Padding(padding: EdgeInsets.only(top: 8),
+              child: Text('Menunggu persetujuan Kaprodi.', style: TextStyle(fontSize: 12, color: AppColors.warnText))),
+        if (status == 'scheduled' && hadirUrl.isNotEmpty)
+          Padding(padding: const EdgeInsets.only(top: 10), child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showQr(s),
+              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+              icon: const Icon(Icons.qr_code_2, size: 20),
+              label: const Text('QR Absensi Tamu'),
+            ),
+          ))
+        else if (status == 'pending' || status == 'rejected')
+          Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
+            Expanded(child: OutlinedButton(onPressed: () => _openForm(edit: s), child: const Text('Edit'))),
+            const SizedBox(width: 8),
+            Expanded(child: OutlinedButton(
+              style: OutlinedButton.styleFrom(foregroundColor: AppColors.error, side: const BorderSide(color: AppColors.error)),
+              onPressed: () => _cancel(s['id']), child: const Text('Batalkan'))),
+          ])),
+      ]
       else if (registered)
         const Padding(padding: EdgeInsets.only(top: 10), child: Text('✓ Anda sudah terdaftar', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600)))
       else
@@ -164,6 +191,49 @@ class _SeminarScreenState extends State<SeminarScreen> {
           child: ElevatedButton(onPressed: () => _register(s['id']), style: ElevatedButton.styleFrom(minimumSize: const Size(0, 42)), child: const Text('Daftar sebagai Audiens')),
         )),
     ]));
+  }
+
+  /// Dialog QR absensi tamu: tamu memindai untuk mengisi daftar hadir (berita acara).
+  void _showQr(Map<String, dynamic> s) {
+    final url = (s['hadir_url'] ?? '').toString();
+    final guest = s['guest_count'] ?? 0;
+    final minGuest = s['min_guests'] ?? 0;
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('QR Absensi Tamu'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Tamu memindai QR ini untuk mengisi daftar hadir seminar (berita acara).',
+                textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.borderSubtle)),
+              child: QrImageView(data: url, size: 220, version: QrVersions.auto),
+            ),
+            const SizedBox(height: 12),
+            Text('Tamu hadir: $guest/$minGuest',
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+            const SizedBox(height: 8),
+            SelectableText(url, textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+          ],
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: url));
+              showMessage(context, 'Link absensi disalin.');
+            },
+            icon: const Icon(Icons.copy, size: 18),
+            label: const Text('Salin link'),
+          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Tutup')),
+        ],
+      ),
+    );
   }
 
   Widget _meta(String k, String v) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

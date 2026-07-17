@@ -20,4 +20,13 @@ class AppConfig {
   /// Jika pakai HP fisik, isi IP laptop di sini (mis. '192.168.1.10') lalu
   /// ganti nilai return di [apiBaseUrl] untuk Android menjadi host ini.
   static const String physicalDeviceHost = '';
+
+  /// Base URL untuk file publik (mis. /storage/...), yaitu [apiBaseUrl] tanpa '/api'.
+  static String get filesBaseUrl => apiBaseUrl.replaceFirst(RegExp(r'/api/?$'), '');
+
+  /// Ubah path file dari API (relatif atau absolut) menjadi URL lengkap.
+  static String absoluteFileUrl(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return '$filesBaseUrl${path.startsWith('/') ? '' : '/'}$path';
+  }
 }
