@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Internship;
+use App\Models\Notification;
 use App\Models\Seminar;
 use App\Models\SeminarRegistration;
 use App\Models\StudentScore;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -121,6 +123,18 @@ class SeminarController extends Controller
             'status'      => 'pending',
             'student_id'  => $student->id,
         ]);
+
+        // Beri tahu Kaprodi ada pengajuan seminar baru yang perlu disetujui.
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::create([
+                'user_id'     => $kaprodiId,
+                'message'     => 'Pengajuan seminar baru dari ' . Auth::user()->name,
+                'date'        => now()->toDateString(),
+                'category'    => 'pengajuan_seminar',
+                'is_read'     => false,
+                'detail_text' => 'Judul: ' . $request->title . '. Menunggu persetujuan Kaprodi.',
+            ]);
+        }
 
         return redirect()->route('mahasiswa.seminar')
             ->with('success', 'Jadwal seminar berhasil diajukan. Menunggu persetujuan Kaprodi.');

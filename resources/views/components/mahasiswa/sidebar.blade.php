@@ -11,6 +11,7 @@
         || request()->routeIs('mahasiswa.seminar');
     $industriActive = request()->routeIs('mahasiswa.magang-saya')
         || request()->routeIs('mahasiswa.internship-groups.*')
+        || request()->routeIs('mahasiswa.lowongan*')
         || request()->routeIs('mahasiswa.ajukan-magang');
   @endphp
 
@@ -54,6 +55,10 @@
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.magang-saya') || request()->routeIs('mahasiswa.internship-groups.*') ? 'active' : '' }}" href="{{ route('mahasiswa.magang-saya') }}">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
           Magang Saya
+        </a>
+        <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.lowongan*') ? 'active' : '' }}" href="{{ route('mahasiswa.lowongan') }}">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          Lowongan Magang
         </a>
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.ajukan-magang') ? 'active' : '' }}" href="{{ route('mahasiswa.ajukan-magang') }}">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>

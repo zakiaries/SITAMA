@@ -8,6 +8,7 @@ use App\Http\Controllers\Mahasiswa\ChatbotController;
 use App\Http\Controllers\Mahasiswa\DashboardController;
 use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
+use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
 use App\Http\Controllers\Mahasiswa\MagangRequestController;
 use App\Http\Controllers\Mahasiswa\NilaiController;
@@ -28,8 +29,10 @@ use App\Http\Controllers\Kaprodi\MahasiswaController as KaprodiMahasiswaControll
 use App\Http\Controllers\Kaprodi\DosenController as KaprodiDosenController;
 use App\Http\Controllers\Kaprodi\MagangRequestController as KaprodiMagangRequestController;
 use App\Http\Controllers\Kaprodi\SeminarController as KaprodiSeminarController;
+use App\Http\Controllers\Kaprodi\LowonganController as KaprodiLowonganController;
 use App\Http\Controllers\Kaprodi\ChatbotController as KaprodiChatbotController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
+use App\Http\Controllers\Kaprodi\NotificationController as KaprodiNotificationController;
 use App\Http\Controllers\BeritaAcaraController;
 use Illuminate\Support\Facades\Route;
 
@@ -86,6 +89,9 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
 
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        Route::get('/lowongan',            [LowonganController::class, 'index'])->name('lowongan');
+        Route::get('/lowongan/{jobListing}', [LowonganController::class, 'show'])->name('lowongan.detail');
 
         Route::get('/ajukan-magang',  [MagangRequestController::class, 'index'])->name('ajukan-magang');
         Route::post('/ajukan-magang', [MagangRequestController::class, 'store'])->name('ajukan-magang.store');
@@ -183,6 +189,15 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::post('/seminar/{seminar}/approve', [KaprodiSeminarController::class, 'approve'])->name('seminar.approve');
     Route::post('/seminar/{seminar}/reject',  [KaprodiSeminarController::class, 'reject'])->name('seminar.reject');
 
+    // Kelola lowongan/tempat magang perusahaan afiliasi (tampil ke mahasiswa).
+    Route::get('/lowongan',                  [KaprodiLowonganController::class, 'index'])->name('lowongan.index');
+    Route::get('/lowongan/create',           [KaprodiLowonganController::class, 'create'])->name('lowongan.create');
+    Route::post('/lowongan',                 [KaprodiLowonganController::class, 'store'])->name('lowongan.store');
+    Route::get('/lowongan/{lowongan}/edit',  [KaprodiLowonganController::class, 'edit'])->name('lowongan.edit');
+    Route::put('/lowongan/{lowongan}',       [KaprodiLowonganController::class, 'update'])->name('lowongan.update');
+    Route::post('/lowongan/{lowongan}/toggle',[KaprodiLowonganController::class, 'toggle'])->name('lowongan.toggle');
+    Route::delete('/lowongan/{lowongan}',    [KaprodiLowonganController::class, 'destroy'])->name('lowongan.destroy');
+
     Route::get('/chatbot',                          [KaprodiChatbotController::class, 'index'])->name('chatbot.index');
     Route::get('/chatbot/logs',                     [KaprodiChatbotController::class, 'logs'])->name('chatbot.logs');
     Route::get('/chatbot/create',                   [KaprodiChatbotController::class, 'create'])->name('chatbot.create');
@@ -194,5 +209,10 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
 
     Route::get('/profile',  [KaprodiProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [KaprodiProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/notifikasi', [KaprodiNotificationController::class, 'index'])->name('notifikasi');
+    Route::get('/notifikasi/{notification}/open', [KaprodiNotificationController::class, 'open'])->name('notifikasi.open');
+    Route::post('/notifikasi/read-all', [KaprodiNotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
+    Route::post('/notifikasi/{notification}/read', [KaprodiNotificationController::class, 'markRead'])->name('notifikasi.read');
 });
 

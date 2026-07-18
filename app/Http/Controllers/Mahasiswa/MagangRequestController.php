@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanyRequest;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -73,6 +75,19 @@ class MagangRequestController extends Controller
             'proof_file'   => $proofPath,
             'status'       => 'pending',
         ]);
+
+        // Beri tahu Kaprodi ada pengajuan magang baru yang perlu direview.
+        $companyName = $company ? $company->name : $request->company_name;
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::create([
+                'user_id'     => $kaprodiId,
+                'message'     => 'Pengajuan magang baru dari ' . Auth::user()->name,
+                'date'        => now()->toDateString(),
+                'category'    => 'pengajuan_magang',
+                'is_read'     => false,
+                'detail_text' => 'Perusahaan: ' . $companyName . '. Menunggu review Kaprodi.',
+            ]);
+        }
 
         return back()->with('success', 'Pengajuan magang berhasil dikirim. Menunggu review Kaprodi.');
     }
