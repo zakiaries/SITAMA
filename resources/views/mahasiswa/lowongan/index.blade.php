@@ -11,11 +11,23 @@
     Perusahaan di luar daftar ini tetap bisa kamu ajukan sendiri lewat menu tersebut.
   </p>
 
-  <form method="GET" action="{{ route('mahasiswa.lowongan') }}" style="display:flex;gap:8px;">
-    <input type="text" name="q" value="{{ $q }}" placeholder="Cari posisi, perusahaan, atau lokasi…"
-      style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+  <form method="GET" action="{{ route('mahasiswa.lowongan') }}" style="display:flex;gap:8px;flex-wrap:wrap;">
+    <input type="text" name="q" value="{{ $q }}" placeholder="Cari posisi, perusahaan…"
+      style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+    <select name="bidang" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+      <option value="">Semua bidang</option>
+      @foreach($bidangOptions as $b)
+        <option value="{{ $b }}" {{ $bidang === $b ? 'selected' : '' }}>{{ $b }}</option>
+      @endforeach
+    </select>
+    <select name="location" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+      <option value="">Semua wilayah</option>
+      @foreach($locationOptions as $loc)
+        <option value="{{ $loc }}" {{ $location === $loc ? 'selected' : '' }}>{{ $loc }}</option>
+      @endforeach
+    </select>
     <button type="submit" class="btn btn-primary" style="padding:9px 16px;">Cari</button>
-    @if($q !== '')
+    @if($q !== '' || $bidang !== '' || $location !== '')
       <a href="{{ route('mahasiswa.lowongan') }}" class="btn" style="padding:9px 16px;border:1.5px solid var(--border);">Reset</a>
     @endif
   </form>
@@ -43,6 +55,9 @@
         {{-- Perusahaan (1 baris) --}}
         <div style="font-size:12.5px;color:var(--text);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $l->company_display_name }}</div>
         {{-- Meta chips --}}
+        @if($l->bidang)
+          <div style="margin-top:8px;"><span style="display:inline-block;background:var(--primary-tint);color:var(--primary);font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;">{{ $l->bidang }}</span></div>
+        @endif
         <div style="display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--text-muted);margin-top:10px;">
           @if($l->location)<span>📍 {{ $l->location }}</span>@endif
           @if($l->division)<span>🏷️ {{ $l->division }}</span>@endif

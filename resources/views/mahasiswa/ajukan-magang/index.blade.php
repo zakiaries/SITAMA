@@ -91,10 +91,20 @@
         @error('pic_name')<div style="color:var(--danger);font-size:12px;">{{ $message }}</div>@enderror
       </div>
 
-      {{-- POSISI & TANGGAL --}}
+      {{-- BIDANG, POSISI & TANGGAL --}}
       <div class="form-group" style="margin-bottom:14px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Posisi / Bidang</label>
-        <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Backend Developer"
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Bidang</label>
+        <select name="bidang" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <option value="">— Pilih bidang —</option>
+          @foreach(\App\Models\JobListing::BIDANG_OPTIONS as $b)
+            <option value="{{ $b }}" {{ old('bidang') === $b ? 'selected' : '' }}>{{ $b }}</option>
+          @endforeach
+        </select>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Membantu perusahaanmu muncul di pencarian & rekomendasi untuk adik tingkat.</div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Posisi (spesifik)</label>
+        <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Backend Developer (Laravel)"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
       </div>
       <div class="form-group" style="margin-bottom:18px;">

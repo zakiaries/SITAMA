@@ -52,6 +52,15 @@
         <input type="text" name="title" value="{{ $fld('title') }}" required style="{{ $inp }}" placeholder="mis. Web Developer Intern">
       </div>
       <div>
+        <label style="{{ $lbl }}">Bidang</label>
+        <select name="bidang" style="{{ $inp }}">
+          <option value="">— Pilih bidang —</option>
+          @foreach(\App\Models\JobListing::BIDANG_OPTIONS as $b)
+            <option value="{{ $b }}" {{ $fld('bidang') === $b ? 'selected' : '' }}>{{ $b }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div>
         <label style="{{ $lbl }}">Divisi</label>
         <input type="text" name="division" value="{{ $fld('division') }}" style="{{ $inp }}" placeholder="mis. Engineering">
       </div>

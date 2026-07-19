@@ -46,6 +46,7 @@ class MagangRequestController extends Controller
             'pic_phone'    => 'nullable|string|max:50',
             'pic_email'    => 'nullable|email|max:255',
             'position'     => 'nullable|string|max:255',
+            'bidang'       => 'nullable|string|max:100',
             'start_date'   => 'required|date',
             'proof_file'   => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
@@ -71,6 +72,7 @@ class MagangRequestController extends Controller
             'pic_email'    => $request->pic_email,
             'pic_phone'    => $request->pic_phone,
             'position'     => $request->position,
+            'bidang'       => $request->bidang,
             'start_date'   => $request->start_date,
             'proof_file'   => $proofPath,
             'status'       => 'pending',

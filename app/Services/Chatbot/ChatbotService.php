@@ -5,177 +5,337 @@ namespace App\Services\Chatbot;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Mesin chatbot rekomendasi SITAMA.
+ * Mesin chatbot SITAMA — hybrid FAQ + rekomendasi tempat magang.
  *
- * Chatbot ini bersifat retrieval-based: dari pertanyaan pengguna, sistem
- * mencari entri basis pengetahuan yang paling relevan menggunakan pembobotan
- * TF-IDF dan Cosine Similarity, lalu merekomendasikan jawabannya.
+ * Chatbot bersifat retrieval-based dan mengelola DUA basis pengetahuan yang
+ * masing-masing di-index dengan TF-IDF:
+ *   1. KB FAQ (chatbot_knowledges) — menjawab pertanyaan prosedur magang.
+ *   2. KB Lowongan (job_listings)  — merekomendasikan tempat magang.
  *
- * Alur pada saat objek dibuat (fit sekali):
- *   1. Setiap entri KB dipraproses menjadi dokumen token.
- *   2. Vectorizer mempelajari IDF dari seluruh dokumen.
- *   3. Tiap dokumen diubah menjadi vektor TF-IDF dan disimpan.
- *
- * Alur menjawab (answer):
- *   1. Kueri pengguna dipraproses dengan pipeline yang sama.
- *   2. Kueri diubah menjadi vektor TF-IDF.
- *   3. Hitung cosine similarity kueri terhadap semua dokumen.
- *   4. Ambil skor tertinggi; jika >= ambang, kembalikan jawabannya beserta
- *      beberapa entri lain sebagai saran. Jika di bawah ambang, kembalikan
- *      pesan fallback tetapi tetap sertakan saran pertanyaan terdekat.
+ * Untuk tiap pertanyaan, sistem menghitung Cosine Similarity kueri terhadap
+ * kedua korpus, mendeteksi maksud (rekomendasi vs pertanyaan), lalu menjawab
+ * dari korpus yang paling relevan. Praproses (Sastrawi), TF-IDF, dan cosine
+ * dipakai untuk keduanya sehingga tetap konsisten dengan judul penelitian.
  */
 class ChatbotService
 {
+    /** Ambang cosine agar jawaban FAQ dianggap relevan. */
+    private const FAQ_THRESHOLD = 0.25;
+
+    /** Ambang cosine agar sebuah lowongan dianggap cocok direkomendasikan. */
+    private const JOB_THRESHOLD = 0.18;
+
+    /** Jumlah maksimal rekomendasi yang dikembalikan. */
+    private const MAX_RECOMMENDATIONS = 4;
+
     /**
-     * Ambang minimal cosine similarity agar sebuah jawaban dianggap relevan.
-     *
-     * Dari pengujian: pertanyaan yang benar-benar relevan berskor >= ~0.40,
-     * sedangkan pertanyaan menyimpang yang hanya berbagi satu kata umum
-     * (mis. "tempat") berskor di sekitar 0.20. Ambang 0.25 berada di celah
-     * antara keduanya sehingga menolak kecocokan semu tanpa membuang
-     * pertanyaan yang sah.
+     * Versi index — dinaikkan bila logika praproses/vektorisasi berubah agar
+     * cache lama otomatis diabaikan (kunci cache hanya berbasis isi KB).
      */
-    private const THRESHOLD = 0.25;
+    private const INDEX_VERSION = 2;
 
     private TextPreprocessor $preprocessor;
-    private TfIdfVectorizer $vectorizer;
 
-    /**
-     * Entri KB (data mentah).
-     *
-     * @var array<int, array{pertanyaan:string, kata_kunci:string, jawaban:string, kategori:string}>
-     */
-    private array $entries;
+    /** @var array<int, array{pertanyaan:string, kata_kunci:string, jawaban:string, kategori:string}> */
+    private array $faqEntries = [];
+    private TfIdfVectorizer $faqVectorizer;
+    /** @var array<int, array<string, float>> */
+    private array $faqVectors = [];
 
-    /**
-     * Vektor TF-IDF tiap dokumen KB, sejajar indeksnya dengan $entries.
-     *
-     * @var array<int, array<string, float>>
-     */
-    private array $documentVectors = [];
+    /** @var array<int, array{id:int, company:string, title:string, bidang:?string, location:?string, contact:?string, text:string}> */
+    private array $jobEntries = [];
+    private TfIdfVectorizer $jobVectorizer;
+    /** @var array<int, array<string, float>> */
+    private array $jobVectors = [];
 
-    public function __construct(?TextPreprocessor $preprocessor = null, ?TfIdfVectorizer $vectorizer = null)
+    public function __construct(?TextPreprocessor $preprocessor = null)
     {
         $this->preprocessor = $preprocessor ?? new TextPreprocessor();
-        $this->vectorizer   = $vectorizer ?? new TfIdfVectorizer();
-        $this->entries      = KnowledgeBase::entries();
 
-        $this->fit();
+        $this->faqEntries = KnowledgeBase::entries();
+        $this->jobEntries = LowonganKnowledge::entries();
+
+        [$this->faqVectorizer, $this->faqVectors] = $this->buildIndex(
+            'faq', $this->faqEntries, fn ($e) => $e['pertanyaan'] . ' ' . $e['kata_kunci']
+        );
+        [$this->jobVectorizer, $this->jobVectors] = $this->buildIndex(
+            'lowongan', $this->jobEntries, fn ($e) => $e['text']
+        );
     }
 
     /**
-     * Bangun korpus terpraproses, latih IDF, lalu vektorkan tiap dokumen.
+     * Latih satu indeks TF-IDF dan kembalikan [vectorizer, vektor-dokumen].
+     * Hasil di-cache dengan kunci berbasis hash isi korpus → otomatis dilatih
+     * ulang saat data berubah (FAQ diedit kaprodi / lowongan bertambah).
      *
-     * Hasil pelatihan (IDF + vektor dokumen) di-cache dengan kunci berbasis
-     * hash isi KB, sehingga praproses + vektorisasi hanya dijalankan sekali
-     * dan otomatis dilatih ulang ketika isi basis pengetahuan berubah.
+     * @param  array<int, array>  $entries
+     * @param  callable(array):string  $docText
+     * @return array{0: TfIdfVectorizer, 1: array<int, array<string,float>>}
      */
-    private function fit(): void
+    private function buildIndex(string $prefix, array $entries, callable $docText): array
     {
-        $signature = md5(json_encode($this->entries));
-        $cacheKey  = 'chatbot.tfidf.' . $signature;
+        $signature = md5(json_encode($entries));
+        $cacheKey  = "chatbot.$prefix.v" . self::INDEX_VERSION . ".$signature";
 
-        $model = Cache::remember($cacheKey, now()->addDay(), function () {
+        $model = Cache::remember($cacheKey, now()->addDay(), function () use ($entries, $docText) {
             $documents = [];
-            foreach ($this->entries as $entry) {
-                $documents[] = $this->preprocessor->process(
-                    $entry['pertanyaan'] . ' ' . $entry['kata_kunci']
-                );
+            foreach ($entries as $entry) {
+                $documents[] = $this->preprocessor->process($docText($entry));
             }
 
-            $this->vectorizer->fit($documents);
+            $vectorizer = new TfIdfVectorizer();
+            $vectorizer->fit($documents);
 
             $vectors = [];
             foreach ($documents as $tokens) {
-                $vectors[] = $this->vectorizer->transform($tokens);
+                $vectors[] = $vectorizer->transform($tokens);
             }
 
-            return ['idf' => $this->vectorizer->export(), 'vectors' => $vectors];
+            return ['idf' => $vectorizer->export(), 'vectors' => $vectors];
         });
 
-        $this->vectorizer->import($model['idf']);
-        $this->documentVectors = $model['vectors'];
+        $vectorizer = new TfIdfVectorizer();
+        $vectorizer->import($model['idf']);
+
+        return [$vectorizer, $model['vectors']];
     }
 
     /**
-     * Cari jawaban paling relevan untuk pertanyaan pengguna.
+     * Jawab pertanyaan pengguna: FAQ, rekomendasi tempat magang, atau fallback.
      *
      * @return array{
-     *     found: bool,
-     *     answer: string,
-     *     score: float,
-     *     question: string|null,
-     *     category: string|null,
-     *     suggestions: array<int, array{question:string}>
+     *   type: string, found: bool, answer: string, score: float,
+     *   question: string|null, category: string|null,
+     *   suggestions: array<int, array{question:string}>,
+     *   recommendations: array<int, array{company:string,title:string,bidang:?string,location:?string,contact:?string,score:float}>
      * }
      */
     public function answer(string $query): array
     {
         $tokens = $this->preprocessor->process($query);
-        $queryVector = $this->vectorizer->transform($tokens);
 
-        // Hitung skor kemiripan terhadap seluruh dokumen KB.
-        $scores = [];
-        foreach ($this->documentVectors as $index => $docVector) {
-            $scores[$index] = $this->vectorizer->cosine($queryVector, $docVector);
+        // Skor kemiripan ke kedua korpus.
+        [$bestFaqIndex, $bestFaqScore, $faqScores] = $this->scoreAgainst($tokens, $this->faqVectorizer, $this->faqVectors);
+        [, $bestJobScore, $jobScores] = $this->scoreAgainst($tokens, $this->jobVectorizer, $this->jobVectors);
+
+        $recoIntent  = $this->looksLikeRecommendation($query);
+        $hasListings = count($this->jobEntries) > 0;
+
+        // 1) Maksud jelas "cari tempat magang".
+        if ($recoIntent) {
+            if ($hasListings && $bestJobScore > 0) {
+                return $this->recommendationResponse($query, $jobScores, $bestJobScore);
+            }
+            return $this->recommendationEmpty($query, $hasListings);
         }
 
-        arsort($scores); // urutkan menurun berdasarkan skor
-        $ranked = array_keys($scores);
+        // 2) Pertanyaan prosedur → FAQ.
+        if ($bestFaqIndex !== null && $bestFaqScore >= self::FAQ_THRESHOLD) {
+            return $this->faqResponse($bestFaqIndex, $bestFaqScore, $faqScores);
+        }
 
-        $bestIndex = $ranked[0] ?? null;
-        $bestScore = $bestIndex !== null ? $scores[$bestIndex] : 0.0;
+        // 3) Tanpa kata kunci eksplisit, tapi ternyata sangat cocok ke lowongan.
+        if ($hasListings && $bestJobScore >= self::JOB_THRESHOLD && $bestJobScore > $bestFaqScore) {
+            return $this->recommendationResponse($query, $jobScores, $bestJobScore);
+        }
 
-        $found = $bestIndex !== null && $bestScore >= self::THRESHOLD;
+        // 4) Fallback (tetap tawarkan saran FAQ terdekat).
+        return $this->fallbackResponse($bestFaqScore, $faqScores);
+    }
 
-        // Susun saran: entri berskor tinggi berikutnya (maks 3), skor > 0.
-        $suggestions = [];
-        foreach (array_slice($ranked, 1) as $index) {
-            if ($scores[$index] <= 0.0 || count($suggestions) >= 3) {
+    /**
+     * Hitung cosine kueri terhadap semua vektor sebuah indeks.
+     *
+     * @param  string[]  $tokens
+     * @param  array<int, array<string,float>>  $vectors
+     * @return array{0:int|null, 1:float, 2:array<int,float>}  [bestIndex, bestScore, scores]
+     */
+    private function scoreAgainst(array $tokens, TfIdfVectorizer $vectorizer, array $vectors): array
+    {
+        $queryVector = $vectorizer->transform($tokens);
+
+        $scores = [];
+        foreach ($vectors as $index => $vector) {
+            $scores[$index] = $vectorizer->cosine($queryVector, $vector);
+        }
+
+        if (empty($scores)) {
+            return [null, 0.0, []];
+        }
+
+        arsort($scores);
+        $bestIndex = array_key_first($scores);
+
+        return [$bestIndex, $scores[$bestIndex], $scores];
+    }
+
+    /** Deteksi maksud "mencari/merekomendasikan tempat magang". */
+    private function looksLikeRecommendation(string $query): bool
+    {
+        $q = ' ' . mb_strtolower($query) . ' ';
+
+        $triggers = [
+            'rekomendasi', 'rekomen', 'cari magang', 'carikan', 'nyari magang',
+            'mencari magang', 'cari tempat', 'tempat magang', 'lowongan',
+            'magang di ', 'magang bidang', 'pengen magang', 'pengin magang',
+            'mau magang', 'ingin magang', 'magang dimana', 'magang di mana',
+            'saran tempat', 'saran magang', 'magang yang', 'magang untuk', 'magang buat',
+        ];
+        foreach ($triggers as $t) {
+            if (str_contains($q, $t)) {
+                return true;
+            }
+        }
+
+        // Sebutan bidang juga menandakan maksud pencarian.
+        $bidang = [
+            'front end', 'frontend', 'back end', 'backend', 'full stack', 'fullstack',
+            'mobile', 'ui/ux', 'data science', 'data analyst', 'jaringan', 'cyber',
+            'security', 'multimedia', 'editor',
+        ];
+        foreach ($bidang as $b) {
+            if (str_contains($q, $b)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<int,float>  $jobScores  index => score (terurut menurun)
+     */
+    private function recommendationResponse(string $query, array $jobScores, float $bestScore): array
+    {
+        $recommendations = [];
+        $lines = [];
+        $rank = 0;
+
+        foreach ($jobScores as $index => $score) {
+            if ($score <= 0.0 || $rank >= self::MAX_RECOMMENDATIONS) {
                 continue;
             }
-            $suggestions[] = ['question' => $this->entries[$index]['pertanyaan']];
-        }
+            $entry = $this->jobEntries[$index];
+            $rank++;
 
-        if ($found) {
-            $entry = $this->entries[$bestIndex];
-
-            return [
-                'found'       => true,
-                'answer'      => $entry['jawaban'],
-                'score'       => round($bestScore, 4),
-                'question'    => $entry['pertanyaan'],
-                'category'    => $entry['kategori'],
-                'suggestions' => $suggestions,
+            $recommendations[] = [
+                'company'  => $entry['company'],
+                'title'    => $entry['title'],
+                'bidang'   => $entry['bidang'],
+                'location' => $entry['location'],
+                'contact'  => $entry['contact'],
+                'score'    => round($score, 4),
             ];
+
+            $lines[] = $rank . '. ' . $entry['company']
+                . ($entry['title'] ? ' — ' . $entry['title'] : '')
+                . ($entry['location'] ? ' (' . $entry['location'] . ')' : '');
         }
 
-        // Fallback: tidak ada entri yang cukup mirip.
+        $answer = "Berikut tempat magang yang paling sesuai dengan pencarianmu:\n" . implode("\n", $lines);
+
         return [
-            'found'       => false,
-            'answer'      => 'Maaf, saya belum menemukan jawaban yang cukup relevan untuk pertanyaan itu. '
-                . 'Coba gunakan kata kunci lain (mis. "syarat seminar", "cara ajukan magang", "upload laporan"), '
-                . 'atau hubungi Kaprodi/admin prodi untuk bantuan lebih lanjut.',
-            'score'       => round($bestScore, 4),
-            'question'    => null,
-            'category'    => null,
-            'suggestions' => $suggestions,
+            'type'            => 'recommendation',
+            'found'           => true,
+            'answer'          => $answer,
+            'score'           => round($bestScore, 4),
+            'question'        => null,
+            'category'        => 'Rekomendasi Magang',
+            'suggestions'     => [],
+            'recommendations' => $recommendations,
+        ];
+    }
+
+    private function recommendationEmpty(string $query, bool $hasListings): array
+    {
+        $answer = $hasListings
+            ? 'Belum ada tempat magang di daftar kami yang cocok dengan pencarian itu. '
+                . 'Coba kata kunci bidang lain (mis. "back end", "data", "multimedia"), '
+                . 'atau lihat semua di menu Lowongan Magang.'
+            : 'Daftar tempat magang belum tersedia saat ini. Silakan cek menu Lowongan Magang '
+                . 'atau hubungi Kaprodi/admin prodi.';
+
+        return [
+            'type'            => 'recommendation',
+            'found'           => false,
+            'answer'          => $answer,
+            'score'           => 0.0,
+            'question'        => null,
+            'category'        => 'Rekomendasi Magang',
+            'suggestions'     => [],
+            'recommendations' => [],
         ];
     }
 
     /**
-     * Daftar pertanyaan populer untuk ditawarkan sebagai pintasan di UI.
+     * @param  array<int,float>  $faqScores
+     */
+    private function faqResponse(int $bestIndex, float $bestScore, array $faqScores): array
+    {
+        $entry = $this->faqEntries[$bestIndex];
+
+        return [
+            'type'            => 'faq',
+            'found'           => true,
+            'answer'          => $entry['jawaban'],
+            'score'           => round($bestScore, 4),
+            'question'        => $entry['pertanyaan'],
+            'category'        => $entry['kategori'],
+            'suggestions'     => $this->faqSuggestions($faqScores, $bestIndex),
+            'recommendations' => [],
+        ];
+    }
+
+    /**
+     * @param  array<int,float>  $faqScores
+     */
+    private function fallbackResponse(float $bestScore, array $faqScores): array
+    {
+        return [
+            'type'            => 'fallback',
+            'found'           => false,
+            'answer'          => 'Maaf, saya belum menemukan jawaban yang cukup relevan. '
+                . 'Untuk prosedur, coba kata kunci seperti "syarat seminar" atau "upload laporan". '
+                . 'Untuk mencari tempat magang, sebutkan bidangmu, mis. "rekomendasi magang back end".',
+            'score'           => round($bestScore, 4),
+            'question'        => null,
+            'category'        => null,
+            'suggestions'     => $this->faqSuggestions($faqScores, null),
+            'recommendations' => [],
+        ];
+    }
+
+    /**
+     * Saran pertanyaan FAQ terdekat (maks 3, skor > 0), selain yang sudah dipakai.
+     *
+     * @param  array<int,float>  $faqScores
+     * @return array<int, array{question:string}>
+     */
+    private function faqSuggestions(array $faqScores, ?int $exclude): array
+    {
+        $suggestions = [];
+        foreach ($faqScores as $index => $score) {
+            if ($index === $exclude || $score <= 0.0 || count($suggestions) >= 3) {
+                continue;
+            }
+            $suggestions[] = ['question' => $this->faqEntries[$index]['pertanyaan']];
+        }
+        return $suggestions;
+    }
+
+    /**
+     * Pertanyaan populer untuk pintasan di UI (FAQ + contoh rekomendasi).
      *
      * @return string[]
      */
     public function popularQuestions(): array
     {
         return [
+            'Rekomendasikan tempat magang bidang Back End',
+            'Cari magang UI/UX di Semarang',
             'Bagaimana cara mengajukan magang?',
             'Apa saja syarat mengajukan seminar?',
             'Bagaimana cara mengunggah laporan akhir?',
-            'Bagaimana cara mengisi logbook?',
-            'Bagaimana cara melihat nilai magang saya?',
             'Saya lupa kata sandi, harus bagaimana?',
         ];
     }

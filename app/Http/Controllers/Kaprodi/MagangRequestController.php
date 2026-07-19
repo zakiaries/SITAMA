@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\CompanyRequest;
 use App\Models\Internship;
 use App\Models\InvitationToken;
+use App\Models\JobListing;
 use App\Models\Lecturer;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -95,6 +96,11 @@ class MagangRequestController extends Controller
             'created_lecturer_id' => $lecturer->id,
         ]);
 
+        // Isi direktori industri: perusahaan tempat mahasiswa ini magang jadi
+        // referensi bagi adik tingkat (tampil di tab Lowongan + bahan rekomendasi
+        // chatbot). Kaprodi tetap bisa menambah/mengedit manual.
+        $this->syncDirectoryListing($magangRequest, $companyId);
+
         // Kirim email aktivasi
         $activationUrl = url('/aktivasi/' . $token->token);
         try {
@@ -132,6 +138,34 @@ class MagangRequestController extends Controller
         ]);
 
         return back()->with('success', "Pengajuan {$magangRequest->student->user->name} ditolak.");
+    }
+
+    /**
+     * Buat entri direktori (job_listings) dari magang yang disetujui, jika belum
+     * ada entri serupa untuk perusahaan + posisi tersebut (hindari duplikat).
+     */
+    private function syncDirectoryListing(CompanyRequest $req, int $companyId): void
+    {
+        $company = Company::find($companyId);
+        $title   = $req->position ?: 'Peserta Magang';
+
+        $exists = JobListing::where('company_id', $companyId)
+            ->where('title', $title)
+            ->when($req->bidang, fn ($q) => $q->where('bidang', $req->bidang))
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        JobListing::create([
+            'company_id'   => $companyId,
+            'company_name' => $company?->name ?? $req->company_name,
+            'title'        => $title,
+            'bidang'       => $req->bidang,
+            'location'     => $company?->address ?? $req->company_address,
+            'status'       => 'active',
+        ]);
     }
 
     private function uniqueEmail(?string $email, string $fallback): string

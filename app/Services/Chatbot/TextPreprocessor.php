@@ -60,6 +60,25 @@ class TextPreprocessor
     ];
 
     /**
+     * Normalisasi frasa majemuk (dua kata) → satu token baku, diterapkan
+     * sebelum tokenisasi agar variasi penulisan bertemu. Contoh: pengguna
+     * mengetik "front end" sementara data tertulis "Frontend" — keduanya
+     * dijadikan "frontend" sehingga cocok.
+     *
+     * @var array<string, string>
+     */
+    private const PHRASES = [
+        'front end'      => 'frontend',
+        'back end'       => 'backend',
+        'full stack'     => 'fullstack',
+        'ui/ux'          => 'uiux',
+        'ui ux'          => 'uiux',
+        'data science'   => 'datascience',
+        'data scientist' => 'datascience',
+        'data analyst'   => 'dataanalyst',
+    ];
+
+    /**
      * Normalisasi singkatan & salah ketik umum → bentuk baku.
      * Diterapkan per token sebelum stopword removal & stemming, agar variasi
      * penulisan mahasiswa tetap cocok dengan basis pengetahuan.
@@ -107,6 +126,10 @@ class TextPreprocessor
     {
         // 1. Case folding
         $text = mb_strtolower($text, 'UTF-8');
+
+        // 1b. Normalisasi frasa majemuk (sebelum tanda baca dibuang, agar
+        //     "ui/ux" ikut tertangani).
+        $text = str_replace(array_keys(self::PHRASES), array_values(self::PHRASES), $text);
 
         // 2. Cleaning — sisakan huruf, angka, dan spasi
         $text = preg_replace('/[^a-z0-9\s]/u', ' ', $text);

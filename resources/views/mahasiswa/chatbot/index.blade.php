@@ -41,6 +41,18 @@
   .cb-typing span:nth-child(2) { animation-delay:.2s; }
   .cb-typing span:nth-child(3) { animation-delay:.4s; }
   @keyframes cbBlink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+
+  .cb-recos { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .cb-reco { border:1px solid var(--border); border-radius:10px; padding:11px 13px; background:var(--bg); }
+  .cb-reco-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .cb-reco-co { font-size:13.5px; font-weight:700; color:var(--text); }
+  .cb-reco-score { font-size:11px; font-weight:700; color:var(--primary); background:var(--blue-tint); padding:1px 8px; border-radius:20px; flex-shrink:0; }
+  .cb-reco-title { font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .cb-reco-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:7px; }
+  .cb-tag { font-size:11px; font-weight:600; color:var(--primary); background:var(--blue-tint); padding:2px 9px; border-radius:20px; }
+  .cb-reco-loc { font-size:11.5px; color:var(--text-muted); }
+  .cb-reco-loc::before { content:"📍 "; }
+  .cb-reco-contact { font-size:11.5px; color:var(--text-muted); margin-top:6px; }
 </style>
 @endpush
 
@@ -138,15 +150,39 @@
   }
 
   function cbAppendBot(data) {
+    const isReco = data.type === 'recommendation';
+
+    // Meta: untuk rekomendasi cukup label kategori (skor per-kartu lebih bermakna).
     let meta = '';
     if (data.found) {
       const pct = Math.round((data.score || 0) * 100);
       meta = '<div class="cb-meta">'
            + (data.category ? '<span class="cb-score">' + cbEscape(data.category) + '</span>' : '')
-           + '<span class="cb-score">Relevansi ' + pct + '%</span>'
+           + (isReco ? '' : '<span class="cb-score">Relevansi ' + pct + '%</span>')
            + '</div>';
     }
 
+    // Kartu rekomendasi tempat magang.
+    let recos = '';
+    if (data.recommendations && data.recommendations.length) {
+      let cards = '';
+      data.recommendations.forEach(r => {
+        const pct = Math.round((r.score || 0) * 100);
+        cards += '<div class="cb-reco">'
+          + '<div class="cb-reco-top"><span class="cb-reco-co">' + cbEscape(r.company) + '</span>'
+          + '<span class="cb-reco-score">' + pct + '%</span></div>'
+          + (r.title ? '<div class="cb-reco-title">' + cbEscape(r.title) + '</div>' : '')
+          + '<div class="cb-reco-meta">'
+          + (r.bidang ? '<span class="cb-tag">' + cbEscape(r.bidang) + '</span>' : '')
+          + (r.location ? '<span class="cb-reco-loc">' + cbEscape(r.location) + '</span>' : '')
+          + '</div>'
+          + (r.contact ? '<div class="cb-reco-contact">Kontak: ' + cbEscape(r.contact) + '</div>' : '')
+          + '</div>';
+      });
+      recos = '<div class="cb-recos">' + cards + '</div>';
+    }
+
+    // Chip saran FAQ.
     let suggests = '';
     if (data.suggestions && data.suggestions.length) {
       let chips = '';
@@ -156,9 +192,15 @@
       suggests = '<div class="cb-suggests"><div class="lbl">Mungkin juga menanyakan</div><div class="cb-chips">' + chips + '</div></div>';
     }
 
+    // Untuk rekomendasi, tampilkan hanya baris pembuka (detail ada di kartu).
+    let bubbleText = data.answer || '';
+    if (isReco && data.recommendations && data.recommendations.length) {
+      bubbleText = bubbleText.split('\n')[0];
+    }
+
     const el = document.createElement('div');
     el.className = 'cb-msg bot';
-    el.innerHTML = '<div class="cb-ico">AI</div><div><div class="cb-bubble">' + cbEscape(data.answer) + '</div>' + meta + suggests + '</div>';
+    el.innerHTML = '<div class="cb-ico">AI</div><div><div class="cb-bubble">' + cbEscape(bubbleText) + '</div>' + meta + recos + suggests + '</div>';
     cbMessages.appendChild(el);
     cbScrollBottom();
   }
