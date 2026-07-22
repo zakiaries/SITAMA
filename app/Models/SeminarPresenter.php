@@ -6,18 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Daftar hadir audiens sesi seminar.
- *
- * Absensi baru berbasis akun (student_id, wajib login) + waktu (created_at).
- * Kolom lama (name/nim/kelas/prodi/signature_path) dipertahankan untuk data
- * anonim lama dan boleh diisi dari akun saat absen.
+ * Mahasiswa penyaji dalam satu sesi seminar, sekaligus menyimpan ketersediaan
+ * tanggal yang ia isi saat dosen membuka penjadwalan.
  */
-class SeminarAttendance extends Model
+class SeminarPresenter extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'seminar_id', 'student_id', 'name', 'nim', 'kelas', 'prodi', 'signature_path',
+        'seminar_id', 'student_id', 'available_dates', 'responded_at',
+    ];
+
+    protected $casts = [
+        'responded_at' => 'datetime',
     ];
 
     public function seminar()

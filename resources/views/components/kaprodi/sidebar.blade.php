@@ -42,11 +42,7 @@
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
       </svg>
-      Pengajuan Seminar
-      @php $pendingSeminar = \App\Models\Seminar::whereNotNull('student_id')->where('status','pending')->count(); @endphp
-      @if($pendingSeminar > 0)
-        <span style="background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:auto;">{{ $pendingSeminar }}</span>
-      @endif
+      Seminar
     </a>
     <a class="nav-item {{ request()->routeIs('kaprodi.chatbot.*') ? 'active' : '' }}" href="{{ route('kaprodi.chatbot.index') }}">
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

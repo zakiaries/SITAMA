@@ -5,29 +5,51 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Sesi seminar hasil magang.
+ *
+ * Model baru: 1 sesi dimiliki 1 dosen pembimbing dan berisi banyak mahasiswa
+ * penyaji (relasi seminar_presenters). Alur: dosen buat sesi (draft) → mahasiswa
+ * isi ketersediaan → dosen finalkan jadwal (scheduled) → audiens absen via login
+ * (min. MIN_GUESTS) → dosen sahkan (completed).
+ */
 class Seminar extends Model
 {
     use HasFactory;
 
-    /** Jumlah minimal tamu (audiens) yang mengisi berita acara. */
-    public const MIN_GUESTS = 10;
+    /** Jumlah minimal audiens (login) yang mengisi daftar hadir per sesi. */
+    public const MIN_GUESTS = 15;
 
-    /** Legacy: dipakai API mobile (kuota audiens mahasiswa). Dipertahankan agar mobile tidak rusak. */
-    public const MIN_AUDIENCE = 10;
+    /** Legacy: dipakai API mobile lama. Dipertahankan agar tidak error saat referensi. */
+    public const MIN_AUDIENCE = 15;
 
     protected $fillable = [
-        'title', 'program', 'date', 'time', 'location', 'organizer',
+        'lecturer_id', 'title', 'program', 'date', 'time', 'location', 'organizer',
         'description', 'qr_code', 'status', 'student_id',
-        'rejection_reason', 'access_token',
+        'rejection_reason', 'access_token', 'witnessed_at',
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date'         => 'date',
+        'witnessed_at' => 'datetime',
     ];
 
-    public function registrations()
+    /** Dosen pembimbing pemilik/penyaksi sesi. */
+    public function lecturer()
     {
-        return $this->hasMany(SeminarRegistration::class);
+        return $this->belongsTo(Lecturer::class);
+    }
+
+    /** Mahasiswa penyaji dalam sesi ini (beserta ketersediaan tanggalnya). */
+    public function presenters()
+    {
+        return $this->hasMany(SeminarPresenter::class);
+    }
+
+    /** Data mahasiswa penyaji (shortcut lewat pivot). */
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'seminar_presenters');
     }
 
     public function attendances()
@@ -35,14 +57,17 @@ class Seminar extends Model
         return $this->hasMany(SeminarAttendance::class);
     }
 
+    /** Legacy (per-mahasiswa) — dipertahankan untuk kompatibilitas data lama. */
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-    /**
-     * Jumlah tamu yang sudah mengisi berita acara.
-     */
+    public function registrations()
+    {
+        return $this->hasMany(SeminarRegistration::class);
+    }
+
     public function guestCount(): int
     {
         return $this->attendances->count();
