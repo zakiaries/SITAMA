@@ -6,7 +6,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Mahasiswa\BimbinganController;
 use App\Http\Controllers\Mahasiswa\ChatbotController;
 use App\Http\Controllers\Mahasiswa\DashboardController;
-use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
 use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
@@ -61,7 +60,7 @@ Route::get('/register', [RegisterController::class, 'showForm'])->name('register
 Route::post('/register', [RegisterController::class, 'register']);
 
 // Mahasiswa Routes (protected)
-Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(function () {
+Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:student'])->group(function () {
 
     // Accessible to pending students too
     Route::get('/menunggu', fn() => view('mahasiswa.menunggu'))->name('menunggu');
@@ -111,17 +110,11 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
         Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
         Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'markRead'])->name('notifikasi.read');
-
-        Route::get('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invitePage'])->name('internship-groups.invite');
-        Route::post('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invite'])->name('internship-groups.invite.store');
-
-        Route::post('/internship-group-members/{member}/accept', [InternshipGroupController::class, 'accept'])->name('internship-group-members.accept');
-        Route::post('/internship-group-members/{member}/decline', [InternshipGroupController::class, 'decline'])->name('internship-group-members.decline');
     });
 });
 
 // ── Dosen Routes (protected) ──────────────────────────────────────────────────
-Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
+Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'role:lecturer'])->group(function () {
 
     Route::get('/dashboard', [DosenDashboardController::class, 'index'])->name('dashboard');
 
@@ -143,7 +136,7 @@ Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
 });
 
 // ── Dosen Industri Routes (protected) ─────────────────────────────────────────
-Route::prefix('dosen-industri')->name('dosen-industri.')->middleware('auth')->group(function () {
+Route::prefix('dosen-industri')->name('dosen-industri.')->middleware(['auth', 'role:lecturer_industry'])->group(function () {
 
     Route::get('/dashboard', [IndustriDashboardController::class, 'index'])->name('dashboard');
 
@@ -162,7 +155,7 @@ Route::prefix('dosen-industri')->name('dosen-industri.')->middleware('auth')->gr
 });
 
 // ── Kaprodi Routes (protected) ────────────────────────────────────────────────
-Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function () {
+Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:kaprodi'])->group(function () {
 
     Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/export-excel', [KaprodiDashboardController::class, 'exportExcel'])->name('dashboard.export-excel');

@@ -10,7 +10,6 @@
         || request()->routeIs('mahasiswa.laporan')
         || request()->routeIs('mahasiswa.seminar');
     $industriActive = request()->routeIs('mahasiswa.magang-saya')
-        || request()->routeIs('mahasiswa.internship-groups.*')
         || request()->routeIs('mahasiswa.lowongan*')
         || request()->routeIs('mahasiswa.ajukan-magang');
   @endphp
@@ -52,7 +51,7 @@
         <span class="nav-caret">▾</span>
       </div>
       <div class="nav-sub">
-        <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.magang-saya') || request()->routeIs('mahasiswa.internship-groups.*') ? 'active' : '' }}" href="{{ route('mahasiswa.magang-saya') }}">
+        <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.magang-saya') ? 'active' : '' }}" href="{{ route('mahasiswa.magang-saya') }}">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
           Magang Saya
         </a>

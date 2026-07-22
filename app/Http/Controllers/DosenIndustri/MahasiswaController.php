@@ -75,6 +75,7 @@ class MahasiswaController extends Controller
     {
         $lecturer = $this->getLecturer();
         $this->getInternship($student, $lecturer);
+        abort_unless($logBook->student_id === $student->id, 404);
 
         $request->validate(['komentar' => 'required|string|max:1000'], [
             'komentar.required' => 'Komentar tidak boleh kosong.',
@@ -89,6 +90,7 @@ class MahasiswaController extends Controller
     {
         $lecturer = $this->getLecturer();
         $this->getInternship($student, $lecturer);
+        abort_unless($logBook->student_id === $student->id, 404);
 
         $logBook->update(['industry_note' => null]);
 

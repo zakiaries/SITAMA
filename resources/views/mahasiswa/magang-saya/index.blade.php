@@ -14,43 +14,6 @@
     </div>
   @endif
 
-  {{-- Undangan Kelompok --}}
-  @if($invitations->count())
-  <div class="card" style="margin-bottom:20px;border-left:4px solid var(--purple-text);">
-    <div class="card-title" style="margin-bottom:14px;color:var(--purple-text);">
-      <x-icon name="users" :size="16"/> Undangan Kelompok
-      <span style="background:var(--purple-bg);color:var(--purple-text);padding:2px 8px;border-radius:20px;font-size:11px;margin-left:6px;">
-        {{ $invitations->count() }}
-      </span>
-    </div>
-
-    @foreach($invitations as $inv)
-    @php $leaderName = $inv->group->leaderApplication->student->user->name ?? '-'; @endphp
-    <div style="padding:12px 0;{{ !$loop->last ? 'border-bottom:1px solid var(--border-subtle);' : '' }}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:700;font-size:14px;color:var(--text);">{{ $inv->group->jobListing->title }}</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">{{ $inv->group->jobListing->company->name }}</div>
-          <div style="font-size:11px;margin-top:4px;color:var(--text-muted);">
-            Diundang oleh: <strong style="color:var(--text);">{{ $leaderName }}</strong>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;flex-shrink:0;">
-          <form method="POST" action="{{ route('mahasiswa.internship-group-members.accept', $inv) }}">
-            @csrf
-            <button type="submit" class="btn btn-primary btn-sm"><x-icon name="check" :size="14"/> Terima</button>
-          </form>
-          <form method="POST" action="{{ route('mahasiswa.internship-group-members.decline', $inv) }}">
-            @csrf
-            <button type="submit" class="btn btn-danger btn-sm"><x-icon name="x" :size="14"/> Tolak</button>
-          </form>
-        </div>
-      </div>
-    </div>
-    @endforeach
-  </div>
-  @endif
-
   {{-- Magang Aktif --}}
   @if($internship)
   <div class="card" style="margin-bottom:20px;">
@@ -189,83 +152,13 @@
   </div>
   @endif
 
-  {{-- Pendaftaran Saya --}}
-  <div class="page-header">
-    <div class="page-title">Pendaftaran Saya</div>
-    <a href="{{ route('mahasiswa.ajukan-magang') }}" class="btn btn-primary btn-sm">+ Ajukan Magang</a>
-  </div>
-
-  @forelse($applications as $app)
-  @php
-    $statusStyle = match($app->status) {
-      'accepted' => ['bg' => 'var(--success-bg)', 'text' => 'var(--success-text)'],
-      'rejected' => ['bg' => 'var(--danger-bg)', 'text' => 'var(--danger)'],
-      default    => ['bg' => 'var(--warn-bg)', 'text' => 'var(--warn-text)'],
-    };
-  @endphp
-  <div class="card" style="margin-bottom:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-      <div style="flex:1;">
-        <div style="font-size:15px;font-weight:700;color:var(--text);">{{ $app->jobListing->title }}</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">{{ $app->jobListing->company->name }}</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-        @if($app->type === 'group')
-          <span style="background:var(--purple-bg);color:var(--purple-text);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px;"><x-icon name="users" :size="12"/> Kelompok</span>
-        @elseif($app->type === 'solo')
-          <span style="background:var(--blue-tint);color:var(--primary);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px;"><x-icon name="user" :size="12"/> Solo</span>
-        @endif
-        <span style="background:{{ $statusStyle['bg'] }};color:{{ $statusStyle['text'] }};padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">
-          {{ ucfirst($app->status) }}
-        </span>
-      </div>
-    </div>
-
-    {{-- Anggota kelompok (jika group) --}}
-    @if($app->type === 'group' && $app->internshipGroup)
-    @php $group = $app->internshipGroup; @endphp
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle);">
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600;">ANGGOTA KELOMPOK</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-        {{-- Ketua (diri sendiri) --}}
-        <div style="display:flex;align-items:center;gap:5px;background:var(--blue-tint);border:1px solid #C7DCFF;padding:4px 10px;border-radius:20px;">
-          <span style="font-size:12px;font-weight:600;color:var(--primary);">{{ Auth::user()->name }}</span>
-          <span style="font-size:10px;color:var(--primary);">(Ketua)</span>
-        </div>
-        {{-- Anggota lain --}}
-        @foreach($group->members as $member)
-        @php
-          $mColor = match($member->status) {
-            'accepted' => ['bg' => 'var(--success-bg)', 'border' => '#A7E8CF', 'text' => 'var(--success-text)', 'icon' => 'check'],
-            'rejected' => ['bg' => 'var(--danger-bg)', 'border' => '#F0C4BE', 'text' => 'var(--danger)', 'icon' => 'x'],
-            default    => ['bg' => 'var(--warn-bg)', 'border' => '#F3D9A0', 'text' => 'var(--warn-text)', 'icon' => 'clock'],
-          };
-        @endphp
-        <div style="display:flex;align-items:center;gap:5px;background:{{ $mColor['bg'] }};border:1px solid {{ $mColor['border'] }};padding:4px 10px;border-radius:20px;">
-          <span style="font-size:12px;font-weight:600;color:{{ $mColor['text'] }};">{{ $member->student->user->name ?? '-' }}</span>
-          <span style="display:inline-flex;"><x-icon :name="$mColor['icon']" :size="11"/></span>
-        </div>
-        @endforeach
-      </div>
-      @if($group->members->where('status', '!=', 'rejected')->count() < 3)
-      <a href="{{ route('mahasiswa.internship-groups.invite', $group) }}"
-         style="font-size:12px;color:var(--purple-text);display:inline-flex;align-items:center;gap:4px;margin-top:10px;">
-        + Undang lebih banyak
-      </a>
-      @endif
-    </div>
-    @endif
-
-    <div style="font-size:11px;color:var(--text-muted);margin-top:10px;">
-      Didaftarkan: {{ $app->created_at->format('d M Y, H:i') }}
-    </div>
-  </div>
-  @empty
+  {{-- Belum punya magang aktif: arahkan ke Ajukan Magang --}}
+  @unless($internship)
   <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
     <div style="margin-bottom:12px;color:var(--text-muted);display:flex;justify-content:center;"><x-icon name="clipboard" :size="40"/></div>
-    <p style="font-size:14px;margin-bottom:16px;">Belum ada pendaftaran magang.</p>
+    <p style="font-size:14px;margin-bottom:16px;">Kamu belum memiliki magang aktif. Ajukan magangmu untuk mulai memantau kegiatan di sini.</p>
     <a href="{{ route('mahasiswa.ajukan-magang') }}" class="btn btn-primary">Ajukan Magang <x-icon name="arrow-right" :size="14"/></a>
   </div>
-  @endforelse
+  @endunless
 
 @endsection
