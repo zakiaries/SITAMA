@@ -6,7 +6,10 @@ use App\Http\Controllers\Api\ApiController;
 use App\Models\Company;
 use App\Models\CompanyRequest;
 use App\Models\Internship;
+use App\Models\JobListing;
+use App\Models\Notification;
 use App\Models\StudentScore;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,10 +25,12 @@ class MagangController extends ApiController
             'has_active_internship' => $student->internships()->where('is_finished', false)->exists(),
             'has_pending'           => $requests->where('status', 'pending')->isNotEmpty(),
             'companies'             => Company::orderBy('name')->get(['id', 'name']),
+            'bidang_options'        => JobListing::BIDANG_OPTIONS,
             'requests'              => $requests->map(fn ($r) => [
                 'id'               => $r->id,
                 'company_name'     => $r->company_name,
                 'position'         => $r->position,
+                'bidang'           => $r->bidang,
                 'start_date'       => optional($r->start_date)->toDateString(),
                 'status'           => $r->status,
                 'rejection_reason' => $r->rejection_reason,
@@ -54,6 +59,7 @@ class MagangController extends ApiController
             'pic_phone'    => 'nullable|string|max:50',
             'pic_email'    => 'nullable|email|max:255',
             'position'     => 'nullable|string|max:255',
+            'bidang'       => 'nullable|string|max:100',
             'start_date'   => 'required|date',
             'proof_file'   => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
@@ -76,10 +82,24 @@ class MagangController extends ApiController
             'pic_email'    => $request->pic_email,
             'pic_phone'    => $request->pic_phone,
             'position'     => $request->position,
+            'bidang'       => $request->bidang,
             'start_date'   => $request->start_date,
             'proof_file'   => $proofPath,
             'status'       => 'pending',
         ]);
+
+        // Beri tahu Kaprodi ada pengajuan magang baru (sama seperti alur web).
+        $companyName = $company ? $company->name : $request->company_name;
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::create([
+                'user_id'     => $kaprodiId,
+                'message'     => 'Pengajuan magang baru dari ' . $request->user()->name,
+                'date'        => now()->toDateString(),
+                'category'    => 'pengajuan_magang',
+                'is_read'     => false,
+                'detail_text' => 'Perusahaan: ' . $companyName . '. Menunggu review Kaprodi.',
+            ]);
+        }
 
         return response()->json(['message' => 'Pengajuan magang berhasil dikirim. Menunggu review Kaprodi.'], 201);
     }

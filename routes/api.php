@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Mahasiswa\ChatbotController as MhsChatbot;
 use App\Http\Controllers\Api\Mahasiswa\DashboardController as MhsDashboard;
 use App\Http\Controllers\Api\Mahasiswa\LaporanController as MhsLaporan;
 use App\Http\Controllers\Api\Mahasiswa\LogBookController as MhsLogBook;
+use App\Http\Controllers\Api\Mahasiswa\LowonganController as MhsLowongan;
 use App\Http\Controllers\Api\Mahasiswa\MagangController as MhsMagang;
 use App\Http\Controllers\Api\Mahasiswa\NilaiController as MhsNilai;
 use App\Http\Controllers\Api\Mahasiswa\NotificationController as MhsNotif;
@@ -36,6 +37,11 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/aktivasi/{token}', [AuthController::class, 'activationShow']);
 Route::post('/aktivasi/{token}', [AuthController::class, 'activate']);
 
+// PDF berita acara seminar — dilindungi signed URL (bisa dibuka di browser HP
+// tanpa token). URL bertanda-tangan hanya diberikan ke pemilik seminar.
+Route::get('/mahasiswa/seminar/{seminar}/berita-acara', [MhsSeminar::class, 'beritaAcaraPdf'])
+    ->middleware('signed')->name('mobile.seminar.berita-acara');
+
 // ── Perlu token (Authorization: Bearer <token>) ──
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
@@ -58,6 +64,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/laporan', [MhsLaporan::class, 'store']);
 
         Route::get('/nilai', [MhsNilai::class, 'index']);
+
+        Route::get('/lowongan', [MhsLowongan::class, 'index']);
+        Route::get('/lowongan/{jobListing}', [MhsLowongan::class, 'show']);
 
         Route::get('/ajukan-magang', [MhsMagang::class, 'ajukanIndex']);
         Route::post('/ajukan-magang', [MhsMagang::class, 'ajukanStore']);

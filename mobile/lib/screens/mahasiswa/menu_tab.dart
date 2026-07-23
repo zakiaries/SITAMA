@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import 'seminar_screen.dart';
 import 'nilai_screen.dart';
 import 'magang_saya_screen.dart';
+import 'lowongan_screen.dart';
 import 'ajukan_magang_screen.dart';
 import 'laporan_screen.dart';
 import 'profile_tab.dart';
@@ -44,6 +45,7 @@ class MenuTab extends StatelessWidget {
                     MenuTile(Icons.event_outlined, 'Seminar', onTap: () => _open(context, const SeminarScreen())),
                     MenuTile(Icons.star_border_rounded, 'Nilai', onTap: () => _open(context, const NilaiScreen())),
                     MenuTile(Icons.business_center_outlined, 'Magang Saya', onTap: () => _open(context, const MagangSayaScreen())),
+                    MenuTile(Icons.work_outline, 'Lowongan', onTap: () => _open(context, const LowonganScreen())),
                     MenuTile(Icons.note_add_outlined, 'Ajukan Magang', onTap: () => _open(context, const AjukanMagangScreen())),
                     MenuTile(Icons.description_outlined, 'Laporan Akhir', onTap: () => _open(context, const LaporanScreen())),
                     MenuTile(Icons.notifications_none_rounded, 'Notifikasi', onTap: () => _open(context, const NotifikasiScreen(basePath: '/mahasiswa'))),

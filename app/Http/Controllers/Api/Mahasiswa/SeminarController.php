@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\Mahasiswa;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Seminar;
 use App\Models\SeminarRegistration;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class SeminarController extends ApiController
 {
@@ -158,6 +161,32 @@ class SeminarController extends ApiController
         return response()->json(['message' => 'Berhasil mendaftar seminar!']);
     }
 
+    /**
+     * Cetak berita acara (daftar hadir tamu) ke PDF — identik dengan versi web.
+     * Dilindungi signed URL (lihat route), jadi bisa dibuka langsung di browser HP.
+     */
+    public function beritaAcaraPdf(Seminar $seminar)
+    {
+        $seminar->load(['attendances' => fn ($q) => $q->orderBy('created_at'), 'student.user']);
+
+        // Sematkan tanda tangan sebagai data-URI agar dompdf tidak perlu akses file/URL.
+        $attendances = $seminar->attendances->map(function ($a) {
+            $a->signature_data = null;
+            if ($a->signature_path && Storage::disk('public')->exists($a->signature_path)) {
+                $a->signature_data = 'data:image/png;base64,'
+                    . base64_encode(Storage::disk('public')->get($a->signature_path));
+            }
+            return $a;
+        });
+
+        $pdf = Pdf::loadView('mahasiswa.seminar.berita-acara-pdf', [
+            'seminar'     => $seminar,
+            'attendances' => $attendances,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('berita-acara-seminar-' . $seminar->id . '.pdf');
+    }
+
     private function authorizeOwn(Request $request, Seminar $seminar): void
     {
         $student = $this->currentStudent($request);
@@ -203,6 +232,10 @@ class SeminarController extends ApiController
             // QR absensi tamu hanya aktif untuk seminar yang sudah di-ACC Kaprodi (punya token).
             'hadir_url'        => ($s->status === 'scheduled' && $s->access_token)
                 ? url('/seminar/hadir/' . $s->access_token)
+                : null,
+            // Unduh berita acara (PDF) — sama seperti web: owner + status scheduled.
+            'berita_acara_url' => $s->status === 'scheduled'
+                ? URL::temporarySignedRoute('mobile.seminar.berita-acara', now()->addHours(6), ['seminar' => $s->id])
                 : null,
         ]);
     }

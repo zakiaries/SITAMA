@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
@@ -29,6 +30,13 @@ class _SeminarScreenState extends State<SeminarScreen> {
   }
 
   void _reload() => setState(() => _future = _load());
+
+  /// Buka PDF berita acara di browser HP (URL sudah bertanda-tangan/signed).
+  Future<void> _openBeritaAcara(String url) async {
+    final uri = Uri.parse(url);
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showMessage(context, 'Tidak dapat membuka berita acara.', error: true);
+  }
 
   Future<void> _register(int id) async {
     try {
@@ -137,6 +145,7 @@ class _SeminarScreenState extends State<SeminarScreen> {
     final registered = s['is_registered'] == true;
     final status = (s['status'] ?? '').toString();
     final hadirUrl = (s['hadir_url'] ?? '').toString();
+    final beritaAcaraUrl = (s['berita_acara_url'] ?? '').toString();
     final rejection = (s['rejection_reason'] ?? '').toString();
     final guest = s['guest_count'] ?? 0;
     final minGuest = s['min_guests'] ?? 0;
@@ -164,7 +173,7 @@ class _SeminarScreenState extends State<SeminarScreen> {
         if (status == 'pending')
           const Padding(padding: EdgeInsets.only(top: 8),
               child: Text('Menunggu persetujuan Kaprodi.', style: TextStyle(fontSize: 12, color: AppColors.warnText))),
-        if (status == 'scheduled' && hadirUrl.isNotEmpty)
+        if (status == 'scheduled' && hadirUrl.isNotEmpty) ...[
           Padding(padding: const EdgeInsets.only(top: 10), child: SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -173,7 +182,18 @@ class _SeminarScreenState extends State<SeminarScreen> {
               icon: const Icon(Icons.qr_code_2, size: 20),
               label: const Text('QR Absensi Tamu'),
             ),
-          ))
+          )),
+          if (beritaAcaraUrl.isNotEmpty)
+            Padding(padding: const EdgeInsets.only(top: 8), child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _openBeritaAcara(beritaAcaraUrl),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                icon: const Icon(Icons.download_rounded, size: 18),
+                label: const Text('Unduh Berita Acara (PDF)'),
+              ),
+            )),
+        ]
         else if (status == 'pending' || status == 'rejected')
           Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
             Expanded(child: OutlinedButton(onPressed: () => _openForm(edit: s), child: const Text('Edit'))),

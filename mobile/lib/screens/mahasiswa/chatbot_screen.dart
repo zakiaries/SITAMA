@@ -10,7 +10,8 @@ class _Msg {
   final String text;
   final bool fromUser;
   final List<String> suggestions;
-  _Msg(this.text, {this.fromUser = false, this.suggestions = const []});
+  final List<Map<String, dynamic>> recommendations;
+  _Msg(this.text, {this.fromUser = false, this.suggestions = const [], this.recommendations = const []});
 }
 
 class ChatbotScreen extends StatefulWidget {
@@ -80,8 +81,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           .map((s) => '${s['question'] ?? ''}')
           .where((s) => s.isNotEmpty)
           .toList();
+      final recommendations = List<Map<String, dynamic>>.from(data['recommendations'] ?? []);
       if (!mounted) return;
-      setState(() => _messages.add(_Msg(answer, suggestions: suggestions)));
+      setState(() => _messages.add(_Msg(answer, suggestions: suggestions, recommendations: recommendations)));
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _messages.add(_Msg(e.message)));
@@ -208,6 +210,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
             child: Text(m.text, style: const TextStyle(fontSize: 13.5, height: 1.5)),
           ),
+          if (m.recommendations.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10, right: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: m.recommendations.map(_recoCard).toList(),
+              ),
+            ),
           if (m.suggestions.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12, right: 20),
@@ -215,6 +225,57 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
         ],
       ),
+    );
+  }
+
+  /// Kartu rekomendasi tempat magang (menyamai kartu di web).
+  Widget _recoCard(Map<String, dynamic> r) {
+    final company = '${r['company'] ?? '-'}';
+    final title = '${r['title'] ?? ''}';
+    final bidang = '${r['bidang'] ?? ''}';
+    final location = '${r['location'] ?? ''}';
+    final contact = '${r['contact'] ?? ''}';
+    final pct = (((r['score'] ?? 0) as num) * 100).round();
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(child: Text(company, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800))),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+            decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(20)),
+            child: Text('$pct%', style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w700)),
+          ),
+        ]),
+        if (title.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Text(title, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+        ],
+        if (bidang.isNotEmpty || location.isNotEmpty) ...[
+          const SizedBox(height: 7),
+          Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+            if (bidang.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
+                decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(20)),
+                child: Text(bidang, style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+              ),
+            if (location.isNotEmpty)
+              Text('📍 $location', style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
+          ]),
+        ],
+        if (contact.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(contact, style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
+        ],
+      ]),
     );
   }
 
