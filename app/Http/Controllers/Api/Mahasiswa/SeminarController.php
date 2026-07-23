@@ -4,239 +4,140 @@ namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Seminar;
-use App\Models\SeminarRegistration;
+use App\Models\SeminarPresenter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
+/**
+ * Jembatan API mobile seminar — model sesi-grup (menyamai web).
+ *
+ * Mahasiswa tidak lagi mengajukan seminar sendiri. Dosen pembimbing membuat sesi
+ * dan menetapkan mahasiswa sebagai penyaji; mahasiswa mengisi ketersediaan
+ * tanggal, lalu melihat jadwal final + QR daftar hadir (audiens absen via login).
+ */
 class SeminarController extends ApiController
 {
+    /** GET /mahasiswa/seminar — semua sesi di mana mahasiswa menjadi penyaji. */
     public function index(Request $request)
     {
         $student = $this->currentStudent($request);
 
-        $seminars = Seminar::whereNull('student_id')->with('registrations')
-            ->orderByDesc('date')->get();
-
-        $mySeminars = Seminar::where('student_id', $student->id)->with('registrations', 'attendances')
-            ->orderByDesc('date')->get();
-
-        $peerSeminars = Seminar::whereNotNull('student_id')
-            ->where('student_id', '!=', $student->id)
-            ->where('status', 'scheduled')
-            ->with(['registrations', 'student.user'])
-            ->orderByDesc('date')->get();
-
-        $registeredIds = SeminarRegistration::where('student_id', $student->id)
-            ->pluck('seminar_id')->toArray();
-
-        $requirements = $this->requirements($student);
-        $canSubmit    = ! in_array(false, array_column($requirements, 'met'), true);
+        $rows = SeminarPresenter::where('student_id', $student->id)
+            ->with(['seminar.lecturer.user', 'seminar.attendances'])
+            ->get()
+            ->sortByDesc(fn ($p) => $p->seminar->created_at)
+            ->values();
 
         return response()->json([
-            'can_submit'     => $canSubmit,
-            'requirements'   => $requirements,
-            'my_seminars'    => $mySeminars->map(fn ($s) => $this->ownerCard($s, $registeredIds)),
-            'peer_seminars'  => $peerSeminars->map(fn ($s) => $this->card($s, $registeredIds)),
-            'seminars'       => $seminars->map(fn ($s) => $this->card($s, $registeredIds)),
+            'sessions' => $rows->map(fn ($row) => $this->sessionCard($row)),
         ]);
     }
 
+    /** POST /mahasiswa/seminar/{seminar}/availability — isi ketersediaan (saat draft). */
+    public function submitAvailability(Request $request, Seminar $seminar)
+    {
+        $student = $this->currentStudent($request);
+
+        $row = SeminarPresenter::where('seminar_id', $seminar->id)
+            ->where('student_id', $student->id)->first();
+        abort_unless($row, 404);
+
+        if ($seminar->status !== 'draft') {
+            return response()->json(['message' => 'Jadwal sudah ditetapkan, ketersediaan tidak dapat diubah.'], 422);
+        }
+
+        $request->validate([
+            'available_dates' => 'required|string|max:255',
+        ], [
+            'available_dates.required' => 'Isi tanggal yang kamu bisa.',
+        ]);
+
+        $row->update([
+            'available_dates' => $request->available_dates,
+            'responded_at'    => now(),
+        ]);
+
+        return response()->json(['message' => 'Ketersediaan tanggalmu tersimpan.']);
+    }
+
+    /** GET /mahasiswa/seminar/{seminar} — detail sesi (penyaji + daftar hadir). */
     public function show(Request $request, Seminar $seminar)
     {
         $student = $this->currentStudent($request);
-        $seminar->load(['registrations.student.user']);
+        abort_unless($this->isPresenter($seminar, $student->id), 403, 'Akses ditolak.');
 
-        $isRegistered = SeminarRegistration::where('student_id', $student->id)
-            ->where('seminar_id', $seminar->id)->exists();
+        $seminar->load(['lecturer.user', 'presenters.student.user',
+            'attendances' => fn ($q) => $q->orderBy('created_at')]);
+
+        $row = $seminar->presenters->firstWhere('student_id', $student->id);
 
         return response()->json([
-            'seminar' => [
-                'id'          => $seminar->id,
-                'title'       => $seminar->title,
-                'program'     => $seminar->program,
-                'date'        => optional($seminar->date)->toDateString(),
-                'time'        => $seminar->time,
-                'location'    => $seminar->location,
-                'organizer'   => $seminar->organizer,
-                'description' => $seminar->description,
-                'status'      => $seminar->status,
-                'audience'    => $seminar->registrations->count(),
-                'min_audience'=> Seminar::MIN_AUDIENCE,
-            ],
-            'is_registered' => $isRegistered,
-            'audiences'     => $seminar->registrations->map(fn ($r) => $r->student->user->name ?? '-'),
+            'session'    => $this->sessionCard($row),
+            'presenters' => $seminar->presenters->map(fn ($p) => [
+                'name'         => $p->student->user->name ?? '-',
+                'nim'          => $p->student->user->username ?? '-',
+                'is_me'        => $p->student_id === $student->id,
+                'responded_at' => optional($p->responded_at)->toDateTimeString(),
+                'available_dates' => $p->available_dates,
+            ]),
+            'attendances' => $seminar->attendances->map(fn ($a) => [
+                'name' => $a->name,
+                'nim'  => $a->nim,
+                'time' => optional($a->created_at)->toDateTimeString(),
+            ]),
         ]);
-    }
-
-    public function store(Request $request)
-    {
-        $student      = $this->currentStudent($request);
-        $requirements = $this->requirements($student);
-
-        if (in_array(false, array_column($requirements, 'met'), true)) {
-            return response()->json(['message' => 'Anda belum memenuhi semua syarat untuk mengajukan jadwal seminar.'], 422);
-        }
-
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'date'        => 'required|date|after_or_equal:today',
-            'time'        => 'nullable|string|max:50',
-            'location'    => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-        ], ['date.after_or_equal' => 'Tanggal seminar tidak boleh sebelum hari ini.']);
-
-        // Sama seperti web: diajukan sebagai 'pending', menunggu ACC Kaprodi.
-        // access_token & QR absensi dibuat otomatis oleh Kaprodi saat menyetujui.
-        $seminar = Seminar::create([
-            'title'       => $request->title,
-            'program'     => $student->study_program ?: 'Magang',
-            'date'        => $request->date,
-            'time'        => $request->time,
-            'location'    => $request->location,
-            'organizer'   => $request->user()->name,
-            'description' => $request->description,
-            'status'      => 'pending',
-            'student_id'  => $student->id,
-        ]);
-
-        return response()->json(['message' => 'Jadwal seminar berhasil diajukan. Menunggu persetujuan Kaprodi.', 'id' => $seminar->id], 201);
-    }
-
-    public function update(Request $request, Seminar $seminar)
-    {
-        $this->authorizeOwn($request, $seminar);
-
-        if (! in_array($seminar->status, ['pending', 'rejected'], true)) {
-            return response()->json(['message' => 'Seminar yang sudah disetujui tidak dapat diubah.'], 422);
-        }
-
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'date'        => 'required|date|after_or_equal:today',
-            'time'        => 'nullable|string|max:50',
-            'location'    => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-        ], ['date.after_or_equal' => 'Tanggal seminar tidak boleh sebelum hari ini.']);
-
-        // Mengajukan ulang → kembali menunggu & bersihkan alasan penolakan (seperti web).
-        $seminar->update([
-            'title'            => $request->title,
-            'date'             => $request->date,
-            'time'             => $request->time,
-            'location'         => $request->location,
-            'description'      => $request->description,
-            'status'           => 'pending',
-            'rejection_reason' => null,
-        ]);
-
-        return response()->json(['message' => 'Jadwal seminar berhasil diperbarui. Menunggu persetujuan Kaprodi.']);
-    }
-
-    public function destroy(Request $request, Seminar $seminar)
-    {
-        $this->authorizeOwn($request, $seminar);
-
-        if (! in_array($seminar->status, ['pending', 'rejected'], true)) {
-            return response()->json(['message' => 'Seminar yang sudah disetujui tidak dapat dibatalkan.'], 422);
-        }
-
-        $seminar->registrations()->delete();
-        $seminar->attendances()->delete();
-        $seminar->delete();
-
-        return response()->json(['message' => 'Pengajuan seminar dibatalkan.']);
-    }
-
-    public function register(Request $request, Seminar $seminar)
-    {
-        $student = $this->currentStudent($request);
-
-        SeminarRegistration::firstOrCreate(
-            ['student_id' => $student->id, 'seminar_id' => $seminar->id],
-            ['status' => 'registered']
-        );
-
-        return response()->json(['message' => 'Berhasil mendaftar seminar!']);
     }
 
     /**
-     * Cetak berita acara (daftar hadir tamu) ke PDF — identik dengan versi web.
-     * Dilindungi signed URL (lihat route), jadi bisa dibuka langsung di browser HP.
+     * Cetak berita acara sesi ke PDF — memakai view yang sama dengan web.
+     * Dilindungi signed URL (lihat route), bisa dibuka langsung di browser HP.
      */
     public function beritaAcaraPdf(Seminar $seminar)
     {
-        $seminar->load(['attendances' => fn ($q) => $q->orderBy('created_at'), 'student.user']);
+        $seminar->load(['lecturer.user', 'presenters.student.user',
+            'attendances' => fn ($q) => $q->orderBy('created_at')]);
 
-        // Sematkan tanda tangan sebagai data-URI agar dompdf tidak perlu akses file/URL.
-        $attendances = $seminar->attendances->map(function ($a) {
-            $a->signature_data = null;
-            if ($a->signature_path && Storage::disk('public')->exists($a->signature_path)) {
-                $a->signature_data = 'data:image/png;base64,'
-                    . base64_encode(Storage::disk('public')->get($a->signature_path));
-            }
-            return $a;
-        });
-
-        $pdf = Pdf::loadView('mahasiswa.seminar.berita-acara-pdf', [
-            'seminar'     => $seminar,
-            'attendances' => $attendances,
-        ])->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('mahasiswa.seminar.berita-acara-pdf', compact('seminar'))
+            ->setPaper('a4', 'portrait');
 
         return $pdf->download('berita-acara-seminar-' . $seminar->id . '.pdf');
     }
 
-    private function authorizeOwn(Request $request, Seminar $seminar): void
+    private function isPresenter(Seminar $seminar, int $studentId): bool
     {
-        $student = $this->currentStudent($request);
-        abort_if($seminar->student_id !== $student->id, 403, 'Akses ditolak.');
+        return SeminarPresenter::where('seminar_id', $seminar->id)
+            ->where('student_id', $studentId)->exists();
     }
 
-    private function requirements($student): array
+    /** Kartu sesi untuk satu baris penyaji (row = SeminarPresenter milik mahasiswa). */
+    private function sessionCard(SeminarPresenter $row): array
     {
-        $internship = $student->activeInternship()->first();
+        $s = $row->seminar;
+        $scheduled = $s->status === 'scheduled';
 
-        return [[
-            'key'   => 'is_finished',
-            'label' => 'Magang sudah ditandai selesai oleh Kaprodi',
-            'met'   => (bool) ($internship?->is_finished),
-            'hint'  => 'Ajukan selesai magang di halaman Magang Saya dan tunggu ACC Kaprodi.',
-        ]];
-    }
-
-    private function card(Seminar $s, array $registeredIds): array
-    {
         return [
-            'id'           => $s->id,
-            'title'        => $s->title,
-            'program'      => $s->program,
-            'date'         => optional($s->date)->toDateString(),
-            'time'         => $s->time,
-            'location'     => $s->location,
-            'status'       => $s->status,
-            'audience'     => $s->registrations->count(),
-            'min_audience' => Seminar::MIN_AUDIENCE,
-            'is_registered'=> in_array($s->id, $registeredIds, true),
-        ];
-    }
-
-    /** Kartu untuk seminar milik sendiri: tambahan info QR absensi tamu + alasan tolak. */
-    private function ownerCard(Seminar $s, array $registeredIds): array
-    {
-        return array_merge($this->card($s, $registeredIds), [
-            'is_owner'         => true,
-            'rejection_reason' => $s->rejection_reason,
+            'id'               => $s->id,
+            'title'            => $s->title,
+            'lecturer_name'    => $s->lecturer->user->name ?? '-',
+            'status'           => $s->status,
+            'date'             => optional($s->date)->toDateString(),
+            'time'             => $s->time,
+            'location'         => $s->location,
             'guest_count'      => $s->attendances->count(),
             'min_guests'       => Seminar::MIN_GUESTS,
-            // QR absensi tamu hanya aktif untuk seminar yang sudah di-ACC Kaprodi (punya token).
-            'hadir_url'        => ($s->status === 'scheduled' && $s->access_token)
+            'witnessed_at'     => optional($s->witnessed_at)->toDateTimeString(),
+            // Ketersediaan yang kuisi (hanya relevan saat draft).
+            'available_dates'  => $row->available_dates,
+            'responded_at'     => optional($row->responded_at)->toDateTimeString(),
+            // QR absensi audiens (login-based) — aktif saat terjadwal.
+            'hadir_url'        => ($scheduled && $s->access_token)
                 ? url('/seminar/hadir/' . $s->access_token)
                 : null,
-            // Unduh berita acara (PDF) — sama seperti web: owner + status scheduled.
-            'berita_acara_url' => $s->status === 'scheduled'
+            // Unduh berita acara — untuk sesi terjadwal/selesai.
+            'berita_acara_url' => in_array($s->status, ['scheduled', 'completed'], true)
                 ? URL::temporarySignedRoute('mobile.seminar.berita-acara', now()->addHours(6), ['seminar' => $s->id])
                 : null,
-        ]);
+        ];
     }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Dosen\DashboardController as DsnDashboard;
 use App\Http\Controllers\Api\Dosen\MahasiswaController as DsnMahasiswa;
 use App\Http\Controllers\Api\Dosen\NotificationController as DsnNotif;
 use App\Http\Controllers\Api\Dosen\ProfileController as DsnProfile;
+use App\Http\Controllers\Api\Dosen\SeminarController as DsnSeminar;
 use App\Http\Controllers\Api\DosenIndustri\DashboardController as IndDashboard;
 use App\Http\Controllers\Api\DosenIndustri\MahasiswaController as IndMahasiswa;
 use App\Http\Controllers\Api\DosenIndustri\NotificationController as IndNotif;
@@ -74,12 +75,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/magang-saya/sertifikat', [MhsMagang::class, 'uploadCertificate']);
         Route::post('/magang-saya/ajukan-selesai', [MhsMagang::class, 'requestFinish']);
 
+        // Seminar model sesi-grup: mahasiswa penyaji isi ketersediaan + lihat jadwal.
         Route::get('/seminar', [MhsSeminar::class, 'index']);
-        Route::post('/seminar', [MhsSeminar::class, 'store']);
         Route::get('/seminar/{seminar}', [MhsSeminar::class, 'show']);
-        Route::put('/seminar/{seminar}', [MhsSeminar::class, 'update']);
-        Route::delete('/seminar/{seminar}', [MhsSeminar::class, 'destroy']);
-        Route::post('/seminar/{seminar}/register', [MhsSeminar::class, 'register']);
+        Route::post('/seminar/{seminar}/availability', [MhsSeminar::class, 'submitAvailability']);
 
         Route::get('/notifikasi', [MhsNotif::class, 'index']);
         Route::post('/notifikasi/read-all', [MhsNotif::class, 'markAllRead']);
@@ -104,6 +103,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/mahasiswa/{student}/laporan/{report}/revisi', [DsnMahasiswa::class, 'revisiLaporan']);
         Route::get('/mahasiswa/{student}/nilai', [DsnMahasiswa::class, 'nilaiPage']);
         Route::post('/mahasiswa/{student}/nilai', [DsnMahasiswa::class, 'updateNilai']);
+
+        // Seminar Bimbingan (sesi-grup): dosen buat/finalkan/sahkan/batalkan sesi.
+        Route::get('/seminar', [DsnSeminar::class, 'index']);
+        Route::post('/seminar', [DsnSeminar::class, 'store']);
+        Route::post('/seminar/{seminar}/finalize', [DsnSeminar::class, 'finalize']);
+        Route::post('/seminar/{seminar}/sahkan', [DsnSeminar::class, 'sahkan']);
+        Route::delete('/seminar/{seminar}', [DsnSeminar::class, 'destroy']);
 
         Route::get('/notifikasi', [DsnNotif::class, 'index']);
         Route::post('/notifikasi/read-all', [DsnNotif::class, 'markAllRead']);

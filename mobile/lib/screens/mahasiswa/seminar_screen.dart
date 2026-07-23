@@ -8,6 +8,11 @@ import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
 
+/// Seminar model sesi-grup (menyamai web).
+///
+/// Dosen pembimbing membuat sesi dan menetapkan mahasiswa sebagai penyaji.
+/// Mahasiswa: isi ketersediaan tanggal (draft) → lihat jadwal final + QR
+/// daftar hadir (scheduled) → sesi disahkan dosen (completed).
 class SeminarScreen extends StatefulWidget {
   const SeminarScreen({super.key});
   @override
@@ -15,21 +20,43 @@ class SeminarScreen extends StatefulWidget {
 }
 
 class _SeminarScreenState extends State<SeminarScreen> {
-  late Future<Map<String, dynamic>> _future;
+  List<Map<String, dynamic>> _sessions = [];
+  bool _loading = true;
+  String? _error;
+
   String get _token => context.read<AuthProvider>().token ?? '';
 
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _load();
   }
 
-  Future<Map<String, dynamic>> _load() async {
-    final data = await ApiClient.get('/mahasiswa/seminar', token: _token);
-    return Map<String, dynamic>.from(data);
+  Future<void> _load() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final data = await ApiClient.get('/mahasiswa/seminar', token: _token);
+      if (!mounted) return;
+      setState(() {
+        _sessions = List<Map<String, dynamic>>.from(data['sessions'] ?? []);
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _error = '$e'; _loading = false; });
+    }
   }
 
-  void _reload() => setState(() => _future = _load());
+  Future<void> _submitAvailability(int id, String dates) async {
+    try {
+      await ApiClient.post('/mahasiswa/seminar/$id/availability',
+          token: _token, body: {'available_dates': dates});
+      if (mounted) showMessage(context, 'Ketersediaan tanggalmu tersimpan.');
+      _load();
+    } on ApiException catch (e) {
+      if (mounted) showMessage(context, e.message, error: true);
+    }
+  }
 
   /// Buka PDF berita acara di browser HP (URL sudah bertanda-tangan/signed).
   Future<void> _openBeritaAcara(String url) async {
@@ -38,322 +65,240 @@ class _SeminarScreenState extends State<SeminarScreen> {
     if (!ok && mounted) showMessage(context, 'Tidak dapat membuka berita acara.', error: true);
   }
 
-  Future<void> _register(int id) async {
-    try {
-      await ApiClient.post('/mahasiswa/seminar/$id/register', token: _token);
-      if (mounted) showMessage(context, 'Berhasil mendaftar seminar.');
-      _reload();
-    } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.message, error: true);
-    }
-  }
-
-  Future<void> _cancel(int id) async {
-    final ok = await showDialog<bool>(context: context, builder: (c) => AlertDialog(
-      title: const Text('Batalkan pengajuan seminar?'),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Tidak')),
-        TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Ya, batalkan')),
-      ],
-    ));
-    if (ok != true) return;
-    try {
-      await ApiClient.delete('/mahasiswa/seminar/$id', token: _token);
-      if (mounted) showMessage(context, 'Pengajuan seminar dibatalkan.');
-      _reload();
-    } on ApiException catch (e) {
-      if (mounted) showMessage(context, e.message, error: true);
-    }
-  }
-
-  Future<void> _openForm({Map<String, dynamic>? edit, bool canSubmit = true, String? blockHint}) async {
-    if (edit == null && !canSubmit) {
-      showMessage(context, blockHint ?? 'Belum memenuhi syarat mengajukan seminar.', error: true);
-      return;
-    }
-    final saved = await showModalBottomSheet<bool>(
-      context: context, isScrollControlled: true,
-      builder: (_) => _SeminarForm(token: _token, edit: edit),
-    );
-    if (saved == true) _reload();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.warm,
       body: Column(children: [
-        const DetailHeader(title: 'Seminar', subtitle: 'Jadwal & pendaftaran seminar'),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async => _reload(),
-        child: FutureBuilder<Map<String, dynamic>>(
-          future: _future,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snap.hasError) {
-              return ErrorRetry(message: '${snap.error}', onRetry: _reload);
-            }
-            final d = snap.data!;
-            final canSubmit = d['can_submit'] == true;
-            final reqs = List<Map<String, dynamic>>.from(d['requirements'] ?? []);
-            final mine = List<Map<String, dynamic>>.from(d['my_seminars'] ?? []);
-            final avail = [
-              ...List<Map<String, dynamic>>.from(d['seminars'] ?? []),
-              ...List<Map<String, dynamic>>.from(d['peer_seminars'] ?? []),
-            ];
-            final blockHint = reqs.isNotEmpty ? reqs.first['hint'] as String? : null;
-
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => _openForm(canSubmit: canSubmit, blockHint: blockHint),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Ajukan Jadwal Seminar'),
-                ),
-                if (!canSubmit)
-                  Padding(padding: const EdgeInsets.only(top: 6), child: Text(blockHint ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
-
-                SectionTitle('Jadwal Seminar Saya (${mine.length})'),
-                if (mine.isEmpty)
-                  const AppCard(child: Text('Belum ada seminar yang Anda ajukan.', style: TextStyle(color: AppColors.textMuted)))
-                else
-                  ...mine.map((s) => _card(s, mine: true)),
-
-                SectionTitle('Seminar Tersedia (${avail.length})'),
-                if (avail.isEmpty)
-                  const AppCard(child: Text('Belum ada seminar tersedia.', style: TextStyle(color: AppColors.textMuted)))
-                else
-                  ...avail.map((s) => _card(s, mine: false)),
-                const SizedBox(height: 24),
-              ],
-            );
-          },
-          ),
-          ),
-        ),
+        const DetailHeader(title: 'Seminar', subtitle: 'Sesi seminar hasil magang'),
+        Expanded(child: _body()),
       ]),
     );
   }
 
-  Widget _card(Map<String, dynamic> s, {required bool mine}) {
-    final aud = s['audience'] ?? 0;
-    final minA = s['min_audience'] ?? 0;
-    final registered = s['is_registered'] == true;
-    final status = (s['status'] ?? '').toString();
-    final hadirUrl = (s['hadir_url'] ?? '').toString();
-    final beritaAcaraUrl = (s['berita_acara_url'] ?? '').toString();
-    final rejection = (s['rejection_reason'] ?? '').toString();
-    final guest = s['guest_count'] ?? 0;
-    final minGuest = s['min_guests'] ?? 0;
-    return AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(children: [
-        Expanded(child: Text(s['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
-        StatusChip(status),
-      ]),
-      const SizedBox(height: 2),
-      Text(s['program'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
-      const SizedBox(height: 8),
-      Wrap(spacing: 16, runSpacing: 4, children: [
-        _meta('Tanggal', s['date'] ?? '-'),
-        _meta('Waktu', s['time'] ?? '-'),
-        _meta('Ruang', s['location'] ?? '-'),
-      ]),
-      const SizedBox(height: 8),
-      Text('Audiens: $aud/$minA', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-      if (mine) ...[
-        if (status == 'scheduled')
-          Padding(padding: const EdgeInsets.only(top: 4),
-              child: Text('Tamu hadir: $guest/$minGuest', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
-        if (status == 'rejected' && rejection.isNotEmpty)
-          NoteBlock(label: 'Alasan Ditolak', value: rejection),
-        if (status == 'pending')
-          const Padding(padding: EdgeInsets.only(top: 8),
-              child: Text('Menunggu persetujuan Kaprodi.', style: TextStyle(fontSize: 12, color: AppColors.warnText))),
-        if (status == 'scheduled' && hadirUrl.isNotEmpty) ...[
-          Padding(padding: const EdgeInsets.only(top: 10), child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _showQr(s),
-              style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
-              icon: const Icon(Icons.qr_code_2, size: 20),
-              label: const Text('QR Absensi Tamu'),
-            ),
-          )),
-          if (beritaAcaraUrl.isNotEmpty)
-            Padding(padding: const EdgeInsets.only(top: 8), child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _openBeritaAcara(beritaAcaraUrl),
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
-                icon: const Icon(Icons.download_rounded, size: 18),
-                label: const Text('Unduh Berita Acara (PDF)'),
+  Widget _body() {
+    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_error != null) return ErrorRetry(message: _error!, onRetry: _load);
+
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: _sessions.isEmpty
+          ? ListView(children: const [
+              SizedBox(height: 40),
+              EmptyState(
+                'Belum ada sesi seminar untukmu',
+                icon: Icons.event_outlined,
+                hint: 'Dosen pembimbing akan membuat sesi setelah magangmu ditandai '
+                    'selesai — kamu akan dapat notifikasi untuk mengisi ketersediaan tanggal.',
               ),
-            )),
-        ]
-        else if (status == 'pending' || status == 'rejected')
-          Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-            Expanded(child: OutlinedButton(onPressed: () => _openForm(edit: s), child: const Text('Edit'))),
-            const SizedBox(width: 8),
-            Expanded(child: OutlinedButton(
-              style: OutlinedButton.styleFrom(foregroundColor: AppColors.error, side: const BorderSide(color: AppColors.error)),
-              onPressed: () => _cancel(s['id']), child: const Text('Batalkan'))),
-          ])),
-      ]
-      else if (registered)
-        const Padding(padding: EdgeInsets.only(top: 10), child: Text('✓ Anda sudah terdaftar', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600)))
-      else
-        Padding(padding: const EdgeInsets.only(top: 10), child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(onPressed: () => _register(s['id']), style: ElevatedButton.styleFrom(minimumSize: const Size(0, 42)), child: const Text('Daftar sebagai Audiens')),
-        )),
+            ])
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: _sessions.map(_card).toList(),
+            ),
+    );
+  }
+
+  Widget _card(Map<String, dynamic> s) {
+    final status = '${s['status'] ?? ''}';
+    return AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('${s['title'] ?? '-'}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+          const SizedBox(height: 2),
+          Text('Dosen: ${s['lecturer_name'] ?? '-'}',
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        ])),
+        const SizedBox(width: 8),
+        _statusBadge(status),
+      ]),
+      const SizedBox(height: 12),
+      if (status == 'draft') _draftSection(s)
+      else if (status == 'scheduled') _scheduledSection(s)
+      else if (status == 'completed') _completedSection(s)
+      else if (status == 'cancelled')
+        const Text('Sesi ini dibatalkan oleh dosen.',
+            style: TextStyle(fontSize: 12.5, color: AppColors.error)),
     ]));
   }
 
-  /// Dialog QR absensi tamu: tamu memindai untuk mengisi daftar hadir (berita acara).
+  Widget _statusBadge(String status) {
+    String label; Color bg, fg;
+    switch (status) {
+      case 'draft':     label = 'Menunggu Jadwal'; bg = AppColors.warnBg; fg = AppColors.warnText;
+      case 'scheduled': label = 'Terjadwal'; bg = AppColors.blueTint; fg = AppColors.primary;
+      case 'completed': label = 'Selesai'; bg = AppColors.successBg; fg = AppColors.success;
+      case 'cancelled': label = 'Dibatalkan'; bg = AppColors.errorBg; fg = AppColors.error;
+      default:          label = status; bg = AppColors.warm; fg = AppColors.textSecondary;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      child: Text(label, style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w700)),
+    );
+  }
+
+  /// Draft: isi/perbarui ketersediaan tanggal.
+  Widget _draftSection(Map<String, dynamic> s) {
+    final responded = (s['responded_at'] ?? '').toString().isNotEmpty;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Divider(height: 1),
+      const SizedBox(height: 10),
+      const Text('Tanggal yang kamu bisa',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+      const SizedBox(height: 6),
+      _AvailabilityField(
+        initial: '${s['available_dates'] ?? ''}',
+        buttonLabel: responded ? 'Perbarui' : 'Kirim',
+        onSubmit: (v) => _submitAvailability(s['id'] as int, v),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        responded
+            ? '✓ Terkirim — dosen akan menetapkan tanggal final.'
+            : 'Isi tanggal yang kamu bisa; dosen akan memilih tanggal final dari ketersediaan semua penyaji.',
+        style: TextStyle(fontSize: 11.5, color: responded ? AppColors.success : AppColors.textMuted),
+      ),
+    ]);
+  }
+
+  /// Scheduled: jadwal final + QR daftar hadir + berita acara.
+  Widget _scheduledSection(Map<String, dynamic> s) {
+    final guest = s['guest_count'] ?? 0;
+    final minGuest = s['min_guests'] ?? 0;
+    final met = guest is num && minGuest is num && guest >= minGuest;
+    final hadirUrl = (s['hadir_url'] ?? '').toString();
+    final beritaAcaraUrl = (s['berita_acara_url'] ?? '').toString();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Divider(height: 1),
+      const SizedBox(height: 10),
+      Wrap(spacing: 18, runSpacing: 8, children: [
+        _meta('Tanggal', '${s['date'] ?? '-'}'),
+        _meta('Waktu', '${s['time'] ?? '-'}'),
+        _meta('Ruang', '${s['location'] ?? '-'}'),
+        _meta('Audiens', '$guest/$minGuest', color: met ? AppColors.success : AppColors.warnText),
+      ]),
+      if (hadirUrl.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        SizedBox(width: double.infinity, child: ElevatedButton.icon(
+          onPressed: () => _showQr(s),
+          style: ElevatedButton.styleFrom(minimumSize: const Size(0, 44)),
+          icon: const Icon(Icons.qr_code_2, size: 20),
+          label: const Text('QR Daftar Hadir'),
+        )),
+      ],
+      if (beritaAcaraUrl.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        SizedBox(width: double.infinity, child: OutlinedButton.icon(
+          onPressed: () => _openBeritaAcara(beritaAcaraUrl),
+          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+          icon: const Icon(Icons.download_rounded, size: 18),
+          label: const Text('Unduh Berita Acara (PDF)'),
+        )),
+      ],
+    ]);
+  }
+
+  /// Completed: info pengesahan + berita acara.
+  Widget _completedSection(Map<String, dynamic> s) {
+    final beritaAcaraUrl = (s['berita_acara_url'] ?? '').toString();
+    final witnessed = (s['witnessed_at'] ?? '-').toString();
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Divider(height: 1),
+      const SizedBox(height: 10),
+      Text('✓ Seminar telah disahkan dosen pada $witnessed. Audiens hadir: ${s['guest_count'] ?? 0}.',
+          style: const TextStyle(fontSize: 12.5, color: AppColors.success)),
+      if (beritaAcaraUrl.isNotEmpty) ...[
+        const SizedBox(height: 10),
+        SizedBox(width: double.infinity, child: OutlinedButton.icon(
+          onPressed: () => _openBeritaAcara(beritaAcaraUrl),
+          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+          icon: const Icon(Icons.download_rounded, size: 18),
+          label: const Text('Unduh Berita Acara (PDF)'),
+        )),
+      ],
+    ]);
+  }
+
+  Widget _meta(String k, String v, {Color? color}) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(k, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+          Text(v, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
+        ],
+      );
+
+  /// Dialog QR daftar hadir: audiens memindai lalu LOGIN untuk absen
+  /// (1 akun = 1 kehadiran, anti-manipulasi — sama seperti web).
   void _showQr(Map<String, dynamic> s) {
     final url = (s['hadir_url'] ?? '').toString();
     final guest = s['guest_count'] ?? 0;
     final minGuest = s['min_guests'] ?? 0;
-    showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('QR Absensi Tamu'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Tamu memindai QR ini untuk mengisi daftar hadir seminar (berita acara).',
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.borderSubtle)),
-              child: QrImageView(data: url, size: 220, version: QrVersions.auto),
-            ),
-            const SizedBox(height: 12),
-            Text('Tamu hadir: $guest/$minGuest',
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-            const SizedBox(height: 8),
-            SelectableText(url, textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-          ],
+    showDialog(context: context, builder: (c) => AlertDialog(
+      title: const Text('QR Daftar Hadir'),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Text('Audiens memindai QR ini, lalu login SITAMA untuk mengisi daftar hadir (1 akun = 1 kehadiran).',
+            style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+          child: QrImageView(data: url, size: 220, version: QrVersions.auto),
         ),
-        actions: [
-          TextButton.icon(
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: url));
-              showMessage(context, 'Link absensi disalin.');
-            },
-            icon: const Icon(Icons.copy, size: 18),
-            label: const Text('Salin link'),
-          ),
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Tutup')),
-        ],
-      ),
-    );
+        const SizedBox(height: 10),
+        Text('Audiens hadir: $guest/$minGuest',
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+      ]),
+      actions: [
+        TextButton(
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: url));
+            if (c.mounted) Navigator.pop(c);
+          },
+          child: const Text('Salin Tautan'),
+        ),
+        TextButton(onPressed: () => Navigator.pop(c), child: const Text('Tutup')),
+      ],
+    ));
   }
-
-  Widget _meta(String k, String v) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(k, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
-        Text(v, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-      ]);
 }
 
-class _SeminarForm extends StatefulWidget {
-  final String token;
-  final Map<String, dynamic>? edit;
-  const _SeminarForm({required this.token, this.edit});
+/// Input ketersediaan dengan tombol kirim di sisi kanan.
+class _AvailabilityField extends StatefulWidget {
+  final String initial;
+  final String buttonLabel;
+  final ValueChanged<String> onSubmit;
+  const _AvailabilityField({required this.initial, required this.buttonLabel, required this.onSubmit});
   @override
-  State<_SeminarForm> createState() => _SeminarFormState();
+  State<_AvailabilityField> createState() => _AvailabilityFieldState();
 }
 
-class _SeminarFormState extends State<_SeminarForm> {
-  late final TextEditingController _title;
-  late final TextEditingController _time;
-  late final TextEditingController _location;
-  late final TextEditingController _desc;
-  DateTime? _date;
-  bool _saving = false;
-  String? _error;
-
-  bool get _isEdit => widget.edit != null;
+class _AvailabilityFieldState extends State<_AvailabilityField> {
+  late final TextEditingController _c = TextEditingController(text: widget.initial);
 
   @override
-  void initState() {
-    super.initState();
-    _title = TextEditingController(text: widget.edit?['title'] ?? '');
-    _time = TextEditingController(text: widget.edit?['time'] ?? '');
-    _location = TextEditingController(text: widget.edit?['location'] ?? '');
-    _desc = TextEditingController(text: widget.edit?['description'] ?? '');
-    _date = DateTime.tryParse(widget.edit?['date'] ?? '');
-  }
-
-  @override
-  void dispose() { _title.dispose(); _time.dispose(); _location.dispose(); _desc.dispose(); super.dispose(); }
-
-  String? get _dateStr => _date == null ? null
-      : '${_date!.year}-${_date!.month.toString().padLeft(2, '0')}-${_date!.day.toString().padLeft(2, '0')}';
-
-  Future<void> _save() async {
-    if (_title.text.trim().isEmpty || _dateStr == null) { setState(() => _error = 'Judul & tanggal wajib diisi.'); return; }
-    setState(() { _saving = true; _error = null; });
-    final body = {
-      'title': _title.text.trim(),
-      'date': _dateStr,
-      'time': _time.text.trim(),
-      'location': _location.text.trim(),
-      'description': _desc.text.trim(),
-    };
-    try {
-      if (_isEdit) {
-        await ApiClient.put('/mahasiswa/seminar/${widget.edit!['id']}', token: widget.token, body: body);
-      } else {
-        await ApiClient.post('/mahasiswa/seminar', token: widget.token, body: body);
-      }
-      if (mounted) Navigator.pop(context, true);
-    } on ApiException catch (e) {
-      setState(() => _error = e.message);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
+  void dispose() { _c.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
-      child: SingleChildScrollView(
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(_isEdit ? 'Edit Seminar' : 'Ajukan Seminar', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 16),
-          if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
-          TextField(controller: _title, decoration: const InputDecoration(labelText: 'Judul Seminar')),
-          const SizedBox(height: 12),
-          InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(context: context, initialDate: _date ?? DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime(2100));
-              if (picked != null) setState(() => _date = picked);
-            },
-            child: InputDecorator(decoration: const InputDecoration(labelText: 'Tanggal'), child: Text(_dateStr ?? 'Pilih tanggal')),
-          ),
-          const SizedBox(height: 12),
-          TextField(controller: _time, decoration: const InputDecoration(labelText: 'Waktu (opsional)', hintText: '09:00 - 11:00')),
-          const SizedBox(height: 12),
-          TextField(controller: _location, decoration: const InputDecoration(labelText: 'Tempat / Ruang (opsional)')),
-          const SizedBox(height: 12),
-          TextField(controller: _desc, maxLines: 3, decoration: const InputDecoration(labelText: 'Deskripsi (opsional)', alignLabelWithHint: true)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _saving ? null : _save,
-            child: _saving
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                : Text(_isEdit ? 'Simpan' : 'Ajukan'),
-          ),
-        ]),
+    return Row(children: [
+      Expanded(child: TextField(
+        controller: _c,
+        decoration: const InputDecoration(
+          hintText: 'Contoh: 12, 15, atau 18 Agustus 2026',
+          isDense: true,
+        ),
+      )),
+      const SizedBox(width: 8),
+      ElevatedButton(
+        onPressed: () {
+          final v = _c.text.trim();
+          if (v.isEmpty) { showMessage(context, 'Isi tanggal yang kamu bisa.', error: true); return; }
+          widget.onSubmit(v);
+        },
+        child: Text(widget.buttonLabel),
       ),
-    );
+    ]);
   }
 }

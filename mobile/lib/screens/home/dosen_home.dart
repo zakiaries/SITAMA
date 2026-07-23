@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../dosen/dosen_list_tab.dart';
+import '../dosen/seminar_screen.dart';
 import '../shared/lecturer_profile_screen.dart';
 
 class DosenHome extends StatefulWidget {
@@ -14,6 +15,7 @@ class _DosenHomeState extends State<DosenHome> {
 
   final _tabs = const [
     DosenListTab(),
+    DosenSeminarTab(),
     LecturerProfileScreen(basePath: '/dosen', roleLabel: 'Dosen Pembimbing'),
   ];
 
@@ -27,6 +29,7 @@ class _DosenHomeState extends State<DosenHome> {
         indicatorColor: AppColors.blueTint,
         destinations: const [
           NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: 'Mahasiswa'),
+          NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: 'Seminar'),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profil'),
         ],
       ),

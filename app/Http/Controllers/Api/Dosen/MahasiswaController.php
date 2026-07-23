@@ -98,6 +98,7 @@ class MahasiswaController extends ApiController
     public function approveBimbingan(Request $request, Student $student, Guidance $guidance)
     {
         $this->internshipOf($request, $student);
+        abort_unless($guidance->student_id === $student->id, 404);
         $guidance->update(['status' => 'approved', 'lecturer_note' => $request->input('note')]);
         return response()->json(['message' => 'Bimbingan berhasil disetujui.']);
     }
@@ -105,6 +106,7 @@ class MahasiswaController extends ApiController
     public function revisiBimbingan(Request $request, Student $student, Guidance $guidance)
     {
         $this->internshipOf($request, $student);
+        abort_unless($guidance->student_id === $student->id, 404);
         $request->validate(['note' => 'required|string'], ['note.required' => 'Catatan revisi wajib diisi.']);
         $guidance->update(['status' => 'rejected', 'lecturer_note' => $request->note]);
         return response()->json(['message' => 'Bimbingan ditandai untuk revisi.']);
@@ -130,6 +132,7 @@ class MahasiswaController extends ApiController
     public function logBookNote(Request $request, Student $student, LogBook $logBook)
     {
         $this->internshipOf($request, $student);
+        abort_unless($logBook->student_id === $student->id, 404);
         $request->validate(['note' => 'nullable|string']);
         $logBook->update(['lecturer_note' => $request->input('note')]);
         return response()->json(['message' => 'Catatan logbook berhasil disimpan.']);

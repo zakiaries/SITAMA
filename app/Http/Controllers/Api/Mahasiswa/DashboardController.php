@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Models\Seminar;
+use App\Models\SeminarPresenter;
 use Illuminate\Http\Request;
 
 class DashboardController extends ApiController
@@ -49,9 +49,10 @@ class DashboardController extends ApiController
                 'date'     => $n->date,
             ]);
 
-        $seminarsCount = Seminar::whereNull('student_id')
-            ->when($student, fn ($q) => $q->orWhere('student_id', $student->id))
-            ->count();
+        // Model sesi-grup: hitung sesi di mana mahasiswa menjadi penyaji.
+        $seminarsCount = $student
+            ? SeminarPresenter::where('student_id', $student->id)->count()
+            : 0;
 
         return response()->json([
             'user'  => ['name' => $user->name],

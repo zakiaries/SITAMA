@@ -79,6 +79,7 @@ class MahasiswaController extends ApiController
     public function kirimKomentar(Request $request, Student $student, LogBook $logBook)
     {
         $this->internshipOf($request, $student);
+        abort_unless($logBook->student_id === $student->id, 404);
         $request->validate(['komentar' => 'required|string|max:1000'], ['komentar.required' => 'Komentar tidak boleh kosong.']);
         $logBook->update(['industry_note' => $request->komentar]);
         return response()->json(['message' => 'Komentar berhasil dikirim.']);
@@ -87,6 +88,7 @@ class MahasiswaController extends ApiController
     public function hapusKomentar(Request $request, Student $student, LogBook $logBook)
     {
         $this->internshipOf($request, $student);
+        abort_unless($logBook->student_id === $student->id, 404);
         $logBook->update(['industry_note' => null]);
         return response()->json(['message' => 'Komentar berhasil dihapus.']);
     }
