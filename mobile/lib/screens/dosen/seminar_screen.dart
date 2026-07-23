@@ -315,19 +315,25 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
     final minGuest = s['min_guests'] ?? 0;
     showDialog(context: context, builder: (c) => AlertDialog(
       title: const Text('QR Daftar Hadir'),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Text('Audiens memindai QR ini, lalu login SITAMA untuk mengisi daftar hadir (1 akun = 1 kehadiran).',
-            style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-        const SizedBox(height: 14),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
-          child: QrImageView(data: url, size: 220, version: QrVersions.auto),
-        ),
-        const SizedBox(height: 10),
-        Text('Audiens hadir: $guest/$minGuest',
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
-      ]),
+      // Lebar tetap: QrImageView memakai LayoutBuilder yang tidak mendukung
+      // pengukuran intrinsik AlertDialog — tanpa ini dialog gagal layout.
+      content: SizedBox(
+        width: 280,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('Audiens memindai QR ini, lalu login SITAMA untuk mengisi daftar hadir (1 akun = 1 kehadiran).',
+              style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+            child: SizedBox(width: 220, height: 220,
+                child: QrImageView(data: url, size: 220, version: QrVersions.auto)),
+          ),
+          const SizedBox(height: 10),
+          Text('Audiens hadir: $guest/$minGuest',
+              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+        ]),
+      ),
       actions: [
         TextButton(
           onPressed: () async {
