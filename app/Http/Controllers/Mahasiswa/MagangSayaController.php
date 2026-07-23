@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
-use App\Models\Application;
 use App\Models\Internship;
-use App\Models\InternshipGroupMember;
 use App\Models\Notification;
 use App\Models\StudentScore;
 use App\Models\User;
@@ -25,28 +23,10 @@ class MagangSayaController extends Controller
             : [];
         $canRequestFinish = !empty($finishChecklist) && !in_array(false, array_column($finishChecklist, 'met'), true);
 
-        $applications = Application::with([
-            'jobListing.company',
-            'internshipGroup.members.student.user',
-        ])
-            ->where('student_id', $student->id)
-            ->latest()
-            ->get();
-
-        $invitations = InternshipGroupMember::with([
-            'group.leaderApplication.student.user',
-            'group.jobListing.company',
-        ])
-            ->where('student_id', $student->id)
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
-
         $logBooks = $student->logBooks()->orderByDesc('date')->limit(5)->get();
 
         return view('mahasiswa.magang-saya.index', compact(
-            'applications', 'invitations', 'internship', 'logBooks',
-            'finishChecklist', 'canRequestFinish'
+            'internship', 'logBooks', 'finishChecklist', 'canRequestFinish'
         ));
     }
 

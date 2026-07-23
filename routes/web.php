@@ -6,7 +6,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Mahasiswa\BimbinganController;
 use App\Http\Controllers\Mahasiswa\ChatbotController;
 use App\Http\Controllers\Mahasiswa\DashboardController;
-use App\Http\Controllers\Mahasiswa\InternshipGroupController;
 use App\Http\Controllers\Mahasiswa\LogBookController;
 use App\Http\Controllers\Mahasiswa\LowonganController;
 use App\Http\Controllers\Mahasiswa\MagangSayaController;
@@ -20,6 +19,7 @@ use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NotificationController as DosenNotificationController;
 use App\Http\Controllers\Dosen\ProfileController as DosenProfileController;
+use App\Http\Controllers\Dosen\SeminarController as DosenSeminarController;
 use App\Http\Controllers\DosenIndustri\DashboardController as IndustriDashboardController;
 use App\Http\Controllers\DosenIndustri\MahasiswaController as IndustriMahasiswaController;
 use App\Http\Controllers\DosenIndustri\NotificationController as IndustriNotificationController;
@@ -44,9 +44,9 @@ Route::view('/tentang', 'public.about')->name('about');
 Route::view('/bantuan', 'public.help')->name('bantuan');
 Route::view('/kontak', 'public.contact')->name('contact');
 
-// Berita acara seminar (publik) — tamu isi identitas + tanda tangan via scan QR
-Route::get('/seminar/hadir/{token}',  [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
-Route::post('/seminar/hadir/{token}', [BeritaAcaraController::class, 'store'])->name('berita-acara.store');
+// Daftar hadir audiens seminar — wajib login (audiens = mahasiswa, anti-manipulasi)
+Route::get('/seminar/hadir/{token}',  [BeritaAcaraController::class, 'show'])->name('berita-acara.show')->middleware('auth');
+Route::post('/seminar/hadir/{token}', [BeritaAcaraController::class, 'store'])->name('berita-acara.store')->middleware('auth');
 
 // Aktivasi akun pembimbing industri (publik)
 Route::view('/aktivasi', 'auth.aktivasi-entry')->name('aktivasi.entry');
@@ -61,7 +61,7 @@ Route::get('/register', [RegisterController::class, 'showForm'])->name('register
 Route::post('/register', [RegisterController::class, 'register']);
 
 // Mahasiswa Routes (protected)
-Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(function () {
+Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:student'])->group(function () {
 
     // Accessible to pending students too
     Route::get('/menunggu', fn() => view('mahasiswa.menunggu'))->name('menunggu');
@@ -80,12 +80,9 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::delete('/logbook/{logBook}', [LogBookController::class, 'destroy'])->name('logbook.destroy');
 
         Route::get('/seminar', [SeminarController::class, 'index'])->name('seminar');
-        Route::post('/seminar', [SeminarController::class, 'store'])->name('seminar.store');
-        Route::put('/seminar/{seminar}', [SeminarController::class, 'update'])->name('seminar.update');
-        Route::delete('/seminar/{seminar}', [SeminarController::class, 'destroy'])->name('seminar.destroy');
+        Route::post('/seminar/{seminar}/availability', [SeminarController::class, 'submitAvailability'])->name('seminar.availability');
         Route::get('/seminar/{seminar}/berita-acara', [SeminarController::class, 'beritaAcaraPdf'])->name('seminar.berita-acara');
         Route::get('/seminar/{seminar}', [SeminarController::class, 'detail'])->name('seminar.detail');
-        Route::post('/seminar/{seminar}/register', [SeminarController::class, 'register'])->name('seminar.register');
 
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -111,17 +108,11 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware('auth')->group(functi
         Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
         Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
         Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'markRead'])->name('notifikasi.read');
-
-        Route::get('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invitePage'])->name('internship-groups.invite');
-        Route::post('/internship-groups/{internshipGroup}/invite', [InternshipGroupController::class, 'invite'])->name('internship-groups.invite.store');
-
-        Route::post('/internship-group-members/{member}/accept', [InternshipGroupController::class, 'accept'])->name('internship-group-members.accept');
-        Route::post('/internship-group-members/{member}/decline', [InternshipGroupController::class, 'decline'])->name('internship-group-members.decline');
     });
 });
 
 // ── Dosen Routes (protected) ──────────────────────────────────────────────────
-Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
+Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'role:lecturer'])->group(function () {
 
     Route::get('/dashboard', [DosenDashboardController::class, 'index'])->name('dashboard');
 
@@ -134,6 +125,12 @@ Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
     Route::post('/mahasiswa/{student}/laporan/{report}/approve',      [DosenMahasiswaController::class, 'approveLaporan'])->name('mahasiswa.laporan.approve');
     Route::post('/mahasiswa/{student}/laporan/{report}/revisi',       [DosenMahasiswaController::class, 'revisiLaporan'])->name('mahasiswa.laporan.revisi');
 
+    Route::get('/seminar',                    [DosenSeminarController::class, 'index'])->name('seminar.index');
+    Route::post('/seminar',                   [DosenSeminarController::class, 'store'])->name('seminar.store');
+    Route::post('/seminar/{seminar}/finalize', [DosenSeminarController::class, 'finalize'])->name('seminar.finalize');
+    Route::post('/seminar/{seminar}/sahkan',  [DosenSeminarController::class, 'sahkan'])->name('seminar.sahkan');
+    Route::delete('/seminar/{seminar}',       [DosenSeminarController::class, 'destroy'])->name('seminar.destroy');
+
     Route::get('/profile',  [DosenProfileController::class, 'index'])->name('profile');
     Route::put('/profile',  [DosenProfileController::class, 'update'])->name('profile.update');
 
@@ -143,7 +140,7 @@ Route::prefix('dosen')->name('dosen.')->middleware('auth')->group(function () {
 });
 
 // ── Dosen Industri Routes (protected) ─────────────────────────────────────────
-Route::prefix('dosen-industri')->name('dosen-industri.')->middleware('auth')->group(function () {
+Route::prefix('dosen-industri')->name('dosen-industri.')->middleware(['auth', 'role:lecturer_industry'])->group(function () {
 
     Route::get('/dashboard', [IndustriDashboardController::class, 'index'])->name('dashboard');
 
@@ -162,7 +159,7 @@ Route::prefix('dosen-industri')->name('dosen-industri.')->middleware('auth')->gr
 });
 
 // ── Kaprodi Routes (protected) ────────────────────────────────────────────────
-Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function () {
+Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:kaprodi'])->group(function () {
 
     Route::get('/dashboard', [KaprodiDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/export-excel', [KaprodiDashboardController::class, 'exportExcel'])->name('dashboard.export-excel');
@@ -186,8 +183,6 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware('auth')->group(function (
     Route::post('/pengajuan-magang/{magangRequest}/resend',  [KaprodiMagangRequestController::class, 'resendInvitation'])->name('pengajuan-magang.resend');
 
     Route::get('/seminar', [KaprodiSeminarController::class, 'index'])->name('seminar.index');
-    Route::post('/seminar/{seminar}/approve', [KaprodiSeminarController::class, 'approve'])->name('seminar.approve');
-    Route::post('/seminar/{seminar}/reject',  [KaprodiSeminarController::class, 'reject'])->name('seminar.reject');
 
     // Kelola lowongan/tempat magang perusahaan afiliasi (tampil ke mahasiswa).
     Route::get('/lowongan',                  [KaprodiLowonganController::class, 'index'])->name('lowongan.index');

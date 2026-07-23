@@ -184,6 +184,13 @@ class MahasiswaController extends Controller
             return back()->with('error', 'Tidak ada pengajuan selesai magang yang bisa di-ACC.');
         }
 
+        // Hanya boleh di-ACC jika mahasiswa benar-benar sudah mengajukan selesai.
+        // Pengajuan itu sendiri sudah tergerbang syarat kelengkapan (sertifikat,
+        // laporan di-ACC, nilai, minimal logbook) di MagangSayaController.
+        if (!$internship->finish_requested) {
+            return back()->with('error', 'Mahasiswa belum mengajukan selesai magang, atau syaratnya belum lengkap.');
+        }
+
         $internship->update(['is_finished' => true, 'finish_requested' => false]);
 
         return back()->with('success', "Magang {$student->user->name} berhasil ditandai selesai.");
