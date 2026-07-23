@@ -298,6 +298,9 @@ class _AvailabilityFieldState extends State<_AvailabilityField> {
       )),
       const SizedBox(width: 8),
       ElevatedButton(
+        // Override theme: minimumSize theme = Size.fromHeight (lebar tak-hingga)
+        // yang membuat layout crash di dalam Row tanpa Expanded.
+        style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48), padding: const EdgeInsets.symmetric(horizontal: 18)),
         onPressed: () {
           final v = _c.text.trim();
           if (v.isEmpty) { showMessage(context, 'Isi tanggal yang kamu bisa.', error: true); return; }
