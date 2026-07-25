@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daftar — SITAMA</title>
+  <title>Daftar — SIMAMA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -99,7 +99,7 @@
     <span class="ring r1"></span><span class="ring r2"></span><span class="dots"></span>
   </div>
   <div class="topmini">
-    <div class="tm-brand an" style="animation-delay:.08s">SITAMA</div>
+    <div class="tm-brand an" style="animation-delay:.08s">SIMAMA</div>
     <a class="tm-help an" style="animation-delay:.12s" href="#">Butuh bantuan?</a>
   </div>
 
@@ -107,8 +107,8 @@
     {{-- LEFT FORM --}}
     <div class="pane-left">
       <div class="brand an" style="animation-delay:.05s">
-        <img class="logo" src="{{ asset('images/logo.png') }}" alt="SITAMA logo">
-        <span class="bn">SITAMA</span>
+        <img class="logo" src="{{ asset('images/logo.png') }}" alt="SIMAMA logo">
+        <span class="bn">SIMAMA</span>
       </div>
       <div class="f-title an" style="animation-delay:.1s">Pendaftaran Mahasiswa</div>
       <div class="f-sub an" style="animation-delay:.14s">Isi data dengan benar. Akun diverifikasi Kaprodi sebelum aktif.</div>
@@ -174,7 +174,7 @@
       <div class="badge2 an" style="animation-delay:.58s"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div>
 
       <div class="r-copy an" style="animation-delay:.3s">
-        <h3>Gabung ke SITAMA</h3>
+        <h3>Gabung ke SIMAMA</h3>
         <p>Satu akun untuk logbook, bimbingan, seminar, dan nilai magangmu.</p>
       </div>
       <div class="glass an" style="animation-delay:.36s">

@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════
-   SITAMA — micro-interactions (ripple + stat count-up)
+   SIMAMA — micro-interactions (ripple + stat count-up)
    Purely additive; no markup or app logic depends on this.
    Skips entirely when the user prefers reduced motion.
    ════════════════════════════════════════════════════════════ */

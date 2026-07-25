@@ -173,7 +173,7 @@ class MagangRequestController extends Controller
         if ($email && !User::where('email', $email)->exists()) {
             return $email;
         }
-        return $fallback . '@sitama.local';
+        return $fallback . '@simama.local';
     }
 
     public function resendInvitation(CompanyRequest $magangRequest)

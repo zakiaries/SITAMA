@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SITAMA — @yield('title','Informasi')</title>
+<title>SIMAMA — @yield('title','Informasi')</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -114,7 +114,7 @@ a{text-decoration:none;color:inherit;}
   <span class="cblob tl"></span><span class="cblob br"></span>
   <div class="shell">
     <div class="topbar">
-      <div class="brand"><img src="{{ asset('images/logo.png') }}" alt="SITAMA"><b>SITAMA</b></div>
+      <div class="brand"><img src="{{ asset('images/logo.png') }}" alt="SIMAMA"><b>SIMAMA</b></div>
       <div class="links">
         <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">Tentang</a>
         <a href="{{ route('bantuan') }}" class="{{ request()->routeIs('bantuan') ? 'active' : '' }}">Bantuan</a>
@@ -128,7 +128,7 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<div class="foot">© {{ date('Y') }} SITAMA · Sistem Informasi Magang &nbsp;·&nbsp; <a href="{{ route('about') }}">Tentang</a> &nbsp;·&nbsp; <a href="{{ route('bantuan') }}">Bantuan</a> &nbsp;·&nbsp; <a href="{{ route('contact') }}">Kontak</a></div>
+<div class="foot">© {{ date('Y') }} SIMAMA · Sistem Informasi Magang &nbsp;·&nbsp; <a href="{{ route('about') }}">Tentang</a> &nbsp;·&nbsp; <a href="{{ route('bantuan') }}">Bantuan</a> &nbsp;·&nbsp; <a href="{{ route('contact') }}">Kontak</a></div>
 
 <script>
 document.querySelectorAll('.faq-q').forEach(function(q){

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * Daftar hadir audiens seminar (wajib login).
  *
- * Audiens memindai QR sesi → login SITAMA → menekan "Hadir". Kehadiran terikat
+ * Audiens memindai QR sesi → login SIMAMA → menekan "Hadir". Kehadiran terikat
  * ke akun mahasiswa (1 akun = 1 kehadiran per sesi), sehingga jumlah audiens
  * tidak bisa digelembungkan lewat form anonim.
  */

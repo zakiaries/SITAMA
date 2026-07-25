@@ -62,7 +62,7 @@
     <div>
       <div class="page-title">Chatbot Rekomendasi</div>
       <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
-        Asisten SITAMA berbasis TF-IDF &amp; Cosine Similarity — tanyakan seputar prosedur magang, bimbingan, seminar, dan fitur lainnya.
+        Asisten SIMAMA berbasis TF-IDF &amp; Cosine Similarity — tanyakan seputar prosedur magang, bimbingan, seminar, dan fitur lainnya.
       </div>
     </div>
   </div>
@@ -73,7 +73,7 @@
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
       <div>
-        <div class="t">Asisten SITAMA</div>
+        <div class="t">Asisten SIMAMA</div>
         <div class="s">Menjawab dengan mencari informasi paling relevan dari basis pengetahuan.</div>
       </div>
     </div>
@@ -83,7 +83,7 @@
         <div class="cb-ico">AI</div>
         <div>
           <div class="cb-bubble">
-            Halo! 👋 Saya asisten SITAMA. Tanyakan apa saja seputar magang — misalnya cara mengajukan magang,
+            Halo! 👋 Saya asisten SIMAMA. Tanyakan apa saja seputar magang — misalnya cara mengajukan magang,
             syarat seminar, atau mengunggah laporan. Kamu juga bisa memilih pertanyaan populer di bawah.
           </div>
           <div class="cb-suggests">

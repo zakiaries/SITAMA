@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menunggu Persetujuan — SITAMA</title>
+  <title>Menunggu Persetujuan — SIMAMA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/sitama.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/simama.css') }}">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -81,7 +81,7 @@
     <div class="info-box">
       <strong>Yang perlu Anda ketahui:</strong><br>
       • Proses verifikasi dilakukan oleh Kaprodi program studi Anda.<br>
-      • Setelah disetujui, Anda dapat langsung menggunakan semua fitur SITAMA.<br>
+      • Setelah disetujui, Anda dapat langsung menggunakan semua fitur SIMAMA.<br>
       • Jika ada pertanyaan, hubungi Kaprodi secara langsung.
     </div>
 

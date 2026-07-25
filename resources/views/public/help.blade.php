@@ -4,7 +4,7 @@
   <div class="hero an">
     <div class="eyebrow">Pusat Bantuan</div>
     <h1>Ada yang bisa kami bantu?</h1>
-    <p>Temukan jawaban dari pertanyaan yang sering diajukan seputar pendaftaran, akun, dan penggunaan SITAMA.</p>
+    <p>Temukan jawaban dari pertanyaan yang sering diajukan seputar pendaftaran, akun, dan penggunaan SIMAMA.</p>
   </div>
   <div class="sec-title an">Pertanyaan yang sering diajukan</div>
   <div class="faq an" style="animation-delay:.06s">

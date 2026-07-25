@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — SITAMA</title>
+  <title>Login — SIMAMA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -130,7 +130,7 @@
     <span class="dots"></span>
   </div>
   <div class="topmini">
-    <div class="tm-brand an" style="animation-delay:.08s">SITAMA</div>
+    <div class="tm-brand an" style="animation-delay:.08s">SIMAMA</div>
     <a class="tm-help an" style="animation-delay:.12s" href="{{ route('bantuan') }}">Butuh bantuan?</a>
   </div>
 
@@ -138,8 +138,8 @@
     {{-- LEFT: FORM --}}
     <div class="pane-left">
       <div class="brand an" style="animation-delay:.05s">
-        <img class="logo" src="{{ asset('images/logo.png') }}" alt="SITAMA logo">
-        <span class="bn">SITAMA</span>
+        <img class="logo" src="{{ asset('images/logo.png') }}" alt="SIMAMA logo">
+        <span class="bn">SIMAMA</span>
       </div>
       <div class="f-title an" style="animation-delay:.1s">LOGIN</div>
       <div class="f-sub an" style="animation-delay:.14s">Masuk untuk melanjutkan ke sistem magang &amp; bimbingan.</div>
@@ -178,7 +178,7 @@
         <button type="submit" class="btn an" style="animation-delay:.36s">Masuk Sekarang</button>
       </form>
 
-      <div class="divider an" style="animation-delay:.42s">SITAMA Politeknik</div>
+      <div class="divider an" style="animation-delay:.42s">SIMAMA Politeknik</div>
       <div class="signup an" style="animation-delay:.46s">Belum punya akun? <a href="{{ route('register') }}">Daftar di sini</a></div>
       <div class="signup an" style="animation-delay:.5s;margin-top:6px;">Pembimbing industri? <a href="{{ route('aktivasi.entry') }}">Aktivasi akun di sini</a></div>
     </div>
@@ -200,7 +200,7 @@
     </div>
   </div>
 
-  <div class="footmini an" style="animation-delay:.55s">© {{ date('Y') }} SITAMA · Sistem Informasi Magang &nbsp;·&nbsp; <a href="{{ route('about') }}">Tentang</a> &nbsp;·&nbsp; <a href="{{ route('bantuan') }}">Bantuan</a> &nbsp;·&nbsp; <a href="{{ route('contact') }}">Kontak</a></div>
+  <div class="footmini an" style="animation-delay:.55s">© {{ date('Y') }} SIMAMA · Sistem Informasi Magang &nbsp;·&nbsp; <a href="{{ route('about') }}">Tentang</a> &nbsp;·&nbsp; <a href="{{ route('bantuan') }}">Bantuan</a> &nbsp;·&nbsp; <a href="{{ route('contact') }}">Kontak</a></div>
 
   <script>
     function togPw(){

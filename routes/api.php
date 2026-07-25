@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes — SITAMA Mobile
+| API Routes — SIMAMA Mobile
 |--------------------------------------------------------------------------
 | Dipakai aplikasi mobile (Mahasiswa, Dosen, Pembimbing Industri).
 | Auth: token via Laravel Sanctum. Tidak mengubah web/DB yang sudah ada.

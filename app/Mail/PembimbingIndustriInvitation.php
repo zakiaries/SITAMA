@@ -26,7 +26,7 @@ class PembimbingIndustriInvitation extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Aktivasi Akun Pembimbing Industri - SITAMA Polines');
+        return new Envelope(subject: 'Aktivasi Akun Pembimbing Industri - SIMAMA Polines');
     }
 
     public function content(): Content

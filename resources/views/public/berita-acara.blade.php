@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Daftar Hadir Seminar — SITAMA</title>
+<title>Daftar Hadir Seminar — SIMAMA</title>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#eef2f9;color:#1e2430;
@@ -61,7 +61,7 @@
     @endif
   </div>
 
-  <div class="foot">SITAMA · Sistem Informasi Magang</div>
+  <div class="foot">SIMAMA · Sistem Informasi Magang</div>
 </div>
 </body>
 </html>

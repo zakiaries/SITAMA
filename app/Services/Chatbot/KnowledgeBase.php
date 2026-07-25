@@ -6,7 +6,7 @@ use App\Models\ChatbotKnowledge;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Basis pengetahuan (knowledge base) chatbot SITAMA.
+ * Basis pengetahuan (knowledge base) chatbot SIMAMA.
  *
  * Tiap entri berisi:
  *   - pertanyaan : pertanyaan utama (representatif) yang ditampilkan ke pengguna.
@@ -61,7 +61,7 @@ class KnowledgeBase
     {
         return [
             [
-                'pertanyaan' => 'Bagaimana cara masuk (login) ke SITAMA?',
+                'pertanyaan' => 'Bagaimana cara masuk (login) ke SIMAMA?',
                 'kata_kunci' => 'login masuk akun sign in NIM nomor induk mahasiswa kata sandi password halaman awal',
                 'jawaban'    => 'Masuk melalui halaman login menggunakan NIM sebagai username dan kata sandimu. Setelah berhasil, kamu diarahkan ke dashboard mahasiswa.',
                 'kategori'   => 'Akun',
@@ -79,7 +79,7 @@ class KnowledgeBase
                 'kategori'   => 'Akun',
             ],
             [
-                'pertanyaan' => 'Bagaimana cara mengajukan magang di SITAMA?',
+                'pertanyaan' => 'Bagaimana cara mengajukan magang di SIMAMA?',
                 'kata_kunci' => 'ajukan mengajukan magang daftar lapor sudah diterima perusahaan tempat magang pengajuan bukti penerimaan posisi tanggal mulai',
                 'jawaban'    => 'Buka menu Ajukan Magang, lalu isi data perusahaan, posisi, tanggal mulai, data pembimbing industri (nama, email, no. HP), dan unggah bukti penerimaan magang. Pengajuan dikirim ke Kaprodi untuk disetujui.',
                 'kategori'   => 'Magang',
@@ -87,7 +87,7 @@ class KnowledgeBase
             [
                 'pertanyaan' => 'Saya diterima magang sendiri di luar platform, apakah bisa dilaporkan?',
                 'kata_kunci' => 'magang mandiri luar platform cari sendiri perusahaan sendiri lowongan tidak ada bukti surat penerimaan',
-                'jawaban'    => 'Bisa. SITAMA tidak menyediakan lowongan — kamu mencari dan mendaftar magang di luar sistem. Setelah diterima, laporkan lewat menu Ajukan Magang dan unggah bukti penerimaan untuk diverifikasi Kaprodi.',
+                'jawaban'    => 'Bisa. SIMAMA tidak menyediakan lowongan — kamu mencari dan mendaftar magang di luar sistem. Setelah diterima, laporkan lewat menu Ajukan Magang dan unggah bukti penerimaan untuk diverifikasi Kaprodi.',
                 'kategori'   => 'Magang',
             ],
             [

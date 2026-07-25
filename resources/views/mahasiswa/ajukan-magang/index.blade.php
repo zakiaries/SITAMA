@@ -56,7 +56,7 @@
       </div>
       <div style="display:flex;gap:16px;margin-bottom:6px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-          <input type="radio" name="company_mode" value="existing" {{ $companyMode === 'existing' ? 'checked' : '' }} onchange="toggleCompany(this.value)"> Sudah terdaftar di SITAMA
+          <input type="radio" name="company_mode" value="existing" {{ $companyMode === 'existing' ? 'checked' : '' }} onchange="toggleCompany(this.value)"> Sudah terdaftar di SIMAMA
         </label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
           <input type="radio" name="company_mode" value="new" {{ $companyMode === 'new' ? 'checked' : '' }} onchange="toggleCompany(this.value)"> Belum terdaftar

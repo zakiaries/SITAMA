@@ -35,7 +35,7 @@
 - ✅ Seminar full e2e, ✅ ajukan-magang→approve (rantai lengkap + notif + hook direktori), ✅ akses lintas peran (403), ✅ chatbot, ✅ smoke 31 halaman 4 peran (200).
 - ⬜ BELUM diuji e2e (CRUD sederhana, sudah smoke 200): logbook+notif dosen, bimbingan approve/revisi + guard IDOR, laporan ACC, input nilai 2 penilai, gerbang selesai-magang.
 
-## ✅ BLOCKER DEPLOY — SUDAH DIBERESKAN (2026-07-25, jalur PROPER; belum di-commit)
+## ✅ BLOCKER DEPLOY — SUDAH DIBERESKAN (2026-07-25, jalur PROPER; di-commit ke branch `lanang`: c1294d1 + 7e551b6, BUKAN `web`, belum push)
 1. **Migrasi tabel dasar direkonstruksi.** 15 file base baru (`0001_01_01_*`, `2026_04_24_*`,
    `2026_04_29_000002/3`) menggabungkan alter make-nullable & lecturer_industry. `migrate:fresh`
    jalan dari nol; skema hasilnya **byte-identical** dgn DB live (diff kosong, teruji di DB

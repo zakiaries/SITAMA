@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aktivasi Akun — SITAMA</title>
-  <link rel="stylesheet" href="{{ asset('css/sitama.css') }}">
+  <title>Aktivasi Akun — SIMAMA</title>
+  <link rel="stylesheet" href="{{ asset('css/simama.css') }}">
   <style>
     body { min-height:100vh; display:flex; align-items:center; justify-content:center;
       background:radial-gradient(1200px 600px at 50% -10%,#EAF1FF,#F2F4FF 45%,#EEF1F8); padding:24px; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 <div class="box">
-  <div class="logo">SITAMA</div>
+  <div class="logo">SIMAMA</div>
   <div class="logo-sub">Sistem Informasi Magang</div>
 
   <div class="title">Aktivasi Akun Pembimbing Industri</div>

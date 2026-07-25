@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aktivasi Akun - SITAMA</title>
-  <link rel="stylesheet" href="{{ asset('css/sitama.css') }}">
+  <title>Aktivasi Akun - SIMAMA</title>
+  <link rel="stylesheet" href="{{ asset('css/simama.css') }}">
   <style>
     body { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f1f5f9; }
     .box { background:#fff; border-radius:14px; padding:36px 32px; width:100%; max-width:420px; box-shadow:0 4px 24px rgba(0,0,0,.09); }
@@ -22,7 +22,7 @@
 </head>
 <body>
 <div class="box">
-  <div class="logo">SITAMA</div>
+  <div class="logo">SIMAMA</div>
   <div class="logo-sub">Sistem Informasi Magang · Polines</div>
 
   @if($expired)
@@ -37,7 +37,7 @@
     </div>
   @else
     <div class="title">Aktivasi Akun Pembimbing</div>
-    <p class="sub">Halo, <strong>{{ $invitation->user->name }}</strong>. Buat username dan password untuk akun SITAMA Anda.</p>
+    <p class="sub">Halo, <strong>{{ $invitation->user->name }}</strong>. Buat username dan password untuk akun SIMAMA Anda.</p>
 
     @if($errors->any())
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:14px;">

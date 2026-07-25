@@ -5,7 +5,7 @@ namespace App\Services\Chatbot;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Mesin chatbot SITAMA — hybrid FAQ + rekomendasi tempat magang.
+ * Mesin chatbot SIMAMA — hybrid FAQ + rekomendasi tempat magang.
  *
  * Chatbot bersifat retrieval-based dan mengelola DUA basis pengetahuan yang
  * masing-masing di-index dengan TF-IDF:

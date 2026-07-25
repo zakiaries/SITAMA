@@ -1,7 +1,7 @@
 @php $sbUser = Auth::user(); @endphp
 <div class="sidebar">
   <div class="sb-logo">
-    <div class="name">SITAMA</div>
+    <div class="name">SIMAMA</div>
     <div class="sub">Sistem Informasi Magang</div>
   </div>
 

@@ -18,7 +18,7 @@
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>SITAMA Polines</h1>
+    <h1>SIMAMA Polines</h1>
     <p>Sistem Informasi Magang</p>
   </div>
   <div class="body">
@@ -29,7 +29,7 @@
     </p>
     <p>
       Silakan klik tombol di bawah untuk mengaktifkan akun Anda dan membuat username serta password
-      yang akan digunakan untuk login ke SITAMA.
+      yang akan digunakan untuk login ke SIMAMA.
     </p>
     <a href="{{ $activationUrl }}" class="btn">Aktivasi Akun Saya</a>
     <p style="font-size:13px;color:#64748b;">
@@ -42,7 +42,7 @@
     </p>
   </div>
   <div class="footer">
-    Email ini dikirim otomatis oleh sistem SITAMA Polines. Jangan membalas email ini.
+    Email ini dikirim otomatis oleh sistem SIMAMA Polines. Jangan membalas email ini.
   </div>
 </div>
 </body>

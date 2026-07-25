@@ -3,11 +3,11 @@
 @section('content')
   <div class="hero an">
     <div class="eyebrow">Tentang Kami</div>
-    <h1>Apa itu SITAMA?</h1>
-    <p>SITAMA (Sistem Informasi Magang) menyatukan pengelolaan magang dan bimbingan — dari logbook, bimbingan, seminar, hingga penilaian — dalam satu tempat yang rapi untuk mahasiswa, dosen, pembimbing industri, dan kaprodi.</p>
+    <h1>Apa itu SIMAMA?</h1>
+    <p>SIMAMA (Sistem Informasi Magang) menyatukan pengelolaan magang dan bimbingan — dari logbook, bimbingan, seminar, hingga penilaian — dalam satu tempat yang rapi untuk mahasiswa, dosen, pembimbing industri, dan kaprodi.</p>
   </div>
   <div class="lead-card an" style="animation-delay:.06s">
-    <p>SITAMA dibuat untuk menyederhanakan proses magang yang biasanya tersebar di banyak dokumen dan grup chat. Lewat satu sistem, <b>mahasiswa</b> mencatat logbook &amp; bimbingan, <b>dosen</b> memantau dan menilai, <b>pembimbing industri</b> memberi catatan, dan <b>kaprodi</b> mengawasi keseluruhan program studi.</p>
+    <p>SIMAMA dibuat untuk menyederhanakan proses magang yang biasanya tersebar di banyak dokumen dan grup chat. Lewat satu sistem, <b>mahasiswa</b> mencatat logbook &amp; bimbingan, <b>dosen</b> memantau dan menilai, <b>pembimbing industri</b> memberi catatan, dan <b>kaprodi</b> mengawasi keseluruhan program studi.</p>
     <p>Tujuannya sederhana: membuat kegiatan magang lebih <b>transparan, terdokumentasi, dan mudah dipantau</b> oleh semua pihak.</p>
   </div>
   <div class="sec-title an" style="animation-delay:.1s">Visi &amp; Misi</div>

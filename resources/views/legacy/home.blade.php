@@ -14,7 +14,7 @@
             <div class="content-section">
                 <h2 class="mb-3" style="color: #2c3e50;">Halaman Beranda</h2>
                 <p>
-                    Selamat datang di SITAMA Web, sebuah platform modern yang dirancang untuk memberikan pengalaman terbaik 
+                    Selamat datang di SIMAMA Web, sebuah platform modern yang dirancang untuk memberikan pengalaman terbaik 
                     kepada pengguna. Kami berkomitmen untuk menyediakan layanan berkualitas tinggi dengan antarmuka yang 
                     intuitif dan responsif.
                 </p>

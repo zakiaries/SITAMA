@@ -143,7 +143,7 @@ class MahasiswaController extends Controller
             $picUser  = User::create([
                 'name'     => $request->pic_name,
                 'username' => $request->pic_username,
-                'email'    => $request->pic_username . '@sitama.local',
+                'email'    => $request->pic_username . '@simama.local',
                 'password' => Hash::make($request->pic_password),
                 'role'     => 'lecturer_industry',
             ]);
