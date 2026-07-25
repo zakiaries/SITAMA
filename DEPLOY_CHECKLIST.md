@@ -11,6 +11,8 @@ jadi ini deploy Laravel standar.
 - [ ] **Set `SEED_KAPRODI_PASSWORD` (& username/email) di `.env`** ke nilai kuat sebelum
       `db:seed`. Deploy bersih TIDAK lagi membawa akun uji `password123` — DB dibangun dari
       migrasi + seeder, satu-satunya akun awal adalah Kaprodi dari `.env` ini.
+      ⚠️ Bila password mengandung `#`/spasi/karakter khusus, **bungkus tanda kutip**
+      (`SEED_KAPRODI_PASSWORD="P@ss#word1"`) — tanpa kutip, `#` dst dianggap komentar & password terpotong diam-diam.
 - [ ] `APP_DEBUG=false` + `APP_ENV=production` (default lokal ON — stack trace bocor bila dibiarkan).
 - [ ] `APP_URL` diisi URL publik https (menentukan isi QR seminar → agar bisa discan dari HP).
 
