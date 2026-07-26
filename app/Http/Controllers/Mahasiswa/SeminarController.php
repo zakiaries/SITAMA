@@ -67,14 +67,8 @@ class SeminarController extends Controller
 
         $seminar->load(['lecturer.user', 'presenters.student.user', 'attendances.student.user']);
 
-        $qrUrl = null;
-        $qrSvg = null;
-        if ($seminar->status === 'scheduled' && $seminar->access_token) {
-            $qrUrl = url('/seminar/hadir/' . $seminar->access_token);
-            $qrSvg = QrCode::format('svg')->size(220)->margin(1)->generate($qrUrl);
-        }
-
-        return view('mahasiswa.seminar.detail', compact('seminar', 'qrUrl', 'qrSvg'));
+        // QR daftar hadir kini ditampilkan dosen (rotating, anti titip-absen), bukan statis di sini.
+        return view('mahasiswa.seminar.detail', compact('seminar'));
     }
 
     public function beritaAcaraPdf(Seminar $seminar)

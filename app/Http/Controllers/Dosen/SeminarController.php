@@ -10,6 +10,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /**
  * Sesi seminar dari sisi dosen pembimbing.
@@ -55,6 +56,31 @@ class SeminarController extends Controller
             ->get();
 
         return view('dosen.seminar.index', compact('seminars', 'eligibleStudents'));
+    }
+
+    /**
+     * Halaman QR daftar hadir untuk diproyeksikan dosen di layar. QR memuat token
+     * berbasis waktu yang berganti otomatis (halaman auto-refresh) → tautan yang
+     * di-share/di-screenshot cepat kedaluwarsa, mencegah titip absen dari luar ruangan.
+     */
+    public function qr(Seminar $seminar)
+    {
+        $lecturer = $this->lecturer();
+        $this->ownSeminar($seminar, $lecturer);
+
+        if ($seminar->status !== 'scheduled' || ! $seminar->access_token) {
+            return back()->with('error', 'QR daftar hadir hanya tersedia untuk sesi yang sudah dijadwalkan.');
+        }
+
+        $url   = url('/seminar/hadir/' . $seminar->access_token) . '?rt=' . $seminar->rotatingToken();
+        $qrSvg = QrCode::format('svg')->size(320)->margin(1)->generate($url);
+
+        return view('dosen.seminar.qr', [
+            'seminar'  => $seminar,
+            'qrSvg'    => $qrSvg,
+            'guests'   => $seminar->attendances()->count(),
+            'interval' => Seminar::QR_INTERVAL,
+        ]);
     }
 
     /** Buat sesi baru (draft) berisi mahasiswa terpilih; minta mereka isi ketersediaan. */

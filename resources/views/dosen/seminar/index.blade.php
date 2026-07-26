@@ -104,7 +104,7 @@
           <strong style="color:{{ $guests >= \App\Models\Seminar::MIN_GUESTS ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ \App\Models\Seminar::MIN_GUESTS }}</strong>
         </div>
         @if($s->access_token)
-          <a href="{{ url('/seminar/hadir/'.$s->access_token) }}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600;">Buka halaman daftar hadir (QR) →</a>
+          <a href="{{ route('dosen.seminar.qr', $s) }}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600;">Tampilkan QR Daftar Hadir (layar) →</a>
         @endif
       </div>
       <form method="POST" action="{{ route('dosen.seminar.sahkan', $s) }}"

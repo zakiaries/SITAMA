@@ -26,12 +26,14 @@
   </div>
 </div>
 
-@if($qrSvg)
-<div class="card" style="margin-bottom:16px;text-align:center;">
-  <div style="font-size:14px;font-weight:700;margin-bottom:4px;">QR Daftar Hadir Audiens</div>
-  <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Audiens memindai QR ini, login, lalu menekan "Hadir". Minimal {{ $min }} audiens.</div>
-  <div style="display:flex;justify-content:center;">{!! $qrSvg !!}</div>
-  <div style="font-size:11px;color:var(--text-muted);margin-top:8px;word-break:break-all;">{{ $qrUrl }}</div>
+@if($seminar->status === 'scheduled')
+<div class="card" style="margin-bottom:16px;">
+  <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Daftar Hadir Audiens</div>
+  <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">
+    QR daftar hadir <strong>ditampilkan dosen di layar</strong> saat seminar berlangsung dan
+    <strong>berganti otomatis</strong> untuk mencegah titip absen. Audiens memindai langsung dari layar,
+    login, lalu menekan "Hadir". Minimal {{ $min }} audiens.
+  </div>
 </div>
 @endif
 

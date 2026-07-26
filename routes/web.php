@@ -136,6 +136,7 @@ Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'role:lecturer'])->g
     Route::post('/mahasiswa/{student}/laporan/{report}/revisi',       [DosenMahasiswaController::class, 'revisiLaporan'])->name('mahasiswa.laporan.revisi');
 
     Route::get('/seminar',                    [DosenSeminarController::class, 'index'])->name('seminar.index');
+    Route::get('/seminar/{seminar}/qr',       [DosenSeminarController::class, 'qr'])->name('seminar.qr');
     Route::post('/seminar',                   [DosenSeminarController::class, 'store'])->name('seminar.store');
     Route::post('/seminar/{seminar}/finalize', [DosenSeminarController::class, 'finalize'])->name('seminar.finalize');
     Route::put('/seminar/{seminar}',           [DosenSeminarController::class, 'update'])->name('seminar.update');

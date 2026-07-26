@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Seminar;
 use App\Models\SeminarAttendance;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class BeritaAcaraController extends Controller
 {
-    public function show(string $token)
+    public function show(Request $request, string $token)
     {
         $seminar = Seminar::where('access_token', $token)->first();
 
@@ -27,17 +28,26 @@ class BeritaAcaraController extends Controller
         $already = $student && SeminarAttendance::where('seminar_id', $seminar->id)
             ->where('student_id', $student->id)->exists();
 
+        // Anti-abuse: QR berganti tiap ~detik; tautan statis/di-share jadi kedaluwarsa.
+        $rt      = $request->query('rt');
+        $rtValid = $seminar->isValidRotatingToken($rt);
+
         $seminar->load('presenters.student.user');
 
-        return view('public.berita-acara', compact('seminar', 'already'));
+        return view('public.berita-acara', compact('seminar', 'already', 'rtValid', 'rt'));
     }
 
-    public function store(string $token)
+    public function store(Request $request, string $token)
     {
         $seminar = Seminar::where('access_token', $token)->first();
 
         if (! $seminar || $seminar->status !== 'scheduled') {
             return view('public.berita-acara-closed', ['seminar' => $seminar]);
+        }
+
+        // Wajib token QR yang masih berlaku (mencegah POST langsung / tautan lama).
+        if (! $seminar->isValidRotatingToken($request->input('rt'))) {
+            return back()->withErrors(['hadir' => 'QR sudah berganti atau tidak valid. Pindai ulang QR terbaru yang ditampilkan dosen di layar.']);
         }
 
         $student = Auth::user()->student;

@@ -47,6 +47,14 @@
 
     @if($already)
       <div class="ok">✓ Kamu sudah tercatat hadir di seminar ini. Terima kasih!</div>
+    @elseif(! $rtValid)
+      <h2>Pindai QR Terbaru</h2>
+      <div class="sub">
+        QR daftar hadir <strong>berganti otomatis</strong> tiap beberapa detik untuk mencegah titip absen.
+        Pindai langsung QR yang sedang <strong>ditampilkan dosen di layar</strong> — tautan lama / hasil
+        share tidak berlaku.
+      </div>
+      <div class="err" style="text-align:center;margin-bottom:0;">QR kedaluwarsa atau tidak valid.</div>
     @else
       <h2>Konfirmasi Kehadiran</h2>
       <div class="sub">Kehadiranmu akan dicatat atas nama akun ini. Satu akun terhitung satu kali.</div>
@@ -56,6 +64,7 @@
       </div>
       <form method="POST" action="{{ route('berita-acara.store', $seminar->access_token) }}">
         @csrf
+        <input type="hidden" name="rt" value="{{ $rt }}">
         <button type="submit" class="submit">Saya Hadir</button>
       </form>
     @endif
