@@ -172,7 +172,7 @@
 
         <div class="frow an" style="animation-delay:.3s">
           <label class="remember"><input type="checkbox" name="remember"> Ingat saya</label>
-          <a class="forgot" href="#">Lupa kata sandi?</a>
+          <a class="forgot" href="{{ route('password.request') }}">Lupa kata sandi?</a>
         </div>
 
         <button type="submit" class="btn an" style="animation-delay:.36s">Masuk Sekarang</button>

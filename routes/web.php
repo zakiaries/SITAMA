@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Mahasiswa\BimbinganController;
 use App\Http\Controllers\Mahasiswa\ChatbotController;
@@ -59,6 +60,12 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'showForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
+
+// Lupa / reset password (mandiri, via link ke email terdaftar)
+Route::get('/lupa-password',  [PasswordResetController::class, 'showRequestForm'])->name('password.request');
+Route::post('/lupa-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 
 // Mahasiswa Routes (protected)
 Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:student'])->group(function () {
