@@ -94,7 +94,7 @@ class _DashboardTabState extends State<DashboardTab> {
                             child: const Icon(Icons.laptop_mac, color: Colors.white, size: 16),
                           ),
                           const SizedBox(width: 8),
-                          const Text('SITAMA', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
+                          const Text('SIMAMA', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
                           const Spacer(),
                           HeaderAction(Icons.notifications_outlined, () => Navigator.push(context,
                               MaterialPageRoute(builder: (_) => const NotifikasiScreen(basePath: '/mahasiswa')))),

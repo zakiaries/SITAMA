@@ -30,7 +30,7 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 26),
-            const Text('SITAMA', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: 2)),
+            const Text('SIMAMA', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: 2)),
             const SizedBox(height: 6),
             const Text('Sistem Informasi Magang', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
             const SizedBox(height: 30),

@@ -320,7 +320,7 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
       content: SizedBox(
         width: 280,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Audiens memindai QR ini, lalu login SITAMA untuk mengisi daftar hadir (1 akun = 1 kehadiran).',
+          const Text('Audiens memindai QR ini, lalu login SIMAMA untuk mengisi daftar hadir (1 akun = 1 kehadiran).',
               style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
           const SizedBox(height: 14),
           Container(

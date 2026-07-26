@@ -1,15 +1,15 @@
-# SITAMA Mobile
+# SIMAMA Mobile
 
-Aplikasi **mobile** untuk SITAMA (Sistem Informasi Magang) — hanya 3 role:
+Aplikasi **mobile** untuk SIMAMA (Sistem Informasi Magang) — hanya 3 role:
 **Mahasiswa, Dosen, Pembimbing Industri**. Peran Kaprodi tetap di web.
 
 Folder ini adalah tempat project aplikasi mobile (rekomendasi: **Flutter**). Aplikasi mobile
 **tidak** menjalankan kode web; ia **memanggil REST API** dari backend Laravel yang sama
-(project di folder induk `SITAMA WEB/`).
+(project di folder induk `SIMAMA WEB/`).
 
 ## Arsitektur singkat
 ```
-SITAMA WEB/            ← Backend Laravel (web + API) + MySQL (DB yang sudah ada)
+SIMAMA WEB/            ← Backend Laravel (web + API) + MySQL (DB yang sudah ada)
 └── mobile/            ← Project aplikasi mobile (Flutter), memanggil /api dari backend
 ```
 
@@ -37,7 +37,7 @@ php artisan serve --host=0.0.0.0 --port=8000
 Endpoint fitur per role menyusul sesuai `PROMPT-sitama-mobile.md` (bab 8).
 
 ## Cara menaruh project Flutter di sini
-Dari folder `SITAMA WEB/`:
+Dari folder `SIMAMA WEB/`:
 ```bash
 cd mobile
 flutter create .        # membuat project Flutter di dalam folder ini

@@ -110,7 +110,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     return Scaffold(
       backgroundColor: AppColors.warm,
       body: Column(children: [
-        const DetailHeader(title: 'Chatbot SITAMA', subtitle: 'Tanya seputar magang, seminar & laporan'),
+        const DetailHeader(title: 'Chatbot SIMAMA', subtitle: 'Tanya seputar magang, seminar & laporan'),
         Expanded(child: _body()),
         _inputBar(),
       ]),

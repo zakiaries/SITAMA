@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Tema SITAMA — biru Dropbox #0061FF, off-white hangat, font Archivo.
+/// Tema SIMAMA — biru Dropbox #0061FF, off-white hangat, font Archivo.
 class AppColors {
   static const primary = Color(0xFF0061FF);
   static const primaryDark = Color(0xFF0048BD);

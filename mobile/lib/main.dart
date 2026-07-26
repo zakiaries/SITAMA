@@ -19,7 +19,7 @@ class SitamaApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => AuthProvider()..bootstrap(),
       child: MaterialApp(
-        title: 'SITAMA',
+        title: 'SIMAMA',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         home: const _SplashRoot(),

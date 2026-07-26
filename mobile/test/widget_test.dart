@@ -1,4 +1,4 @@
-// Basic smoke test placeholder untuk SITAMA Mobile.
+// Basic smoke test placeholder untuk SIMAMA Mobile.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

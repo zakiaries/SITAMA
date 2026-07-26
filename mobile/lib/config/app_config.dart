@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// Konfigurasi global aplikasi SITAMA Mobile.
+/// Konfigurasi global aplikasi SIMAMA Mobile.
 class AppConfig {
   /// Base URL API backend Laravel — otomatis menyesuaikan platform.
   ///
