@@ -34,4 +34,18 @@ class AuthFlowTest extends FeatureTestCase
             ->assertSessionHasErrors('username');
         $this->assertGuest();
     }
+
+    public function test_login_throttled_after_too_many_attempts(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $this->from('/login')->post('/login', ['username' => 'kaprodi', 'password' => 'salah']);
+        }
+        $this->from('/login')->post('/login', ['username' => 'kaprodi', 'password' => 'salah'])
+            ->assertSessionHasErrors('username');
+        $this->assertStringContainsString('Terlalu banyak', session('errors')->first('username'));
+
+        // NIM berbeda (share IP) tidak ikut terkunci.
+        $this->from('/login')->post('/login', ['username' => '3.34.23.2.01', 'password' => 'password'])
+            ->assertRedirect(route('mahasiswa.dashboard'));
+    }
 }

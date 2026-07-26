@@ -62,10 +62,11 @@ Route::get('/register', [RegisterController::class, 'showForm'])->name('register
 Route::post('/register', [RegisterController::class, 'register']);
 
 // Lupa / reset password (mandiri, via link ke email terdaftar)
+// throttle backstop anti spam email / tebak token (cukup longgar utk WiFi kampus share-IP).
 Route::get('/lupa-password',  [PasswordResetController::class, 'showRequestForm'])->name('password.request');
-Route::post('/lupa-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+Route::post('/lupa-password', [PasswordResetController::class, 'sendResetLink'])->middleware('throttle:12,1')->name('password.email');
 Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:12,1')->name('password.update');
 
 // Mahasiswa Routes (protected)
 Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:student'])->group(function () {
