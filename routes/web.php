@@ -131,6 +131,7 @@ Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'role:lecturer'])->g
     Route::get('/seminar',                    [DosenSeminarController::class, 'index'])->name('seminar.index');
     Route::post('/seminar',                   [DosenSeminarController::class, 'store'])->name('seminar.store');
     Route::post('/seminar/{seminar}/finalize', [DosenSeminarController::class, 'finalize'])->name('seminar.finalize');
+    Route::put('/seminar/{seminar}',           [DosenSeminarController::class, 'update'])->name('seminar.update');
     Route::post('/seminar/{seminar}/sahkan',  [DosenSeminarController::class, 'sahkan'])->name('seminar.sahkan');
     Route::delete('/seminar/{seminar}',       [DosenSeminarController::class, 'destroy'])->name('seminar.destroy');
 

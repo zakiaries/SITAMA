@@ -48,8 +48,16 @@
           {{ $s->date->format('d M Y') }}{{ $s->time ? ' · '.$s->time : '' }}{{ $s->location ? ' · '.$s->location : '' }}
         </div>
       @endif
+      @if($s->description)
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">{{ $s->description }}</div>
+      @endif
     </div>
-    <span class="badge" style="background:{{ $st[1] }};color:{{ $st[2] }};">{{ $st[0] }}</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <span class="badge" style="background:{{ $st[1] }};color:{{ $st[2] }};">{{ $st[0] }}</span>
+      @if(in_array($s->status, ['draft','scheduled']))
+        <button type="button" class="btn btn-outline btn-sm" onclick="openEditSeminar({{ $s->id }}, @js($s->title), @js($s->description))"><x-icon name="pencil" :size="13"/> Ubah Detail</button>
+      @endif
+    </div>
   </div>
 
   {{-- Penyaji + ketersediaan --}}
@@ -106,6 +114,19 @@
           <x-icon name="check" :size="14"/> Sahkan Seminar (Saksi)
         </button>
       </form>
+      <details style="margin-top:10px;">
+        <summary style="font-size:12px;color:var(--primary);cursor:pointer;">Ubah jadwal / lokasi</summary>
+        <form method="POST" action="{{ route('dosen.seminar.finalize', $s) }}" style="margin-top:8px;">
+          @csrf
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:8px;">
+            <input type="date" name="date" value="{{ $s->date?->toDateString() }}" min="{{ now()->toDateString() }}" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+            <input type="text" name="time" value="{{ $s->time }}" placeholder="Waktu (mis. 09:00-11:00)" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+            <input type="text" name="location" value="{{ $s->location }}" placeholder="Ruang/tempat" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          </div>
+          <button type="submit" class="btn btn-outline btn-sm">Simpan Perubahan Jadwal</button>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Mahasiswa penyaji akan diberi tahu perubahan jadwal.</div>
+        </form>
+      </details>
     </div>
 
   @elseif($s->status === 'completed')
@@ -148,4 +169,43 @@
   </div>
 </div>
 
+{{-- Modal Ubah Detail Sesi --}}
+<div class="modal-overlay" id="modal-edit-seminar" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Ubah Detail Sesi</div>
+      <button class="modal-close" onclick="document.getElementById('modal-edit-seminar').classList.remove('open')"><x-icon name="x" :size="14"/></button>
+    </div>
+    <form method="POST" id="form-edit-seminar" action="">
+      @csrf
+      @method('PUT')
+      <div class="form-group">
+        <label>Judul Sesi</label>
+        <input type="text" name="title" id="edit-sem-title" required>
+      </div>
+      <div class="form-group">
+        <label>Deskripsi (opsional)</label>
+        <textarea name="description" id="edit-sem-desc" rows="3" placeholder="Catatan/keterangan sesi seminar..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;"></textarea>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px;">Untuk mengubah tanggal/waktu/lokasi, gunakan form jadwal pada kartu sesi.</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-edit-seminar').classList.remove('open')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+  function openEditSeminar(id, title, description) {
+    var form = document.getElementById('form-edit-seminar');
+    form.action = '{{ url('dosen/seminar') }}/' + id;
+    document.getElementById('edit-sem-title').value = title || '';
+    document.getElementById('edit-sem-desc').value = description || '';
+    document.getElementById('modal-edit-seminar').classList.add('open');
+  }
+</script>
+@endpush

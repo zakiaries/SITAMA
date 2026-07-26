@@ -147,6 +147,29 @@ class SeminarController extends Controller
         return back()->with('success', 'Jadwal seminar ditetapkan. Mahasiswa penyaji telah diberi tahu.');
     }
 
+    /** Ubah detail deskriptif sesi (judul & deskripsi). Jadwal/lokasi lewat finalize. */
+    public function update(Request $request, Seminar $seminar)
+    {
+        $lecturer = $this->lecturer();
+        $this->ownSeminar($seminar, $lecturer);
+
+        if (! in_array($seminar->status, ['draft', 'scheduled'], true)) {
+            return back()->with('error', 'Sesi yang sudah disahkan atau dibatalkan tidak bisa diubah.');
+        }
+
+        $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string|max:2000',
+        ]);
+
+        $seminar->update([
+            'title'       => $request->title,
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Detail sesi seminar diperbarui.');
+    }
+
     /** Sahkan sesi (dosen sebagai saksi) → completed. Butuh audiens minimal. */
     public function sahkan(Seminar $seminar)
     {
