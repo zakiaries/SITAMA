@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Guidance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class BimbinganController extends Controller
 {
@@ -85,5 +86,29 @@ class BimbinganController extends Controller
 
         return redirect()->route('mahasiswa.bimbingan')
             ->with('success', 'Revisi bimbingan berhasil dikirim ulang ke dosen.');
+    }
+
+    /**
+     * Hapus bimbingan yang BELUM disetujui dosen. Yang sudah 'approved' terkunci
+     * (jejak akademik yang sah tidak boleh dihapus).
+     */
+    public function destroy(Guidance $guidance)
+    {
+        $student = Auth::user()->student;
+
+        if ($guidance->student_id !== $student->id) abort(403);
+
+        if ($guidance->status === 'approved') {
+            return back()->with('error', 'Bimbingan yang sudah disetujui dosen tidak bisa dihapus.');
+        }
+
+        if ($guidance->name_file) {
+            Storage::disk('public')->delete($guidance->name_file);
+        }
+
+        $guidance->delete();
+
+        return redirect()->route('mahasiswa.bimbingan')
+            ->with('success', 'Bimbingan berhasil dihapus.');
     }
 }

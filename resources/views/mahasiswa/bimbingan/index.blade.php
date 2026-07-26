@@ -71,12 +71,19 @@
         <a href="{{ Storage::url($g->name_file) }}" target="_blank">File Bimbingan</a>
       </div>
       @endif
-      @if($g->status === 'rejected')
-      <div style="margin-top:14px;">
+      @if($g->status !== 'approved')
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        @if($g->status === 'rejected')
         <button class="btn btn-primary btn-sm"
           onclick="openRevisi({{ $g->id }}, @js($g->title), '{{ $g->date->format('Y-m-d') }}', @js($g->activity))">
           <x-icon name="refresh" :size="14"/> Revisi & Kirim Ulang
         </button>
+        @endif
+        <form method="POST" action="{{ route('mahasiswa.bimbingan.destroy', $g->id) }}" data-confirm="Hapus bimbingan ini?" data-confirm-danger>
+          @csrf
+          @method('DELETE')
+          <button type="submit" class="btn btn-danger btn-sm"><x-icon name="trash" :size="14"/> Hapus</button>
+        </form>
       </div>
       @endif
     </div>

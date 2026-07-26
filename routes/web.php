@@ -74,6 +74,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:studen
         Route::get('/bimbingan', [BimbinganController::class, 'index'])->name('bimbingan');
         Route::post('/bimbingan', [BimbinganController::class, 'store'])->name('bimbingan.store');
         Route::put('/bimbingan/{guidance}', [BimbinganController::class, 'update'])->name('bimbingan.update');
+        Route::delete('/bimbingan/{guidance}', [BimbinganController::class, 'destroy'])->name('bimbingan.destroy');
 
         Route::get('/logbook', [LogBookController::class, 'index'])->name('logbook');
         Route::post('/logbook', [LogBookController::class, 'store'])->name('logbook.store');
