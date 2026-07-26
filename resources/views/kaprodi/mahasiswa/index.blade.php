@@ -58,7 +58,7 @@
 {{-- Filter Tabs --}}
 <div class="filter-tabs">
   @php
-    $tabs = ['pending'=>'Menunggu','semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang'];
+    $tabs = ['pending'=>'Menunggu','semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang','rejected'=>'Ditolak'];
   @endphp
   @foreach($tabs as $key => $label)
   <a href="{{ route('kaprodi.mahasiswa.index', ['status' => $key, 'search' => request('search')]) }}"
@@ -73,6 +73,11 @@
 <div class="info-note">
   <span style="font-size:16px;">ℹ️</span>
   <span>Mahasiswa berikut baru mendaftar dan <strong>belum bisa masuk ke sistem</strong> sampai Anda menyetujui akunnya. Klik <strong>Setujui</strong> untuk mengaktifkan, atau <strong>Tolak</strong> jika data tidak valid.</span>
+</div>
+@elseif($status === 'rejected')
+<div class="info-note">
+  <span style="font-size:16px;">ℹ️</span>
+  <span>Mahasiswa berikut pendaftarannya <strong>ditolak</strong> dan tidak bisa login. Jika ada yang salah tolak, klik <strong>Pulihkan</strong> untuk menyetujui dan mengaktifkan akunnya kembali.</span>
 </div>
 @endif
 
@@ -117,6 +122,14 @@
         <button type="submit" class="btn-tolak" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="x" :size="14"/> Tolak</button>
       </form>
     </div>
+  @elseif($student->status === 'rejected')
+    {{-- Ditolak: bisa dipulihkan kalau salah tolak --}}
+    <span class="st-badge" style="background:var(--danger-bg);color:var(--danger);display:inline-flex;align-items:center;gap:4px;"><x-icon name="x" :size="12"/> Ditolak</span>
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.approve', $student) }}"
+      data-confirm="Pulihkan & setujui akun {{ $student->user->name }}? Mahasiswa akan bisa login kembali.">
+      @csrf
+      <button type="submit" class="btn-setujui" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="refresh" :size="14"/> Pulihkan</button>
+    </form>
   @elseif(!$internship)
     <span class="st-badge st-belum">Belum Magang</span>
     <a href="{{ route('kaprodi.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">Detail</a>

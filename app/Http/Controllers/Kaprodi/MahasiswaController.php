@@ -48,6 +48,9 @@ class MahasiswaController extends Controller
                 $query->where('status', 'active')
                       ->whereDoesntHave('internships');
                 break;
+            case 'rejected':
+                $query->where('status', 'rejected');
+                break;
             default:
                 $query->where('status', 'active');
         }
@@ -60,6 +63,7 @@ class MahasiswaController extends Controller
             'aktif'        => Student::where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', false))->count(),
             'selesai'      => Student::where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', true))->count(),
             'belum_magang' => Student::where('status', 'active')->whereDoesntHave('internships')->count(),
+            'rejected'     => Student::where('status', 'rejected')->count(),
         ];
 
         $lecturers = Lecturer::with('user')->get();
