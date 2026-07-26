@@ -93,4 +93,30 @@ class MagangRequestController extends Controller
 
         return back()->with('success', 'Pengajuan magang berhasil dikirim. Menunggu review Kaprodi.');
     }
+
+    /**
+     * Batalkan pengajuan yang masih menunggu review (belum diproses Kaprodi).
+     * Setelah dibatalkan, mahasiswa bisa mengajukan lagi.
+     */
+    public function cancel(CompanyRequest $magangRequest)
+    {
+        $student = Auth::user()->student;
+
+        if ($magangRequest->student_id !== $student->id) {
+            abort(403);
+        }
+
+        if ($magangRequest->status !== 'pending') {
+            return back()->with('error', 'Hanya pengajuan yang masih menunggu review yang bisa dibatalkan.');
+        }
+
+        if ($magangRequest->proof_file) {
+            Storage::disk('public')->delete($magangRequest->proof_file);
+        }
+
+        $magangRequest->delete();
+
+        return redirect()->route('mahasiswa.ajukan-magang')
+            ->with('success', 'Pengajuan magang dibatalkan. Kamu bisa mengajukan lagi.');
+    }
 }

@@ -47,6 +47,28 @@ class LogBookController extends Controller
             ->with('success', 'Log book berhasil ditambahkan.');
     }
 
+    public function update(Request $request, LogBook $logBook)
+    {
+        if ($logBook->student_id !== Auth::user()->student->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'activity' => 'required|string',
+            'date'     => 'required|date',
+        ]);
+
+        $logBook->update([
+            'title'    => $request->title,
+            'activity' => $request->activity,
+            'date'     => $request->date,
+        ]);
+
+        return redirect()->route('mahasiswa.logbook')
+            ->with('success', 'Log book berhasil diperbarui.');
+    }
+
     private function notifySupervisors($student, LogBook $logBook): void
     {
         $internship = $student->activeInternship()->with(['lecturer.user', 'lecturerIndustry.user'])->first();

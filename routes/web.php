@@ -77,6 +77,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:studen
 
         Route::get('/logbook', [LogBookController::class, 'index'])->name('logbook');
         Route::post('/logbook', [LogBookController::class, 'store'])->name('logbook.store');
+        Route::put('/logbook/{logBook}', [LogBookController::class, 'update'])->name('logbook.update');
         Route::delete('/logbook/{logBook}', [LogBookController::class, 'destroy'])->name('logbook.destroy');
 
         Route::get('/seminar', [SeminarController::class, 'index'])->name('seminar');
@@ -92,6 +93,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:studen
 
         Route::get('/ajukan-magang',  [MagangRequestController::class, 'index'])->name('ajukan-magang');
         Route::post('/ajukan-magang', [MagangRequestController::class, 'store'])->name('ajukan-magang.store');
+        Route::delete('/ajukan-magang/{magangRequest}', [MagangRequestController::class, 'cancel'])->name('ajukan-magang.cancel');
 
         Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
         Route::post('/magang-saya/sertifikat', [MagangSayaController::class, 'uploadCertificate'])->name('magang-saya.sertifikat');

@@ -167,6 +167,16 @@
     </div>
   @endif
   <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Diajukan {{ $req->created_at->format('d M Y H:i') }}</div>
+  @if($req->status === 'pending')
+    <form method="POST" action="{{ route('mahasiswa.ajukan-magang.cancel', $req->id) }}" style="margin-top:10px;"
+      data-confirm="Batalkan pengajuan magang ini? Kamu bisa mengajukan lagi setelahnya." data-confirm-danger>
+      @csrf
+      @method('DELETE')
+      <button type="submit" class="btn btn-outline btn-sm" style="color:var(--danger);border-color:#F0C4BE;">
+        <x-icon name="x" :size="13"/> Batalkan Pengajuan
+      </button>
+    </form>
+  @endif
 </div>
 @endforeach
 @endif

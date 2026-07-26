@@ -46,6 +46,10 @@
       </div>
       @endif
       <div style="display:flex;gap:8px;margin-top:12px;">
+        <button type="button" class="btn btn-outline btn-sm"
+          onclick="openEditLogbook({{ $lb->id }}, @js($lb->title), '{{ $lb->date->format('Y-m-d') }}', @js($lb->activity))">
+          <x-icon name="pencil" :size="14"/> Edit
+        </button>
         <form method="POST" action="{{ route('mahasiswa.logbook.destroy', $lb->id) }}" data-confirm="Hapus log book ini?" data-confirm-danger>
           @csrf
           @method('DELETE')
@@ -60,4 +64,47 @@
   </div>
   @endforelse
 
+  {{-- Modal Edit Log Book --}}
+  <div class="modal-overlay" id="modal-logbook-edit" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Edit Log Book</div>
+        <button class="modal-close" onclick="document.getElementById('modal-logbook-edit').classList.remove('open')"><x-icon name="x" :size="14"/></button>
+      </div>
+      <form method="POST" id="form-logbook-edit" action="">
+        @csrf
+        @method('PUT')
+        <div class="form-group">
+          <label>Judul Kegiatan</label>
+          <input type="text" name="title" id="edit-lb-title" required>
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" name="date" id="edit-lb-date" required>
+        </div>
+        <div class="form-group">
+          <label>Deskripsi Aktivitas</label>
+          <textarea name="activity" id="edit-lb-activity" rows="4" required style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-logbook-edit').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 @endsection
+
+@push('scripts')
+<script>
+  function openEditLogbook(id, title, date, activity) {
+    var form = document.getElementById('form-logbook-edit');
+    form.action = '{{ url('mahasiswa/logbook') }}/' + id;
+    document.getElementById('edit-lb-title').value = title;
+    document.getElementById('edit-lb-date').value = date;
+    document.getElementById('edit-lb-activity').value = activity;
+    document.getElementById('modal-logbook-edit').classList.add('open');
+  }
+</script>
+@endpush
