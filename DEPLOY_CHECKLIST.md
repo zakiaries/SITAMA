@@ -86,8 +86,9 @@ php artisan view:cache
 - [x] **Rubrik penilaian** (4 komponen + 12 rinci) — otomatis dari `db:seed` (`RubrikPenilaianSeeder`).
 - [x] **KB chatbot** — otomatis dari `db:seed` (`ChatbotKnowledgeSeeder`).
 - [ ] Akun **dosen** (role `lecturer`) — buat lewat login Kaprodi (menu Dosen) setelah deploy.
-- [ ] Beberapa **perusahaan afiliasi + lowongan** (dengan bidang) — input lewat Kaprodi agar
-      demo lowongan/rekomendasi chatbot ada isinya (opsional; belum ada demo seeder).
+- [ ] Beberapa **perusahaan afiliasi + lowongan** (dengan bidang) agar demo lowongan/rekomendasi
+      chatbot ada isinya. Cepat: `php artisan db:seed --class=DemoSeeder` (opsional, hanya untuk
+      demo/uji — jangan di produksi nyata). Atau input manual lewat Kaprodi.
 
 ## 5. HTTPS
 
