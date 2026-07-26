@@ -127,7 +127,7 @@
             <input type="text" name="name" value="{{ old('name') }}" placeholder="Sesuai KTM" required>
           </div>
           <div class="row-2">
-            <div class="field"><label>NIM</label><input type="text" name="username" value="{{ old('username') }}" placeholder="Nomor Induk Mahasiswa" required></div>
+            <div class="field"><label>NIM</label><input type="text" name="username" value="{{ old('username') }}" placeholder="Contoh: 3.34.23.2.12" pattern="\d+\.\d+\.\d+\.\d+\.\d+" title="Format NIM: 5 kelompok angka dipisah titik, mis. 3.34.23.2.12" required></div>
             <div class="field"><label>Email</label><input type="email" name="email" value="{{ old('email') }}" placeholder="email@kampus.ac.id" required></div>
           </div>
           <div class="row-2">

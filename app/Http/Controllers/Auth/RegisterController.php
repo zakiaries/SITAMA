@@ -19,7 +19,8 @@ class RegisterController extends Controller
     {
         $request->validate([
             'name'          => 'required|string|max:255',
-            'username'      => 'required|string|max:50|unique:users,username',
+            // NIM Polines: 5 kelompok angka dipisah titik, mis. 3.34.23.2.12.
+            'username'      => ['required', 'string', 'max:50', 'unique:users,username', 'regex:/^\d+\.\d+\.\d+\.\d+\.\d+$/'],
             'email'         => 'required|email|max:255|unique:users,email',
             'password'      => 'required|string|min:8|confirmed',
             'the_class'     => 'required|string|max:50',
@@ -30,6 +31,7 @@ class RegisterController extends Controller
             'name.required'          => 'Nama wajib diisi.',
             'username.required'      => 'NIM wajib diisi.',
             'username.unique'        => 'NIM sudah terdaftar.',
+            'username.regex'         => 'Format NIM tidak valid. Gunakan format seperti 3.34.23.2.12.',
             'email.required'         => 'Email wajib diisi.',
             'email.unique'           => 'Email sudah terdaftar.',
             'password.required'      => 'Password wajib diisi.',
