@@ -84,7 +84,7 @@
       <div style="background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;">
         <input type="text" name="pic_name" value="{{ old('pic_name') }}" placeholder="Nama lengkap pembimbing *" required
           style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-        <input type="text" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP / WhatsApp (opsional)"
+        <input type="tel" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP / WhatsApp (opsional)"
           style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
         <input type="email" name="pic_email" value="{{ old('pic_email') }}" placeholder="Email (opsional)"
           style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">

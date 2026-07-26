@@ -167,7 +167,7 @@
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <input type="password" name="pic_password" placeholder="Password (min. 6 karakter)"
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-          <input type="text" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP (opsional)"
+          <input type="tel" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP (opsional)"
             style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
         </div>
       </div>

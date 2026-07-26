@@ -33,6 +33,10 @@ class BimbinganController extends Controller
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
             'date'     => 'required|date',
+            'file'     => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+        ], [
+            'file.mimes' => 'File bimbingan harus berformat PDF atau Word (doc/docx).',
+            'file.max'   => 'Ukuran file maksimal 10 MB.',
         ]);
 
         $student = Auth::user()->student;
@@ -69,6 +73,10 @@ class BimbinganController extends Controller
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
             'date'     => 'required|date',
+            'file'     => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+        ], [
+            'file.mimes' => 'File bimbingan harus berformat PDF atau Word (doc/docx).',
+            'file.max'   => 'Ukuran file maksimal 10 MB.',
         ]);
 
         $data = [

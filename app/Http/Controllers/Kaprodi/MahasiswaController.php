@@ -116,10 +116,11 @@ class MahasiswaController extends Controller
             'pic_name'             => 'required_without:lecturer_industry_id|nullable|string|max:255',
             'pic_username'         => 'required_without:lecturer_industry_id|nullable|string|max:50|unique:users,username',
             'pic_password'         => 'required_without:lecturer_industry_id|nullable|string|min:6',
-            'pic_phone'            => 'nullable|string|max:50',
+            'pic_phone'            => ['nullable', 'string', 'max:50', 'regex:/^[0-9()+\-\s]{7,20}$/'],
             'position'             => 'nullable|string|max:255',
             'start_date'           => 'required|date',
         ], [
+            'pic_phone.regex'                 => 'Nomor HP tidak valid (hanya angka dan simbol + - ( ) spasi).',
             'company_name.required_without'   => 'Pilih perusahaan yang ada atau isi nama perusahaan baru.',
             'pic_name.required_without'       => 'Pilih pembimbing yang ada atau isi nama pembimbing baru.',
             'pic_username.required_without'   => 'Username pembimbing industri wajib diisi.',
