@@ -32,9 +32,10 @@ class BimbinganController extends Controller
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
+            'date'     => 'required|date|before_or_equal:today',
             'file'     => 'nullable|file|mimes:pdf,doc,docx|max:10240',
         ], [
+            'date.before_or_equal' => 'Tanggal tidak boleh di masa depan.',
             'file.mimes' => 'File bimbingan harus berformat PDF atau Word (doc/docx).',
             'file.max'   => 'Ukuran file maksimal 10 MB.',
         ]);
@@ -72,9 +73,10 @@ class BimbinganController extends Controller
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
+            'date'     => 'required|date|before_or_equal:today',
             'file'     => 'nullable|file|mimes:pdf,doc,docx|max:10240',
         ], [
+            'date.before_or_equal' => 'Tanggal tidak boleh di masa depan.',
             'file.mimes' => 'File bimbingan harus berformat PDF atau Word (doc/docx).',
             'file.max'   => 'Ukuran file maksimal 10 MB.',
         ]);

@@ -29,7 +29,9 @@ class LogBookController extends Controller
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
+            'date'     => 'required|date|before_or_equal:today',
+        ], [
+            'date.before_or_equal' => 'Tanggal tidak boleh di masa depan.',
         ]);
 
         $student = Auth::user()->student;
@@ -56,7 +58,9 @@ class LogBookController extends Controller
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
+            'date'     => 'required|date|before_or_equal:today',
+        ], [
+            'date.before_or_equal' => 'Tanggal tidak boleh di masa depan.',
         ]);
 
         $logBook->update([
