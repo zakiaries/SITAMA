@@ -8,7 +8,6 @@ use App\Models\SeminarPresenter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /**
  * Sisi mahasiswa untuk model seminar sesi-grup.
