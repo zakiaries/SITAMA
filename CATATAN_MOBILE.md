@@ -1,41 +1,34 @@
 # Catatan Sinkronisasi Mobile (untuk partner — sisi `Api/` + Flutter)
 
-Sesi web (branch `web`, commit `c1294d1`..`60ee27b`) menambah beberapa aturan & perubahan.
-Sisi **web sudah beres**; berikut yang **perlu disamakan di mobile** biar konsisten.
+Update 2026-07-27: **Fase 1 (backend/API) SUDAH dikerjakan & ditest** (commit `22fde6a`).
+Sisa = **Fase 2 (UI Flutter)** yang perlu kamu build/cek di emulator.
 
-## 1. Validasi input — SAMAKAN di controller `Api/*`
-Aturan ini ada di controller web tapi **belum tentu ada di endpoint API mobile**. Cek & tambahkan
-di `App\Http\Controllers\Api\*` (registrasi, ajukan magang, logbook, bimbingan):
+## ✅ Fase 1 — API sudah disamakan dengan web (SELESAI)
+Endpoint baru di `routes/api.php` + `app/Http/Controllers/Api/*`:
+- `PUT /api/mahasiswa/logbook/{id}` — edit logbook.
+- `DELETE /api/mahasiswa/bimbingan/{id}` — hapus bimbingan yang belum di-approve.
+- `DELETE /api/mahasiswa/ajukan-magang/{id}` — batal pengajuan magang pending.
+- `PUT /api/dosen/seminar/{id}` — edit judul/deskripsi sesi.
+- `GET /api/dosen/seminar/{id}/qr` — token QR **rotating** terkini (`{url, rt, interval}`).
+- `POST /api/lupa-password` + `POST /api/reset-password` — reset password.
+Validasi disamakan (NIM, HP, file bimbingan mimes, tanggal ≤ hari ini) + rate-limit login API
++ throttle reset. Semua lolos 5 test `ApiParityTest` (Sanctum).
 
-| Field | Aturan (Laravel) | Sumber web |
-|---|---|---|
-| **NIM** (username, saat register) | `regex:/^\d+\.\d+\.\d+\.\d+\.\d+$/` (5 kelompok angka, mis. `3.34.23.2.12`) | `Auth/RegisterController` |
-| **Nomor HP** (pic_phone) | `regex:/^[0-9()+\-\s]{7,20}$/` | `Mahasiswa/MagangRequestController` |
-| **File bimbingan** | `nullable\|file\|mimes:pdf,doc,docx\|max:10240` | `Mahasiswa/BimbinganController` |
-| **Tanggal logbook & bimbingan** | `required\|date\|before_or_equal:today` (tak boleh masa depan) | `Mahasiswa/LogBook`/`BimbinganController` |
-| Email | `email` | (sudah standar) |
-| Nilai/skor | `numeric\|min:0\|max:100` | `Dosen`/`DosenIndustri` |
+## ⬜ Fase 2 — yang perlu DIKERJAKAN di Flutter (`mobile/lib`)
+Tambahkan UI yang memanggil endpoint di atas:
+1. **Logbook**: tombol Edit (panggil `PUT /logbook/{id}`).
+2. **Bimbingan**: tombol Hapus (muncul saat status ≠ approved) → `DELETE /bimbingan/{id}`.
+3. **Ajukan magang**: tombol Batalkan pada pengajuan pending → `DELETE /ajukan-magang/{id}`.
+4. **Dosen seminar**: tombol Ubah Detail (judul/deskripsi) → `PUT /dosen/seminar/{id}`.
+5. **⚠️ QR seminar (PENTING)**: QR daftar hadir sekarang **berputar** tiap 20 dtk. QR statis lama
+   **akan ditolak** web. Ubah layar QR dosen agar memanggil `GET /dosen/seminar/{id}/qr` secara
+   berkala (mis. tiap 10 dtk) dan render ulang QR dari field `url` yang dikembalikan. (Sementara,
+   field `hadir_url` di daftar sesi sudah menyertakan `rt` terkini, jadi QR valid saat layar dibuka
+   tapi belum auto-refresh.)
+6. **Reset password**: `forgot_password_screen` cukup panggil `POST /api/lupa-password` (link reset
+   dikirim ke email → dibuka di web). Endpoint `POST /api/reset-password` tersedia bila mau in-app.
 
-> Pola NIM & HP sengaja **longgar di nilai** (biar D3/D4, angkatan baru, prodi lain tak keblokir);
-> legitimasi tetap lewat approve kaprodi.
-
-## 2. Timezone — sudah otomatis untuk API, cek sisi Flutter
-`config/app.php` diubah ke `Asia/Jakarta` (WIB). Karena API bagian dari app Laravel yang sama,
-**waktu dari API otomatis WIB** — tak perlu ubah `Api/*`. Tapi kalau **Flutter memformat/menghitung
-waktu sendiri**, pastikan pakai WIB (jangan asumsikan UTC).
-
-## 3. Rebrand SITAMA → SIMAMA
-Nama tampilan sudah SIMAMA di web & mobile (`0d7f3e6`, `9a7e94d`). **Identitas teknis sengaja
-dibiarkan** (aman jangan diubah): `pubspec name: sitama_mobile`, `applicationId com.sitama.sitama_mobile`,
-kunci token `sitama_token`, class `SitamaApp`. Mengubahnya = ganti identitas app di store & rusak signing.
-
-## 4. Fitur/endpoint baru di web (opsional — kalau mau parity di mobile)
-Kalau mobile ingin fitur yang sama, tambah endpoint padanannya:
-- Mahasiswa: **edit logbook** (PUT), **batal pengajuan magang** pending (DELETE), **hapus bimbingan**
-  belum-approve (DELETE).
-- Kaprodi: **pulihkan mahasiswa ditolak** (tab "Ditolak" → approve).
-- Dosen: **edit detail sesi seminar** + ubah jadwal terjadwal.
-
-## 5. Skema DB / deploy
-Migrasi tabel dasar sudah direkonstruksi → `php artisan migrate --seed` jalan dari nol. API pakai DB
-yang sama, jadi tak ada kerja mobile khusus; ini info saja.
+## Catatan tetap
+- Rebrand nama tampilan mobile → SIMAMA sudah (`9a7e94d`). Identitas teknis (`sitama_mobile`,
+  `applicationId com.sitama.*`, `_tokenKey`, class `SitamaApp`) **sengaja dibiarkan** — jangan diubah.
+- Timezone: config bersama, API otomatis WIB. Pastikan Flutter tidak asumsi UTC saat format waktu.
