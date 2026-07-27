@@ -14,19 +14,21 @@ Endpoint baru di `routes/api.php` + `app/Http/Controllers/Api/*`:
 Validasi disamakan (NIM, HP, file bimbingan mimes, tanggal ≤ hari ini) + rate-limit login API
 + throttle reset. Semua lolos 5 test `ApiParityTest` (Sanctum).
 
-## ⬜ Fase 2 — yang perlu DIKERJAKAN di Flutter (`mobile/lib`)
-Tambahkan UI yang memanggil endpoint di atas:
-1. **Logbook**: tombol Edit (panggil `PUT /logbook/{id}`).
-2. **Bimbingan**: tombol Hapus (muncul saat status ≠ approved) → `DELETE /bimbingan/{id}`.
-3. **Ajukan magang**: tombol Batalkan pada pengajuan pending → `DELETE /ajukan-magang/{id}`.
-4. **Dosen seminar**: tombol Ubah Detail (judul/deskripsi) → `PUT /dosen/seminar/{id}`.
-5. **⚠️ QR seminar (PENTING)**: QR daftar hadir sekarang **berputar** tiap 20 dtk. QR statis lama
-   **akan ditolak** web. Ubah layar QR dosen agar memanggil `GET /dosen/seminar/{id}/qr` secara
-   berkala (mis. tiap 10 dtk) dan render ulang QR dari field `url` yang dikembalikan. (Sementara,
-   field `hadir_url` di daftar sesi sudah menyertakan `rt` terkini, jadi QR valid saat layar dibuka
-   tapi belum auto-refresh.)
-6. **Reset password**: `forgot_password_screen` cukup panggil `POST /api/lupa-password` (link reset
-   dikirim ke email → dibuka di web). Endpoint `POST /api/reset-password` tersedia bila mau in-app.
+## ⚠️ Fase 2 — UI Flutter SUDAH DITULIS, tapi WAJIB DI-BUILD-CHECK (commit `aff482b`)
+Kode Dart ditulis mengikuti pola yang ada, TAPI **belum bisa divalidasi** (laptop Lanang: Flutter
+SDK 3.9.2 < syarat project Dart ^3.12.2, `flutter analyze` gagal resolve). **Partner WAJIB cek:**
+```
+cd mobile && flutter pub get && flutter analyze && flutter run
+```
+Yang sudah ditambahkan di `mobile/lib`:
+1. `screens/mahasiswa/logbook_screen.dart` — tombol Edit (form dipakai ulang) + date picker ≤ hari ini.
+2. `screens/mahasiswa/bimbingan_screen.dart` — tombol Hapus (status ≠ approved) + date picker ≤ hari ini.
+3. `screens/mahasiswa/ajukan_magang_screen.dart` — tombol Batalkan (pengajuan pending).
+4. `screens/dosen/seminar_screen.dart` — tombol Ubah Detail (judul+deskripsi) + `_QrDialog` yang
+   auto-refresh tiap 10 dtk via `GET /dosen/seminar/{id}/qr` (QR rotating).
+5. `screens/auth/forgot_password_screen.dart` — disambung ke `POST /lupa-password` (dulu stub).
+
+Kalau ada error saat analyze/build, kemungkinan besar hal kecil (tipe/argumen) — perbaiki lalu commit.
 
 ## Catatan tetap
 - Rebrand nama tampilan mobile → SIMAMA sudah (`9a7e94d`). Identitas teknis (`sitama_mobile`,
