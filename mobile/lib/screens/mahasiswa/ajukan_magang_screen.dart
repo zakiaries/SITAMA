@@ -51,7 +51,7 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
     String? position,
     String? bidang,
   }) async {
-    final ok = await Navigator.push<bool>(context, MaterialPageRoute(
+    await Navigator.push<bool>(context, MaterialPageRoute(
       builder: (_) => _AjukanForm(
         token: _token,
         companies: companies,
@@ -61,7 +61,7 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
         initialBidang: bidang,
       ),
     ));
-    if (ok == true) _reload();
+    if (mounted) _reload(); // selalu segarkan setelah form ditutup
   }
 
   Future<void> _cancel(dynamic id) async {

@@ -33,12 +33,12 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
   void _reload() => setState(() => _future = _load());
 
   Future<void> _openForm({Map<String, dynamic>? revisi}) async {
-    final saved = await showModalBottomSheet<bool>(
+    await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _BimbinganForm(token: _token, revisi: revisi),
     );
-    if (saved == true) _reload();
+    if (mounted) _reload(); // selalu segarkan setelah modal ditutup
   }
 
   Future<void> _openFile(String url) async {

@@ -53,21 +53,21 @@ class _LogbookScreenState extends State<LogbookScreen> {
   }
 
   Future<void> _openAdd() async {
-    final saved = await showModalBottomSheet<bool>(
+    await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _LogbookForm(token: _token),
     );
-    if (saved == true) _reload();
+    if (mounted) _reload(); // selalu segarkan setelah modal ditutup
   }
 
   Future<void> _openEdit(Map<String, dynamic> item) async {
-    final saved = await showModalBottomSheet<bool>(
+    await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _LogbookForm(token: _token, item: item),
     );
-    if (saved == true) _reload();
+    if (mounted) _reload(); // selalu segarkan setelah modal ditutup
   }
 
   @override
