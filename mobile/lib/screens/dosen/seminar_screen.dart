@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../providers/auth_provider.dart';
@@ -126,9 +126,21 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: Text('${s['title'] ?? '-'}',
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5))),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
+        if (status == 'draft' || status == 'scheduled')
+          InkWell(
+            onTap: () => _openEditDetail(s),
+            borderRadius: BorderRadius.circular(8),
+            child: const Padding(padding: EdgeInsets.all(3), child: Icon(Icons.edit_outlined, size: 17, color: AppColors.primary)),
+          ),
+        const SizedBox(width: 4),
         _statusBadge(status),
       ]),
+      if ((s['description'] ?? '').toString().isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text('${s['description']}', style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+        ),
       const SizedBox(height: 8),
       _presenterList(presenters, showAvailability: status == 'draft'),
       const SizedBox(height: 10),
@@ -309,42 +321,153 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
     }
   }
 
+  void _openEditDetail(Map<String, dynamic> s) {
+    showDialog(context: context, builder: (_) => _EditDetailDialog(
+      initialTitle: '${s['title'] ?? ''}',
+      initialDescription: '${s['description'] ?? ''}',
+      onSubmit: (title, desc) => _act(() async {
+        await ApiClient.put('/dosen/seminar/${s['id']}', token: _token, body: {
+          'title': title,
+          'description': desc,
+        });
+        if (mounted) showMessage(context, 'Detail sesi diperbarui.');
+      }),
+    ));
+  }
+
   void _showQr(Map<String, dynamic> s) {
-    final url = (s['hadir_url'] ?? '').toString();
-    final guest = s['guest_count'] ?? 0;
-    final minGuest = s['min_guests'] ?? 0;
-    showDialog(context: context, builder: (c) => AlertDialog(
+    // QR berputar: dialog memuat token terkini secara berkala.
+    showDialog(context: context, builder: (_) => _QrDialog(
+      seminarId: s['id'] as int,
+      token: _token,
+      initialUrl: '${s['hadir_url'] ?? ''}',
+      initialGuest: s['guest_count'] ?? 0,
+      initialMin: s['min_guests'] ?? 0,
+    )).then((_) {
+      if (mounted) _load(); // segarkan jumlah hadir setelah QR ditutup
+    });
+  }
+}
+
+// ── Dialog ubah detail sesi (judul + deskripsi) ──────────────────────────────
+
+class _EditDetailDialog extends StatefulWidget {
+  final String initialTitle, initialDescription;
+  final void Function(String title, String description) onSubmit;
+  const _EditDetailDialog({required this.initialTitle, required this.initialDescription, required this.onSubmit});
+  @override
+  State<_EditDetailDialog> createState() => _EditDetailDialogState();
+}
+
+class _EditDetailDialogState extends State<_EditDetailDialog> {
+  late final TextEditingController _title = TextEditingController(text: widget.initialTitle);
+  late final TextEditingController _desc = TextEditingController(text: widget.initialDescription);
+
+  @override
+  void dispose() { _title.dispose(); _desc.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Ubah Detail Sesi'),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: _title, decoration: const InputDecoration(labelText: 'Judul Sesi *')),
+        const SizedBox(height: 12),
+        TextField(controller: _desc, maxLines: 3, decoration: const InputDecoration(labelText: 'Deskripsi (opsional)', alignLabelWithHint: true)),
+        const SizedBox(height: 6),
+        const Align(alignment: Alignment.centerLeft,
+            child: Text('Tanggal/waktu/lokasi diubah lewat "Ubah Jadwal".', style: TextStyle(fontSize: 11.5, color: AppColors.textMuted))),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+        ElevatedButton(
+          onPressed: () {
+            if (_title.text.trim().isEmpty) { showMessage(context, 'Judul sesi wajib diisi.', error: true); return; }
+            Navigator.pop(context);
+            widget.onSubmit(_title.text.trim(), _desc.text.trim());
+          },
+          child: const Text('Simpan'),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Dialog QR daftar hadir (berputar otomatis) ───────────────────────────────
+
+class _QrDialog extends StatefulWidget {
+  final int seminarId;
+  final String token;
+  final String initialUrl;
+  final dynamic initialGuest, initialMin;
+  const _QrDialog({
+    required this.seminarId,
+    required this.token,
+    required this.initialUrl,
+    required this.initialGuest,
+    required this.initialMin,
+  });
+  @override
+  State<_QrDialog> createState() => _QrDialogState();
+}
+
+class _QrDialogState extends State<_QrDialog> {
+  late String _url = widget.initialUrl;
+  late dynamic _guest = widget.initialGuest;
+  late dynamic _min = widget.initialMin;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+    // Muat ulang token QR tiap 10 dtk agar selalu valid saat dipindai.
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) => _refresh());
+  }
+
+  Future<void> _refresh() async {
+    try {
+      final data = await ApiClient.get('/dosen/seminar/${widget.seminarId}/qr', token: widget.token);
+      if (!mounted) return;
+      setState(() {
+        _url = '${data['url'] ?? _url}';
+        _guest = data['guest_count'] ?? _guest;
+        _min = data['min_guests'] ?? _min;
+      });
+    } catch (_) {
+      // Abaikan error sesaat; QR tetap memakai nilai terakhir.
+    }
+  }
+
+  @override
+  void dispose() { _timer?.cancel(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       title: const Text('QR Daftar Hadir'),
-      // Lebar tetap: QrImageView memakai LayoutBuilder yang tidak mendukung
-      // pengukuran intrinsik AlertDialog — tanpa ini dialog gagal layout.
       content: SizedBox(
         width: 280,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('Audiens memindai QR ini, lalu login SIMAMA untuk mengisi daftar hadir (1 akun = 1 kehadiran).',
+          const Text('QR berganti otomatis. Audiens memindai QR ini, login SIMAMA, lalu menekan Hadir (1 akun = 1 kehadiran).',
               style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
             child: SizedBox(width: 220, height: 220,
-                child: QrImageView(data: url, size: 220, version: QrVersions.auto)),
+                child: _url.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : QrImageView(data: _url, size: 220, version: QrVersions.auto)),
           ),
           const SizedBox(height: 10),
-          Text('Audiens hadir: $guest/$minGuest',
-              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+          Text('Audiens hadir: $_guest/$_min', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
         ]),
       ),
       actions: [
-        TextButton(
-          onPressed: () async {
-            await Clipboard.setData(ClipboardData(text: url));
-            if (c.mounted) Navigator.pop(c);
-          },
-          child: const Text('Salin Tautan'),
-        ),
-        TextButton(onPressed: () => Navigator.pop(c), child: const Text('Tutup')),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Tutup')),
       ],
-    ));
+    );
   }
 }
 

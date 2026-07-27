@@ -47,6 +47,28 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
     if (!ok && mounted) showMessage(context, 'Tidak bisa membuka file.', error: true);
   }
 
+  Future<void> _delete(dynamic id) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Hapus bimbingan?'),
+        content: const Text('Bimbingan yang belum disetujui akan dihapus permanen.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Hapus')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ApiClient.delete('/mahasiswa/bimbingan/$id', token: _token);
+      if (mounted) showMessage(context, 'Bimbingan dihapus.');
+      _reload();
+    } on ApiException catch (e) {
+      if (mounted) showMessage(context, e.message, error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,17 +154,26 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
                                       label: const Text('Lihat File Bimbingan'),
                                     ),
                                   ),
-                                if (status == 'rejected')
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 10),
-                                      child: ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(minimumSize: const Size(0, 40)),
-                                        onPressed: () => _openForm(revisi: g),
-                                        icon: const Icon(Icons.refresh, size: 18),
-                                        label: const Text('Revisi & Kirim Ulang'),
-                                      ),
+                                if (status != 'approved')
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Row(
+                                      children: [
+                                        if (status == 'rejected')
+                                          ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 40)),
+                                            onPressed: () => _openForm(revisi: g),
+                                            icon: const Icon(Icons.refresh, size: 18),
+                                            label: const Text('Revisi & Kirim Ulang'),
+                                          ),
+                                        const Spacer(),
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                                          onPressed: () => _delete(g['id']),
+                                          icon: const Icon(Icons.delete_outline, size: 18),
+                                          label: const Text('Hapus'),
+                                        ),
+                                      ],
                                     ),
                                   ),
                               ],
@@ -247,7 +278,7 @@ class _BimbinganFormState extends State<_BimbinganForm> {
           const SizedBox(height: 12),
           InkWell(
             onTap: () async {
-              final picked = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2020), lastDate: DateTime(2100));
+              final picked = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2020), lastDate: DateTime.now());
               if (picked != null) setState(() => _date = picked);
             },
             child: InputDecorator(decoration: const InputDecoration(labelText: 'Tanggal'), child: Text(_dateStr)),

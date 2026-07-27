@@ -61,6 +61,15 @@ class _LogbookScreenState extends State<LogbookScreen> {
     if (saved == true) _reload();
   }
 
+  Future<void> _openEdit(Map<String, dynamic> item) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _LogbookForm(token: _token, item: item),
+    );
+    if (saved == true) _reload();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +125,15 @@ class _LogbookScreenState extends State<LogbookScreen> {
                                 ),
                                 const Spacer(),
                                 InkWell(
+                                  onTap: () => _openEdit(l),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                InkWell(
                                   onTap: () => _delete(l['id']),
                                   borderRadius: BorderRadius.circular(8),
                                   child: const Padding(
@@ -168,17 +186,28 @@ class _Note extends StatelessWidget {
 
 class _LogbookForm extends StatefulWidget {
   final String token;
-  const _LogbookForm({required this.token});
+  final Map<String, dynamic>? item; // null = tambah, ada = edit
+  const _LogbookForm({required this.token, this.item});
   @override
   State<_LogbookForm> createState() => _LogbookFormState();
 }
 
 class _LogbookFormState extends State<_LogbookForm> {
-  final _title = TextEditingController();
-  final _activity = TextEditingController();
-  DateTime _date = DateTime.now();
+  late final TextEditingController _title;
+  late final TextEditingController _activity;
+  late DateTime _date;
   bool _saving = false;
   String? _error;
+
+  bool get _isEdit => widget.item != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _title = TextEditingController(text: widget.item?['title']?.toString() ?? '');
+    _activity = TextEditingController(text: widget.item?['activity']?.toString() ?? '');
+    _date = DateTime.tryParse(widget.item?['date']?.toString() ?? '') ?? DateTime.now();
+  }
 
   @override
   void dispose() {
@@ -196,11 +225,16 @@ class _LogbookFormState extends State<_LogbookForm> {
     }
     setState(() { _saving = true; _error = null; });
     try {
-      await ApiClient.post('/mahasiswa/logbook', token: widget.token, body: {
+      final body = {
         'title': _title.text.trim(),
         'activity': _activity.text.trim(),
         'date': _dateStr,
-      });
+      };
+      if (_isEdit) {
+        await ApiClient.put('/mahasiswa/logbook/${widget.item!['id']}', token: widget.token, body: body);
+      } else {
+        await ApiClient.post('/mahasiswa/logbook', token: widget.token, body: body);
+      }
       if (mounted) Navigator.pop(context, true);
     } on ApiException catch (e) {
       setState(() => _error = e.message);
@@ -220,7 +254,7 @@ class _LogbookFormState extends State<_LogbookForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Tambah Log Book', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(_isEdit ? 'Edit Log Book' : 'Tambah Log Book', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 16),
           if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
           TextField(controller: _title, decoration: const InputDecoration(labelText: 'Judul')),
@@ -229,7 +263,7 @@ class _LogbookFormState extends State<_LogbookForm> {
           const SizedBox(height: 12),
           InkWell(
             onTap: () async {
-              final picked = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2020), lastDate: DateTime(2100));
+              final picked = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2020), lastDate: DateTime.now());
               if (picked != null) setState(() => _date = picked);
             },
             child: InputDecorator(

@@ -64,6 +64,28 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
     if (ok == true) _reload();
   }
 
+  Future<void> _cancel(dynamic id) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Batalkan pengajuan?'),
+        content: const Text('Pengajuan ini akan dibatalkan. Kamu bisa mengajukan lagi setelahnya.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Tidak')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Batalkan')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ApiClient.delete('/mahasiswa/ajukan-magang/$id', token: _token);
+      if (mounted) showMessage(context, 'Pengajuan dibatalkan.');
+      _reload();
+    } on ApiException catch (e) {
+      if (mounted) showMessage(context, e.message, error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -132,6 +154,16 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
                             Text(_reqSubtitle(r), style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                             if ((r['rejection_reason'] ?? '').toString().isNotEmpty)
                               Padding(padding: const EdgeInsets.only(top: 6), child: Text('Ditolak: ${r['rejection_reason']}', style: const TextStyle(color: AppColors.error, fontSize: 12))),
+                            if ((r['status'] ?? '') == 'pending')
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton.icon(
+                                  style: TextButton.styleFrom(foregroundColor: AppColors.error, padding: const EdgeInsets.symmetric(horizontal: 4)),
+                                  onPressed: () => _cancel(r['id']),
+                                  icon: const Icon(Icons.close, size: 16),
+                                  label: const Text('Batalkan Pengajuan'),
+                                ),
+                              ),
                           ]))),
                   ],
                 );

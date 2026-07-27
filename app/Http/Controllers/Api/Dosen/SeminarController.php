@@ -255,6 +255,7 @@ class SeminarController extends ApiController
         return [
             'id'           => $s->id,
             'title'        => $s->title,
+            'description'  => $s->description,
             'status'       => $s->status,
             'date'         => optional($s->date)->toDateString(),
             'time'         => $s->time,
