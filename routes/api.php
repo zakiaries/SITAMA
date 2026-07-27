@@ -38,6 +38,10 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/aktivasi/{token}', [AuthController::class, 'activationShow']);
 Route::post('/aktivasi/{token}', [AuthController::class, 'activate']);
 
+// Reset password mandiri (link ke email terdaftar). throttle backstop anti spam.
+Route::post('/lupa-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:12,1');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:12,1');
+
 // PDF berita acara seminar — dilindungi signed URL (bisa dibuka di browser HP
 // tanpa token). URL bertanda-tangan hanya diberikan ke pemilik seminar.
 Route::get('/mahasiswa/seminar/{seminar}/berita-acara', [MhsSeminar::class, 'beritaAcaraPdf'])
@@ -55,11 +59,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/logbook', [MhsLogBook::class, 'index']);
         Route::post('/logbook', [MhsLogBook::class, 'store']);
+        Route::put('/logbook/{logBook}', [MhsLogBook::class, 'update']);
         Route::delete('/logbook/{logBook}', [MhsLogBook::class, 'destroy']);
 
         Route::get('/bimbingan', [MhsBimbingan::class, 'index']);
         Route::post('/bimbingan', [MhsBimbingan::class, 'store']);
         Route::put('/bimbingan/{guidance}', [MhsBimbingan::class, 'update']);
+        Route::delete('/bimbingan/{guidance}', [MhsBimbingan::class, 'destroy']);
 
         Route::get('/laporan', [MhsLaporan::class, 'index']);
         Route::post('/laporan', [MhsLaporan::class, 'store']);
@@ -71,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/ajukan-magang', [MhsMagang::class, 'ajukanIndex']);
         Route::post('/ajukan-magang', [MhsMagang::class, 'ajukanStore']);
+        Route::delete('/ajukan-magang/{magangRequest}', [MhsMagang::class, 'cancelAjukan']);
         Route::get('/magang-saya', [MhsMagang::class, 'magangSaya']);
         Route::post('/magang-saya/sertifikat', [MhsMagang::class, 'uploadCertificate']);
         Route::post('/magang-saya/ajukan-selesai', [MhsMagang::class, 'requestFinish']);
@@ -107,6 +114,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Seminar Bimbingan (sesi-grup): dosen buat/finalkan/sahkan/batalkan sesi.
         Route::get('/seminar', [DsnSeminar::class, 'index']);
         Route::post('/seminar', [DsnSeminar::class, 'store']);
+        Route::put('/seminar/{seminar}', [DsnSeminar::class, 'update']);
+        Route::get('/seminar/{seminar}/qr', [DsnSeminar::class, 'qrToken']);
         Route::post('/seminar/{seminar}/finalize', [DsnSeminar::class, 'finalize']);
         Route::post('/seminar/{seminar}/sahkan', [DsnSeminar::class, 'sahkan']);
         Route::delete('/seminar/{seminar}', [DsnSeminar::class, 'destroy']);

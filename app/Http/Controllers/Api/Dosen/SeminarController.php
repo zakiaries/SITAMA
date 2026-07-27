@@ -185,6 +185,47 @@ class SeminarController extends ApiController
         return response()->json(['message' => 'Sesi seminar dibatalkan.']);
     }
 
+    /** PUT /dosen/seminar/{seminar} — ubah judul & deskripsi sesi (draft/scheduled). */
+    public function update(Request $request, Seminar $seminar)
+    {
+        $lecturer = $this->currentLecturer($request, 'lecturer');
+        $this->ownSeminar($seminar, $lecturer);
+
+        if (! in_array($seminar->status, ['draft', 'scheduled'], true)) {
+            return response()->json(['message' => 'Sesi yang sudah disahkan atau dibatalkan tidak bisa diubah.'], 422);
+        }
+
+        $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string|max:2000',
+        ]);
+
+        $seminar->update(['title' => $request->title, 'description' => $request->description]);
+
+        return response()->json(['message' => 'Detail sesi seminar diperbarui.']);
+    }
+
+    /** GET /dosen/seminar/{seminar}/qr — token QR rotating terkini utk ditampilkan dosen. */
+    public function qrToken(Request $request, Seminar $seminar)
+    {
+        $lecturer = $this->currentLecturer($request, 'lecturer');
+        $this->ownSeminar($seminar, $lecturer);
+
+        if ($seminar->status !== 'scheduled' || ! $seminar->access_token) {
+            return response()->json(['message' => 'QR hanya tersedia untuk sesi terjadwal.'], 422);
+        }
+
+        $rt = $seminar->rotatingToken();
+
+        return response()->json([
+            'url'         => url('/seminar/hadir/' . $seminar->access_token) . '?rt=' . $rt,
+            'rt'          => $rt,
+            'interval'    => Seminar::QR_INTERVAL,
+            'guest_count' => $seminar->attendances()->count(),
+            'min_guests'  => Seminar::MIN_GUESTS,
+        ]);
+    }
+
     private function ownSeminar(Seminar $seminar, $lecturer): void
     {
         abort_unless($seminar->lecturer_id === $lecturer->id, 404);
@@ -221,8 +262,10 @@ class SeminarController extends ApiController
             'guest_count'  => $s->attendances->count(),
             'min_guests'   => Seminar::MIN_GUESTS,
             'witnessed_at' => optional($s->witnessed_at)->toDateTimeString(),
+            // Sertakan token rotating terkini agar QR yang ditampilkan valid saat dipindai.
+            // Untuk QR yang berputar otomatis, klien memanggil endpoint qr secara berkala.
             'hadir_url'    => ($s->status === 'scheduled' && $s->access_token)
-                ? url('/seminar/hadir/' . $s->access_token)
+                ? url('/seminar/hadir/' . $s->access_token) . '?rt=' . $s->rotatingToken()
                 : null,
             'presenters'   => $s->presenters->map(fn ($p) => [
                 'name'            => $p->student->user->name ?? '-',

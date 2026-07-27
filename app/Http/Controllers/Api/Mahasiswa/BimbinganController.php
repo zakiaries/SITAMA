@@ -44,8 +44,8 @@ class BimbinganController extends ApiController
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
-            'file'     => 'nullable|file|max:10240',
+            'date'     => 'required|date|before_or_equal:today',
+            'file'     => 'nullable|file|mimes:pdf,doc,docx|max:10240',
         ]);
 
         $nameFile = $request->hasFile('file')
@@ -76,8 +76,8 @@ class BimbinganController extends ApiController
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
-            'file'     => 'nullable|file|max:10240',
+            'date'     => 'required|date|before_or_equal:today',
+            'file'     => 'nullable|file|mimes:pdf,doc,docx|max:10240',
         ]);
 
         $data = [
@@ -93,5 +93,23 @@ class BimbinganController extends ApiController
         $guidance->update($data);
 
         return response()->json(['message' => 'Revisi bimbingan berhasil dikirim ulang ke dosen.']);
+    }
+
+    public function destroy(Request $request, Guidance $guidance)
+    {
+        $student = $this->currentStudent($request);
+        abort_if($guidance->student_id !== $student->id, 403, 'Akses ditolak.');
+
+        if ($guidance->status === 'approved') {
+            return response()->json(['message' => 'Bimbingan yang sudah disetujui dosen tidak bisa dihapus.'], 422);
+        }
+
+        if ($guidance->name_file) {
+            Storage::disk('public')->delete($guidance->name_file);
+        }
+
+        $guidance->delete();
+
+        return response()->json(['message' => 'Bimbingan berhasil dihapus.']);
     }
 }

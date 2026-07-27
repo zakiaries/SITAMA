@@ -56,7 +56,7 @@ class MagangController extends ApiController
             'company_id'   => 'nullable|exists:companies,id',
             'company_name' => 'required_without:company_id|nullable|string|max:255',
             'pic_name'     => 'required|string|max:255',
-            'pic_phone'    => 'nullable|string|max:50',
+            'pic_phone'    => ['nullable', 'string', 'max:50', 'regex:/^[0-9()+\-\s]{7,20}$/'],
             'pic_email'    => 'nullable|email|max:255',
             'position'     => 'nullable|string|max:255',
             'bidang'       => 'nullable|string|max:100',
@@ -65,6 +65,7 @@ class MagangController extends ApiController
         ], [
             'company_name.required_without' => 'Pilih perusahaan yang ada atau isi nama perusahaan baru.',
             'pic_name.required'             => 'Nama pembimbing industri wajib diisi.',
+            'pic_phone.regex'               => 'Nomor HP tidak valid (hanya angka dan simbol + - ( ) spasi).',
             'start_date.required'           => 'Tanggal mulai magang wajib diisi.',
             'proof_file.required'           => 'Bukti penerimaan magang wajib diunggah.',
             'proof_file.mimes'              => 'Bukti harus berformat PDF atau gambar (JPG/PNG).',
@@ -102,6 +103,25 @@ class MagangController extends ApiController
         }
 
         return response()->json(['message' => 'Pengajuan magang berhasil dikirim. Menunggu review Kaprodi.'], 201);
+    }
+
+    /** DELETE /ajukan-magang/{magangRequest} — batalkan pengajuan yang masih pending. */
+    public function cancelAjukan(Request $request, CompanyRequest $magangRequest)
+    {
+        $student = $this->currentStudent($request);
+        abort_if($magangRequest->student_id !== $student->id, 403, 'Akses ditolak.');
+
+        if ($magangRequest->status !== 'pending') {
+            return response()->json(['message' => 'Hanya pengajuan yang masih menunggu review yang bisa dibatalkan.'], 422);
+        }
+
+        if ($magangRequest->proof_file) {
+            Storage::disk('public')->delete($magangRequest->proof_file);
+        }
+
+        $magangRequest->delete();
+
+        return response()->json(['message' => 'Pengajuan magang dibatalkan. Kamu bisa mengajukan lagi.']);
     }
 
     /** GET /magang-saya */

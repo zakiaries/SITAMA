@@ -37,7 +37,7 @@ class LogBookController extends ApiController
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
-            'date'     => 'required|date',
+            'date'     => 'required|date|before_or_equal:today',
         ]);
 
         $logBook = LogBook::create([
@@ -50,6 +50,26 @@ class LogBookController extends ApiController
         $this->notifySupervisors($student, $logBook);
 
         return response()->json(['message' => 'Log book berhasil ditambahkan.', 'id' => $logBook->id], 201);
+    }
+
+    public function update(Request $request, LogBook $logBook)
+    {
+        $student = $this->currentStudent($request);
+        abort_if($logBook->student_id !== $student->id, 403, 'Akses ditolak.');
+
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'activity' => 'required|string',
+            'date'     => 'required|date|before_or_equal:today',
+        ]);
+
+        $logBook->update([
+            'title'    => $request->title,
+            'activity' => $request->activity,
+            'date'     => $request->date,
+        ]);
+
+        return response()->json(['message' => 'Log book berhasil diperbarui.']);
     }
 
     public function destroy(Request $request, LogBook $logBook)
