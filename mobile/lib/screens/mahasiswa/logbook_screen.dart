@@ -28,7 +28,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
     return List<Map<String, dynamic>>.from(data['logbooks'] ?? []);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   Future<void> _delete(int id) async {
     final ok = await showDialog<bool>(

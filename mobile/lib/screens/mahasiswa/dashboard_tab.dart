@@ -31,7 +31,7 @@ class _DashboardTabState extends State<DashboardTab> {
     return Map<String, dynamic>.from(data);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   void _push(Widget page) =>
       Navigator.push(context, MaterialPageRoute(builder: (_) => page));

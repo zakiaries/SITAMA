@@ -29,7 +29,7 @@ class _DosenListTabState extends State<DosenListTab> {
     return Map<String, dynamic>.from(data);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   String _initials(String n) {
     final p = n.trim().split(RegExp(r'\s+'));

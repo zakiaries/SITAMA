@@ -28,7 +28,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
     return Map<String, dynamic>.from(data);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   Future<void> _upload() async {
     final path = await pickFilePath(extensions: ['pdf', 'doc', 'docx']);

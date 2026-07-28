@@ -30,7 +30,7 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
     return Map<String, dynamic>.from(data);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   Future<void> _openForm({Map<String, dynamic>? revisi}) async {
     await showModalBottomSheet<bool>(

@@ -77,7 +77,7 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snap.hasError) {
-            return ErrorRetry(message: '${snap.error}', onRetry: () => setState(() => _future = _load()));
+            return ErrorRetry(message: '${snap.error}', onRetry: () => setState(() { _future = _load(); }));
           }
           final comps = snap.data!;
           return ListView(

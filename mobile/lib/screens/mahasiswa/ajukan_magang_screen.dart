@@ -42,7 +42,7 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
     return Map<String, dynamic>.from(data);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   Future<void> _openForm(
     List<Map<String, dynamic>> companies,

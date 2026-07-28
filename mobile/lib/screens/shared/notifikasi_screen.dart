@@ -28,7 +28,7 @@ class _NotifikasiScreenState extends State<NotifikasiScreen> {
     return Map<String, dynamic>.from(data);
   }
 
-  void _reload() => setState(() => _future = _load());
+  void _reload() => setState(() { _future = _load(); });
 
   Future<void> _markAll() async {
     try {

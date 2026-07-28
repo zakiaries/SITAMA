@@ -40,7 +40,7 @@ class _NilaiScreenState extends State<NilaiScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snap.hasError) {
-            return ErrorRetry(message: '${snap.error}', onRetry: () => setState(() => _future = _load()));
+            return ErrorRetry(message: '${snap.error}', onRetry: () => setState(() { _future = _load(); }));
           }
           final nilai = snap.data!['nilai'] as Map<String, dynamic>?;
           if (nilai == null) {
