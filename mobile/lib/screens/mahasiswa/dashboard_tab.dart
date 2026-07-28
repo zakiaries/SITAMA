@@ -90,8 +90,9 @@ class _DashboardTabState extends State<DashboardTab> {
                         children: [
                           Container(
                             width: 28, height: 28,
-                            decoration: BoxDecoration(color: Colors.white.withAlpha(52), borderRadius: BorderRadius.circular(8)),
-                            child: const Icon(Icons.laptop_mac, color: Colors.white, size: 16),
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                            child: Image.asset('assets/images/logo.png', fit: BoxFit.contain),
                           ),
                           const SizedBox(width: 8),
                           const Text('SIMAMA', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700)),
