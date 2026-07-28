@@ -34,10 +34,10 @@ class DashboardController extends Controller
             }
 
             $latestGuidances = $student->guidances()
-                ->orderByDesc('date')->take(3)->get();
+                ->orderByDesc('updated_at')->take(3)->get();
 
             $latestLogBooks = $student->logBooks()
-                ->orderByDesc('date')->take(3)->get();
+                ->orderByDesc('updated_at')->take(3)->get();
         }
 
         $notifications = $user->notifications()

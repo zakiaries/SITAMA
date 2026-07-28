@@ -56,9 +56,9 @@ class MahasiswaController extends Controller
         }
 
         if ($filter === 'semua') {
-            $query->orderByRaw('industry_note IS NOT NULL')->orderByDesc('date');
+            $query->orderByRaw('industry_note IS NOT NULL')->orderByDesc('updated_at');
         } else {
-            $query->orderByDesc('date');
+            $query->orderByDesc('updated_at');
         }
 
         $logBooks = $query->get();

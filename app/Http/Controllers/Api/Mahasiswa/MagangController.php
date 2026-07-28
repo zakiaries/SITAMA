@@ -133,7 +133,7 @@ class MagangController extends ApiController
         $checklist        = ($internship && ! $internship->is_finished) ? $this->finishChecklist($student, $internship) : [];
         $canRequestFinish = ! empty($checklist) && ! in_array(false, array_column($checklist, 'met'), true);
 
-        $logBooks = $student->logBooks()->orderByDesc('date')->limit(5)->get()
+        $logBooks = $student->logBooks()->orderByDesc('updated_at')->limit(5)->get()
             ->map(fn ($l) => [
                 'id' => $l->id, 'title' => $l->title,
                 'date' => optional($l->date)->toDateString(),

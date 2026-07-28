@@ -22,7 +22,7 @@ class DashboardController extends ApiController
             ? now()->diffInDays($internship->start_date)
             : 0;
 
-        $latestGuidances = $student->guidances()->orderByDesc('date')->take(3)->get()
+        $latestGuidances = $student->guidances()->orderByDesc('updated_at')->take(3)->get()
             ->map(fn ($g) => [
                 'id'            => $g->id,
                 'title'         => $g->title,
@@ -32,7 +32,7 @@ class DashboardController extends ApiController
                 'lecturer_note' => $g->lecturer_note,
             ]);
 
-        $latestLogBooks = $student->logBooks()->orderByDesc('date')->take(3)->get()
+        $latestLogBooks = $student->logBooks()->orderByDesc('updated_at')->take(3)->get()
             ->map(fn ($l) => [
                 'id'       => $l->id,
                 'title'    => $l->title,

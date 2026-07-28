@@ -41,9 +41,9 @@ class MahasiswaController extends ApiController
             $query->whereMonth('date', now()->month)->whereYear('date', now()->year);
         }
         if ($filter === 'semua') {
-            $query->orderByRaw('industry_note IS NOT NULL')->orderByDesc('date');
+            $query->orderByRaw('industry_note IS NOT NULL')->orderByDesc('updated_at');
         } else {
-            $query->orderByDesc('date');
+            $query->orderByDesc('updated_at');
         }
 
         return response()->json([

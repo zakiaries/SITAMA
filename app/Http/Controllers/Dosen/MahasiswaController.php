@@ -39,7 +39,7 @@ class MahasiswaController extends Controller
 
         $student->load([
             'user',
-            'guidances'  => fn($q) => $q->orderByDesc('date'),
+            'guidances'  => fn($q) => $q->orderByDesc('updated_at'),
             'report',
         ]);
 
@@ -74,9 +74,9 @@ class MahasiswaController extends Controller
         }
 
         if ($filter === 'semua') {
-            $logQuery->orderByRaw('lecturer_note IS NOT NULL')->orderByDesc('date');
+            $logQuery->orderByRaw('lecturer_note IS NOT NULL')->orderByDesc('updated_at');
         } else {
-            $logQuery->orderByDesc('date');
+            $logQuery->orderByDesc('updated_at');
         }
 
         $logBooks = $logQuery->get();

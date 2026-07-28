@@ -23,7 +23,7 @@ class MagangSayaController extends Controller
             : [];
         $canRequestFinish = !empty($finishChecklist) && !in_array(false, array_column($finishChecklist, 'met'), true);
 
-        $logBooks = $student->logBooks()->orderByDesc('date')->limit(5)->get();
+        $logBooks = $student->logBooks()->orderByDesc('updated_at')->limit(5)->get();
 
         return view('mahasiswa.magang-saya.index', compact(
             'internship', 'logBooks', 'finishChecklist', 'canRequestFinish'

@@ -38,12 +38,12 @@ class MahasiswaController extends ApiController
         }
         $this->applyPeriod($logQuery, $period);
         if ($filter === 'semua') {
-            $logQuery->orderByRaw('lecturer_note IS NOT NULL')->orderByDesc('date');
+            $logQuery->orderByRaw('lecturer_note IS NOT NULL')->orderByDesc('updated_at');
         } else {
-            $logQuery->orderByDesc('date');
+            $logQuery->orderByDesc('updated_at');
         }
 
-        $guidances = $student->guidances()->orderByDesc('date')->get()->map(fn ($g) => [
+        $guidances = $student->guidances()->orderByDesc('updated_at')->get()->map(fn ($g) => [
             'id'            => $g->id,
             'title'         => $g->title,
             'activity'      => $g->activity,
