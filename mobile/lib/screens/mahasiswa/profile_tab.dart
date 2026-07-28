@@ -28,6 +28,15 @@ class _ProfileTabState extends State<ProfileTab> {
 
   void _reload() => setState(() { _future = _load(); });
 
+  Future<void> _editProfile(Map<String, dynamic> user) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _EditForm(token: _token, user: user),
+    );
+    if (saved == true) _reload();
+  }
+
   String _initials(String n) {
     final p = n.trim().split(RegExp(r'\s+'));
     return p.take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
@@ -103,6 +112,13 @@ class _ProfileTabState extends State<ProfileTab> {
                   InfoRow('Tahun Akademik', student['academic_year'] ?? '-'),
                 ])),
                 const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                  onPressed: () => _editProfile(user),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('Edit Profil'),
+                ),
+                const SizedBox(height: 10),
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
@@ -132,6 +148,69 @@ class _ProfileTabState extends State<ProfileTab> {
           },
           ),
           ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _EditForm extends StatefulWidget {
+  final String token;
+  final Map<String, dynamic> user;
+  const _EditForm({required this.token, required this.user});
+  @override
+  State<_EditForm> createState() => _EditFormState();
+}
+
+class _EditFormState extends State<_EditForm> {
+  late final TextEditingController _name = TextEditingController(text: widget.user['name'] ?? '');
+  late final TextEditingController _email = TextEditingController(text: widget.user['email'] ?? '');
+  final _password = TextEditingController();
+  final _passwordConfirm = TextEditingController();
+  bool _saving = false;
+  String? _error;
+
+  @override
+  void dispose() { _name.dispose(); _email.dispose(); _password.dispose(); _passwordConfirm.dispose(); super.dispose(); }
+
+  Future<void> _save() async {
+    setState(() { _saving = true; _error = null; });
+    final body = {'name': _name.text.trim(), 'email': _email.text.trim()};
+    if (_password.text.isNotEmpty) {
+      body['password'] = _password.text;
+      body['password_confirmation'] = _passwordConfirm.text;
+    }
+    try {
+      await ApiClient.put('/mahasiswa/profile', token: widget.token, body: body);
+      if (mounted) { showMessage(context, 'Profil diperbarui.'); Navigator.pop(context, true); }
+    } on ApiException catch (e) {
+      setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Text('Edit Profil', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 16),
+        if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
+        TextField(controller: _name, decoration: const InputDecoration(labelText: 'Nama')),
+        const SizedBox(height: 12),
+        TextField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email')),
+        const SizedBox(height: 12),
+        TextField(controller: _password, obscureText: true, decoration: const InputDecoration(labelText: 'Password baru (opsional)')),
+        const SizedBox(height: 12),
+        TextField(controller: _passwordConfirm, obscureText: true, decoration: const InputDecoration(labelText: 'Konfirmasi password')),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _saving ? null : _save,
+          child: _saving
+              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
+              : const Text('Simpan'),
         ),
       ]),
     );
