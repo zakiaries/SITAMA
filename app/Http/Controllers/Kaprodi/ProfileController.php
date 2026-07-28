@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Kaprodi;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\HandlesProfilePhoto;
 use App\Models\Company;
 use App\Models\Lecturer;
 use App\Models\Seminar;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    use HandlesProfilePhoto;
+
     public function index()
     {
         $user = Auth::user();
@@ -42,6 +45,8 @@ class ProfileController extends Controller
             $request->validate(['password' => 'min:8|confirmed']);
             $user->update(['password' => Hash::make($request->password)]);
         }
+
+        $this->storeProfilePhoto($request, $user);
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }

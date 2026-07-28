@@ -93,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/profile', [MhsProfile::class, 'index']);
         Route::put('/profile', [MhsProfile::class, 'update']);
+        Route::post('/profile/photo', [MhsProfile::class, 'photo']);
 
         Route::get('/chatbot', [MhsChatbot::class, 'index']);
         Route::post('/chatbot', [MhsChatbot::class, 'ask']);
@@ -126,6 +127,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/profile', [DsnProfile::class, 'index']);
         Route::put('/profile', [DsnProfile::class, 'update']);
+        Route::post('/profile/photo', [DsnProfile::class, 'photo']);
     });
 
     // ══════════ PEMBIMBING INDUSTRI ══════════
@@ -144,5 +146,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/profile', [IndProfile::class, 'index']);
         Route::put('/profile', [IndProfile::class, 'update']);
+        Route::post('/profile/photo', [IndProfile::class, 'photo']);
     });
 });

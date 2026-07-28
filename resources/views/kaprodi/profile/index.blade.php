@@ -20,7 +20,13 @@
 @php $initials = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
 
 <div class="profile-hero">
-  <div class="profile-av">{{ $initials }}</div>
+  <div class="profile-av">
+    @if($user->photo_profile)
+      <img src="{{ $user->photoUrl() }}" alt="Foto profil" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+    @else
+      {{ $initials }}
+    @endif
+  </div>
   <div>
     <div class="profile-name">{{ $user->name }}</div>
     <div class="profile-role">Ketua Program Studi · Superadmin</div>
@@ -84,9 +90,13 @@
 <div class="modal-overlay" id="modal-edit-profile" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal-box">
     <div class="modal-header"><div class="modal-title">Edit Profil</div></div>
-    <form method="POST" action="{{ route('kaprodi.profile.update') }}">
+    <form method="POST" action="{{ route('kaprodi.profile.update') }}" enctype="multipart/form-data">
       @csrf
       @method('PUT')
+      <div class="form-group">
+        <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Foto Profil <span style="font-weight:400;color:var(--text-muted);">(JPG/PNG, maks 4 MB)</span></label>
+        <input type="file" name="photo" accept=".jpg,.jpeg,.png">
+      </div>
       <div class="form-group">
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Nama Lengkap</label>
         <input type="text" name="name" value="{{ $user->name }}" required>

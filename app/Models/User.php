@@ -36,6 +36,16 @@ class User extends Authenticatable
         'is_activated'      => 'boolean',
     ];
 
+    /**
+     * URL foto profil (null bila belum ada) — dipakai web & API.
+     */
+    public function photoUrl(): ?string
+    {
+        return $this->photo_profile
+            ? \Illuminate\Support\Facades\Storage::url($this->photo_profile)
+            : null;
+    }
+
     public function student()
     {
         return $this->hasOne(Student::class);

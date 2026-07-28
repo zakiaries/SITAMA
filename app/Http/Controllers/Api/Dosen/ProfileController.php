@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\Dosen;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Concerns\HandlesProfilePhoto;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends ApiController
 {
+    use HandlesProfilePhoto;
+
     public function index(Request $request)
     {
         $lecturer = $this->currentLecturer($request, 'lecturer');
@@ -18,10 +21,11 @@ class ProfileController extends ApiController
 
         return response()->json([
             'user' => [
-                'name'     => $user->name,
-                'username' => $user->username,
-                'email'    => $user->email,
-                'role'     => $user->role,
+                'name'      => $user->name,
+                'username'  => $user->username,
+                'email'     => $user->email,
+                'role'      => $user->role,
+                'photo_url' => $user->photoUrl(),
             ],
             'stats' => [
                 'total_mahasiswa' => $totalMahasiswa,
@@ -47,5 +51,17 @@ class ProfileController extends ApiController
         }
 
         return response()->json(['message' => 'Profil berhasil diperbarui.']);
+    }
+
+    public function photo(Request $request)
+    {
+        $this->currentLecturer($request, 'lecturer');
+        $user = $request->user();
+        $this->storeProfilePhoto($request, $user, true);
+
+        return response()->json([
+            'message'   => 'Foto profil berhasil diperbarui.',
+            'photo_url' => $user->fresh()->photoUrl(),
+        ]);
     }
 }

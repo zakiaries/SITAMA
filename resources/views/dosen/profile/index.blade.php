@@ -16,7 +16,13 @@
 
 {{-- Profile Hero --}}
 <div class="profile-hero">
-  <div class="profile-av">{{ $initials }}</div>
+  <div class="profile-av">
+    @if($user->photo_profile)
+      <img src="{{ $user->photoUrl() }}" alt="Foto profil" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+    @else
+      {{ $initials }}
+    @endif
+  </div>
   <div>
     <div class="profile-name">{{ $user->name }}</div>
     <div class="profile-role">Dosen Pembimbing</div>
@@ -81,9 +87,13 @@
     <div class="modal-header">
       <div class="modal-title">Edit Profil</div>
     </div>
-    <form method="POST" action="{{ route('dosen.profile.update') }}">
+    <form method="POST" action="{{ route('dosen.profile.update') }}" enctype="multipart/form-data">
       @csrf
       @method('PUT')
+      <div class="form-group">
+        <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Foto Profil <span style="font-weight:400;color:var(--text-muted);">(JPG/PNG, maks 4 MB)</span></label>
+        <input type="file" name="photo" accept=".jpg,.jpeg,.png">
+      </div>
       <div class="form-group">
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Nama Lengkap</label>
         <input type="text" name="name" value="{{ $user->name }}" required>
