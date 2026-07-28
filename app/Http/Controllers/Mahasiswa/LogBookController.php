@@ -13,7 +13,8 @@ class LogBookController extends Controller
     public function index(Request $request)
     {
         $student = Auth::user()->student;
-        $query   = $student->logBooks()->orderByDesc('date');
+        // Terbaru ditambah/diedit di paling atas (updated_at ikut berubah saat edit).
+        $query   = $student->logBooks()->orderByDesc('updated_at')->orderByDesc('id');
 
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
