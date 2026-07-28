@@ -14,7 +14,8 @@ class BimbinganController extends ApiController
         $student = $this->currentStudent($request);
         $student->loadMissing('lecturer.user', 'activeInternship.lecturer.user');
 
-        $query = $student->guidances()->orderByDesc('date');
+        // Terbaru ditambah/diedit di paling atas (updated_at ikut berubah saat edit).
+        $query = $student->guidances()->orderByDesc('updated_at')->orderByDesc('id');
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
