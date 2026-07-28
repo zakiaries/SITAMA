@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
 import 'nilai_screen.dart';
+
+/// Buka file lampiran (bimbingan/laporan) di aplikasi eksternal.
+Future<void> _openFileUrl(BuildContext context, String url) async {
+  if (url.trim().isEmpty) return;
+  final uri = Uri.parse(AppConfig.absoluteFileUrl(url));
+  final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!ok && context.mounted) showMessage(context, 'Tidak bisa membuka file.', error: true);
+}
 
 class DosenMahasiswaDetail extends StatefulWidget {
   final int studentId;
@@ -227,6 +237,15 @@ class _GuidanceCard extends StatelessWidget {
         Text(g['date'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
         const SizedBox(height: 8),
         Text(g['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
+        if ((g['file_url'] ?? '').toString().isNotEmpty)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _openFileUrl(context, '${g['file_url']}'),
+              icon: const Icon(Icons.attach_file, size: 18),
+              label: const Text('Lihat File Bimbingan'),
+            ),
+          ),
         if ((g['lecturer_note'] ?? '').toString().isNotEmpty)
           Padding(padding: const EdgeInsets.only(top: 8), child: Text('Catatan: ${g['lecturer_note']}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
         if (status == 'pending')
@@ -256,6 +275,15 @@ class _ReportCard extends StatelessWidget {
           Expanded(child: Text(r['title'] ?? 'Laporan Akhir', style: const TextStyle(fontWeight: FontWeight.w700))),
           StatusChip(status),
         ]),
+        if ((r['file_url'] ?? '').toString().isNotEmpty)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _openFileUrl(context, '${r['file_url']}'),
+              icon: const Icon(Icons.attach_file, size: 18),
+              label: const Text('Lihat File Laporan'),
+            ),
+          ),
         if ((r['lecturer_note'] ?? '').toString().isNotEmpty)
           Padding(padding: const EdgeInsets.only(top: 8), child: Text('Catatan: ${r['lecturer_note']}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
         if (status == 'pending')
