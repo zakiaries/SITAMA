@@ -96,11 +96,11 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
             final student = Map<String, dynamic>.from(d['student'] ?? {});
             final internship = Map<String, dynamic>.from(d['internship'] ?? {});
             final logbooks = List<Map<String, dynamic>>.from(d['logbooks'] ?? [])
-              // Urutan stabil (tanggal terbaru dulu, seri di-tie-break dengan id) supaya
-              // item TIDAK pindah posisi saat baru dikomentari — komentar langsung tampil di tempatnya.
+              // Terbaru ditambah/diedit di paling atas (updated_at), seri di-tie-break
+              // dengan id — konsisten dengan sisi mahasiswa.
               ..sort((a, b) {
-                final byDate = '${b['date'] ?? ''}'.compareTo('${a['date'] ?? ''}');
-                if (byDate != 0) return byDate;
+                final byUpdated = '${b['updated_at'] ?? ''}'.compareTo('${a['updated_at'] ?? ''}');
+                if (byUpdated != 0) return byUpdated;
                 return ((b['id'] ?? 0) as num).compareTo((a['id'] ?? 0) as num);
               });
             final name = student['name'] ?? '';

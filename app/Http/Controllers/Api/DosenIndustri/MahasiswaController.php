@@ -69,6 +69,7 @@ class MahasiswaController extends ApiController
                 'title'         => $l->title,
                 'activity'      => $l->activity,
                 'date'          => optional($l->date)->toDateString(),
+                'updated_at'    => optional($l->updated_at)->toDateTimeString(),
                 'industry_note' => $l->industry_note,
             ]),
             'filter' => $filter,

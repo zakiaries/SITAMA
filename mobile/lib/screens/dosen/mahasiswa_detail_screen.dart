@@ -84,11 +84,11 @@ class _DosenMahasiswaDetailState extends State<DosenMahasiswaDetail> {
             final guidances = List<Map<String, dynamic>>.from(d['guidances'] ?? []);
             final report = d['report'] as Map<String, dynamic>?;
             final logbooks = List<Map<String, dynamic>>.from(d['logbooks'] ?? [])
-              // Urutan stabil (tanggal terbaru dulu, seri di-tie-break dengan id) supaya
-              // item TIDAK pindah posisi saat baru diberi catatan — catatan langsung tampil di tempatnya.
+              // Terbaru ditambah/diedit di paling atas (updated_at), seri di-tie-break
+              // dengan id — konsisten dengan sisi mahasiswa.
               ..sort((a, b) {
-                final byDate = '${b['date'] ?? ''}'.compareTo('${a['date'] ?? ''}');
-                if (byDate != 0) return byDate;
+                final byUpdated = '${b['updated_at'] ?? ''}'.compareTo('${a['updated_at'] ?? ''}');
+                if (byUpdated != 0) return byUpdated;
                 return ((b['id'] ?? 0) as num).compareTo((a['id'] ?? 0) as num);
               });
             final name = student['name'] ?? '';
