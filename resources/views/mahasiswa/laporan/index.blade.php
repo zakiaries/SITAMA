@@ -82,11 +82,12 @@
     </div>
   @endif
 
-  {{-- Form upload: tampil jika belum ada laporan, atau laporan ditolak --}}
-  @if(!$report || $report->status === 'rejected')
+  {{-- Form upload: tampil selama laporan belum disetujui dosen (belum ada / pending / ditolak) --}}
+  @php $isRevisi = $report && $report->status === 'rejected'; @endphp
+  @if(!$report || $report->status !== 'approved')
     <div class="card">
       <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">
-        {{ $report ? 'Unggah Ulang Laporan (Revisi)' : 'Unggah Laporan Akhir' }}
+        {{ !$report ? 'Unggah Laporan Akhir' : ($isRevisi ? 'Unggah Ulang Laporan (Revisi)' : 'Ganti File Laporan') }}
       </div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
         Format PDF atau Word (.doc/.docx), maksimal 10 MB.
@@ -103,7 +104,7 @@
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:8px;">
           <button type="submit" class="btn btn-primary">
-            {{ $report ? 'Kirim Ulang' : 'Unggah Laporan' }}
+            {{ !$report ? 'Unggah Laporan' : ($isRevisi ? 'Kirim Ulang' : 'Ganti File') }}
           </button>
         </div>
       </form>

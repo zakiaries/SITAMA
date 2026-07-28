@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../services/file_helper.dart';
@@ -29,6 +31,12 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
   }
 
   void _reload() => setState(() { _future = _load(); });
+
+  Future<void> _openFile(String url) async {
+    final uri = Uri.parse(AppConfig.absoluteFileUrl(url));
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showMessage(context, 'Tidak bisa membuka file.', error: true);
+  }
 
   Future<void> _uploadCertificate() async {
     final path = await pickFilePath(extensions: ['pdf', 'jpg', 'jpeg', 'png']);
@@ -114,6 +122,11 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
                         style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
                     const Text('Format PDF/JPG/PNG.', style: TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
                   ])),
+                  if (hasCert)
+                    TextButton(
+                      onPressed: () => _openFile('${internship['certificate_url']}'),
+                      child: const Text('Lihat'),
+                    ),
                   TextButton(
                     onPressed: _busy ? null : _uploadCertificate,
                     child: Text(hasCert ? 'Ganti' : 'Unggah'),

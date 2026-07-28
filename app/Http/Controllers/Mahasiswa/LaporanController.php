@@ -26,10 +26,10 @@ class LaporanController extends Controller
     {
         $student = Auth::user()->student;
 
-        // Hanya boleh upload kalau belum ada, atau yang lama sudah ditolak.
+        // Boleh diganti selama belum disetujui dosen (pending maupun revisi/rejected).
         $existing = $student->report;
-        if ($existing && $existing->status !== 'rejected') {
-            return back()->with('error', 'Laporan sudah diunggah dan sedang/berhasil diproses.');
+        if ($existing && $existing->status === 'approved') {
+            return back()->with('error', 'Laporan sudah disetujui dosen dan tidak bisa diganti.');
         }
 
         $request->validate([

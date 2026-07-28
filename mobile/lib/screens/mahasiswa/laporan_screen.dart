@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../services/file_helper.dart';
@@ -29,6 +31,12 @@ class _LaporanScreenState extends State<LaporanScreen> {
   }
 
   void _reload() => setState(() { _future = _load(); });
+
+  Future<void> _openFile(String url) async {
+    final uri = Uri.parse(AppConfig.absoluteFileUrl(url));
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) showMessage(context, 'Tidak bisa membuka file.', error: true);
+  }
 
   Future<void> _upload() async {
     final path = await pickFilePath(extensions: ['pdf', 'doc', 'docx']);
@@ -65,7 +73,8 @@ class _LaporanScreenState extends State<LaporanScreen> {
             }
             final report = snap.data!['report'] as Map<String, dynamic>?;
             final status = (report?['status'] ?? '').toString();
-            final canUpload = report == null || status == 'rejected';
+            // Boleh unggah/ganti selama belum disetujui dosen (belum ada / pending / revisi).
+            final canUpload = status != 'approved';
 
             return ListView(
               padding: const EdgeInsets.all(16),
@@ -83,6 +92,16 @@ class _LaporanScreenState extends State<LaporanScreen> {
                       Text('Catatan dosen:', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
                       Text('${report['lecturer_note']}', style: const TextStyle(fontSize: 13)),
                     ],
+                    if ((report['file_url'] ?? '').toString().isNotEmpty)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () => _openFile('${report['file_url']}'),
+                          style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                          icon: const Icon(Icons.description_outlined, size: 18),
+                          label: const Text('Lihat File Laporan'),
+                        ),
+                      ),
                     if (status == 'approved')
                       const Padding(padding: EdgeInsets.only(top: 10), child: Text('✓ Laporan sudah disetujui dosen.', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600))),
                   ])),
@@ -93,10 +112,12 @@ class _LaporanScreenState extends State<LaporanScreen> {
                     icon: _uploading
                         ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
                         : const Icon(Icons.upload_file),
-                    label: Text(report == null ? 'Unggah Laporan (PDF/Word)' : 'Unggah Ulang (Revisi)'),
+                    label: Text(report == null
+                        ? 'Unggah Laporan (PDF/Word)'
+                        : (status == 'rejected' ? 'Unggah Ulang (Revisi)' : 'Ganti File Laporan')),
                   )
                 else
-                  const Text('Laporan sedang diproses / sudah disetujui.', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                  const Text('Laporan sudah disetujui dosen dan tidak bisa diganti.', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
               ],
             );
           },

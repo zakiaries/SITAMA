@@ -35,8 +35,9 @@ class LaporanController extends ApiController
         $student  = $this->currentStudent($request);
         $existing = $student->report;
 
-        if ($existing && $existing->status !== 'rejected') {
-            return response()->json(['message' => 'Laporan sudah diunggah dan sedang/berhasil diproses.'], 422);
+        // Boleh diganti selama belum disetujui dosen (pending maupun revisi/rejected).
+        if ($existing && $existing->status === 'approved') {
+            return response()->json(['message' => 'Laporan sudah disetujui dosen dan tidak bisa diganti.'], 422);
         }
 
         $request->validate([
