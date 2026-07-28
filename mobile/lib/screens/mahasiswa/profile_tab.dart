@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
+import '../shared/profile_edit_sheet.dart';
 import '../widgets/ui.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -32,14 +33,11 @@ class _ProfileTabState extends State<ProfileTab> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => _EditForm(token: _token, user: user),
+      backgroundColor: AppColors.bg,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+      builder: (_) => ProfileEditSheet(basePath: '/mahasiswa', token: _token, user: user),
     );
     if (saved == true) _reload();
-  }
-
-  String _initials(String n) {
-    final p = n.trim().split(RegExp(r'\s+'));
-    return p.take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
   }
 
   @override
@@ -78,8 +76,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     boxShadow: kSoftShadow,
                   ),
                   child: Row(children: [
-                    CircleAvatar(radius: 32, backgroundColor: AppColors.primary,
-                        child: Text(_initials(name), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800))),
+                    ProfileAvatar(name: name, photoUrl: '${user['photo_url'] ?? ''}', radius: 32, fontSize: 20),
                     const SizedBox(width: 14),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
@@ -148,69 +145,6 @@ class _ProfileTabState extends State<ProfileTab> {
           },
           ),
           ),
-        ),
-      ]),
-    );
-  }
-}
-
-class _EditForm extends StatefulWidget {
-  final String token;
-  final Map<String, dynamic> user;
-  const _EditForm({required this.token, required this.user});
-  @override
-  State<_EditForm> createState() => _EditFormState();
-}
-
-class _EditFormState extends State<_EditForm> {
-  late final TextEditingController _name = TextEditingController(text: widget.user['name'] ?? '');
-  late final TextEditingController _email = TextEditingController(text: widget.user['email'] ?? '');
-  final _password = TextEditingController();
-  final _passwordConfirm = TextEditingController();
-  bool _saving = false;
-  String? _error;
-
-  @override
-  void dispose() { _name.dispose(); _email.dispose(); _password.dispose(); _passwordConfirm.dispose(); super.dispose(); }
-
-  Future<void> _save() async {
-    setState(() { _saving = true; _error = null; });
-    final body = {'name': _name.text.trim(), 'email': _email.text.trim()};
-    if (_password.text.isNotEmpty) {
-      body['password'] = _password.text;
-      body['password_confirmation'] = _passwordConfirm.text;
-    }
-    try {
-      await ApiClient.put('/mahasiswa/profile', token: widget.token, body: body);
-      if (mounted) { showMessage(context, 'Profil diperbarui.'); Navigator.pop(context, true); }
-    } on ApiException catch (e) {
-      setState(() => _error = e.message);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).viewInsets.bottom + 16),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Text('Edit Profil', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 16),
-        if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
-        TextField(controller: _name, decoration: const InputDecoration(labelText: 'Nama')),
-        const SizedBox(height: 12),
-        TextField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email')),
-        const SizedBox(height: 12),
-        TextField(controller: _password, obscureText: true, decoration: const InputDecoration(labelText: 'Password baru (opsional)')),
-        const SizedBox(height: 12),
-        TextField(controller: _passwordConfirm, obscureText: true, decoration: const InputDecoration(labelText: 'Konfirmasi password')),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _saving ? null : _save,
-          child: _saving
-              ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-              : const Text('Simpan'),
         ),
       ]),
     );

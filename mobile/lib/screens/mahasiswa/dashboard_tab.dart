@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_config.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
@@ -68,6 +69,7 @@ class _DashboardTabState extends State<DashboardTab> {
             final internship = d['internship'] as Map<String, dynamic>?;
             final guidances = List<Map<String, dynamic>>.from(d['latest_guidances'] ?? []);
             final name = d['user']?['name'] ?? '';
+            final photoUrl = '${d['user']?['photo_url'] ?? ''}';
 
             return ListView(
               padding: EdgeInsets.zero,
@@ -109,9 +111,14 @@ class _DashboardTabState extends State<DashboardTab> {
                             decoration: BoxDecoration(
                               color: Colors.white.withAlpha(40),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withAlpha(115), width: 1.5),
+                              border: Border.all(color: Colors.white.withAlpha(photoUrl.isEmpty ? 115 : 160), width: 1.5),
+                              image: photoUrl.isEmpty
+                                  ? null
+                                  : DecorationImage(image: NetworkImage(AppConfig.absoluteFileUrl(photoUrl)), fit: BoxFit.cover),
                             ),
-                            child: const Icon(Icons.person_outline, color: Colors.white, size: 24),
+                            child: photoUrl.isEmpty
+                                ? const Icon(Icons.person_outline, color: Colors.white, size: 24)
+                                : null,
                           ),
                           const SizedBox(width: 12),
                           Expanded(

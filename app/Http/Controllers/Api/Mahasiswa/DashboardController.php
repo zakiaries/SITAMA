@@ -55,7 +55,7 @@ class DashboardController extends ApiController
             : 0;
 
         return response()->json([
-            'user'  => ['name' => $user->name],
+            'user'  => ['name' => $user->name, 'photo_url' => $user->photoUrl()],
             'stats' => [
                 'logbook'     => $logBooksCount,
                 'bimbingan'   => $guidancesDone,
