@@ -69,9 +69,11 @@ class BimbinganController extends ApiController
         $student = $this->currentStudent($request);
         abort_if($guidance->student_id !== $student->id, 403, 'Akses ditolak.');
 
-        if ($guidance->status !== 'rejected') {
-            return response()->json(['message' => 'Bimbingan ini tidak sedang dalam status revisi.'], 422);
+        // Boleh diubah selama belum disetujui dosen (pending maupun revisi/rejected).
+        if ($guidance->status === 'approved') {
+            return response()->json(['message' => 'Bimbingan yang sudah disetujui dosen tidak bisa diubah.'], 422);
         }
+        $wasRejected = $guidance->status === 'rejected';
 
         $request->validate([
             'title'    => 'required|string|max:255',
@@ -92,7 +94,9 @@ class BimbinganController extends ApiController
 
         $guidance->update($data);
 
-        return response()->json(['message' => 'Revisi bimbingan berhasil dikirim ulang ke dosen.']);
+        return response()->json(['message' => $wasRejected
+            ? 'Revisi bimbingan berhasil dikirim ulang ke dosen.'
+            : 'Bimbingan berhasil diperbarui.']);
     }
 
     public function destroy(Request $request, Guidance $guidance)

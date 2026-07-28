@@ -165,6 +165,13 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
                                             onPressed: () => _openForm(revisi: g),
                                             icon: const Icon(Icons.refresh, size: 18),
                                             label: const Text('Revisi & Kirim Ulang'),
+                                          )
+                                        else
+                                          OutlinedButton.icon(
+                                            style: OutlinedButton.styleFrom(minimumSize: const Size(0, 40)),
+                                            onPressed: () => _openForm(revisi: g),
+                                            icon: const Icon(Icons.edit_outlined, size: 18),
+                                            label: const Text('Edit'),
                                           ),
                                         const Spacer(),
                                         TextButton.icon(
@@ -208,7 +215,8 @@ class _BimbinganFormState extends State<_BimbinganForm> {
   String? _error;
   String? _filePath; // file lampiran (opsional)
 
-  bool get _isRevisi => widget.revisi != null;
+  bool get _isEdit => widget.revisi != null; // ada record → update (PUT)
+  bool get _isRevisi => widget.revisi?['status']?.toString() == 'rejected'; // untuk kata "Revisi"
 
   @override
   void initState() {
@@ -236,17 +244,17 @@ class _BimbinganFormState extends State<_BimbinganForm> {
     final fields = {'title': _title.text.trim(), 'activity': _activity.text.trim(), 'date': _dateStr};
     try {
       if (_filePath != null) {
-        // Ada file → kirim multipart. Untuk revisi pakai spoof _method=PUT
+        // Ada file → kirim multipart. Untuk edit/revisi pakai spoof _method=PUT
         // (PHP tidak mengurai file pada request PUT asli).
-        final path = _isRevisi ? '/mahasiswa/bimbingan/${widget.revisi!['id']}' : '/mahasiswa/bimbingan';
+        final path = _isEdit ? '/mahasiswa/bimbingan/${widget.revisi!['id']}' : '/mahasiswa/bimbingan';
         await ApiClient.upload(
           path,
           fileField: 'file',
           filePath: _filePath!,
-          fields: _isRevisi ? {...fields, '_method': 'PUT'} : fields,
+          fields: _isEdit ? {...fields, '_method': 'PUT'} : fields,
           token: widget.token,
         );
-      } else if (_isRevisi) {
+      } else if (_isEdit) {
         await ApiClient.put('/mahasiswa/bimbingan/${widget.revisi!['id']}', token: widget.token, body: fields);
       } else {
         await ApiClient.post('/mahasiswa/bimbingan', token: widget.token, body: fields);
@@ -269,7 +277,7 @@ class _BimbinganFormState extends State<_BimbinganForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(_isRevisi ? 'Revisi Bimbingan' : 'Ajukan Bimbingan', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(_isEdit ? (_isRevisi ? 'Revisi Bimbingan' : 'Edit Bimbingan') : 'Ajukan Bimbingan', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 16),
           if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 10), child: Text(_error!, style: const TextStyle(color: AppColors.error))),
           TextField(controller: _title, decoration: const InputDecoration(labelText: 'Judul')),
@@ -307,7 +315,7 @@ class _BimbinganFormState extends State<_BimbinganForm> {
             onPressed: _saving ? null : _save,
             child: _saving
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                : Text(_isRevisi ? 'Kirim Ulang' : 'Simpan'),
+                : Text(_isEdit ? (_isRevisi ? 'Kirim Ulang' : 'Simpan Perubahan') : 'Simpan'),
           ),
         ],
       ),
