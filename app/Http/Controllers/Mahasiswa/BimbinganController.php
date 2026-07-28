@@ -64,11 +64,12 @@ class BimbinganController extends Controller
     {
         $student = Auth::user()->student;
 
-        // Hanya pemilik & hanya bimbingan yang diminta revisi (ditolak) yang boleh dikirim ulang.
+        // Hanya pemilik; boleh diubah selama belum disetujui dosen (pending maupun revisi/rejected).
         if ($guidance->student_id !== $student->id) abort(403);
-        if ($guidance->status !== 'rejected') {
-            return back()->with('error', 'Bimbingan ini tidak sedang dalam status revisi.');
+        if ($guidance->status === 'approved') {
+            return back()->with('error', 'Bimbingan yang sudah disetujui dosen tidak bisa diubah.');
         }
+        $wasRejected = $guidance->status === 'rejected';
 
         $request->validate([
             'title'    => 'required|string|max:255',
@@ -95,7 +96,9 @@ class BimbinganController extends Controller
         $guidance->update($data);
 
         return redirect()->route('mahasiswa.bimbingan')
-            ->with('success', 'Revisi bimbingan berhasil dikirim ulang ke dosen.');
+            ->with('success', $wasRejected
+                ? 'Revisi bimbingan berhasil dikirim ulang ke dosen.'
+                : 'Bimbingan berhasil diperbarui.');
     }
 
     /**

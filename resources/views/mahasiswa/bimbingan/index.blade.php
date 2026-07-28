@@ -75,8 +75,13 @@
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
         @if($g->status === 'rejected')
         <button class="btn btn-primary btn-sm"
-          onclick="openRevisi({{ $g->id }}, @js($g->title), '{{ $g->date->format('Y-m-d') }}', @js($g->activity))">
+          onclick="openRevisi({{ $g->id }}, @js($g->title), '{{ $g->date->format('Y-m-d') }}', @js($g->activity), true)">
           <x-icon name="refresh" :size="14"/> Revisi & Kirim Ulang
+        </button>
+        @else
+        <button class="btn btn-outline btn-sm"
+          onclick="openRevisi({{ $g->id }}, @js($g->title), '{{ $g->date->format('Y-m-d') }}', @js($g->activity), false)">
+          <x-icon name="pencil" :size="14"/> Edit
         </button>
         @endif
         <form method="POST" action="{{ route('mahasiswa.bimbingan.destroy', $g->id) }}" data-confirm="Hapus bimbingan ini?" data-confirm-danger>
@@ -98,7 +103,7 @@
   <div class="modal-overlay" id="modal-revisi">
     <div class="modal-box">
       <div class="modal-header">
-        <div class="modal-title">Revisi Bimbingan</div>
+        <div class="modal-title" id="revisi-modal-title">Revisi Bimbingan</div>
         <button class="modal-close" onclick="document.getElementById('modal-revisi').classList.remove('open')"><x-icon name="x" :size="14"/></button>
       </div>
       <form method="POST" id="form-revisi" action="" enctype="multipart/form-data">
@@ -122,7 +127,7 @@
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
           <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-revisi').classList.remove('open')">Batal</button>
-          <button type="submit" class="btn btn-primary">Kirim Ulang</button>
+          <button type="submit" class="btn btn-primary" id="revisi-submit-btn">Kirim Ulang</button>
         </div>
       </form>
     </div>
@@ -132,12 +137,14 @@
 
 @push('scripts')
 <script>
-  function openRevisi(id, title, date, activity) {
+  function openRevisi(id, title, date, activity, isRevisi) {
     var form = document.getElementById('form-revisi');
     form.action = '{{ url('mahasiswa/bimbingan') }}/' + id;
     document.getElementById('revisi-title').value = title;
     document.getElementById('revisi-date').value = date;
     document.getElementById('revisi-activity').value = activity;
+    document.getElementById('revisi-modal-title').textContent = isRevisi ? 'Revisi Bimbingan' : 'Edit Bimbingan';
+    document.getElementById('revisi-submit-btn').textContent = isRevisi ? 'Kirim Ulang' : 'Simpan Perubahan';
     document.getElementById('modal-revisi').classList.add('open');
   }
 </script>
