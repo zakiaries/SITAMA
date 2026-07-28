@@ -84,6 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Seminar model sesi-grup: mahasiswa penyaji isi ketersediaan + lihat jadwal.
         Route::get('/seminar', [MhsSeminar::class, 'index']);
+        Route::post('/seminar/attend', [MhsSeminar::class, 'attend']); // audiens absen via scan QR in-app
         Route::get('/seminar/{seminar}', [MhsSeminar::class, 'show']);
         Route::post('/seminar/{seminar}/availability', [MhsSeminar::class, 'submitAvailability']);
 

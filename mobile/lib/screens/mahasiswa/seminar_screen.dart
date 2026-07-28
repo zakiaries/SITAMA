@@ -7,6 +7,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
+import 'scan_absen_screen.dart';
 
 /// Seminar model sesi-grup (menyamai web).
 ///
@@ -73,6 +74,12 @@ class _SeminarScreenState extends State<SeminarScreen> {
         const DetailHeader(title: 'Seminar', subtitle: 'Sesi seminar hasil magang'),
         Expanded(child: _body()),
       ]),
+      // Audiens seminar mana pun bisa absen dengan memindai QR (identitas otomatis).
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanAbsenScreen())),
+        icon: const Icon(Icons.qr_code_scanner),
+        label: const Text('Scan Absen'),
+      ),
     );
   }
 

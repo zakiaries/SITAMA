@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Seminar;
+use App\Models\SeminarAttendance;
 use App\Models\SeminarPresenter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -102,6 +103,44 @@ class SeminarController extends ApiController
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('berita-acara-seminar-' . $seminar->id . '.pdf');
+    }
+
+    /**
+     * POST /mahasiswa/seminar/attend — audiens mengisi daftar hadir dengan
+     * memindai QR di dalam app. Identitas terisi otomatis dari akun yang login
+     * (1 akun = 1 kehadiran). Menerima {token, rt} hasil parse URL QR.
+     */
+    public function attend(Request $request)
+    {
+        $student = $this->currentStudent($request);
+
+        $request->validate([
+            'token' => 'required|string',
+            'rt'    => 'required|string',
+        ]);
+
+        $seminar = Seminar::where('access_token', $request->token)->first();
+        if (! $seminar || $seminar->status !== 'scheduled') {
+            return response()->json(['message' => 'Sesi seminar tidak aktif untuk daftar hadir.'], 422);
+        }
+
+        // Anti-abuse: QR berganti tiap ~detik; token lama/di-share ditolak.
+        if (! $seminar->isValidRotatingToken($request->rt)) {
+            return response()->json(['message' => 'QR sudah berganti atau tidak valid. Pindai ulang QR terbaru di layar.'], 422);
+        }
+
+        $attendance = SeminarAttendance::firstOrCreate(
+            ['seminar_id' => $seminar->id, 'student_id' => $student->id],
+            ['name' => $request->user()->name, 'nim' => $request->user()->username]
+        );
+
+        return response()->json([
+            'message'       => $attendance->wasRecentlyCreated
+                ? 'Daftar hadir tercatat. Terima kasih!'
+                : 'Kamu sudah tercatat hadir di sesi ini.',
+            'seminar_title' => $seminar->title,
+            'already'       => ! $attendance->wasRecentlyCreated,
+        ]);
     }
 
     private function isPresenter(Seminar $seminar, int $studentId): bool
