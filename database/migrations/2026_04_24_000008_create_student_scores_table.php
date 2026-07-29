@@ -12,10 +12,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('internship_id')->constrained()->cascadeOnDelete();
             $table->foreignId('detailed_assessment_component_id')->constrained()->cascadeOnDelete();
+            // Penilai: dosen pembimbing ('lecturer') atau pembimbing industri
+            // ('lecturer_industry'). Wajib ada agar skor dua penilai tidak saling menimpa.
+            $table->enum('scorer_type', ['lecturer', 'lecturer_industry'])->default('lecturer');
             $table->decimal('score', 5, 2)->nullable();
             $table->timestamps();
 
-            $table->unique(['internship_id', 'detailed_assessment_component_id'], 'scores_unique');
+            // Satu skor per (internship, komponen rinci, penilai).
+            $table->unique(['internship_id', 'detailed_assessment_component_id', 'scorer_type'], 'scores_unique');
         });
     }
 
