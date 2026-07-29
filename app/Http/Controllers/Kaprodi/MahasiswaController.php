@@ -66,7 +66,10 @@ class MahasiswaController extends Controller
             'rejected'     => Student::where('status', 'rejected')->count(),
         ];
 
-        $lecturers = Lecturer::with('user')->get();
+        // Dropdown "Plot Dosen" hanya untuk dosen kampus (role lecturer), BUKAN
+        // pembimbing industri — mereka ditugaskan lewat magang, bukan di sini.
+        $lecturers = Lecturer::whereHas('user', fn($q) => $q->where('role', 'lecturer'))
+            ->with('user')->get();
 
         return view('kaprodi.mahasiswa.index', compact('students', 'status', 'counts', 'lecturers'));
     }
