@@ -8,6 +8,11 @@
       {{ session('success') }}
     </div>
   @endif
+  @if($errors->any())
+    <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      {{ $errors->first() }}
+    </div>
+  @endif
 
   <div class="page-header">
     <div class="page-title">Log Book</div>
@@ -63,6 +68,35 @@
     <p>Belum ada data log book.</p>
   </div>
   @endforelse
+
+  {{-- Modal Tambah Log Book --}}
+  <div class="modal-overlay" id="modal-logbook" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Tambah Log Book</div>
+        <button class="modal-close" onclick="document.getElementById('modal-logbook').classList.remove('open')"><x-icon name="x" :size="14"/></button>
+      </div>
+      <form method="POST" action="{{ route('mahasiswa.logbook.store') }}">
+        @csrf
+        <div class="form-group">
+          <label>Judul Kegiatan</label>
+          <input type="text" name="title" value="{{ old('title') }}" required>
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" name="date" value="{{ old('date', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}" required>
+        </div>
+        <div class="form-group">
+          <label>Deskripsi Aktivitas</label>
+          <textarea name="activity" rows="4" required style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;">{{ old('activity') }}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-logbook').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   {{-- Modal Edit Log Book --}}
   <div class="modal-overlay" id="modal-logbook-edit" onclick="if(event.target===this)this.classList.remove('open')">

@@ -8,6 +8,11 @@
       {{ session('success') }}
     </div>
   @endif
+  @if(session('error') || $errors->any())
+    <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      {{ session('error') ?? $errors->first() }}
+    </div>
+  @endif
 
   {{-- Dosen Pembimbing --}}
   <div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
@@ -98,6 +103,39 @@
     <p>Belum ada data bimbingan.</p>
   </div>
   @endforelse
+
+  {{-- Modal Tambah Bimbingan --}}
+  <div class="modal-overlay" id="modal-bimb" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Tambah Bimbingan</div>
+        <button class="modal-close" onclick="document.getElementById('modal-bimb').classList.remove('open')"><x-icon name="x" :size="14"/></button>
+      </div>
+      <form method="POST" action="{{ route('mahasiswa.bimbingan.store') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+          <label>Judul Bimbingan</label>
+          <input type="text" name="title" value="{{ old('title') }}" required>
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" name="date" value="{{ old('date', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}" required>
+        </div>
+        <div class="form-group">
+          <label>Aktivitas / Deskripsi</label>
+          <textarea name="activity" rows="4" required style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;">{{ old('activity') }}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Lampiran File <span style="font-weight:400;color:var(--text-muted);">(PDF/Word, opsional, maks 10 MB)</span></label>
+          <input type="file" name="file" accept=".pdf,.doc,.docx">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-bimb').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">Kirim Bimbingan</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   {{-- Modal Revisi --}}
   <div class="modal-overlay" id="modal-revisi">
