@@ -1,0 +1,57 @@
+# Stack SIMAMA: web (Caddy, auto-HTTPS) + app (PHP-FPM) + db (MariaDB).
+# Variabel ${...} dibaca otomatis dari file .env di folder ini.
+# Deploy: lihat DEPLOY_DOCKER.md
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html               # kode + storage upload duduk di disk host (aman)
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [simama]
+
+  web:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}          # domain untuk sertifikat HTTPS otomatis
+    volumes:
+      - ./:/var/www/html
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data                 # simpan sertifikat SSL (jangan hilang)
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks: [simama]
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql            # data database persisten
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks: [simama]
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  simama:

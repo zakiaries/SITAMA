@@ -1,0 +1,27 @@
+# Caddy: reverse proxy + HTTPS OTOMATIS (Let's Encrypt) untuk SIMAMA.
+# {$APP_DOMAIN} dibaca dari environment (di-set docker-compose dari .env).
+# Syarat auto-HTTPS: domain sudah mengarah ke IP server + port 80/443 terbuka.
+
+{$APP_DOMAIN} {
+    root * /var/www/html/public
+    encode gzip zstd
+
+    # File PHP diteruskan ke php-fpm (service "app" port 9000).
+    php_fastcgi app:9000
+
+    # Sajikan file statis (css/js/gambar/upload).
+    file_server
+
+    # Header keamanan dasar.
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        Referrer-Policy no-referrer-when-downgrade
+        -Server
+    }
+
+    # Batas ukuran unggahan (laporan/foto).
+    request_body {
+        max_size 15MB
+    }
+}
