@@ -156,7 +156,7 @@
         <div class="field an" style="animation-delay:.2s">
           <div class="iwrap">
             <span class="lead-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-            <input type="text" name="username" value="{{ old('username') }}" placeholder="NIM / NIP" autocomplete="username" required>
+            <input type="text" name="username" value="{{ old('username') }}" placeholder="NIM / NIP / Username" autocomplete="username" required>
           </div>
         </div>
         <div class="field an" style="animation-delay:.26s">
