@@ -175,7 +175,7 @@ class MahasiswaController extends Controller
         $internship = $this->getInternship($student, $lecturer);
         $student->load('user');
 
-        $components = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
+        $components = AssessmentComponent::forScorer('lecturer')->with(['detailedComponents' => function ($q) use ($internship) {
             $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)
                 ->where('scorer_type', 'lecturer')]);
         }])->get();
@@ -190,7 +190,7 @@ class MahasiswaController extends Controller
 
         $request->validate([
             'scores'   => 'required|array',
-            'scores.*' => 'nullable|numeric|min:0|max:100',
+            'scores.*' => 'nullable|numeric|min:1|max:10',
         ]);
 
         foreach ($request->scores as $detailId => $score) {

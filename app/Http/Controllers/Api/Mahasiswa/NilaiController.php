@@ -25,10 +25,7 @@ class NilaiController extends ApiController
                 'lecturer_industry'  => $internship->lecturerIndustry?->user?->name,
                 'is_finished'        => (bool) $internship->is_finished,
             ] : null,
-            'nilai' => $nilai ? [
-                'overall' => $nilai['overall'],
-                'items'   => $nilai['items'],
-            ] : null,
+            'nilai' => $nilai, // { lecturer:{average,components[]}, industry:{...}, final }
         ]);
     }
 }

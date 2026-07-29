@@ -94,7 +94,7 @@
       <div class="accordion-icon-wrap">
         <span style="color:var(--primary);display:inline-flex;"><x-icon :name="$icon" :size="18"/></span>
       </div>
-      <div class="accordion-title">{{ $component->name }}</div>
+      <div class="accordion-title">{{ $component->name }}@if($component->weight) <span style="font-weight:500;color:var(--text-muted);font-size:12px;">(bobot {{ intval($component->weight) }}%)</span>@endif</div>
       <svg class="accordion-chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <polyline points="6 9 12 15 18 9"/>
       </svg>
@@ -109,8 +109,8 @@
           name="scores[{{ $detail->id }}]"
           class="score-input"
           value="{{ $currentScore !== null ? number_format($currentScore, 1) : '' }}"
-          placeholder="0 - 100"
-          min="0" max="100" step="0.5"
+          placeholder="1 - 10"
+          min="1" max="10" step="0.5"
           oninput="clampScore(this)">
       </div>
       @endforeach
@@ -137,8 +137,8 @@ function clampScore(el) {
   if (el.value === '') return;
   var v = parseFloat(el.value);
   if (isNaN(v)) { el.value = ''; return; }
-  if (v > 100) el.value = 100;
-  if (v < 0)   el.value = 0;
+  if (v > 10) el.value = 10;
+  if (v < 1)  el.value = 1;
 }
 </script>
 @endpush

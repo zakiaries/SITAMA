@@ -99,7 +99,7 @@ class MahasiswaController extends ApiController
         $internship = $this->internshipOf($request, $student);
         $student->load('user');
 
-        $components = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
+        $components = AssessmentComponent::forScorer('lecturer_industry')->with(['detailedComponents' => function ($q) use ($internship) {
             $q->with(['scores' => fn ($q2) => $q2->where('internship_id', $internship->id)->where('scorer_type', 'lecturer_industry')]);
         }])->get()->map(fn ($c) => [
             'id'      => $c->id,
@@ -124,7 +124,7 @@ class MahasiswaController extends ApiController
 
         $request->validate([
             'scores'            => 'array',
-            'scores.*'          => 'nullable|numeric|min:0|max:100',
+            'scores.*'          => 'nullable|numeric|min:1|max:10',
             'performance_notes' => 'nullable|string|max:2000',
         ]);
 

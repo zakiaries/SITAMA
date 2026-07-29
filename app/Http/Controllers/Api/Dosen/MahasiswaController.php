@@ -144,11 +144,12 @@ class MahasiswaController extends ApiController
         $internship = $this->internshipOf($request, $student);
         $student->load('user');
 
-        $components = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
+        $components = AssessmentComponent::forScorer('lecturer')->with(['detailedComponents' => function ($q) use ($internship) {
             $q->with(['scores' => fn ($q2) => $q2->where('internship_id', $internship->id)->where('scorer_type', 'lecturer')]);
         }])->get()->map(fn ($c) => [
             'id'      => $c->id,
             'name'    => $c->name,
+            'weight'  => $c->weight !== null ? (float) $c->weight : null,
             'details' => $c->detailedComponents->map(fn ($d) => [
                 'id'    => $d->id,
                 'name'  => $d->name,
@@ -168,7 +169,7 @@ class MahasiswaController extends ApiController
 
         $request->validate([
             'scores'   => 'required|array',
-            'scores.*' => 'nullable|numeric|min:0|max:100',
+            'scores.*' => 'nullable|numeric|min:1|max:10',
         ]);
 
         foreach ($request->scores as $detailId => $score) {

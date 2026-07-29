@@ -47,15 +47,15 @@
   </div>
 @else
 
-  {{-- Rata-rata keseluruhan --}}
+  {{-- Nilai Akhir = rata dosen + rata industri (dijumlah) --}}
   <div class="nilai-overall">
-    <div class="nilai-overall-lbl">Rata-rata Nilai Akhir</div>
-    <div class="nilai-overall-val">{{ $nilai['overall'] ?? '-' }}</div>
+    <div class="nilai-overall-lbl">Nilai Akhir (Dosen + Industri)</div>
+    <div class="nilai-overall-val">{{ $nilai['final'] ?? '-' }}</div>
     <div class="nilai-overall-sub">
-      @if($nilai['overall'] === null)
-        Belum ada nilai yang diberikan oleh pembimbing.
+      @if($nilai['final'] === null)
+        Menunggu penilaian lengkap dari dosen pembimbing & pembimbing industri.
       @else
-        Gabungan penilaian dosen pembimbing kampus & industri
+        Rata dosen {{ $nilai['lecturer']['average'] }} + Rata industri {{ $nilai['industry']['average'] }} &nbsp;(skala 1–10)
       @endif
     </div>
   </div>
@@ -82,12 +82,29 @@
     </div>
   </div>
 
-  {{-- Rincian per komponen --}}
+  {{-- Penilaian Dosen Pembimbing (Proposal 20% + Laporan 80%) --}}
   <div class="page-header">
-    <div class="page-title">Rincian Nilai per Komponen</div>
+    <div class="page-title">Penilaian Dosen Pembimbing</div>
+    <span class="nilai-badge {{ $nilai['lecturer']['average'] === null ? 'empty' : '' }}">{{ $nilai['lecturer']['average'] ?? 'Belum dinilai' }}</span>
+  </div>
+  <div class="nilai-card" style="margin-bottom:16px;">
+    @foreach($nilai['lecturer']['components'] as $item)
+    <div class="nilai-row">
+      <div style="font-size:13px;color:var(--text);">
+        {{ $item['name'] }}@if($item['weight']) <span style="color:var(--text-muted);font-size:11px;">(bobot {{ intval($item['weight']) }}%)</span>@endif
+      </div>
+      <div class="nilai-badge {{ $item['avg'] === null ? 'empty' : '' }}">{{ $item['avg'] ?? 'Belum dinilai' }}</div>
+    </div>
+    @endforeach
+  </div>
+
+  {{-- Penilaian Pembimbing Industri (rata 8 komponen) --}}
+  <div class="page-header">
+    <div class="page-title">Penilaian Pembimbing Industri</div>
+    <span class="nilai-badge {{ $nilai['industry']['average'] === null ? 'empty' : '' }}">{{ $nilai['industry']['average'] ?? 'Belum dinilai' }}</span>
   </div>
   <div class="nilai-card">
-    @foreach($nilai['items'] as $item)
+    @foreach($nilai['industry']['components'] as $item)
     <div class="nilai-row">
       <div style="font-size:13px;color:var(--text);">{{ $item['name'] }}</div>
       <div class="nilai-badge {{ $item['avg'] === null ? 'empty' : '' }}">{{ $item['avg'] ?? 'Belum dinilai' }}</div>

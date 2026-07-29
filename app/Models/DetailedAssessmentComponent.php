@@ -11,7 +11,7 @@ class DetailedAssessmentComponent extends Model
 
     protected $table = 'detailed_assessment_components';
 
-    protected $fillable = ['assessment_component_id', 'name'];
+    protected $fillable = ['assessment_component_id', 'name', 'order'];
 
     public function assessmentComponent()
     {

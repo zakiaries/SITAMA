@@ -54,25 +54,66 @@ class Internship extends Model
      * Rata-rata nilai per komponen penilaian (gabungan dosen kampus & dosen industri),
      * beserta rata-rata keseluruhan.
      */
+    /**
+     * Ringkasan nilai magang sesuai form resmi:
+     *  • lecturer (dosen)  : berbobot — Proposal 20% + Laporan 80%.
+     *  • industry          : rata polos 8 komponen (Total ÷ 8).
+     *  • final             : rata dosen + rata industri (DIJUMLAH), diserahkan ke
+     *                        kaprodi. Null bila salah satu penilai belum menilai.
+     * Skala 1–10.
+     */
     public function nilaiSummary(): array
     {
-        $components = AssessmentComponent::with(['detailedComponents.scores' => function ($q) {
-            $q->where('internship_id', $this->id);
-        }])->get();
+        $lecturer = $this->scorerSummary('lecturer', true);
+        $industry = $this->scorerSummary('lecturer_industry', false);
 
-        $items = $components->map(function ($comp) {
-            $scores = $comp->detailedComponents->flatMap->scores->pluck('score')->filter();
+        $final = ($lecturer['average'] !== null && $industry['average'] !== null)
+            ? round($lecturer['average'] + $industry['average'], 2)
+            : null;
+
+        return [
+            'lecturer' => $lecturer,
+            'industry' => $industry,
+            'final'    => $final,
+        ];
+    }
+
+    /**
+     * Rangkum nilai satu penilai.
+     * @param  bool  $weighted  true = rata berbobot (pakai kolom weight komponen).
+     */
+    private function scorerSummary(string $scorerType, bool $weighted): array
+    {
+        $components = AssessmentComponent::forScorer($scorerType)
+            ->with(['detailedComponents.scores' => fn ($q) => $q
+                ->where('internship_id', $this->id)
+                ->where('scorer_type', $scorerType)])
+            ->get();
+
+        $comps = $components->map(function ($comp) {
+            $scores = $comp->detailedComponents->flatMap->scores->pluck('score')
+                ->filter(fn ($v) => $v !== null);
             return [
-                'name' => $comp->name,
-                'avg'  => $scores->count() > 0 ? round($scores->avg(), 2) : null,
+                'name'   => $comp->name,
+                'weight' => $comp->weight !== null ? (float) $comp->weight : null,
+                'avg'    => $scores->count() > 0 ? round($scores->avg(), 2) : null,
             ];
         });
 
-        $filled = $items->pluck('avg')->filter();
+        $rated = $comps->filter(fn ($c) => $c['avg'] !== null);
 
-        return [
-            'items'   => $items,
-            'overall' => $filled->count() > 0 ? round($filled->avg(), 2) : null,
-        ];
+        if ($rated->isEmpty()) {
+            $average = null;
+        } elseif ($weighted && $rated->every(fn ($c) => $c['weight'] !== null)) {
+            // Berbobot; dinormalisasi atas komponen yang sudah dinilai.
+            $totalWeight = $rated->sum('weight');
+            $average = $totalWeight > 0
+                ? round($rated->sum(fn ($c) => $c['avg'] * $c['weight']) / $totalWeight, 2)
+                : null;
+        } else {
+            $average = round($rated->avg('avg'), 2);
+        }
+
+        return ['average' => $average, 'components' => $comps->values()->all()];
     }
 }

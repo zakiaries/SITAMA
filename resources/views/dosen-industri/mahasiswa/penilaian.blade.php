@@ -82,7 +82,7 @@
         <div class="score-input-wrap">
           <input type="number" name="scores[{{ $detail->id }}]" class="score-input js-score"
                  value="{{ $current !== null ? rtrim(rtrim(number_format($current,1),'0'),'.') : '' }}"
-                 placeholder="0" min="0" max="100" step="0.5" oninput="clampScore(this);hitungRata()">
+                 placeholder="1 - 10" min="1" max="10" step="0.5" oninput="clampScore(this);hitungRata()">
           <span class="score-max">/100</span>
         </div>
       </div>
@@ -125,8 +125,8 @@ function clampScore(el) {
   if (el.value === '') return;
   var v = parseFloat(el.value);
   if (isNaN(v)) { el.value = ''; return; }
-  if (v > 100) el.value = 100;
-  if (v < 0)   el.value = 0;
+  if (v > 10) el.value = 10;
+  if (v < 1)  el.value = 1;
 }
 
 function hitungRata() {
