@@ -36,6 +36,7 @@ APP_ENV=production
 APP_DEBUG=false
 APP_KEY=            # php artisan key:generate
 APP_URL=https://domain-anda        # WAJIB benar (QR & tautan)
+APP_TIMEZONE=Asia/Jakarta          # WIB — jam logbook/bimbingan/absensi seminar
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -58,6 +59,10 @@ MAIL_PASSWORD=...
 MAIL_FROM_ADDRESS=...
 ```
 
+> **Batas upload PHP (php.ini)**: laporan/sertifikat (maks 10 MB) & foto profil (maks 4 MB)
+> membutuhkan `upload_max_filesize` **dan** `post_max_size` ≥ ~12 MB. Default hosting sering
+> 2 MB → upload gagal diam-diam.
+
 ## 3. Langkah build & migrasi (di server)
 
 > ✅ Skema dibangun sepenuhnya dari migrasi (migrasi tabel dasar sudah direkonstruksi).
@@ -70,7 +75,7 @@ composer install --no-dev --optimize-autoloader
 php artisan key:generate            # sekali, jika APP_KEY belum ada
 php artisan migrate --force         # bangun seluruh skema dari nol
 php artisan db:seed --force         # akun Kaprodi awal + rubrik penilaian + FAQ chatbot
-php artisan storage:link            # agar file upload (bukti/sertifikat/laporan) bisa dibuka
+php artisan storage:link            # WAJIB — tanpa ini foto profil, file bimbingan/laporan/sertifikat, & logo PDF berita acara akan 404
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
@@ -83,7 +88,7 @@ php artisan view:cache
 ## 4. Data awal (bootstrap)
 
 - [x] **1 akun Kaprodi** (superadmin) — otomatis dari `db:seed` (`DatabaseSeeder`, kredensial dari `.env`).
-- [x] **Rubrik penilaian** (4 komponen + 12 rinci) — otomatis dari `db:seed` (`RubrikPenilaianSeeder`).
+- [x] **Rubrik penilaian** (dosen: Proposal 20% + Laporan 80% berbobot; pembimbing industri: 8 komponen, skala 1–10) — otomatis dari `db:seed` (`RubrikPenilaianSeeder`, idempoten).
 - [x] **KB chatbot** — otomatis dari `db:seed` (`ChatbotKnowledgeSeeder`).
 - [ ] Akun **dosen** (role `lecturer`) — buat lewat login Kaprodi (menu Dosen) setelah deploy.
 - [ ] Beberapa **perusahaan afiliasi + lowongan** (dengan bidang) agar demo lowongan/rekomendasi
@@ -101,28 +106,35 @@ php artisan view:cache
 - [ ] Coba akses lintas peran (mis. mahasiswa buka `/kaprodi/...`) → harus **403**.
 - [ ] Chatbot menjawab FAQ & memberi rekomendasi lowongan.
 - [ ] Upload file (bukti magang) tersimpan & bisa dibuka (storage:link).
-- [ ] **Scan QR seminar dari HP asli** (bukan localhost) → halaman "Saya Hadir" terbuka.
+- [ ] **Scan QR seminar dari HP asli** (bukan localhost) → tercatat hadir (via kamera HP → web, atau scan in-app di mobile).
+- [ ] Ubah profil + **unggah foto** (semua peran) → foto tampil di profil.
+- [ ] **Input nilai** dosen (Proposal/Laporan berbobot) & industri (8 komponen) → nilai akhir muncul di halaman mahasiswa/kaprodi.
+- [ ] **Ekspor PDF berita acara** seminar (format resmi) bisa diunduh & dibuka.
 - [ ] Notifikasi masuk saat ajukan magang / seminar / selesai magang.
 
 ## 7. Mobile (tugas partner)
 
 - [ ] Base URL API Flutter (`lib/config/app_config.dart`) diarahkan ke URL deploy (bukan `10.0.2.2`/localhost).
+- [ ] `flutter pub get` — ada dependensi baru **`mobile_scanner`** (scan absen seminar in-app). Bila resolusi versi bentrok, sesuaikan versi di `pubspec.yaml`.
+- [ ] Izin **kamera Android** sudah ada di manifest. Untuk build iOS, tambahkan `NSCameraUsageDescription` di `Info.plist`.
+- [ ] Build APK rilis dari kode branch `web` terbaru (banyak layar berubah sesi ini: nilai, profil+foto, logbook/bimbingan urutan, edit bimbingan/laporan, scan absen).
 
 ## 8. Keterbatasan yang perlu disadari sebelum uji lapangan
 
-- **Absensi seminar bisa di-abuse**: link/QR bila di-share ke grup, mahasiswa di luar
-  ruangan tetap bisa menandai hadir (login hanya mencegah NIM palsu & dobel, bukan
-  kehadiran fisik). Fitur "QR berputar (rotating)" belum dibangun — putuskan apakah
-  perlu dibuat sebelum uji nyata.
-- Belum ada suite pengujian otomatis; verifikasi masih manual → sebaiknya lakukan
-  satu putaran uji fungsional menyeluruh sebelum menghadapkan ke 72 mahasiswa.
+- **Absensi seminar**: QR sudah **berputar (rotating ~20 detik)** + wajib login, jadi link/QR
+  yang di-share cepat kedaluwarsa & tak bisa dobel/NIM palsu. Namun login tetap tak menjamin
+  kehadiran **fisik** (yang sempat memindai QR terbaru dari luar ruangan masih bisa tercatat) —
+  kombinasikan dengan pengawasan dosen saat uji nyata.
+- **Tes otomatis sudah ada** (30 feature test: auth, registrasi, reset password, fitur mahasiswa,
+  seminar, nilai, API parity). Tetap lakukan satu putaran uji fungsional manual menyeluruh
+  sebelum uji lapangan penuh.
 - Mail bisa gagal diam-diam bila SMTP belum dikonfigurasi → gunakan fallback link manual
   aktivasi pembimbing industri.
 
 ---
 
-## Rekomendasi tahapan (jangan langsung 72 mahasiswa)
+## Rekomendasi tahapan (jangan langsung skala penuh)
 1. Beresin #0–#5 (config produksi + data awal).
 2. Uji fungsional menyeluruh (semua alur, tiap peran).
 3. Soft-launch ke grup kecil (1 kelas / 5–10 orang) ~1 minggu.
-4. Baru full test 72 mahasiswa untuk Bab IV.
+4. Baru uji lapangan penuh / UAT (jumlah responden sesuai target Bab IV).
