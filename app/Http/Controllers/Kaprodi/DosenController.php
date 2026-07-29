@@ -4,11 +4,48 @@ namespace App\Http\Controllers\Kaprodi;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lecturer;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class DosenController extends Controller
 {
+    /** Tambah akun dosen kampus / pembimbing industri (dibuat Kaprodi, langsung aktif). */
+    public function store(Request $request)
+    {
+        $tab  = $request->input('tab') === 'industri' ? 'industri' : 'dosen';
+        $role = $tab === 'industri' ? 'lecturer_industry' : 'lecturer';
+
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'username' => 'required|string|max:50|unique:users,username',
+            'email'    => 'nullable|email|max:255|unique:users,email',
+            'password' => 'required|string|min:6',
+        ], [
+            'name.required'     => 'Nama wajib diisi.',
+            'username.required' => 'NIP / username wajib diisi.',
+            'username.unique'   => 'NIP / username sudah terdaftar.',
+            'email.unique'      => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min'      => 'Password minimal 6 karakter.',
+        ]);
+
+        $user = User::create([
+            'name'         => $request->name,
+            'username'     => $request->username,
+            'email'        => $request->email ?: ($request->username . '@simama.local'),
+            'password'     => Hash::make($request->password),
+            'role'         => $role,
+            'is_activated' => true,
+        ]);
+        Lecturer::create(['user_id' => $user->id]);
+
+        $label = $role === 'lecturer_industry' ? 'Pembimbing industri' : 'Dosen';
+
+        return redirect()->route('kaprodi.dosen.index', ['tab' => $tab])
+            ->with('success', "{$label} {$request->name} berhasil ditambahkan.");
+    }
+
     public function index(Request $request)
     {
         $search = $request->input('search');

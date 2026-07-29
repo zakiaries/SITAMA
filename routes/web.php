@@ -187,6 +187,7 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:kaprodi'])
     Route::post('/mahasiswa/{student}/reject',          [KaprodiMahasiswaController::class, 'reject'])->name('mahasiswa.reject');
 
     Route::get('/dosen',                                  [KaprodiDosenController::class, 'index'])->name('dosen.index');
+    Route::post('/dosen',                                 [KaprodiDosenController::class, 'store'])->name('dosen.store');
     Route::get('/dosen/{lecturer}',                       [KaprodiDosenController::class, 'detail'])->name('dosen.detail');
     Route::post('/dosen/{lecturer}/reset-password',       [KaprodiDosenController::class, 'resetPassword'])->name('dosen.reset-password');
 

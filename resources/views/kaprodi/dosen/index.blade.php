@@ -25,6 +25,13 @@
 
 @section('content')
 
+@if(session('success'))
+  <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
+@endif
+@if($errors->any())
+  <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ $errors->first() }}</div>
+@endif
+
 {{-- Tab --}}
 <div style="display:flex;gap:8px;margin-bottom:18px;border-bottom:1.5px solid var(--border);">
   @foreach(['dosen' => 'Dosen Kampus', 'industri' => 'Pembimbing Industri'] as $key => $label)
@@ -38,6 +45,12 @@
     </span>
   </a>
   @endforeach
+</div>
+
+<div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+  <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('modal-add-dosen').style.display='flex'">
+    + Tambah {{ $tab === 'industri' ? 'Pembimbing Industri' : 'Dosen' }}
+  </button>
 </div>
 
 <form method="GET" action="{{ route('kaprodi.dosen.index') }}">
@@ -80,5 +93,40 @@
 @empty
 <div style="text-align:center;padding:40px;color:var(--text-muted);"><p>Tidak ada dosen ditemukan.</p></div>
 @endforelse
+
+{{-- Modal Tambah Dosen / Pembimbing Industri --}}
+<div id="modal-add-dosen" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;width:100%;max-width:430px;margin:16px;">
+    <div style="font-weight:700;font-size:15px;margin-bottom:4px;">Tambah {{ $tab === 'industri' ? 'Pembimbing Industri' : 'Dosen Kampus' }}</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Akun dibuat oleh Kaprodi dan langsung aktif (bisa langsung login).</p>
+    <form method="POST" action="{{ route('kaprodi.dosen.store') }}">
+      @csrf
+      <input type="hidden" name="tab" value="{{ $tab }}">
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" name="name" value="{{ old('name') }}" required>
+      </div>
+      <div class="form-group">
+        <label>{{ $tab === 'industri' ? 'Username' : 'NIP / Username' }}</label>
+        <input type="text" name="username" value="{{ old('username') }}" required>
+      </div>
+      <div class="form-group">
+        <label>Email <span style="color:var(--text-muted);font-weight:400;">(opsional)</span></label>
+        <input type="email" name="email" value="{{ old('email') }}">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Min. 6 karakter" required>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-add-dosen').style.display='none'">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+@if($errors->any())
+<script>document.getElementById('modal-add-dosen').style.display='flex';</script>
+@endif
 
 @endsection
