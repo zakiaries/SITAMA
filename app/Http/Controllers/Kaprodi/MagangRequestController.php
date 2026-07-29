@@ -59,6 +59,34 @@ class MagangRequestController extends Controller
             $companyId = $company->id;
         }
 
+        // Mahasiswa memilih PIC yang SUDAH terdaftar → pakai langsung, tanpa buat
+        // akun/aktivasi baru. Langsung nyangkut ke magang mahasiswa ini.
+        if ($magangRequest->lecturer_industry_id) {
+            $lecturer = Lecturer::find($magangRequest->lecturer_industry_id);
+
+            Internship::create([
+                'student_id'           => $student->id,
+                'lecturer_id'          => $student->lecturer_id,
+                'company_id'           => $companyId,
+                'lecturer_industry_id' => $lecturer?->id,
+                'position'             => $magangRequest->position,
+                'start_date'           => $magangRequest->start_date ?? now(),
+                'is_finished'          => false,
+            ]);
+
+            $magangRequest->update([
+                'status'              => 'approved',
+                'created_company_id'  => $companyId,
+                'created_lecturer_id' => $lecturer?->id,
+            ]);
+
+            $this->syncDirectoryListing($magangRequest, $companyId);
+
+            return back()->with('success',
+                "Pengajuan {$student->user->name} disetujui. Pembimbing industri "
+                . "({$lecturer?->user?->name}) sudah terdaftar — tak perlu aktivasi ulang.");
+        }
+
         // Buat akun pembimbing industri — belum aktif, username/password diisi saat aktivasi
         $tempUsername = 'pending_' . Str::random(10);
         $picUser = User::create([

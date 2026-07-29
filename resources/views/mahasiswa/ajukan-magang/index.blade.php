@@ -81,8 +81,22 @@
       <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">
         Data Pembimbing Industri <span style="color:var(--danger);">*</span>
       </div>
-      <div style="background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;">
-        <input type="text" name="pic_name" value="{{ old('pic_name') }}" placeholder="Nama lengkap pembimbing *" required
+      @if($existingPics->isNotEmpty())
+      <select name="lecturer_industry_id" id="pic_sel" onchange="togglePic(this.value)"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:6px;">
+        <option value="">— Pembimbing baru (isi data di bawah) —</option>
+        @foreach($existingPics as $p)
+          <option value="{{ $p['id'] }}" {{ old('lecturer_industry_id') == $p['id'] ? 'selected' : '' }}>
+            {{ $p['name'] }}@if($p['company']) — {{ $p['company'] }}@endif
+          </option>
+        @endforeach
+      </select>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
+        Kalau pembimbingmu sudah pernah terdaftar (mis. dari mahasiswa lain di perusahaan yang sama), pilih dari sini — tak perlu daftar ulang.
+      </div>
+      @endif
+      <div id="pic-manual" style="background:var(--warm);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;">
+        <input type="text" name="pic_name" value="{{ old('pic_name') }}" placeholder="Nama lengkap pembimbing *"
           style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
         <input type="tel" name="pic_phone" value="{{ old('pic_phone') }}" placeholder="No. HP / WhatsApp (opsional)"
           style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
@@ -187,5 +201,17 @@ function toggleCompany(mode) {
   document.getElementById('co-new').style.display      = mode === 'new'      ? 'block' : 'none';
   document.getElementById('company_id_sel').required   = mode === 'existing';
 }
+
+// Pilih PIC terdaftar → sembunyikan isian manual & tak wajib; "baru" → tampilkan.
+function togglePic(v) {
+  var manual = document.getElementById('pic-manual');
+  var name   = document.querySelector('input[name="pic_name"]');
+  if (v) { manual.style.display = 'none'; name.required = false; }
+  else   { manual.style.display = 'flex'; name.required = true; }
+}
+(function () {
+  var sel = document.getElementById('pic_sel');
+  togglePic(sel ? sel.value : '');
+})();
 </script>
 @endsection

@@ -10,7 +10,7 @@ class CompanyRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'company_id',
+        'student_id', 'company_id', 'lecturer_industry_id',
         'company_name', 'company_address', 'company_field', 'company_phone', 'company_email',
         'proof_file', 'position', 'bidang', 'start_date',
         'pic_name', 'pic_email', 'pic_phone',
@@ -38,5 +38,11 @@ class CompanyRequest extends Model
     public function createdLecturer()
     {
         return $this->belongsTo(Lecturer::class, 'created_lecturer_id');
+    }
+
+    /** PIC yang sudah terdaftar yang dipilih mahasiswa (opsional). */
+    public function lecturerIndustry()
+    {
+        return $this->belongsTo(Lecturer::class, 'lecturer_industry_id');
     }
 }

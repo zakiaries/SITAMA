@@ -19,11 +19,26 @@ class MagangRequestController extends Controller
         $requests = CompanyRequest::where('student_id', $student->id)->latest()->get();
         $companies = Company::orderBy('name')->get();
 
+        // Pembimbing industri yang SUDAH terdaftar (dari magang sebelumnya) —
+        // ditampilkan berlabel perusahaan agar mahasiswa berikutnya tinggal pilih.
+        $existingPics = \App\Models\Internship::whereNotNull('lecturer_industry_id')
+            ->with(['lecturerIndustry.user', 'company'])
+            ->get()
+            ->groupBy('lecturer_industry_id')
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'id'      => $first->lecturer_industry_id,
+                    'name'    => $first->lecturerIndustry->user->name ?? 'Pembimbing',
+                    'company' => $group->pluck('company.name')->filter()->unique()->implode(', '),
+                ];
+            })->values();
+
         $hasActiveInternship = $student->internships()->where('is_finished', false)->exists();
         $hasPending          = $requests->where('status', 'pending')->isNotEmpty();
 
         return view('mahasiswa.ajukan-magang.index', compact(
-            'requests', 'companies', 'hasActiveInternship', 'hasPending'
+            'requests', 'companies', 'existingPics', 'hasActiveInternship', 'hasPending'
         ));
     }
 
@@ -40,11 +55,12 @@ class MagangRequestController extends Controller
         }
 
         $request->validate([
-            'company_id'   => 'nullable|exists:companies,id',
-            'company_name' => 'required_without:company_id|nullable|string|max:255',
-            'pic_name'     => 'required|string|max:255',
-            'pic_phone'    => ['nullable', 'string', 'max:50', 'regex:/^[0-9()+\-\s]{7,20}$/'],
-            'pic_email'    => 'nullable|email|max:255',
+            'company_id'           => 'nullable|exists:companies,id',
+            'company_name'         => 'required_without:company_id|nullable|string|max:255',
+            'lecturer_industry_id' => 'nullable|exists:lecturers,id',
+            'pic_name'             => 'required_without:lecturer_industry_id|nullable|string|max:255',
+            'pic_phone'            => ['nullable', 'string', 'max:50', 'regex:/^[0-9()+\-\s]{7,20}$/'],
+            'pic_email'            => 'nullable|email|max:255',
             'position'     => 'nullable|string|max:255',
             'bidang'       => 'nullable|string|max:100',
             'start_date'   => 'required|date',
@@ -65,18 +81,25 @@ class MagangRequestController extends Controller
             ? Company::find($request->company_id)
             : null;
 
+        // PIC yang sudah terdaftar (dipilih dari dropdown) — pastikan role industri.
+        $existingPic = $request->filled('lecturer_industry_id')
+            ? \App\Models\Lecturer::whereHas('user', fn ($q) => $q->where('role', 'lecturer_industry'))
+                ->with('user')->find($request->lecturer_industry_id)
+            : null;
+
         CompanyRequest::create([
-            'student_id'   => $student->id,
-            'company_id'   => $company?->id,
-            'company_name' => $company ? $company->name : $request->company_name,
-            'pic_name'     => $request->pic_name,
-            'pic_email'    => $request->pic_email,
-            'pic_phone'    => $request->pic_phone,
-            'position'     => $request->position,
-            'bidang'       => $request->bidang,
-            'start_date'   => $request->start_date,
-            'proof_file'   => $proofPath,
-            'status'       => 'pending',
+            'student_id'           => $student->id,
+            'company_id'           => $company?->id,
+            'lecturer_industry_id' => $existingPic?->id,
+            'company_name'         => $company ? $company->name : $request->company_name,
+            'pic_name'             => $existingPic ? $existingPic->user->name : $request->pic_name,
+            'pic_email'            => $existingPic ? $existingPic->user->email : $request->pic_email,
+            'pic_phone'            => $existingPic ? null : $request->pic_phone,
+            'position'             => $request->position,
+            'bidang'               => $request->bidang,
+            'start_date'           => $request->start_date,
+            'proof_file'           => $proofPath,
+            'status'               => 'pending',
         ]);
 
         // Beri tahu Kaprodi ada pengajuan magang baru yang perlu direview.
