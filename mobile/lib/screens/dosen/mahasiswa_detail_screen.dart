@@ -159,9 +159,13 @@ class _DosenMahasiswaDetailState extends State<DosenMahasiswaDetail> {
                 // Nilai
                 AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
-                    const Text('Rata-rata Nilai: ', style: TextStyle(color: AppColors.textSecondary)),
-                    Text('${nilai['overall'] ?? '-'}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.primary)),
+                    const Text('Nilai Anda (Dosen): ', style: TextStyle(color: AppColors.textSecondary)),
+                    Text('${(nilai['lecturer'] as Map?)?['average'] ?? '-'}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.primary)),
                   ]),
+                  if (nilai['final'] != null)
+                    Padding(padding: const EdgeInsets.only(top: 2),
+                        child: Text('Nilai akhir (dosen + industri): ${nilai['final']}',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted))),
                   const SizedBox(height: 10),
                   SizedBox(width: double.infinity, child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(46)),

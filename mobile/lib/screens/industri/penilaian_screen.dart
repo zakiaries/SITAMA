@@ -88,6 +88,9 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             children: [
               Text(widget.studentName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              const SizedBox(height: 4),
+              const Text('Isi skor 1–10 per komponen. Nilai industri = rata-rata seluruh komponen.',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               const SizedBox(height: 12),
               ...comps.map((c) {
                 final details = List<Map<String, dynamic>>.from(c['details'] ?? []);
@@ -105,7 +108,7 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
                                 controller: _scores[d['id']],
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 textAlign: TextAlign.center,
-                                decoration: const InputDecoration(hintText: '0-100', isDense: true),
+                                decoration: const InputDecoration(hintText: '1-10', isDense: true),
                               ),
                             ),
                           ]),

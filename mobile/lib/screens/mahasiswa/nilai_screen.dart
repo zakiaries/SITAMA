@@ -46,24 +46,26 @@ class _NilaiScreenState extends State<NilaiScreen> {
           if (nilai == null) {
             return const EmptyState('Belum ada data nilai / magang aktif.', icon: Icons.grade_outlined);
           }
-          final items = List<Map<String, dynamic>>.from(nilai['items'] ?? []);
+          final lecturer = Map<String, dynamic>.from(nilai['lecturer'] ?? {});
+          final industry = Map<String, dynamic>.from(nilai['industry'] ?? {});
+          final lecComps = List<Map<String, dynamic>>.from(lecturer['components'] ?? []);
+          final indComps = List<Map<String, dynamic>>.from(industry['components'] ?? []);
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              NilaiHero('${nilai['overall'] ?? '-'}'),
-              const SectionTitle('Rincian per Komponen'),
-              ...items.map((it) => AppCard(child: Row(children: [
-                    Expanded(child: Text(it['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600))),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: it['avg'] == null ? AppColors.warm : AppColors.blueTint,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(it['avg']?.toString() ?? 'Belum dinilai',
-                          style: TextStyle(fontWeight: FontWeight.w700, color: it['avg'] == null ? AppColors.textMuted : AppColors.primary)),
-                    ),
-                  ]))),
+              NilaiHero('${nilai['final'] ?? '-'}'),
+              Padding(
+                padding: const EdgeInsets.only(top: 6, bottom: 2),
+                child: Text(
+                  nilai['final'] == null
+                      ? 'Menunggu penilaian lengkap dari dosen & industri.'
+                      : 'Rata dosen ${lecturer['average']} + rata industri ${industry['average']}  (skala 1–10)',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                ),
+              ),
+              _section('Penilaian Dosen Pembimbing', lecturer['average'], lecComps, showWeight: true),
+              _section('Penilaian Pembimbing Industri', industry['average'], indComps, showWeight: false),
             ],
           );
             },
@@ -72,4 +74,34 @@ class _NilaiScreenState extends State<NilaiScreen> {
       ]),
     );
   }
+
+  Widget _section(String title, dynamic avg, List<Map<String, dynamic>> comps, {required bool showWeight}) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(2, 16, 2, 8),
+        child: Row(children: [
+          Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14))),
+          _badge(avg),
+        ]),
+      ),
+      ...comps.map((it) => AppCard(child: Row(children: [
+            Expanded(child: Text(
+              showWeight && it['weight'] != null
+                  ? '${it['name']}  (bobot ${(it['weight'] as num).toInt()}%)'
+                  : '${it['name'] ?? ''}',
+              style: const TextStyle(fontWeight: FontWeight.w600))),
+            _badge(it['avg']),
+          ]))),
+    ]);
+  }
+
+  Widget _badge(dynamic v) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+        decoration: BoxDecoration(
+          color: v == null ? AppColors.warm : AppColors.blueTint,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(v?.toString() ?? 'Belum dinilai',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: v == null ? AppColors.textMuted : AppColors.primary)),
+      );
 }

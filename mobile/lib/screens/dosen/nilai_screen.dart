@@ -85,7 +85,8 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
             children: [
               Text(widget.studentName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               const SizedBox(height: 4),
-              const Text('Isi skor 0–100 per sub-komponen.', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+              const Text('Isi skor 1–10 per sub-komponen. Nilai dosen berbobot: Proposal 20% + Laporan 80%.',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               const SizedBox(height: 12),
               ...comps.map((c) {
                 final details = List<Map<String, dynamic>>.from(c['details'] ?? []);
@@ -93,7 +94,12 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(c['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800)),
+                      Row(children: [
+                        Expanded(child: Text(c['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800))),
+                        if (c['weight'] != null)
+                          Text('bobot ${(c['weight'] as num).toInt()}%',
+                              style: const TextStyle(color: AppColors.textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+                      ]),
                       const SizedBox(height: 6),
                       ...details.map((d) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6),
@@ -105,7 +111,7 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
                                   controller: _controllers[d['id']],
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(hintText: '0-100', isDense: true),
+                                  decoration: const InputDecoration(hintText: '1-10', isDense: true),
                                 ),
                               ),
                             ]),
