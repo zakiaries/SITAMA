@@ -34,6 +34,12 @@ services:
   db:
     image: mariadb:11
     restart: unless-stopped
+    # Tuning hemat memori untuk VPS RAM kecil (mis. 1 GB).
+    command: >
+      --innodb-buffer-pool-size=64M
+      --performance-schema=OFF
+      --key-buffer-size=8M
+      --max-connections=40
     environment:
       MARIADB_DATABASE: ${DB_DATABASE}
       MARIADB_USER: ${DB_USERNAME}
