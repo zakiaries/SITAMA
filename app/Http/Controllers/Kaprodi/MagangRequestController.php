@@ -48,6 +48,14 @@ class MagangRequestController extends Controller
             return back()->with('error', 'Mahasiswa ini sudah memiliki magang aktif.');
         }
 
+        // Magang WAJIB punya dosen pembimbing. Kalau disetujui tanpa dospem,
+        // internships.lecturer_id jadi NULL dan mahasiswa hilang dari portal
+        // dosen tanpa error apa pun (portal dosen memfilter lewat kolom itu).
+        if (! $student->lecturer_id) {
+            return back()->with('error',
+                "{$student->user->name} belum punya dosen pembimbing. Plot dosen pembimbingnya dulu di menu Data Mahasiswa, lalu setujui pengajuan ini.");
+        }
+
         // Resolve company
         if ($magangRequest->company_id) {
             $companyId = $magangRequest->company_id;

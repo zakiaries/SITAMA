@@ -36,9 +36,13 @@ class MagangRequestController extends Controller
 
         $hasActiveInternship = $student->internships()->where('is_finished', false)->exists();
         $hasPending          = $requests->where('status', 'pending')->isNotEmpty();
+        // Dospem diplot Kaprodi SEBELUM mahasiswa mencari magang (dospem yang
+        // membimbing proposal). Tanpa itu, magang yang terbentuk tak punya dosen
+        // dan mahasiswa jadi tak terlihat di portal dosen.
+        $hasLecturer         = (bool) $student->lecturer_id;
 
         return view('mahasiswa.ajukan-magang.index', compact(
-            'requests', 'companies', 'existingPics', 'hasActiveInternship', 'hasPending'
+            'requests', 'companies', 'existingPics', 'hasActiveInternship', 'hasPending', 'hasLecturer'
         ));
     }
 
@@ -52,6 +56,14 @@ class MagangRequestController extends Controller
 
         if (CompanyRequest::where('student_id', $student->id)->where('status', 'pending')->exists()) {
             return back()->with('error', 'Kamu sudah memiliki pengajuan yang sedang menunggu review Kaprodi.');
+        }
+
+        // Tanpa dosen pembimbing, magang yang disetujui akan lahir tanpa dosen
+        // (internships.lecturer_id NULL) dan mahasiswa tak akan pernah muncul di
+        // portal dosen. Dospem juga yang membimbing proposal sebelum magang mulai.
+        if (! $student->lecturer_id) {
+            return back()->with('error',
+                'Dosen pembimbing belum ditugaskan oleh Kaprodi. Pengajuan magang bisa dikirim setelah dosen pembimbingmu ditetapkan.');
         }
 
         $request->validate([

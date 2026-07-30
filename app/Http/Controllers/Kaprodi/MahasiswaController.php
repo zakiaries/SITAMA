@@ -112,6 +112,13 @@ class MahasiswaController extends Controller
             return back()->with('error', 'Mahasiswa sudah memiliki data magang.');
         }
 
+        // Sama seperti jalur pengajuan mahasiswa: magang tanpa dospem akan lahir
+        // dengan lecturer_id NULL dan mahasiswanya tak terlihat di portal dosen.
+        if (! $student->lecturer_id) {
+            return back()->with('error',
+                'Plot dosen pembimbing untuk mahasiswa ini dulu, baru catat data magangnya.');
+        }
+
         $request->validate([
             'company_id'           => 'nullable|exists:companies,id',
             'company_name'         => 'required_without:company_id|nullable|string|max:255',

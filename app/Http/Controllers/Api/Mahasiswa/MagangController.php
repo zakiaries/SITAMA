@@ -24,6 +24,8 @@ class MagangController extends ApiController
         return response()->json([
             'has_active_internship' => $student->internships()->where('is_finished', false)->exists(),
             'has_pending'           => $requests->where('status', 'pending')->isNotEmpty(),
+            // Flutter: sembunyikan/nonaktifkan form bila false (dospem belum diplot).
+            'has_lecturer'          => (bool) $student->lecturer_id,
             'companies'             => Company::orderBy('name')->get(['id', 'name']),
             'bidang_options'        => JobListing::BIDANG_OPTIONS,
             'requests'              => $requests->map(fn ($r) => [
@@ -50,6 +52,11 @@ class MagangController extends ApiController
         }
         if (CompanyRequest::where('student_id', $student->id)->where('status', 'pending')->exists()) {
             return response()->json(['message' => 'Kamu sudah memiliki pengajuan yang sedang menunggu review Kaprodi.'], 422);
+        }
+        // Paritas dengan web: tanpa dospem, magang yang disetujui lahir tanpa
+        // dosen dan mahasiswa tak terlihat di portal dosen.
+        if (! $student->lecturer_id) {
+            return response()->json(['message' => 'Dosen pembimbing belum ditugaskan oleh Kaprodi. Pengajuan magang bisa dikirim setelah dosen pembimbingmu ditetapkan.'], 422);
         }
 
         $request->validate([

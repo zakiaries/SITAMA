@@ -23,6 +23,16 @@
     <p style="font-size:13px;color:var(--text-muted);margin:0;">Kaprodi sedang mereview pengajuanmu. Kamu tidak bisa mengajukan lagi sampai pengajuan sebelumnya selesai diproses.</p>
   </div>
 
+@elseif(! $hasLecturer)
+  <div class="card" style="border-left:4px solid var(--warning);">
+    <div style="font-weight:700;color:var(--warn-text);margin-bottom:6px;">Dosen pembimbing belum ditetapkan</div>
+    <p style="font-size:13px;color:var(--text-muted);margin:0;">
+      Kaprodi belum menugaskan dosen pembimbing untukmu. Pengajuan magang bisa dikirim setelah dosen
+      pembimbingmu ditetapkan — dosen itulah yang akan membimbing proposal dan mendampingi kendala
+      magangmu. Silakan hubungi Kaprodi bila magangmu sudah dekat.
+    </p>
+  </div>
+
 @else
   {{-- Form Ajukan Magang --}}
   <div class="card" style="margin-bottom:20px;">
