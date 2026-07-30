@@ -26,6 +26,11 @@
 @if(session('error'))
   <div style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('error') }}</div>
 @endif
+@if($errors->any())
+  <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    {{ $errors->first() }}
+  </div>
+@endif
 @if(session('activation_info'))
   @php $act = session('activation_info'); @endphp
   <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;">
@@ -118,3 +123,7 @@
 </div>
 
 @endsection
+
+@if($errors->any())
+<script>document.getElementById('modal-reset-pw').style.display='flex';</script>
+@endif

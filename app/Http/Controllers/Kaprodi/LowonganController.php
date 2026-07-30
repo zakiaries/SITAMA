@@ -76,7 +76,8 @@ class LowonganController extends Controller
     /** Aktif/nonaktifkan lowongan (yang nonaktif tidak tampil ke mahasiswa). */
     public function toggle(JobListing $lowongan)
     {
-        $lowongan->update(['status' => $lowongan->status === 'active' ? 'inactive' : 'active']);
+        // Kolom status = enum('active','closed') — memakai 'inactive' membuat SQL error (500).
+        $lowongan->update(['status' => $lowongan->status === 'active' ? 'closed' : 'active']);
 
         return back()->with('success', 'Status lowongan diperbarui.');
     }

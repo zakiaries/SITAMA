@@ -53,6 +53,11 @@
     {{ session('error') }}
   </div>
 @endif
+@if($errors->any())
+  <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    {{ $errors->first() }}
+  </div>
+@endif
 
 {{-- Back Button --}}
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -323,3 +328,7 @@
 </div>
 
 @endsection
+
+@if($errors->any())
+<script>document.getElementById('modal-reset-pw').style.display='flex';</script>
+@endif

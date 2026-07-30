@@ -41,12 +41,12 @@ class ProfileController extends ApiController
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
         $user->update(['name' => $request->name, 'email' => $request->email]);
 
         if ($request->filled('password')) {
-            $request->validate(['password' => 'min:8|confirmed']);
             $user->update(['password' => Hash::make($request->password)]);
         }
 
