@@ -16,13 +16,8 @@
 
   {{-- Dosen Pembimbing --}}
   <div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
-    <div class="avatar" style="width:42px;height:42px;font-size:14px;background:var(--primary-light);color:var(--primary-text);">
-      @if($lecturer && $lecturer->user)
-        {{ collect(explode(' ', $lecturer->user->name))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('') }}
-      @else
-        ?
-      @endif
-    </div>
+    <x-avatar :user="$lecturer?->user" class="avatar" :size="42" :font="14"
+              style="background:var(--primary-light);color:var(--primary-text);" />
     <div>
       <div class="field-label">Dosen Pembimbing</div>
       <div style="font-size:14px;font-weight:700;color:var(--text);">

@@ -17,16 +17,9 @@
   <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('success') }}</div>
 @endif
 
-@php $initials = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
 
 <div class="profile-hero">
-  <div class="profile-av">
-    @if($user->photo_profile)
-      <img src="{{ $user->photoUrl() }}" alt="Foto profil" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
-    @else
-      {{ $initials }}
-    @endif
-  </div>
+  <x-avatar :user="$user" class="profile-av" />
   <div>
     <div class="profile-name">{{ $user->name }}</div>
     <div class="profile-role">Ketua Program Studi · Superadmin</div>

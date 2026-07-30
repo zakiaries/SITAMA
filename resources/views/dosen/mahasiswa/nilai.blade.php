@@ -60,10 +60,8 @@
 
 {{-- Info Card --}}
 <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:14px;">
-  @php $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
-  <div style="width:42px;height:42px;border-radius:50%;background:var(--blue-tint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">
-    {{ $initials }}
-  </div>
+  <x-avatar :user="$student->user" :size="42" :font="13"
+            style="border-radius:50%;background:var(--blue-tint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;" />
   <div style="flex:1;">
     <div style="font-weight:700;font-size:14px;">{{ $student->user->name }}</div>
     <div style="font-size:12px;color:var(--text-muted);">{{ $internship->company->name ?? '-' }} · {{ $internship->position }}</div>

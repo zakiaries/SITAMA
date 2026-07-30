@@ -54,9 +54,8 @@
 @section('content')
 
 {{-- Hero --}}
-@php $heroInit = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
 <div class="industri-hero">
-  <div class="hero-av">{{ $heroInit }}</div>
+  <x-avatar :user="$user" class="hero-av" />
   <div style="flex:1;">
     <div class="hero-role">Pembimbing Industri</div>
     <div class="hero-name">{{ $user->name }}</div>
@@ -113,10 +112,9 @@
     ['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
   ];
   $color   = $colors[$student->id % count($colors)];
-  $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
 @endphp
 <a href="{{ route('dosen-industri.mahasiswa.detail', $student) }}" class="student-card">
-  <div class="student-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};">{{ $initials }}</div>
+  <x-avatar :user="$student->user" class="student-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};" />
   <div class="student-info">
     <div class="student-name">{{ $student->user->name }}</div>
     <div class="student-nim">{{ $student->user->username }}</div>

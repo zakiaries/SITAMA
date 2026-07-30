@@ -75,10 +75,9 @@
     ['bg'=>'var(--warn-bg)','text'=>'var(--warn-text)'],['bg'=>'var(--purple-bg)','text'=>'var(--purple-text)'],
   ];
   $color    = $colors[$lec->id % count($colors)];
-  $initials = collect(explode(' ', $lec->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
 @endphp
 <a href="{{ route('kaprodi.dosen.detail', $lec) }}" class="dosen-card">
-  <div class="dosen-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};">{{ $initials }}</div>
+  <x-avatar :user="$lec->user" class="dosen-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};" />
   <div class="dosen-info">
     <div class="dosen-name">{{ $lec->user->name ?? '-' }}</div>
     <div class="dosen-user">{{ $lec->user->username ?? '-' }}</div>

@@ -50,9 +50,8 @@
 @section('content')
 
 {{-- Hero --}}
-@php $initials = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
 <div class="kaprodi-hero">
-  <div class="hero-av">{{ $initials }}</div>
+  <x-avatar :user="$user" class="hero-av" />
   <div style="flex:1;">
     <div class="hero-role">KETUA PROGRAM STUDI</div>
     <div class="hero-name">{{ $user->name }}<span class="hero-badge"><x-icon name="star" :size="12"/> Superadmin</span></div>

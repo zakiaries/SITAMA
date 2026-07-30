@@ -110,11 +110,8 @@
 </div>
 
 {{-- Hero --}}
-@php
-  $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
-@endphp
 <div class="student-hero">
-  <div class="hero-avatar">{{ $initials }}</div>
+  <x-avatar :user="$student->user" class="hero-avatar" />
   <div class="hero-detail">
     <div class="hero-sname">{{ $student->user->name }}</div>
     <div class="hero-nim">{{ $student->user->username }}</div>

@@ -1,6 +1,5 @@
 @php
   $authUser = Auth::user();
-  $initials = collect(explode(' ', $authUser->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
 @endphp
 <div class="topbar">
   <div class="tb-title">{{ $title ?? 'Dashboard' }}</div>
@@ -21,7 +20,7 @@
     </style>
     <details class="user-dd" style="position:relative;">
       <summary title="{{ $authUser->name }}">
-        <div class="avatar" style="width:34px;height:34px;font-size:11px;background:var(--primary-light);color:var(--primary-text);">{{ $initials }}</div>
+        <x-avatar :user="$authUser" class="avatar" :size="34" :font="11" style="background:var(--primary-light);color:var(--primary-text);" />
       </summary>
       <div style="position:absolute;right:0;top:calc(100% + 10px);min-width:190px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.13);z-index:200;overflow:hidden;">
         <div style="padding:11px 14px;border-bottom:1px solid var(--border);">

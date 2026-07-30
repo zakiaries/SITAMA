@@ -93,10 +93,9 @@
     ['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
   ];
   $color    = $colors[$student->id % count($colors)];
-  $initials = collect(explode(' ', $student->user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
 @endphp
 <div class="mhs-card {{ $student->status === 'pending' ? 'is-pending' : '' }}">
-  <div class="mhs-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};">{{ $initials }}</div>
+  <x-avatar :user="$student->user" class="mhs-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};" />
   <div class="mhs-info">
     <div class="mhs-name">{{ $student->user->name }}</div>
     <div class="mhs-meta">{{ $student->user->username }} · {{ $student->the_class }}@if($internship?->company) · {{ $internship->company->name }}@endif</div>

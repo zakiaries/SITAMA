@@ -11,18 +11,11 @@
 @endif
 
 @php
-  $initials = collect(explode(' ', $user->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join('');
 @endphp
 
 {{-- Profile Hero --}}
 <div class="profile-hero">
-  <div class="profile-av">
-    @if($user->photo_profile)
-      <img src="{{ $user->photoUrl() }}" alt="Foto profil" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
-    @else
-      {{ $initials }}
-    @endif
-  </div>
+  <x-avatar :user="$user" class="profile-av" />
   <div>
     <div class="profile-name">{{ $user->name }}</div>
     <div class="profile-role">Dosen Pembimbing</div>

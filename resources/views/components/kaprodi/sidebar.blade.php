@@ -54,10 +54,7 @@
 
   <a class="sb-user {{ request()->routeIs('kaprodi.profile') ? 'sb-user-active' : '' }}"
      href="{{ route('kaprodi.profile') }}" style="text-decoration:none;">
-    @php $initials = collect(explode(' ', $sbUser->name ?? ''))->take(2)->map(fn($w) => strtoupper($w[0] ?? ''))->join(''); @endphp
-    <div class="avatar" style="width:36px;height:36px;font-size:12px;">
-      {{ $initials }}
-    </div>
+    <x-avatar :user="$sbUser" class="avatar" :size="36" :font="12" />
     <div>
       <div class="uname">{{ $sbUser->name }}</div>
       <div class="urole">Kaprodi</div>
