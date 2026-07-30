@@ -3,8 +3,11 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -49,9 +52,37 @@ class Handler extends ExceptionHandler
             //
         });
 
+        // Kegagalan validasi TIDAK dicatat Laravel (hanya redirect back), jadi
+        // form yang "gagal senyap" mustahil didiagnosa di server. Catat sebagai
+        // warning lalu lanjutkan penanganan default (return null).
+        $this->renderable(function (ValidationException $e, $request) {
+            Log::warning('Validasi gagal', [
+                'url'    => $request->fullUrl(),
+                'user'   => Auth::id(),
+                'errors' => $e->errors(),
+            ]);
+
+            return null;
+        });
+
         // Sesi/token kedaluwarsa (419): jangan tampilkan halaman 419 mentah.
         // Arahkan ke dashboard sesuai role bila masih login, atau ke login.
         $this->renderable(function (TokenMismatchException $e, $request) {
+            // Unggahan yang melebihi post_max_size dibuang PHP SEBELUM sampai ke
+            // aplikasi: $_POST kosong sehingga _token hilang dan gejalanya sama
+            // dengan token kedaluwarsa. Beri pesan yang benar, bukan "sesi habis".
+            if ($this->looksLikeOversizedUpload($request)) {
+                Log::warning('Unggahan melebihi post_max_size', [
+                    'url'            => $request->fullUrl(),
+                    'user'           => Auth::id(),
+                    'content_length' => $request->server('CONTENT_LENGTH'),
+                    'post_max_size'  => ini_get('post_max_size'),
+                ]);
+
+                return back()->with('error', 'File yang diunggah terlalu besar sehingga ditolak server (batas '
+                    . ini_get('upload_max_filesize') . ' per file). Perkecil file lalu coba lagi.');
+            }
+
             if (Auth::check()) {
                 return redirect()->to($this->dashboardFor(Auth::user()->role))
                     ->with('error', 'Sesi sempat kedaluwarsa, silakan coba lagi.');
@@ -60,6 +91,18 @@ class Handler extends ExceptionHandler
             return redirect()->route('login')
                 ->withErrors(['username' => 'Sesi kedaluwarsa, silakan login kembali.']);
         });
+    }
+
+    /**
+     * Ciri POST yang body-nya dibuang PHP karena melebihi post_max_size:
+     * ada Content-Length besar, tapi $_POST dan $_FILES kosong.
+     */
+    private function looksLikeOversizedUpload(Request $request): bool
+    {
+        return $request->isMethod('POST')
+            && (int) $request->server('CONTENT_LENGTH', 0) > 0
+            && empty($request->post())
+            && empty($_FILES);
     }
 
     private function dashboardFor(?string $role): string

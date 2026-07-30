@@ -24,6 +24,32 @@ class StudentFeaturesTest extends FeatureTestCase
             ->assertSessionHasNoErrors();
     }
 
+    /** Bug produksi: bimbingan tak tersimpan sama sekali (Guidance::count()=0). */
+    public function test_bimbingan_tersimpan_dengan_dan_tanpa_lampiran(): void
+    {
+        Storage::fake('public');
+        $u = $this->userByUsername('3.34.23.2.01');
+
+        $this->from('/mahasiswa/bimbingan')->actingAs($u)->post('/mahasiswa/bimbingan', [
+            'title' => 'Konsultasi tanpa file', 'activity' => 'bahas progres', 'date' => '2024-07-01',
+        ])->assertSessionHasNoErrors()->assertRedirect('/mahasiswa/bimbingan');
+
+        $tanpaFile = Guidance::where('title', 'Konsultasi tanpa file')->first();
+        $this->assertNotNull($tanpaFile);
+        $this->assertSame('pending', $tanpaFile->status);
+        $this->assertNull($tanpaFile->name_file);
+
+        $this->from('/mahasiswa/bimbingan')->actingAs($u)->post('/mahasiswa/bimbingan', [
+            'title' => 'Konsultasi dengan file', 'activity' => 'bahas draft', 'date' => '2024-07-02',
+            'file'  => UploadedFile::fake()->create('draft.pdf', 300, 'application/pdf'),
+        ])->assertSessionHasNoErrors();
+
+        $denganFile = Guidance::where('title', 'Konsultasi dengan file')->first();
+        $this->assertNotNull($denganFile);
+        $this->assertNotNull($denganFile->name_file);
+        Storage::disk('public')->assertExists($denganFile->name_file);
+    }
+
     public function test_bimbingan_file_type_validated(): void
     {
         $u = $this->userByUsername('3.34.23.2.01');
