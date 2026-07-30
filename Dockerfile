@@ -9,6 +9,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring gd zip bcmath intl \
     && rm -rf /var/lib/apt/lists/*
 
+# Batas unggah: laporan/bimbingan 10 MB & foto 4 MB butuh lebih dari default PHP
+# (upload_max_filesize=2M, post_max_size=8M) — tanpa ini unggahan gagal senyap.
+RUN { \
+      echo 'upload_max_filesize=12M'; \
+      echo 'post_max_size=15M'; \
+      echo 'memory_limit=256M'; \
+      echo 'max_execution_time=120'; \
+    } > /usr/local/etc/php/conf.d/simama.ini
+
 # Composer (disalin dari image resmi).
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
