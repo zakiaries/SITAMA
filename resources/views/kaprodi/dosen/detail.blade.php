@@ -102,14 +102,20 @@
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div>
           <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Password Baru <span style="color:var(--danger);">*</span></label>
-          <input type="password" name="new_password" required minlength="6"
-            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"
-            placeholder="Minimal 6 karakter">
+          <div class="pw-wrap">
+            <input type="password" name="new_password" required minlength="6"
+              style="width:100%;padding:9px 42px 9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"
+              placeholder="Minimal 6 karakter">
+            <x-password-toggle />
+          </div>
         </div>
         <div>
           <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;">Konfirmasi Password <span style="color:var(--danger);">*</span></label>
-          <input type="password" name="new_password_confirmation" required minlength="6"
-            style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          <div class="pw-wrap">
+            <input type="password" name="new_password_confirmation" required minlength="6"
+              style="width:100%;padding:9px 42px 9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+            <x-password-toggle />
+          </div>
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;">

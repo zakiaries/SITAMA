@@ -115,7 +115,10 @@
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" name="password" placeholder="Min. 6 karakter" required>
+        <div class="pw-wrap">
+          <input type="password" name="password" placeholder="Min. 6 karakter" required>
+          <x-password-toggle />
+        </div>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
         <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-add-dosen').style.display='none'">Batal</button>

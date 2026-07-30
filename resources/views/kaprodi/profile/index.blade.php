@@ -102,11 +102,17 @@
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">
           Password Baru <span style="font-weight:400;color:var(--text-muted);">(kosongkan jika tidak ubah)</span>
         </label>
-        <input type="password" name="password" placeholder="Min. 8 karakter">
+        <div class="pw-wrap">
+          <input type="password" name="password" placeholder="Min. 8 karakter">
+          <x-password-toggle />
+        </div>
       </div>
       <div class="form-group">
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Konfirmasi Password</label>
-        <input type="password" name="password_confirmation">
+        <div class="pw-wrap">
+          <input type="password" name="password_confirmation">
+          <x-password-toggle />
+        </div>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
         <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-edit-profile').classList.remove('open')">Batal</button>

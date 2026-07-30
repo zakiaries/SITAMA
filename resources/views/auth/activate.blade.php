@@ -62,14 +62,20 @@
       </div>
       <div class="form-group">
         <label class="form-label">Password <span style="color:#dc2626;">*</span></label>
-        <input class="form-input" type="password" name="password"
-          placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password">
+        <div class="pw-wrap">
+          <input class="form-input" type="password" name="password"
+            placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password">
+          <x-password-toggle />
+        </div>
         @error('password')<div class="error-msg">{{ $message }}</div>@enderror
       </div>
       <div class="form-group">
         <label class="form-label">Konfirmasi Password <span style="color:#dc2626;">*</span></label>
-        <input class="form-input" type="password" name="password_confirmation"
-          placeholder="Ulangi password" required minlength="6" autocomplete="new-password">
+        <div class="pw-wrap">
+          <input class="form-input" type="password" name="password_confirmation"
+            placeholder="Ulangi password" required minlength="6" autocomplete="new-password">
+          <x-password-toggle />
+        </div>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;">
         Aktifkan Akun

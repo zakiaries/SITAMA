@@ -40,12 +40,18 @@
     <input type="hidden" name="email" value="{{ $email }}">
     <div class="form-group">
       <label class="form-label">Password Baru <span style="color:#dc2626;">*</span></label>
-      <input class="form-input" type="password" name="password" placeholder="Minimal 8 karakter" required minlength="8" autocomplete="new-password" autofocus>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" name="password" placeholder="Minimal 8 karakter" required minlength="8" autocomplete="new-password" autofocus>
+        <x-password-toggle />
+      </div>
       @error('password')<div class="error-msg">{{ $message }}</div>@enderror
     </div>
     <div class="form-group">
       <label class="form-label">Konfirmasi Password <span style="color:#dc2626;">*</span></label>
-      <input class="form-input" type="password" name="password_confirmation" placeholder="Ulangi password baru" required minlength="8" autocomplete="new-password">
+      <div class="pw-wrap">
+        <input class="form-input" type="password" name="password_confirmation" placeholder="Ulangi password baru" required minlength="8" autocomplete="new-password">
+        <x-password-toggle />
+      </div>
     </div>
     <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;">Simpan Password Baru</button>
   </form>
