@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DosenIndustri;
 
 use App\Http\Controllers\Controller;
 use App\Models\AssessmentComponent;
+use App\Models\Internship;
 use App\Models\LogBook;
 use App\Models\Student;
 use App\Models\StudentScore;
@@ -66,8 +67,22 @@ class MahasiswaController extends Controller
         $totalLog     = $student->logBooks()->count();
         $sudahDikomen = $student->logBooks()->whereNotNull('industry_note')->count();
 
+        // Konteks yang dibutuhkan pembimbing industri tapi dulu tak ada di halaman ini:
+        // kontak mahasiswa, data akademiknya, dan siapa dosen pembimbing kampusnya
+        // (untuk koordinasi), plus progres & status penilaian yang jadi tugasnya.
+        $internship->load('lecturer.user');
+
+        $minLogbook    = Internship::MIN_LOGBOOK;
+        $logTerakhir   = $student->logBooks()->max('date');
+        $nilaiIndustri = $internship->nilaiSummary()['industry'];
+        $komponenTotal = count($nilaiIndustri['components']);
+        $komponenDinilai = collect($nilaiIndustri['components'])
+            ->filter(fn ($c) => $c['avg'] !== null)
+            ->count();
+
         return view('dosen-industri.mahasiswa.detail', compact(
-            'student', 'internship', 'logBooks', 'filter', 'period', 'totalLog', 'sudahDikomen'
+            'student', 'internship', 'logBooks', 'filter', 'period', 'totalLog', 'sudahDikomen',
+            'minLogbook', 'logTerakhir', 'nilaiIndustri', 'komponenTotal', 'komponenDinilai'
         ));
     }
 

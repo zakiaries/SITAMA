@@ -19,6 +19,22 @@
 .hero-pos   { font-size:13px;color:var(--text-secondary); }
 
 .info-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px; }
+@media(max-width:640px){ .info-grid { grid-template-columns:1fr; } }
+
+/* Kartu konteks: data mahasiswa & pembimbing kampus */
+.ctx-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px; }
+@media(max-width:640px){ .ctx-grid { grid-template-columns:1fr; } }
+.ctx-card { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px; }
+.ctx-card h4 { font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 12px; }
+.ctx-row { display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border-subtle,#EEE); }
+.ctx-row:last-child { border-bottom:none; }
+.ctx-row .k { color:var(--text-muted);flex-shrink:0; }
+.ctx-row .v { color:var(--text);font-weight:600;text-align:right;word-break:break-word; }
+
+/* Bar progres logbook */
+.prog-track { height:7px;background:var(--border);border-radius:9999px;overflow:hidden;margin-top:8px; }
+.prog-fill  { height:100%;background:var(--primary);border-radius:9999px; }
+.prog-fill.done { background:var(--success); }
 .info-box  { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px; }
 .info-box .ib-label { font-size:11px;color:var(--text-muted);margin-bottom:4px; }
 .info-box .ib-value { font-size:15px;font-weight:700;color:var(--text); }
@@ -91,6 +107,55 @@
   @endif
 </div>
 
+{{-- Konteks: siapa mahasiswanya & siapa dosen kampusnya (untuk koordinasi) --}}
+<div class="ctx-grid">
+  <div class="ctx-card">
+    <h4>Data Mahasiswa</h4>
+    <div class="ctx-row">
+      <span class="k">Email</span>
+      <span class="v"><a href="mailto:{{ $student->user->email }}">{{ $student->user->email }}</a></span>
+    </div>
+    <div class="ctx-row">
+      <span class="k">Program Studi</span>
+      <span class="v">{{ $student->study_program ?: '-' }}</span>
+    </div>
+    <div class="ctx-row">
+      <span class="k">Jurusan</span>
+      <span class="v">{{ $student->major ?: '-' }}</span>
+    </div>
+    <div class="ctx-row">
+      <span class="k">Kelas</span>
+      <span class="v">{{ $student->the_class ?: '-' }}</span>
+    </div>
+    <div class="ctx-row">
+      <span class="k">Tahun Akademik</span>
+      <span class="v">{{ $student->academic_year ?: '-' }}</span>
+    </div>
+  </div>
+
+  <div class="ctx-card">
+    <h4>Pembimbing Kampus</h4>
+    @if($internship->lecturer?->user)
+      <div class="ctx-row">
+        <span class="k">Nama</span>
+        <span class="v">{{ $internship->lecturer->user->name }}</span>
+      </div>
+      <div class="ctx-row">
+        <span class="k">Email</span>
+        <span class="v"><a href="mailto:{{ $internship->lecturer->user->email }}">{{ $internship->lecturer->user->email }}</a></span>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);line-height:1.6;margin:12px 0 0;">
+        Hubungi dosen pembimbing kampus bila ada kendala akademik atau perilaku mahasiswa
+        yang perlu ditindaklanjuti pihak kampus.
+      </p>
+    @else
+      <p style="font-size:13px;color:var(--text-muted);margin:0;">
+        Dosen pembimbing kampus belum ditetapkan Kaprodi.
+      </p>
+    @endif
+  </div>
+</div>
+
 {{-- Info Grid 2x2 --}}
 <div class="info-grid">
   <div class="info-box">
@@ -102,20 +167,61 @@
     <div class="ib-value">{{ $internship->end_date ? $internship->end_date->format('d M Y') : 'Belum' }}</div>
   </div>
   <div class="info-box blue">
-    <div class="ib-label"><x-icon name="book" :size="13"/> Total Logbook</div>
-    <div class="ib-value">{{ $totalLog }} entri</div>
+    <div class="ib-label"><x-icon name="book" :size="13"/> Logbook Terkumpul</div>
+    <div class="ib-value">{{ $totalLog }} / {{ $minLogbook }} minimum</div>
+    @php $pct = $minLogbook > 0 ? min(100, (int) round($totalLog / $minLogbook * 100)) : 0; @endphp
+    <div class="prog-track">
+      <div class="prog-fill {{ $totalLog >= $minLogbook ? 'done' : '' }}" style="width:{{ $pct }}%;"></div>
+    </div>
   </div>
   <div class="info-box">
     <div class="ib-label"><x-icon name="message" :size="13"/> Sudah Dikomentari</div>
     <div class="ib-value">{{ $sudahDikomen }}/{{ $totalLog }}</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">
+      @if($logTerakhir)
+        Logbook terakhir {{ \Carbon\Carbon::parse($logTerakhir)->translatedFormat('d M Y') }}
+        ({{ \Carbon\Carbon::parse($logTerakhir)->diffForHumans() }})
+      @else
+        Mahasiswa belum mengisi logbook
+      @endif
+    </div>
   </div>
 </div>
 
-{{-- CTA Penilaian Akhir --}}
-<a href="{{ route('dosen-industri.mahasiswa.penilaian', $student) }}" class="btn btn-primary"
-   style="width:100%;justify-content:center;padding:14px;font-size:15px;margin-bottom:24px;">
-  <x-icon name="star" :size="16"/> Beri Penilaian Akhir
-</a>
+{{-- Status penilaian oleh pembimbing industri (tugas utama peran ini) --}}
+<div class="ctx-card" style="margin-bottom:16px;">
+  <h4>Penilaian Anda</h4>
+  <div class="ctx-row">
+    <span class="k">Komponen dinilai</span>
+    <span class="v">{{ $komponenDinilai }} / {{ $komponenTotal }}</span>
+  </div>
+  <div class="ctx-row">
+    <span class="k">Rata-rata nilai industri</span>
+    <span class="v">
+      @if($nilaiIndustri['average'] !== null)
+        {{ number_format($nilaiIndustri['average'], 2) }} <span style="font-weight:400;color:var(--text-muted);">/ 10</span>
+      @else
+        <span style="font-weight:400;color:var(--text-muted);">Belum dinilai</span>
+      @endif
+    </span>
+  </div>
+
+  @if($internship->performance_notes)
+    <div style="background:var(--warm);border-radius:8px;padding:10px 12px;margin-top:12px;">
+      <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Catatan Kinerja</div>
+      <div style="font-size:12.5px;color:var(--text);line-height:1.55;">{{ $internship->performance_notes }}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">
+        {{ $internship->performance_notes_by }}@if($internship->performance_notes_date) · {{ \Carbon\Carbon::parse($internship->performance_notes_date)->translatedFormat('d M Y') }}@endif
+      </div>
+    </div>
+  @endif
+
+  <a href="{{ route('dosen-industri.mahasiswa.penilaian', $student) }}" class="btn btn-primary"
+     style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-top:14px;">
+    <x-icon name="star" :size="16"/>
+    {{ $komponenDinilai > 0 ? 'Ubah / Lanjutkan Penilaian' : 'Beri Penilaian Akhir' }}
+  </a>
+</div>
 
 {{-- Logbook Section --}}
 <div class="card-title" style="margin-bottom:14px;">Logbook Mahasiswa</div>
