@@ -35,6 +35,11 @@ class LogBookController extends ApiController
     {
         $student = $this->currentStudent($request);
 
+        // Sama seperti web: logbook hanya untuk mahasiswa dengan magang aktif.
+        if (! $student->activeInternship()->exists()) {
+            return response()->json(['message' => 'Kamu belum memiliki magang aktif. Log book bisa diisi setelah pengajuan magangmu disetujui Kaprodi.'], 422);
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',

@@ -14,9 +14,23 @@
     </div>
   @endif
 
+  @if(!$canFill)
+    <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      Kamu belum memiliki magang aktif. Log book bisa diisi setelah pengajuan magangmu disetujui Kaprodi.
+    </div>
+  @elseif($noLecturer)
+    <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      Dosen pembimbing belum ditugaskan Kaprodi — log book tetap bisa diisi, tapi belum bisa dipantau dosen.
+    </div>
+  @endif
+
   <div class="page-header">
     <div class="page-title">Log Book</div>
-    <button class="btn btn-primary" onclick="document.getElementById('modal-logbook').classList.add('open')">+ Tambah Log Book</button>
+    @if($canFill)
+      <button class="btn btn-primary" onclick="document.getElementById('modal-logbook').classList.add('open')">+ Tambah Log Book</button>
+    @else
+      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;" title="Belum ada magang aktif">+ Tambah Log Book</button>
+    @endif
   </div>
 
   <form method="GET" action="{{ route('mahasiswa.logbook') }}">

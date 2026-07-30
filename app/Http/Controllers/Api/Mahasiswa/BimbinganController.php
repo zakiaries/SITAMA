@@ -42,6 +42,11 @@ class BimbinganController extends ApiController
     {
         $student = $this->currentStudent($request);
 
+        // Sama seperti web: butuh dosen pembimbing agar bimbingan bisa diproses.
+        if (! ($student->lecturer_id ?? $student->activeInternship?->lecturer_id)) {
+            return response()->json(['message' => 'Dosen pembimbing belum ditugaskan oleh Kaprodi. Kamu bisa mengajukan bimbingan setelah dosen pembimbingmu ditetapkan.'], 422);
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',

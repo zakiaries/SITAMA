@@ -31,9 +31,19 @@
     </div>
   </div>
 
+  @if(!$lecturer)
+    <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      Dosen pembimbing belum ditugaskan oleh Kaprodi. Kamu bisa mengajukan bimbingan setelah dosen pembimbingmu ditetapkan.
+    </div>
+  @endif
+
   <div class="page-header">
     <div class="page-title">Daftar Bimbingan</div>
-    <button class="btn btn-primary" onclick="document.getElementById('modal-bimb').classList.add('open')">+ Tambah Bimbingan</button>
+    @if($lecturer)
+      <button class="btn btn-primary" onclick="document.getElementById('modal-bimb').classList.add('open')">+ Tambah Bimbingan</button>
+    @else
+      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;" title="Dosen pembimbing belum ditugaskan">+ Tambah Bimbingan</button>
+    @endif
   </div>
 
   <form method="GET" action="{{ route('mahasiswa.bimbingan') }}">

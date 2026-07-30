@@ -30,6 +30,15 @@ class BimbinganController extends Controller
 
     public function store(Request $request)
     {
+        $student = Auth::user()->student;
+
+        // Bimbingan ditujukan ke dosen pembimbing — tanpa dospem, tak ada yang
+        // bisa menyetujui/melihatnya (data jadi yatim).
+        if (! ($student->lecturer_id ?? $student->activeInternship?->lecturer_id)) {
+            return back()->with('error',
+                'Dosen pembimbing belum ditugaskan oleh Kaprodi. Kamu bisa mengajukan bimbingan setelah dosen pembimbingmu ditetapkan.');
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
@@ -40,8 +49,6 @@ class BimbinganController extends Controller
             'file.mimes' => 'File bimbingan harus berformat PDF atau Word (doc/docx).',
             'file.max'   => 'Ukuran file maksimal 10 MB.',
         ]);
-
-        $student = Auth::user()->student;
 
         $nameFile = null;
         if ($request->hasFile('file')) {

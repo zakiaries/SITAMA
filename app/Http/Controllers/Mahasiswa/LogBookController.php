@@ -22,11 +22,24 @@ class LogBookController extends Controller
 
         $logBooks = $query->get();
 
-        return view('mahasiswa.logbook.index', compact('logBooks'));
+        // Logbook = catatan kegiatan magang → hanya bisa diisi saat magang aktif.
+        $internship  = $student->activeInternship()->first();
+        $canFill     = (bool) $internship;
+        $noLecturer  = $canFill && ! $internship->lecturer_id && ! $student->lecturer_id;
+
+        return view('mahasiswa.logbook.index', compact('logBooks', 'canFill', 'noLecturer'));
     }
 
     public function store(Request $request)
     {
+        $student = Auth::user()->student;
+
+        // Tanpa magang aktif, logbook tak punya konteks & tak terlihat pembimbing.
+        if (! $student->activeInternship()->exists()) {
+            return back()->with('error',
+                'Kamu belum memiliki magang aktif. Log book bisa diisi setelah pengajuan magangmu disetujui Kaprodi.');
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
@@ -34,8 +47,6 @@ class LogBookController extends Controller
         ], [
             'date.before_or_equal' => 'Tanggal tidak boleh di masa depan.',
         ]);
-
-        $student = Auth::user()->student;
 
         $logBook = LogBook::create([
             'student_id' => $student->id,
