@@ -68,15 +68,15 @@
         <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <a href="{{ route('bantuan') }}" class="setting-row" style="text-decoration:none;color:inherit;">
-        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></a>
+        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="setting-main"><div class="setting-label">Help &amp; Support</div><div class="setting-desc">Bantuan dan pusat dukungan</div></div>
         <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
+      </a>
       <a href="{{ route('about') }}" class="setting-row" style="text-decoration:none;color:inherit;">
-        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></a>
+        <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
         <div class="setting-main"><div class="setting-label">About App</div><div class="setting-desc">Versi &amp; informasi aplikasi</div></div>
         <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
+      </a>
       <form method="POST" action="{{ route('logout') }}">
         @csrf
         <button type="submit" class="setting-row danger">
