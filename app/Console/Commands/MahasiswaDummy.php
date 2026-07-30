@@ -37,7 +37,7 @@ class MahasiswaDummy extends Command
         {--tahun=2023/2024 : Tahun akademik}
         {--tahap=sedang-magang : sedang-magang | siap-selesai | selesai}
         {--dospem= : Username dosen pembimbing (default: dosen pertama yang ada)}
-        {--password= : Password akun dummy (default: diacak lalu dicetak sekali)}
+        {--password= : Password akun dummy — berlaku juga untuk pembimbing industri dummy (default: diacak lalu dicetak sekali)}
         {--hapus : Hapus akun dummy beserta seluruh data pendukungnya}
         {--force : Lewati konfirmasi saat menghapus}';
 
@@ -215,8 +215,13 @@ class MahasiswaDummy extends Command
     {
         $user = User::where('username', 'industri_dummy')->first();
 
+        // --password ikut dipakai di sini supaya penguji bisa login sebagai
+        // pembimbing industri (mengomentari logbook & mengisi nilai) tanpa
+        // perlu mencatat dua password berbeda.
+        $password = $this->option('password') ?: null;
+
         if (! $user) {
-            $password = Str::random(14);
+            $password ??= Str::random(14);
             $user = User::create([
                 'name'         => 'Pembimbing Industri Dummy',
                 'username'     => 'industri_dummy',
@@ -226,6 +231,9 @@ class MahasiswaDummy extends Command
                 'is_activated' => true,
             ]);
             $this->warn("Akun pembimbing industri dummy dibuat — username: industri_dummy | password: {$password}");
+        } elseif ($password) {
+            $user->update(['password' => Hash::make($password), 'is_activated' => true]);
+            $this->line("Password pembimbing industri dummy (industri_dummy) disetel ulang ke password yang sama.");
         }
 
         return $user->lecturer ?? Lecturer::create(['user_id' => $user->id]);
