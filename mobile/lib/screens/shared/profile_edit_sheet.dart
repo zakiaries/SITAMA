@@ -25,6 +25,8 @@ class _ProfileEditSheetState extends State<ProfileEditSheet> {
   String? _photoPath; // foto lokal yang baru dipilih (belum diunggah)
   bool _saving = false;
   String? _error;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   String get _initials {
     final p = '${widget.user['name'] ?? ''}'.trim().split(RegExp(r'\s+'));
@@ -139,9 +141,19 @@ class _ProfileEditSheetState extends State<ProfileEditSheet> {
           const Text('Ubah Password', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
           const Text('Kosongkan jika tidak ingin mengubah.', style: TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
           const SizedBox(height: 12),
-          TextField(controller: _password, obscureText: true, decoration: _dec('Password baru (min. 8 karakter)')),
+          TextField(
+            controller: _password,
+            obscureText: _obscurePassword,
+            decoration: _dec('Password baru (min. 8 karakter)',
+                suffix: _eye(_obscurePassword, () => setState(() => _obscurePassword = !_obscurePassword))),
+          ),
           const SizedBox(height: 14),
-          TextField(controller: _passwordConfirm, obscureText: true, decoration: _dec('Konfirmasi password')),
+          TextField(
+            controller: _passwordConfirm,
+            obscureText: _obscureConfirm,
+            decoration: _dec('Konfirmasi password',
+                suffix: _eye(_obscureConfirm, () => setState(() => _obscureConfirm = !_obscureConfirm))),
+          ),
 
           const SizedBox(height: 26),
           ElevatedButton(
@@ -161,7 +173,15 @@ class _ProfileEditSheetState extends State<ProfileEditSheet> {
         child: Text(t, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
       );
 
-  InputDecoration _dec(String hint) => InputDecoration(hintText: hint);
+  InputDecoration _dec(String hint, {Widget? suffix}) =>
+      InputDecoration(hintText: hint, suffixIcon: suffix);
+
+  /// Tombol mata show/hide untuk field password (paritas dengan web).
+  Widget _eye(bool obscured, VoidCallback onTap) => IconButton(
+        tooltip: 'Tampilkan / sembunyikan kata sandi',
+        icon: Icon(obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
+        onPressed: onTap,
+      );
 }
 
 /// Avatar bulat: tampilkan foto profil (network) bila ada, jika tidak inisial nama.

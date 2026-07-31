@@ -31,11 +31,6 @@ class _DosenListTabState extends State<DosenListTab> {
 
   void _reload() => setState(() { _future = _load(); });
 
-  String _initials(String n) {
-    final p = n.trim().split(RegExp(r'\s+'));
-    return p.take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +58,8 @@ class _DosenListTabState extends State<DosenListTab> {
                   return ErrorRetry(message: '${snap.error}', onRetry: _reload);
                 }
                 final counts = Map<String, dynamic>.from(snap.data!['counts'] ?? {});
+                final menunggu = Map<String, dynamic>.from(snap.data!['menunggu_tanggapan'] ?? {});
+                final totalMenunggu = (menunggu['total'] ?? 0) as int;
                 var students = List<Map<String, dynamic>>.from(snap.data!['students'] ?? []);
                 if (_search.isNotEmpty) {
                   final q = _search.toLowerCase();
@@ -80,24 +77,57 @@ class _DosenListTabState extends State<DosenListTab> {
                       StatItem('${counts['dinilai'] ?? 0}', 'Sudah Dinilai'),
                     ]),
                     SearchFilterBar(hint: 'Cari nama / NIM...', onChanged: (v) => setState(() => _search = v)),
+                    if (totalMenunggu > 0)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.errorBg,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(children: [
+                          CountBadge(totalMenunggu),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'menunggu tanggapanmu — '
+                              '${menunggu['logbook'] ?? 0} logbook, '
+                              '${menunggu['bimbingan'] ?? 0} bimbingan, '
+                              '${menunggu['laporan'] ?? 0} laporan',
+                              style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ]),
+                      ),
                     if (students.isEmpty)
                       const EmptyState('Belum ada mahasiswa bimbingan',
                           icon: Icons.people_outline,
                           hint: 'Mahasiswa yang Anda bimbing akan muncul di sini.')
                     else
-                      ...students.map((s) => AppListTile(
-                            leading: CircleAvatar(
-                              radius: 22, backgroundColor: AppColors.blueTint,
-                              child: Text(_initials(s['name'] ?? '-'), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 13)),
+                      ...students.map((s) {
+                        final perlu = (s['perlu_tanggapan'] ?? 0) as int;
+                        return AppListTile(
+                            leading: UserAvatar(
+                              name: '${s['name'] ?? '-'}',
+                              photoUrl: s['photo_url'] as String?,
                             ),
                             title: s['name'] ?? '-',
-                            subtitle: '${s['username'] ?? ''} · ${s['company'] ?? '-'}\n${s['guidances_count'] ?? 0} bimbingan · ${s['logbooks_count'] ?? 0} log',
-                            trailing: StatusChip(s['status'] ?? ''),
+                            subtitle: '${s['username'] ?? ''} · ${s['company'] ?? '-'}\n'
+                                '${s['guidances_count'] ?? 0} bimbingan · ${s['logbooks_count'] ?? 0} log'
+                                '${perlu > 0 ? '\n$perlu menunggu tanggapanmu' : ''}',
+                            trailing: perlu > 0
+                                ? Row(mainAxisSize: MainAxisSize.min, children: [
+                                    CountBadge(perlu),
+                                    const SizedBox(width: 6),
+                                    StatusChip(s['status'] ?? ''),
+                                  ])
+                                : StatusChip(s['status'] ?? ''),
                             onTap: () async {
                               await Navigator.push(context, MaterialPageRoute(builder: (_) => DosenMahasiswaDetail(studentId: s['id'])));
                               if (context.mounted) _reload();
                             },
-                          )),
+                          );
+                      }),
                     const SizedBox(height: 24),
                   ],
                 );

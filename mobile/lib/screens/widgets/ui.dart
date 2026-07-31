@@ -241,6 +241,91 @@ class StatStrip extends StatelessWidget {
       );
 }
 
+// ── Avatar user: foto profil bila ada, kalau tidak inisial namanya ──
+/// Padanan komponen <x-avatar> di web. Dipakai di SEMUA tempat yang
+/// menampilkan orang lain (daftar & detail mahasiswa), supaya foto profil
+/// tak cuma terlihat di halaman profil sendiri.
+class UserAvatar extends StatelessWidget {
+  final String? name;
+  final String? photoUrl;
+  final double radius;
+  final Color? background;
+  final Color? foreground;
+
+  const UserAvatar({
+    super.key,
+    this.name,
+    this.photoUrl,
+    this.radius = 22,
+    this.background,
+    this.foreground,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = background ?? AppColors.blueTint;
+    final fg = foreground ?? AppColors.primary;
+    final url = photoUrl;
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: bg,
+      // Kalau foto gagal dimuat (offline / file hilang), inisial di bawahnya
+      // tetap terlihat — tidak berubah jadi ikon rusak.
+      backgroundImage: (url != null && url.isNotEmpty) ? NetworkImage(url) : null,
+      child: (url != null && url.isNotEmpty)
+          ? null
+          : Text(
+              _initials(name ?? ''),
+              style: TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: radius * 0.6),
+            ),
+    );
+  }
+
+  static String _initials(String n) {
+    final parts = n.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    return parts.take(2).map((w) => w[0].toUpperCase()).join();
+  }
+}
+
+// ── Lencana angka merah (penanda "menunggu tanggapan") ──
+class CountBadge extends StatelessWidget {
+  final int count;
+  const CountBadge(this.count, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.error,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+// ── Titik merah kecil (penanda ada yang baru) ──
+class NewDot extends StatelessWidget {
+  const NewDot({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 9,
+      height: 9,
+      decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+    );
+  }
+}
+
 // ── Lingkaran status (leading item) ──
 class StatusDot extends StatelessWidget {
   final String kind; // done | pending | rejected | blue

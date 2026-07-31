@@ -105,6 +105,20 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
               });
             final name = student['name'] ?? '';
 
+            // Konteks tambahan (paritas dengan web). Semua pakai fallback supaya
+            // aman bila server belum diperbarui / field belum ada.
+            final lecturer = d['lecturer'] == null ? null : Map<String, dynamic>.from(d['lecturer']);
+            final stats = Map<String, dynamic>.from(d['stats'] ?? {});
+            final penilaian = Map<String, dynamic>.from(d['penilaian'] ?? {});
+
+            final logTotal = (stats['logbook_total'] ?? 0) as int;
+            final logDikomen = (stats['logbook_dikomen'] ?? 0) as int;
+            final logMin = (stats['logbook_minimum'] ?? 20) as int;
+            final logTerakhir = '${stats['logbook_terakhir'] ?? ''}';
+            final komponenDinilai = (penilaian['komponen_dinilai'] ?? 0) as int;
+            final komponenTotal = (penilaian['komponen_total'] ?? 0) as int;
+            final rataRata = penilaian['rata_rata'];
+
             final belum = logbooks.where((l) => (l['industry_note'] ?? '').toString().isEmpty).toList();
             final sudah = logbooks.where((l) => (l['industry_note'] ?? '').toString().isNotEmpty).toList();
             final shown = _filter == 1 ? belum : _filter == 2 ? sudah : logbooks;
@@ -121,14 +135,67 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
                     border: Border.all(color: AppColors.borderSubtle),
                     boxShadow: kSoftShadow,
                   ),
+                  child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    UserAvatar(name: '$name', photoUrl: student['photo_url'] as String?, radius: 26),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                        if ((student['username'] ?? '').toString().isNotEmpty)
+                          Container(margin: const EdgeInsets.only(top: 5), padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
+                            decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(9999)),
+                            child: Text('${student['username']}', style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700))),
+                        const SizedBox(height: 6),
+                        Text('${internship['position'] ?? ''} · ${internship['company'] ?? ''}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                      ]),
+                    ),
+                  ]),
+                ),
+                const SizedBox(height: 12),
+
+                // ── Data mahasiswa (paritas dengan web) ──
+                AppCard(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                    if ((student['username'] ?? '').toString().isNotEmpty)
-                      Container(margin: const EdgeInsets.only(top: 5), padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(9999)),
-                        child: Text('${student['username']}', style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700))),
-                    const SizedBox(height: 6),
-                    Text('${internship['position'] ?? ''} · ${internship['company'] ?? ''}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                    const SectionTitle('Data Mahasiswa'),
+                    InfoRow('Email', '${student['email'] ?? '-'}'),
+                    InfoRow('Program Studi', '${student['study_program'] ?? '-'}'),
+                    InfoRow('Jurusan', '${student['major'] ?? '-'}'),
+                    InfoRow('Kelas', '${student['the_class'] ?? '-'}'),
+                    InfoRow('Tahun Akademik', '${student['academic_year'] ?? '-'}'),
+                  ]),
+                ),
+                const SizedBox(height: 12),
+
+                // ── Pembimbing kampus — untuk koordinasi kendala akademik ──
+                AppCard(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const SectionTitle('Pembimbing Kampus'),
+                    if (lecturer != null) ...[
+                      InfoRow('Nama', '${lecturer['name'] ?? '-'}'),
+                      InfoRow('Email', '${lecturer['email'] ?? '-'}'),
+                    ] else
+                      const Text('Dosen pembimbing kampus belum ditetapkan Kaprodi.',
+                          style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                  ]),
+                ),
+                const SizedBox(height: 12),
+
+                // ── Progres logbook & status penilaian ──
+                AppCard(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const SectionTitle('Progres & Penilaian'),
+                    InfoRow('Logbook terkumpul', '$logTotal / $logMin minimum'),
+                    InfoRow('Sudah dikomentari', '$logDikomen / $logTotal'),
+                    if (logTerakhir.isNotEmpty) InfoRow('Logbook terakhir', logTerakhir),
+                    InfoRow('Komponen dinilai', '$komponenDinilai / $komponenTotal'),
+                    InfoRow('Rata-rata nilai', rataRata == null ? 'Belum dinilai' : '$rataRata / 10'),
+                    if ('${penilaian['catatan_kinerja'] ?? ''}'.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      NoteBlock(
+                        label: 'Catatan Kinerja',
+                        value: '${penilaian['catatan_kinerja']}',
+                      ),
+                    ],
                   ]),
                 ),
                 const SizedBox(height: 12),

@@ -29,6 +29,47 @@ InputDecoration authField(String hint, IconData icon, {Widget? suffix}) {
   );
 }
 
+/// Field password dengan tombol mata show/hide (paritas dengan web).
+/// Tiap field mengelola state-nya sendiri, jadi password & konfirmasi tak
+/// saling ikut terbuka.
+class AuthPasswordField extends StatefulWidget {
+  final TextEditingController controller;
+  final String hint;
+  final ValueChanged<String>? onSubmitted;
+
+  const AuthPasswordField({
+    super.key,
+    required this.controller,
+    required this.hint,
+    this.onSubmitted,
+  });
+
+  @override
+  State<AuthPasswordField> createState() => _AuthPasswordFieldState();
+}
+
+class _AuthPasswordFieldState extends State<AuthPasswordField> {
+  bool _obscure = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: widget.controller,
+      obscureText: _obscure,
+      onSubmitted: widget.onSubmitted,
+      decoration: authField(
+        widget.hint,
+        Icons.lock_outline,
+        suffix: IconButton(
+          tooltip: 'Tampilkan / sembunyikan kata sandi',
+          icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20),
+          onPressed: () => setState(() => _obscure = !_obscure),
+        ),
+      ),
+    );
+  }
+}
+
 /// Badge logo bulat. icon == null → pakai logo.png; selain itu badge ikon biru-muda.
 class AuthBadge extends StatelessWidget {
   final IconData? icon;

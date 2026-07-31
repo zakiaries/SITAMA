@@ -31,11 +31,6 @@ class _IndustriListTabState extends State<IndustriListTab> {
 
   void _reload() => setState(() { _future = _load(); });
 
-  String _initials(String n) {
-    final p = n.trim().split(RegExp(r'\s+'));
-    return p.take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +83,7 @@ class _IndustriListTabState extends State<IndustriListTab> {
                       ...students.map((s) {
                         final total = (s['logbook_total'] ?? 0) as int;
                         final done = (s['logbook_dikomen'] ?? 0) as int;
+                        final belum = (s['logbook_belum_dikomen'] ?? (total - done)) as int;
                         final pct = total > 0 ? done / total : 0.0;
                         return AppCard(
                           onTap: () async {
@@ -96,12 +92,20 @@ class _IndustriListTabState extends State<IndustriListTab> {
                           },
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Row(children: [
-                              CircleAvatar(radius: 20, backgroundColor: AppColors.blueTint, child: Text(_initials(s['name'] ?? '-'), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 12))),
+                              UserAvatar(
+                                name: '${s['name'] ?? '-'}',
+                                photoUrl: s['photo_url'] as String?,
+                                radius: 20,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                Text(s['name'] ?? '-', style: const TextStyle(fontWeight: FontWeight.w700)),
+                                Row(children: [
+                                  Flexible(child: Text(s['name'] ?? '-', style: const TextStyle(fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis)),
+                                  if (belum > 0) ...[const SizedBox(width: 6), const NewDot()],
+                                ]),
                                 Text('${s['position'] ?? '-'} · ${s['company'] ?? '-'}', style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
                               ])),
+                              if (belum > 0) ...[CountBadge(belum), const SizedBox(width: 6)],
                               StatusChip(s['is_finished'] == true ? 'selesai' : 'aktif'),
                             ]),
                             const SizedBox(height: 10),
