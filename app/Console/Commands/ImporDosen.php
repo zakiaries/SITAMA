@@ -23,8 +23,10 @@ use Illuminate\Support\Str;
 class ImporDosen extends Command
 {
     protected $signature = 'simama:impor-dosen
-        {--prodi=semua : ik | tI | semua}
+        {--prodi=semua : ik | ti | semua}
         {--password= : Samakan password semua akun (default: diacak per akun lalu dicetak sekali)}
+        {--mudah : Password acak yang mudah diketik & disalin tangan (kata-kata-angka), tetap unik per dosen}
+        {--setel-ulang : Setel ulang password akun yang SUDAH ada (bukan hanya membuat yang baru)}
         {--pratinjau : Tampilkan daftar saja, tanpa membuat akun}';
 
     protected $description = 'Buat akun dosen prodi Teknik Informatika (D3) & Teknologi Rekayasa Komputer (D4)';
@@ -61,6 +63,31 @@ class ImporDosen extends Command
         'ti' => 'Teknologi Rekayasa Komputer (D4)',
     ];
 
+    /**
+     * Kata-kata pendek tanpa ejaan rancu, dipakai menyusun password yang mudah
+     * ditulis tangan dan diketik ulang. Sengaja tidak memakai huruf/angka yang
+     * gampang tertukar (l, 1, I, O, 0) seperti pada password acak biasa.
+     */
+    private const KATA = [
+        'biru', 'hijau', 'merah', 'kuning', 'ungu', 'jingga', 'putih', 'hitam',
+        'batu', 'kayu', 'besi', 'kaca', 'awan', 'hujan', 'angin', 'embun',
+        'gunung', 'pantai', 'sungai', 'danau', 'hutan', 'taman', 'kebun', 'sawah',
+        'kuda', 'rusa', 'merpati', 'elang', 'kupu', 'lebah', 'harimau', 'panda',
+        'mangga', 'jambu', 'melon', 'anggur', 'kelapa', 'pisang', 'jeruk', 'salak',
+    ];
+
+    private function passwordAcak(): string
+    {
+        if (! $this->option('mudah')) {
+            return Str::random(12);
+        }
+
+        $a = self::KATA[random_int(0, count(self::KATA) - 1)];
+        $b = self::KATA[random_int(0, count(self::KATA) - 1)];
+
+        return $a . '-' . $b . '-' . random_int(23, 98);
+    }
+
     public function handle(): int
     {
         $pilihan = strtolower((string) $this->option('prodi'));
@@ -74,21 +101,40 @@ class ImporDosen extends Command
         $kelompok = $pilihan === 'semua' ? ['ik', 'ti'] : [$pilihan];
         $seragam  = $this->option('password') ?: null;
 
+        if ($seragam !== null && strlen($seragam) < 6) {
+            $this->error('Password minimal 6 karakter (mengikuti aturan form Tambah Dosen).');
+
+            return self::FAILURE;
+        }
+
         $baris = [];
-        $dibuat = $dilewati = 0;
+        $dibuat = $dilewati = $disetel = 0;
 
         foreach ($kelompok as $kode) {
             foreach (self::DOSEN[$kode] as [$nip, $nama]) {
-                $adaAkun = User::where('username', $nip)->exists();
+                $akun = User::where('username', $nip)->first();
 
                 if ($this->option('pratinjau')) {
-                    $baris[] = [$nip, $nama, self::LABEL[$kode], $adaAkun ? 'sudah ada' : 'akan dibuat', '—'];
+                    $rencana = $akun
+                        ? ($this->option('setel-ulang') ? 'password disetel ulang' : 'sudah ada')
+                        : 'akan dibuat';
+                    $baris[] = [$nip, $nama, self::LABEL[$kode], $rencana, '—'];
                     continue;
                 }
 
-                if ($adaAkun) {
-                    $baris[] = [$nip, $nama, self::LABEL[$kode], 'dilewati (sudah ada)', '—'];
-                    $dilewati++;
+                // Akun sudah ada: setel ulang passwordnya bila diminta, kalau tidak lewati.
+                if ($akun) {
+                    if (! $this->option('setel-ulang')) {
+                        $baris[] = [$nip, $nama, self::LABEL[$kode], 'dilewati (sudah ada)', '—'];
+                        $dilewati++;
+                        continue;
+                    }
+
+                    $password = $seragam ?: $this->passwordAcak();
+                    $akun->update(['password' => Hash::make($password)]);
+
+                    $baris[] = [$nip, $nama, self::LABEL[$kode], 'password disetel ulang', $password];
+                    $disetel++;
                     continue;
                 }
 
@@ -126,9 +172,9 @@ class ImporDosen extends Command
         }
 
         $this->newLine();
-        $this->info("Selesai. {$dibuat} akun dibuat, {$dilewati} dilewati.");
+        $this->info("Selesai. {$dibuat} akun dibuat, {$disetel} password disetel ulang, {$dilewati} dilewati.");
 
-        if ($dibuat > 0 && ! $seragam) {
+        if (($dibuat > 0 || $disetel > 0) && ! $seragam) {
             $this->warn('Catat kolom Password sekarang — tidak ditampilkan lagi setelah ini.');
         }
 
