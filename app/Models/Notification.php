@@ -10,7 +10,7 @@ class Notification extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'message', 'date', 'category', 'is_read', 'detail_text',
+        'user_id', 'message', 'date', 'category', 'is_read', 'detail_text', 'link',
     ];
 
     protected $casts = [
@@ -31,8 +31,9 @@ class Notification extends Model
      *
      * $userId null (mis. dosen pembimbing belum diplot) diabaikan diam-diam,
      * supaya kegagalan mengirim notifikasi tak pernah menggagalkan aksi utama.
+     * $link = path relatif tujuan saat notifikasi diklik (boleh memakai anchor).
      */
-    public static function kirim(?int $userId, string $message, string $category, ?string $detail = null): void
+    public static function kirim(?int $userId, string $message, string $category, ?string $detail = null, ?string $link = null): void
     {
         if (! $userId) {
             return;
@@ -45,6 +46,7 @@ class Notification extends Model
             'category'    => $category,
             'is_read'     => false,
             'detail_text' => $detail,
+            'link'        => $link,
         ]);
     }
 }

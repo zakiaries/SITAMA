@@ -32,6 +32,18 @@ class NotificationController extends Controller
         return back()->with('success', 'Notifikasi ditandai sudah dibaca.');
     }
 
+    /** Buka notifikasi: tandai dibaca lalu arahkan ke halaman yang dirujuk. */
+    public function open(Notification $notification)
+    {
+        $this->authorizeOwner($notification);
+
+        if (! $notification->is_read) {
+            $notification->update(['is_read' => true]);
+        }
+
+        return redirect($notification->link ?: route('dosen-industri.notifikasi'));
+    }
+
     public function markAllRead()
     {
         Auth::user()->notifications()

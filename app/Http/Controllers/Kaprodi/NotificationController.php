@@ -41,7 +41,9 @@ class NotificationController extends Controller
             $notification->update(['is_read' => true]);
         }
 
-        return redirect($this->targetUrl($notification->category));
+        // Tujuan spesifik (mis. logbook tertentu) bila ada; kalau tidak, jatuh ke
+        // peta kategori untuk notifikasi lama yang belum menyimpan tujuan.
+        return redirect($notification->link ?: $this->targetUrl($notification->category));
     }
 
     /** Peta kategori notifikasi → halaman tujuan. */

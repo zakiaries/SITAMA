@@ -96,21 +96,17 @@ class LogBookController extends Controller
         $message = "{$student->user->name} mengisi log book baru: \"{$logBook->title}\".";
         $detail  = "Log book tanggal {$logBook->date->format('d M Y')}: {$logBook->activity}";
 
-        $userIds = collect([
-            $internship->lecturer?->user?->id,
-            $internship->lecturerIndustry?->user?->id,
-        ])->filter()->unique();
+        // Tujuan klik berbeda per peran: masing-masing dibawa ke halaman detail
+        // mahasiswa di portalnya sendiri, langsung ke logbook yang dimaksud.
+        Notification::kirim(
+            $internship->lecturer?->user?->id, $message, 'log_book', $detail,
+            "/dosen/mahasiswa/{$student->id}#logbook-{$logBook->id}"
+        );
 
-        foreach ($userIds as $userId) {
-            Notification::create([
-                'user_id'     => $userId,
-                'message'     => $message,
-                'date'        => now()->toDateString(),
-                'category'    => 'log_book',
-                'is_read'     => false,
-                'detail_text' => $detail,
-            ]);
-        }
+        Notification::kirim(
+            $internship->lecturerIndustry?->user?->id, $message, 'log_book', $detail,
+            "/dosen-industri/mahasiswa/{$student->id}#logbook-{$logBook->id}"
+        );
     }
 
     public function destroy(LogBook $logBook)

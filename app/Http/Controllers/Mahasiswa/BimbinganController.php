@@ -65,7 +65,7 @@ class BimbinganController extends Controller
             'status'     => 'pending',
         ]);
 
-        $this->beritahuDosen($student, "{$student->user->name} mengajukan bimbingan baru: \"{$request->title}\".", $request->activity);
+        $this->beritahuDosen($student, "{$student->user->name} mengajukan bimbingan baru: \"{$request->title}\".", $request->activity, "#bimbingan");
 
         return redirect()->route('mahasiswa.bimbingan')
             ->with('success', 'Bimbingan berhasil ditambahkan.');
@@ -107,7 +107,7 @@ class BimbinganController extends Controller
         $guidance->update($data);
 
         if ($wasRejected) {
-            $this->beritahuDosen($student, "{$student->user->name} mengirim ulang revisi bimbingan: \"{$request->title}\".", $request->activity);
+            $this->beritahuDosen($student, "{$student->user->name} mengirim ulang revisi bimbingan: \"{$request->title}\".", $request->activity, "#bimbingan");
         }
 
         return redirect()->route('mahasiswa.bimbingan')
@@ -117,11 +117,12 @@ class BimbinganController extends Controller
     }
 
     /** Beri tahu dosen pembimbing (plot mahasiswa, atau yang menempel di magang). */
-    private function beritahuDosen($student, string $pesan, ?string $detail = null): void
+    private function beritahuDosen($student, string $pesan, ?string $detail = null, string $anchor = ''): void
     {
         $lecturer = $student->lecturer ?? $student->activeInternship?->lecturer;
 
-        Notification::kirim($lecturer?->user_id, $pesan, 'bimbingan', $detail);
+        Notification::kirim($lecturer?->user_id, $pesan, 'bimbingan', $detail,
+            "/dosen/mahasiswa/{$student->id}{$anchor}");
     }
 
     /**

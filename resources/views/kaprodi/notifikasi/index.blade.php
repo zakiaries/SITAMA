@@ -29,7 +29,7 @@
     </div>
     <div style="flex:1;">
       <div class="alert-title">
-        {{ $notif->message }}
+        <a class="alert-link" href="{{ route('kaprodi.notifikasi.open', $notif->id) }}">{{ $notif->message }}</a>
         @unless($notif->is_read)
           <span class="badge" style="background:var(--danger-bg);color:var(--danger);margin-left:6px;">Baru</span>
         @endunless
@@ -40,7 +40,7 @@
         <div class="alert-body">{{ ucfirst($notif->category) }}</div>
       @endif
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+    <div class="alert-actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
       <div class="alert-time">{{ $notif->date->format('d M Y') }}</div>
       <span style="color:var(--primary);font-size:12px;font-weight:600;white-space:nowrap;">Lihat →</span>
     </div>

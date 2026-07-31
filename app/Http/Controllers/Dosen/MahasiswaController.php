@@ -102,7 +102,7 @@ class MahasiswaController extends Controller
             'lecturer_note' => $request->input('note'),
         ]);
 
-        Notification::kirim($student->user_id, "Bimbingan \"{$guidance->title}\" disetujui dosen pembimbing.", 'bimbingan', $request->input('note'));
+        Notification::kirim($student->user_id, "Bimbingan \"{$guidance->title}\" disetujui dosen pembimbing.", 'bimbingan', $request->input('note'), '/mahasiswa/bimbingan');
 
         return back()->with('success', 'Bimbingan berhasil disetujui.');
     }
@@ -122,7 +122,7 @@ class MahasiswaController extends Controller
             'lecturer_note' => $request->note,
         ]);
 
-        Notification::kirim($student->user_id, "Bimbingan \"{$guidance->title}\" perlu direvisi.", 'bimbingan', $request->note);
+        Notification::kirim($student->user_id, "Bimbingan \"{$guidance->title}\" perlu direvisi.", 'bimbingan', $request->note, '/mahasiswa/bimbingan');
 
         return back()->with('success', 'Bimbingan ditandai untuk revisi.');
     }
@@ -140,7 +140,7 @@ class MahasiswaController extends Controller
             'reviewed_at'   => now(),
         ]);
 
-        Notification::kirim($student->user_id, 'Laporan akhir magang disetujui dosen pembimbing.', 'laporan', $request->input('note'));
+        Notification::kirim($student->user_id, 'Laporan akhir magang disetujui dosen pembimbing.', 'laporan', $request->input('note'), '/mahasiswa/laporan');
 
         return back()->with('success', 'Laporan akhir berhasil disetujui.');
     }
@@ -162,7 +162,7 @@ class MahasiswaController extends Controller
             'reviewed_at'   => now(),
         ]);
 
-        Notification::kirim($student->user_id, 'Laporan akhir magang perlu direvisi.', 'laporan', $request->note);
+        Notification::kirim($student->user_id, 'Laporan akhir magang perlu direvisi.', 'laporan', $request->note, '/mahasiswa/laporan');
 
         return back()->with('success', 'Laporan ditandai untuk revisi.');
     }

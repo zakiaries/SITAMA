@@ -117,6 +117,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:studen
         Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
 
         Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi');
+        Route::get('/notifikasi/{notification}/open', [NotificationController::class, 'open'])->name('notifikasi.open');
         Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
         Route::post('/notifikasi/{notification}/read', [NotificationController::class, 'markRead'])->name('notifikasi.read');
     });
@@ -148,6 +149,7 @@ Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'role:lecturer'])->g
     Route::put('/profile',  [DosenProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/notifikasi', [DosenNotificationController::class, 'index'])->name('notifikasi');
+    Route::get('/notifikasi/{notification}/open', [DosenNotificationController::class, 'open'])->name('notifikasi.open');
     Route::post('/notifikasi/read-all', [DosenNotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
     Route::post('/notifikasi/{notification}/read', [DosenNotificationController::class, 'markRead'])->name('notifikasi.read');
 });
@@ -167,6 +169,7 @@ Route::prefix('dosen-industri')->name('dosen-industri.')->middleware(['auth', 'r
     Route::put('/profile',  [IndustriProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/notifikasi', [IndustriNotificationController::class, 'index'])->name('notifikasi');
+    Route::get('/notifikasi/{notification}/open', [IndustriNotificationController::class, 'open'])->name('notifikasi.open');
     Route::post('/notifikasi/read-all', [IndustriNotificationController::class, 'markAllRead'])->name('notifikasi.read-all');
     Route::post('/notifikasi/{notification}/read', [IndustriNotificationController::class, 'markRead'])->name('notifikasi.read');
 });

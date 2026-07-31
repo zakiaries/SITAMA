@@ -54,7 +54,8 @@ class SinkronNotifikasi extends Command
                     "{$nama} mengisi log book: \"{$lb->title}\".",
                     'log_book',
                     $lb->activity,
-                    $pratinjau
+                    $pratinjau,
+                    "/dosen/mahasiswa/{$lb->student_id}#logbook-{$lb->id}"
                 );
             }
 
@@ -64,7 +65,8 @@ class SinkronNotifikasi extends Command
                     "{$nama} mengisi log book: \"{$lb->title}\".",
                     'log_book',
                     $lb->activity,
-                    $pratinjau
+                    $pratinjau,
+                    "/dosen-industri/mahasiswa/{$lb->student_id}#logbook-{$lb->id}"
                 );
             }
         }
@@ -85,7 +87,8 @@ class SinkronNotifikasi extends Command
                 "{$nama} mengajukan bimbingan baru: \"{$g->title}\".",
                 'bimbingan',
                 $g->activity,
-                $pratinjau
+                $pratinjau,
+                "/dosen/mahasiswa/{$g->student_id}#bimbingan-{$g->id}"
             );
         }
 
@@ -104,7 +107,8 @@ class SinkronNotifikasi extends Command
                 "{$nama} mengunggah laporan akhir magang.",
                 'laporan',
                 'Laporan menunggu review dan persetujuan dosen pembimbing.',
-                $pratinjau
+                $pratinjau,
+                "/dosen/mahasiswa/{$r->student_id}#laporan"
             );
         }
 
@@ -131,7 +135,7 @@ class SinkronNotifikasi extends Command
     private array $sudahDiproses = [];
 
     /** @return int 1 bila dibuat/akan dibuat, 0 bila dilewati. */
-    private function buat(?int $userId, string $message, string $category, ?string $detail, bool $pratinjau): int
+    private function buat(?int $userId, string $message, string $category, ?string $detail, bool $pratinjau, ?string $link = null): int
     {
         if (! $userId) {
             return 0;
@@ -155,7 +159,7 @@ class SinkronNotifikasi extends Command
         }
 
         if (! $pratinjau) {
-            Notification::kirim($userId, $message, $category, $detail);
+            Notification::kirim($userId, $message, $category, $detail, $link);
         }
 
         return 1;

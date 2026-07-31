@@ -249,7 +249,7 @@
 {{-- Logbook List --}}
 @forelse($logBooks as $lb)
 @php $dt = $lb->date; $hasComment = !empty($lb->industry_note); @endphp
-<div class="lb-card">
+<div class="lb-card" id="logbook-{{ $lb->id }}">
   <div class="lb-card-head">
     <div class="lb-day-box">
       <div class="num">{{ $dt->format('d') }}</div>
@@ -310,3 +310,19 @@
 @endforelse
 
 @endsection
+
+@push('scripts')
+<script>
+  // Dibuka dari notifikasi: gulir ke logbook yang dimaksud lalu soroti sebentar.
+  document.addEventListener('DOMContentLoaded', function () {
+    var hash = window.location.hash.slice(1);
+    if (!hash) return;
+    var el = document.getElementById(hash);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.transition = 'box-shadow .3s';
+    el.style.boxShadow = '0 0 0 3px var(--primary)';
+    setTimeout(function () { el.style.boxShadow = ''; }, 2200);
+  });
+</script>
+@endpush

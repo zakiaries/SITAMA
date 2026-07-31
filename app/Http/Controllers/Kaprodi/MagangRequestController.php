@@ -92,7 +92,7 @@ class MagangRequestController extends Controller
             $this->syncDirectoryListing($magangRequest, $companyId);
 
             Notification::kirim($student->user_id, 'Pengajuan magang kamu disetujui Kaprodi.', 'pengajuan_magang',
-                'Data magang sudah dibuat. Kamu bisa mulai mengisi logbook.');
+                'Data magang sudah dibuat. Kamu bisa mulai mengisi logbook.', '/mahasiswa/magang-saya');
 
             return back()->with('success',
                 "Pengajuan {$student->user->name} disetujui. Pembimbing industri "
@@ -151,7 +151,7 @@ class MagangRequestController extends Controller
         }
 
         Notification::kirim($student->user_id, 'Pengajuan magang kamu disetujui Kaprodi.', 'pengajuan_magang',
-            'Data magang sudah dibuat. Kamu bisa mulai mengisi logbook.');
+            'Data magang sudah dibuat. Kamu bisa mulai mengisi logbook.', '/mahasiswa/magang-saya');
 
         return back()
             ->with('success', "Pengajuan {$student->user->name} disetujui.")
@@ -181,7 +181,7 @@ class MagangRequestController extends Controller
         ]);
 
         Notification::kirim($magangRequest->student->user_id, 'Pengajuan magang kamu ditolak Kaprodi.', 'pengajuan_magang',
-            $request->rejection_reason);
+            $request->rejection_reason, '/mahasiswa/ajukan-magang');
 
         return back()->with('success', "Pengajuan {$magangRequest->student->user->name} ditolak.");
     }

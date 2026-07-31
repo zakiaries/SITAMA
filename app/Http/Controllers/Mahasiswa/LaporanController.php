@@ -69,7 +69,8 @@ class LaporanController extends Controller
             $lecturer?->user_id,
             "{$student->user->name} mengunggah laporan akhir magang.",
             'laporan',
-            'Laporan menunggu review dan persetujuan dosen pembimbing.'
+            'Laporan menunggu review dan persetujuan dosen pembimbing.',
+            "/dosen/mahasiswa/{$student->id}#laporan"
         );
 
         return redirect()->route('mahasiswa.laporan')

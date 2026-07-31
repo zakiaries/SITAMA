@@ -23,6 +23,7 @@ class NotificationController extends ApiController
                     'date'        => $n->date,
                     'is_read'     => (bool) $n->is_read,
                     'detail_text' => $n->detail_text,
+                    'link'        => $n->link,
                 ]),
         ]);
     }

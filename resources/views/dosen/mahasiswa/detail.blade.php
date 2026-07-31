@@ -230,7 +230,7 @@
             'approved' => 'status-approved', 'rejected' => 'status-rejected', default => '',
           };
         @endphp
-        <div class="bimb-item {{ $itemClass }}">
+        <div class="bimb-item {{ $itemClass }}" id="bimbingan-{{ $g->id }}">
           <div class="bimb-header" onclick="toggle(this)">
             <div class="status-circle {{ $scClass }}">@if($scIcon)<x-icon :name="$scIcon" :size="13"/>@else—@endif</div>
             <div style="flex:1;">
@@ -316,7 +316,7 @@
           </form>
         </div>
         @forelse($logBooks as $lb)
-        <div class="bimb-item">
+        <div class="bimb-item" id="logbook-{{ $lb->id }}">
           <div class="bimb-header" onclick="toggle(this)">
             <div style="flex:1;">
               <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $lb->title }}</div>
@@ -428,6 +428,32 @@ document.addEventListener('DOMContentLoaded', function () {
   switchTab('logbook', document.querySelectorAll('.tab-btn')[1]);
 });
 @endif
+
+// Dibuka dari notifikasi: pindah ke tab yang benar, gulir ke itemnya, lalu
+// soroti sebentar. Tanpa ini anchor tak berguna karena tab lain disembunyikan.
+document.addEventListener('DOMContentLoaded', function () {
+  var hash = window.location.hash.slice(1);
+  if (!hash) return;
+
+  var tabs = document.querySelectorAll('.tab-btn');
+  var peta = { bimbingan: 0, logbook: 1, laporan: 2 };
+  var nama = hash.split('-')[0];
+
+  if (peta[nama] !== undefined && tabs[peta[nama]]) {
+    switchTab(nama, tabs[peta[nama]]);
+  }
+
+  var el = document.getElementById(hash);
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.style.transition = 'box-shadow .3s';
+  el.style.boxShadow = '0 0 0 3px var(--primary)';
+  setTimeout(function () { el.style.boxShadow = ''; }, 2200);
+
+  var body = el.querySelector('.bimb-body');
+  if (body) el.classList.add('open');
+});
 
 function submitRevisi(btn, id) {
   const noteEl = btn.closest('form').querySelector('textarea[name="note"]');

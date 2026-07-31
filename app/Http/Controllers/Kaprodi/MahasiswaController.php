@@ -210,7 +210,7 @@ class MahasiswaController extends Controller
         $internship->update(['is_finished' => true, 'finish_requested' => false]);
 
         Notification::kirim($student->user_id, 'Selesai magang kamu sudah di-ACC Kaprodi.', 'selesai_magang',
-            'Nilai dari pembimbing kini terkunci. Kamu bisa lanjut ke tahap seminar magang.');
+            'Nilai dari pembimbing kini terkunci. Kamu bisa lanjut ke tahap seminar magang.', '/mahasiswa/magang-saya');
 
         return back()->with('success', "Magang {$student->user->name} berhasil ditandai selesai.");
     }
@@ -270,7 +270,7 @@ class MahasiswaController extends Controller
         }
 
         Notification::kirim($student->user_id, 'Dosen pembimbing kamu sudah ditetapkan Kaprodi.', 'pengajuan_magang',
-            'Sekarang kamu bisa mengajukan magang dan mengisi bimbingan.');
+            'Sekarang kamu bisa mengajukan magang dan mengisi bimbingan.', '/mahasiswa/ajukan-magang');
 
         return back()->with('success', 'Dosen pembimbing berhasil ditugaskan kepada ' . $student->user->name . '.');
     }

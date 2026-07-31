@@ -253,6 +253,14 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
   color: var(--warning-text);
 }
 .alert-title { font-size: 14px; font-weight: 600; color: var(--text); }
+/* Notifikasi bisa diklik menuju hal yang dirujuk. Tautannya "diregangkan"
+   menutupi seluruh kartu lewat ::after, supaya tombol "Tandai dibaca" tetap
+   bisa diklik (tanpa menyarangkan form di dalam anchor — HTML tak sah). */
+.alert-box { position: relative; transition: background .12s, border-color .12s; }
+.alert-box:has(.alert-link):hover { border-color: var(--primary); }
+.alert-link { color: inherit; text-decoration: none; }
+.alert-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.alert-actions { position: relative; z-index: 1; }
 .alert-body  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .alert-time  { font-size: 12px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
 

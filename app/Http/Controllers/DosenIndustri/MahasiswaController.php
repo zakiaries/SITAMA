@@ -99,7 +99,7 @@ class MahasiswaController extends Controller
 
         $logBook->update(['industry_note' => $request->komentar]);
 
-        Notification::kirim($student->user_id, "Pembimbing industri mengomentari logbook \"{$logBook->title}\".", 'log_book', $request->komentar);
+        Notification::kirim($student->user_id, "Pembimbing industri mengomentari logbook \"{$logBook->title}\".", 'log_book', $request->komentar, '/mahasiswa/logbook');
 
         return back()->with('success', 'Komentar berhasil dikirim.');
     }
