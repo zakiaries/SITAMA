@@ -592,6 +592,23 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
 /* Toast (for JS-driven notifications, if used) */
 @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
 
+/* Penanda "menunggu tanggapan" untuk dosen & pembimbing industri */
+.nav-badge {
+  margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 9999px; background: var(--danger); color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.dot-baru {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--danger); flex-shrink: 0; display: inline-block;
+}
+.tag-baru {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--danger-bg); color: var(--danger);
+  font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 9999px;
+}
+
 /* Field password + tombol mata (komponen x-password-toggle) */
 .pw-wrap { position: relative; display: block; }
 .pw-wrap input { padding-right: 42px; }

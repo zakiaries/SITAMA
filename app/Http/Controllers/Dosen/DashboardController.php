@@ -29,6 +29,7 @@ class DashboardController extends Controller
                     ->with('company')->withCount(['scores' => $ownScores])->latest(),
                 'guidances',
                 'logBooks',
+                'report', // dipakai penanda "laporan menunggu review" di kartu
             ]);
 
         if ($status === 'dinilai') {

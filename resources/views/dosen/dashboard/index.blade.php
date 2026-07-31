@@ -133,11 +133,23 @@
     ['bg'=>'var(--danger-bg)','text'=>'var(--danger)'],
   ];
   $color    = $colors[$student->id % count($colors)];
+
+  // Yang menunggu tanggapan dosen dari mahasiswa ini (dihitung dari relasi yang
+  // sudah ter-eager-load, jadi tanpa query tambahan per kartu).
+  $lbBaru   = $student->logBooks->whereNull('lecturer_note')->count();
+  $bimBaru  = $student->guidances->where('status', 'pending')->count();
+  $lapBaru  = ($student->report && $student->report->status === 'pending') ? 1 : 0;
+  $perluAksi = $lbBaru + $bimBaru + $lapBaru;
 @endphp
 <a href="{{ route('dosen.mahasiswa.detail', $student) }}" class="student-card">
   <x-avatar :user="$student->user" class="student-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};" />
   <div class="student-info">
-    <div class="student-name">{{ $student->user->name ?? '-' }}</div>
+    <div class="student-name">
+      {{ $student->user->name ?? '-' }}
+      @if($perluAksi > 0)
+        <span class="dot-baru" title="Ada {{ $perluAksi }} hal yang menunggu tanggapanmu"></span>
+      @endif
+    </div>
     <div class="student-nim">{{ $student->user->username ?? '-' }}</div>
     <div class="student-meta">
       <span>{{ $student->major }}</span>
@@ -146,6 +158,13 @@
         <span>{{ $internship->company->name }}</span>
       @endif
     </div>
+    @if($perluAksi > 0)
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+        @if($lbBaru > 0)<span class="tag-baru">{{ $lbBaru }} logbook belum dikomentari</span>@endif
+        @if($bimBaru > 0)<span class="tag-baru">{{ $bimBaru }} bimbingan belum di-ACC</span>@endif
+        @if($lapBaru > 0)<span class="tag-baru">Laporan menunggu review</span>@endif
+      </div>
+    @endif
   </div>
   <div class="student-stats">
     <div class="student-stat-item">

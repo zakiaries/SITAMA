@@ -1,4 +1,8 @@
-@php $sbUser = Auth::user(); @endphp
+@php
+  $sbUser  = Auth::user();
+  // Penanda: berapa hal dari mahasiswa bimbingan yang menunggu tanggapan dosen.
+  $menunggu = $sbUser->lecturer?->menungguTanggapanKampus() ?? ['total' => 0];
+@endphp
 <div class="sidebar">
   <div class="sb-logo">
     <div class="name">SIMAMA</div>
@@ -12,6 +16,12 @@
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
       Dashboard
+      @if($menunggu['total'] > 0)
+        <span class="nav-badge"
+              title="{{ $menunggu['logbook'] }} logbook belum dikomentari, {{ $menunggu['bimbingan'] }} bimbingan belum di-ACC, {{ $menunggu['laporan'] }} laporan menunggu review">
+          {{ $menunggu['total'] > 99 ? '99+' : $menunggu['total'] }}
+        </span>
+      @endif
     </a>
     <a class="nav-item {{ request()->routeIs('dosen.seminar.*') ? 'active' : '' }}"
        href="{{ route('dosen.seminar.index') }}">

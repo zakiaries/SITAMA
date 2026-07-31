@@ -116,7 +116,12 @@
 <a href="{{ route('dosen-industri.mahasiswa.detail', $student) }}" class="student-card">
   <x-avatar :user="$student->user" class="student-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};" />
   <div class="student-info">
-    <div class="student-name">{{ $student->user->name }}</div>
+    <div class="student-name">
+      {{ $student->user->name }}
+      @if($totalLog - $dikomen > 0)
+        <span class="dot-baru" title="{{ $totalLog - $dikomen }} logbook belum kamu komentari"></span>
+      @endif
+    </div>
     <div class="student-nim">{{ $student->user->username }}</div>
     <div class="student-meta">
       <span>{{ $internship?->position ?? '-' }}</span>
@@ -125,6 +130,11 @@
         <span>{{ $internship->company->name }}</span>
       @endif
     </div>
+    @if($totalLog - $dikomen > 0)
+      <div style="margin-top:6px;">
+        <span class="tag-baru">{{ $totalLog - $dikomen }} logbook belum dikomentari</span>
+      </div>
+    @endif
     <div class="logbook-bar">
       <div class="logbook-bar-label">
         <span>Logbook dikomentari</span>

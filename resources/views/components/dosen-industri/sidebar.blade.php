@@ -1,4 +1,8 @@
-@php $sbUser = Auth::user(); @endphp
+@php
+  $sbUser   = Auth::user();
+  // Penanda: logbook mahasiswa asuhan yang belum dikomentari.
+  $menunggu = $sbUser->lecturer?->menungguTanggapanIndustri() ?? 0;
+@endphp
 <div class="sidebar">
   <div class="sb-logo">
     <div class="name">SIMAMA</div>
@@ -12,6 +16,11 @@
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
       Dashboard
+      @if($menunggu > 0)
+        <span class="nav-badge" title="{{ $menunggu }} logbook belum dikomentari">
+          {{ $menunggu > 99 ? '99+' : $menunggu }}
+        </span>
+      @endif
     </a>
   </nav>
 
