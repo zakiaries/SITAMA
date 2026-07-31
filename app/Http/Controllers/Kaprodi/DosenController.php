@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lecturer;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DosenController extends Controller
@@ -54,12 +55,21 @@ class DosenController extends Controller
         $role = $tab === 'industri' ? 'lecturer_industry' : 'lecturer';
 
         $query = Lecturer::with('user')
-            ->whereHas('user', fn($u) => $u->where('role', $role))
-            ->withCount(['internships as students_count' => function ($q) use ($role) {
-                $col = $role === 'lecturer_industry' ? 'lecturer_industry_id' : 'lecturer_id';
-                $q->select(\Illuminate\Support\Facades\DB::raw('count(distinct student_id)'))
-                  ->whereColumn($col, 'lecturers.id');
-            }]);
+            ->whereHas('user', fn($u) => $u->where('role', $role));
+
+        if ($role === 'lecturer_industry') {
+            // Pembimbing industri tak "diplot" — kaitannya hanya lewat magang.
+            // Satu mahasiswa bisa punya >1 magang dengan pembimbing yang sama,
+            // jadi dihitung distinct agar tak terhitung dobel.
+            $query->withCount(['industryInternships as students_count' => fn ($q) => $q
+                ->select(DB::raw('count(distinct student_id)'))]);
+        } else {
+            // Dosen kampus: yang dihitung adalah mahasiswa yang DIPLOT Kaprodi
+            // (students.lecturer_id) — itulah arti "mahasiswa bimbingan", dan
+            // angkanya harus langsung berubah begitu diplot, jauh sebelum
+            // mahasiswanya punya magang.
+            $query->withCount('students as students_count');
+        }
 
         if ($search) {
             $query->whereHas('user', fn($u) => $u->where('name', 'like', "%$search%")
@@ -90,7 +100,11 @@ class DosenController extends Controller
                 ])
                 ->get();
         } else {
-            $students = \App\Models\Student::whereHas('internships', fn($q) => $q->where('lecturer_id', $lecturer->id))
+            // Sumbernya students.lecturer_id (hasil plot Kaprodi), sama seperti
+            // angka di daftar dosen — kalau di sini pakai internships, mahasiswa
+            // yang sudah diplot tapi belum magang hilang dan jumlahnya berbeda
+            // dengan angka di kartu.
+            $students = \App\Models\Student::where('lecturer_id', $lecturer->id)
                 ->with([
                     'user',
                     'internships' => fn($q) => $q->where('lecturer_id', $lecturer->id)->with('company')->latest(),
