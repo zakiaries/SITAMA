@@ -155,13 +155,20 @@
       </div>
       <div class="form-group">
         <label>Pilih Mahasiswa Penyaji (sudah selesai magang)</label>
-        <div style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px;">
-          @foreach($eligibleStudents as $st)
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-            <input type="checkbox" name="student_ids[]" value="{{ $st->id }}" checked>
-            {{ $st->user->name ?? '-' }} <span style="color:var(--text-muted);">· {{ $st->user->username ?? '' }}</span>
-          </label>
-          @endforeach
+        <div class="pick-list">
+          @forelse($eligibleStudents as $st)
+            <label class="pick-row">
+              <input type="checkbox" name="student_ids[]" value="{{ $st->id }}" checked>
+              <x-avatar :user="$st->user" class="avatar" :size="30" :font="11"
+                        style="background:var(--primary-light);color:var(--primary-text);" />
+              <span style="flex:1;min-width:0;">
+                <span class="pick-name" style="display:block;">{{ $st->user->name ?? '-' }}</span>
+                <span class="pick-sub" style="display:block;">{{ $st->user->username ?? '' }}</span>
+              </span>
+            </label>
+          @empty
+            <div class="pick-empty">Belum ada mahasiswa bimbingan yang selesai magang.</div>
+          @endforelse
         </div>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">

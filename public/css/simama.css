@@ -516,6 +516,24 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
   background: var(--bg);
 }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--primary); }
+/* Checkbox & radio jangan ikut aturan input di atas — width:100% + padding
+   membuatnya melar selebar baris dan mendorong teks di sebelahnya. */
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+  width: auto; min-width: 0; padding: 0; margin: 0;
+  flex-shrink: 0; accent-color: var(--primary);
+  width: 16px; height: 16px; cursor: pointer;
+}
+
+/* Baris pilihan (mis. daftar mahasiswa penyaji di modal Buat Sesi Seminar) */
+.pick-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px; background: var(--bg); }
+.pick-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px;
+  cursor: pointer; transition: background .12s; }
+.pick-row:hover { background: var(--warm-2); }
+.pick-row .pick-name { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.25; }
+.pick-row .pick-sub  { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+.pick-empty { padding: 14px 10px; font-size: 12.5px; color: var(--text-muted); text-align: center; }
 .form-group textarea { resize: vertical; min-height: 80px; }
 .modal-footer { display: flex; gap: 9px; justify-content: flex-end; margin-top: 18px; }
 .btn-cancel   { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
