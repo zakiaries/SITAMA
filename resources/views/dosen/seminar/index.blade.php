@@ -159,11 +159,9 @@
           @forelse($eligibleStudents as $st)
             <label class="pick-row">
               <input type="checkbox" name="student_ids[]" value="{{ $st->id }}" checked>
-              <x-avatar :user="$st->user" class="avatar" :size="30" :font="11"
-                        style="background:var(--primary-light);color:var(--primary-text);" />
               <span style="flex:1;min-width:0;">
-                <span class="pick-name" style="display:block;">{{ $st->user->name ?? '-' }}</span>
-                <span class="pick-sub" style="display:block;">{{ $st->user->username ?? '' }}</span>
+                <span class="pick-name">{{ $st->user->name ?? '-' }}</span>
+                <span class="pick-sub">{{ $st->user->username ?? '' }}</span>
               </span>
             </label>
           @empty
