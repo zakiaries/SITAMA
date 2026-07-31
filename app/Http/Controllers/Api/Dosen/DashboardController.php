@@ -23,6 +23,7 @@ class DashboardController extends ApiController
                     ->with('company')->withCount(['scores' => $ownScores])->latest(),
                 'guidances',
                 'logBooks',
+                'report', // penanda "laporan menunggu review"
             ]);
 
         if ($status === 'dinilai') {
@@ -50,6 +51,11 @@ class DashboardController extends ApiController
             $graded     = ($internship?->scores_count ?? 0) > 0;
             $badge      = $graded ? 'dinilai' : ($internship?->is_finished ? 'selesai' : 'aktif');
 
+            // Paritas dengan web: foto profil & penanda "menunggu tanggapan".
+            $lbBelum  = $student->logBooks->whereNull('lecturer_note')->count();
+            $bimBelum = $student->guidances->where('status', 'pending')->count();
+            $lapBelum = ($student->report && $student->report->status === 'pending') ? 1 : 0;
+
             return [
                 'id'              => $student->id,
                 'name'            => $student->user->name ?? '-',
@@ -60,6 +66,11 @@ class DashboardController extends ApiController
                 'guidances_count' => $student->guidances->count(),
                 'logbooks_count'  => $student->logBooks->count(),
                 'status'          => $badge,
+                'photo_url'       => $student->user?->photoUrl(),
+                'logbook_belum_dikomentari' => $lbBelum,
+                'bimbingan_pending'         => $bimBelum,
+                'laporan_pending'           => $lapBelum,
+                'perlu_tanggapan'           => $lbBelum + $bimBelum + $lapBelum,
             ];
         });
 
@@ -73,6 +84,8 @@ class DashboardController extends ApiController
         return response()->json([
             'lecturer' => $request->user()->name,
             'counts'   => $counts,
+            // Untuk badge di menu/appbar: total yang menunggu tanggapan dosen.
+            'menunggu_tanggapan' => $lecturer->menungguTanggapanKampus(),
             'majors'   => Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id))->distinct()->pluck('major'),
             'years'    => Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id))->distinct()->pluck('academic_year'),
             'students' => $students,

@@ -23,6 +23,13 @@ class MahasiswaController extends ApiController
     {
         $internship = $this->internshipOf($request, $student);
         $student->load('user');
+        $internship->load('lecturer.user');
+
+        $nilaiIndustri   = $internship->nilaiSummary()['industry'];
+        $komponenTotal   = count($nilaiIndustri['components']);
+        $komponenDinilai = collect($nilaiIndustri['components'])
+            ->filter(fn ($c) => $c['avg'] !== null)
+            ->count();
 
         $filter = $request->input('filter', 'semua');
         $period = $request->input('period', 'semua');
@@ -52,6 +59,12 @@ class MahasiswaController extends ApiController
                 'name'      => $student->user->name,
                 'username'  => $student->user->username,
                 'the_class' => $student->the_class,
+                // Konteks yang dibutuhkan pembimbing industri (paritas dengan web).
+                'photo_url'     => $student->user->photoUrl(),
+                'email'         => $student->user->email,
+                'study_program' => $student->study_program,
+                'major'         => $student->major,
+                'academic_year' => $student->academic_year,
             ],
             'internship' => [
                 'company'     => $internship->company->name ?? null,
@@ -60,9 +73,24 @@ class MahasiswaController extends ApiController
                 'end_date'    => optional($internship->end_date)->toDateString(),
                 'is_finished' => (bool) $internship->is_finished,
             ],
+            // Dosen pembimbing kampus — untuk koordinasi kendala akademik.
+            'lecturer' => $internship->lecturer?->user ? [
+                'name'  => $internship->lecturer->user->name,
+                'email' => $internship->lecturer->user->email,
+            ] : null,
+            'penilaian' => [
+                'komponen_dinilai'      => $komponenDinilai,
+                'komponen_total'        => $komponenTotal,
+                'rata_rata'             => $nilaiIndustri['average'],
+                'catatan_kinerja'       => $internship->performance_notes,
+                'catatan_kinerja_oleh'  => $internship->performance_notes_by,
+                'catatan_kinerja_tgl'   => $internship->performance_notes_date,
+            ],
             'stats' => [
                 'logbook_total'   => $student->logBooks()->count(),
                 'logbook_dikomen' => $student->logBooks()->whereNotNull('industry_note')->count(),
+                'logbook_minimum' => \App\Models\Internship::MIN_LOGBOOK,
+                'logbook_terakhir' => $student->logBooks()->max('date'),
             ],
             'logbooks' => $query->get()->map(fn ($l) => [
                 'id'            => $l->id,

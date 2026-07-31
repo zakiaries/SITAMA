@@ -62,6 +62,8 @@ class MahasiswaController extends ApiController
                 'username'  => $student->user->username,
                 'major'     => $student->major,
                 'the_class' => $student->the_class,
+                'photo_url' => $student->user->photoUrl(),
+                'email'     => $student->user->email,
             ],
             'internship' => [
                 'company'     => $internship->company->name ?? null,

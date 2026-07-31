@@ -44,6 +44,10 @@ class DashboardController extends ApiController
                 'logbook_total'   => $total,
                 'logbook_dikomen' => $dikomen,
                 'is_finished' => (bool) ($internship?->is_finished),
+                // Paritas dengan web: foto profil & penanda "menunggu tanggapan".
+                'photo_url'               => $s->user?->photoUrl(),
+                'logbook_belum_dikomen'   => $total - $dikomen,
+                'perlu_tanggapan'         => $total - $dikomen,
             ];
         });
 
