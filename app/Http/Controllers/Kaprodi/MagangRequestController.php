@@ -10,6 +10,7 @@ use App\Models\Internship;
 use App\Models\InvitationToken;
 use App\Models\JobListing;
 use App\Models\Lecturer;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -90,6 +91,9 @@ class MagangRequestController extends Controller
 
             $this->syncDirectoryListing($magangRequest, $companyId);
 
+            Notification::kirim($student->user_id, 'Pengajuan magang kamu disetujui Kaprodi.', 'pengajuan_magang',
+                'Data magang sudah dibuat. Kamu bisa mulai mengisi logbook.');
+
             return back()->with('success',
                 "Pengajuan {$student->user->name} disetujui. Pembimbing industri "
                 . "({$lecturer?->user?->name}) sudah terdaftar — tak perlu aktivasi ulang.");
@@ -146,6 +150,9 @@ class MagangRequestController extends Controller
             $mailStatus = "Email gagal terkirim. Bagikan link aktivasi ini secara manual:";
         }
 
+        Notification::kirim($student->user_id, 'Pengajuan magang kamu disetujui Kaprodi.', 'pengajuan_magang',
+            'Data magang sudah dibuat. Kamu bisa mulai mengisi logbook.');
+
         return back()
             ->with('success', "Pengajuan {$student->user->name} disetujui.")
             ->with('activation_info', [
@@ -172,6 +179,9 @@ class MagangRequestController extends Controller
             'status'           => 'rejected',
             'rejection_reason' => $request->rejection_reason,
         ]);
+
+        Notification::kirim($magangRequest->student->user_id, 'Pengajuan magang kamu ditolak Kaprodi.', 'pengajuan_magang',
+            $request->rejection_reason);
 
         return back()->with('success', "Pengajuan {$magangRequest->student->user->name} ditolak.");
     }

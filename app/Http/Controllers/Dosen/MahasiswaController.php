@@ -7,6 +7,7 @@ use App\Models\AssessmentComponent;
 use App\Models\Guidance;
 use App\Models\InternshipReport;
 use App\Models\LogBook;
+use App\Models\Notification;
 use App\Models\Student;
 use App\Models\StudentScore;
 use Illuminate\Http\Request;
@@ -101,6 +102,8 @@ class MahasiswaController extends Controller
             'lecturer_note' => $request->input('note'),
         ]);
 
+        Notification::kirim($student->user_id, "Bimbingan \"{$guidance->title}\" disetujui dosen pembimbing.", 'bimbingan', $request->input('note'));
+
         return back()->with('success', 'Bimbingan berhasil disetujui.');
     }
 
@@ -119,6 +122,8 @@ class MahasiswaController extends Controller
             'lecturer_note' => $request->note,
         ]);
 
+        Notification::kirim($student->user_id, "Bimbingan \"{$guidance->title}\" perlu direvisi.", 'bimbingan', $request->note);
+
         return back()->with('success', 'Bimbingan ditandai untuk revisi.');
     }
 
@@ -134,6 +139,8 @@ class MahasiswaController extends Controller
             'lecturer_note' => $request->input('note'),
             'reviewed_at'   => now(),
         ]);
+
+        Notification::kirim($student->user_id, 'Laporan akhir magang disetujui dosen pembimbing.', 'laporan', $request->input('note'));
 
         return back()->with('success', 'Laporan akhir berhasil disetujui.');
     }
@@ -154,6 +161,8 @@ class MahasiswaController extends Controller
             'lecturer_note' => $request->note,
             'reviewed_at'   => now(),
         ]);
+
+        Notification::kirim($student->user_id, 'Laporan akhir magang perlu direvisi.', 'laporan', $request->note);
 
         return back()->with('success', 'Laporan ditandai untuk revisi.');
     }

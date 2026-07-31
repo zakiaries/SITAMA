@@ -1,6 +1,6 @@
 @extends('layouts.dosen')
-@section('title', 'Seminar Bimbingan')
-@php $title = 'Seminar Bimbingan'; @endphp
+@section('title', 'Seminar Magang')
+@php $title = 'Seminar Magang'; @endphp
 @section('content')
 
 @if(session('success'))
@@ -12,7 +12,7 @@
 
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
   <div>
-    <div class="page-title">Seminar Bimbingan</div>
+    <div class="page-title">Seminar Magang</div>
     <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
       Buat sesi seminar untuk mahasiswa bimbingan yang sudah selesai magang. Mereka maju bergantian dalam satu sesi.
     </div>
@@ -115,16 +115,19 @@
         </button>
       </form>
       <details style="margin-top:10px;">
-        <summary style="font-size:12px;color:var(--primary);cursor:pointer;">Ubah jadwal / lokasi</summary>
+        <summary style="font-size:12px;color:var(--primary);cursor:pointer;">Ubah jam / lokasi</summary>
         <form method="POST" action="{{ route('dosen.seminar.finalize', $s) }}" style="margin-top:8px;">
           @csrf
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px;">
+            Tanggal <strong style="color:var(--text);">{{ $s->date?->format('d M Y') }}</strong> sudah ditetapkan
+            dan tidak bisa diubah lagi. Yang masih bisa disesuaikan hanya jam dan lokasinya.
+          </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:8px;">
-            <input type="date" name="date" value="{{ $s->date?->toDateString() }}" min="{{ now()->toDateString() }}" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
             <input type="text" name="time" value="{{ $s->time }}" placeholder="Waktu (mis. 09:00-11:00)" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
             <input type="text" name="location" value="{{ $s->location }}" placeholder="Ruang/tempat" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           </div>
-          <button type="submit" class="btn btn-outline btn-sm">Simpan Perubahan Jadwal</button>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Mahasiswa penyaji akan diberi tahu perubahan jadwal.</div>
+          <button type="submit" class="btn btn-outline btn-sm">Simpan Perubahan</button>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Mahasiswa penyaji akan diberi tahu perubahannya.</div>
         </form>
       </details>
     </div>

@@ -7,7 +7,7 @@ import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/ui.dart';
 
-/// "Seminar Bimbingan" — sesi seminar dari sisi dosen pembimbing (menyamai web).
+/// "Seminar Magang" — sesi seminar dari sisi dosen pembimbing (menyamai web).
 ///
 /// Alur: buat sesi (draft) berisi mahasiswa bimbingan yang sudah selesai magang
 /// → mahasiswa isi ketersediaan → tetapkan jadwal final (scheduled) → audiens
@@ -62,7 +62,7 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
     return Scaffold(
       backgroundColor: AppColors.warm,
       body: Column(children: [
-        const AppHeader(title: 'Seminar Bimbingan', subtitle: 'Sesi seminar mahasiswa bimbingan'),
+        const AppHeader(title: 'Seminar Magang', subtitle: 'Sesi seminar mahasiswa bimbingan'),
         Expanded(child: _body()),
       ]),
     );

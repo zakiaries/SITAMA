@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Internship;
 use App\Models\Lecturer;
+use App\Models\Notification;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -208,6 +209,9 @@ class MahasiswaController extends Controller
 
         $internship->update(['is_finished' => true, 'finish_requested' => false]);
 
+        Notification::kirim($student->user_id, 'Selesai magang kamu sudah di-ACC Kaprodi.', 'selesai_magang',
+            'Nilai dari pembimbing kini terkunci. Kamu bisa lanjut ke tahap seminar magang.');
+
         return back()->with('success', "Magang {$student->user->name} berhasil ditandai selesai.");
     }
 
@@ -264,6 +268,9 @@ class MahasiswaController extends Controller
         if ($internship) {
             $internship->update(['lecturer_id' => $request->lecturer_id]);
         }
+
+        Notification::kirim($student->user_id, 'Dosen pembimbing kamu sudah ditetapkan Kaprodi.', 'pengajuan_magang',
+            'Sekarang kamu bisa mengajukan magang dan mengisi bimbingan.');
 
         return back()->with('success', 'Dosen pembimbing berhasil ditugaskan kepada ' . $student->user->name . '.');
     }

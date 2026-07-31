@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 /**
- * Jembatan API mobile "Seminar Bimbingan" untuk dosen — menyamai web
+ * Jembatan API mobile "Seminar Magang" untuk dosen — menyamai web
  * (Dosen\SeminarController): dosen buat sesi (draft) berisi mahasiswa bimbingan
  * yang sudah selesai magang → mahasiswa isi ketersediaan → dosen finalkan
  * jadwal (scheduled) → audiens absen via login → dosen sahkan (completed).
@@ -115,8 +115,12 @@ class SeminarController extends ApiController
             return response()->json(['message' => 'Sesi ini tidak dapat dijadwalkan lagi.'], 422);
         }
 
+        // Paritas dengan web: tanggal ditetapkan sekali saat penjadwalan awal.
+        // Sesi yang sudah terjadwal hanya boleh diubah jam dan lokasinya.
+        $sudahTerjadwal = $seminar->status === 'scheduled';
+
         $request->validate([
-            'date'     => 'required|date|after_or_equal:today',
+            'date'     => ($sudahTerjadwal ? 'nullable' : 'required') . '|date|after_or_equal:today',
             'time'     => 'nullable|string|max:50',
             'location' => 'required|string|max:255',
         ], [
@@ -125,7 +129,7 @@ class SeminarController extends ApiController
         ]);
 
         $seminar->update([
-            'date'         => $request->date,
+            'date'         => $sudahTerjadwal ? $seminar->date : $request->date,
             'time'         => $request->time,
             'location'     => $request->location,
             'status'       => 'scheduled',

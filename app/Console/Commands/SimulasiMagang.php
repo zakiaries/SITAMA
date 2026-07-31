@@ -588,7 +588,7 @@ class SimulasiMagang extends Command
 
         if ($seminar) {
             $this->line('Halaman QR daftar hadir   : masuk sebagai ' . ($dospem->user->username ?? '-')
-                . ' → menu Seminar Bimbingan → tombol QR pada sesi "' . $seminar->title . '"');
+                . ' → menu Seminar Magang → tombol QR pada sesi "' . $seminar->title . '"');
         }
     }
 }

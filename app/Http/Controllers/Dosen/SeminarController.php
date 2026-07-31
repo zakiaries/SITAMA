@@ -146,17 +146,27 @@ class SeminarController extends Controller
             return back()->with('error', 'Sesi ini tidak dapat dijadwalkan lagi.');
         }
 
-        $request->validate([
-            'date'     => 'required|date|after_or_equal:today',
+        // Tanggal ditetapkan SEKALI saat penjadwalan awal. Sesi yang sudah
+        // terjadwal hanya boleh diubah jam dan lokasinya — mengganti tanggal
+        // membatalkan kesiapan penyaji dan audiens yang sudah diberi tahu.
+        $sudahTerjadwal = $seminar->status === 'scheduled';
+
+        $aturan = [
             'time'     => 'nullable|string|max:50',
             'location' => 'required|string|max:255',
-        ], [
+        ];
+
+        if (! $sudahTerjadwal) {
+            $aturan['date'] = 'required|date|after_or_equal:today';
+        }
+
+        $request->validate($aturan, [
             'date.after_or_equal' => 'Tanggal tidak boleh sebelum hari ini.',
             'location.required'   => 'Ruang/tempat wajib diisi.',
         ]);
 
         $seminar->update([
-            'date'         => $request->date,
+            'date'         => $sudahTerjadwal ? $seminar->date : $request->date,
             'time'         => $request->time,
             'location'     => $request->location,
             'status'       => 'scheduled',

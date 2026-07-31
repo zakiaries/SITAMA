@@ -64,6 +64,14 @@ class LaporanController extends Controller
             ]);
         }
 
+        $lecturer = $student->lecturer ?? $student->activeInternship?->lecturer;
+        \App\Models\Notification::kirim(
+            $lecturer?->user_id,
+            "{$student->user->name} mengunggah laporan akhir magang.",
+            'laporan',
+            'Laporan menunggu review dan persetujuan dosen pembimbing.'
+        );
+
         return redirect()->route('mahasiswa.laporan')
             ->with('success', 'Laporan akhir berhasil diunggah dan menunggu persetujuan dosen.');
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Guidance;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -64,6 +65,8 @@ class BimbinganController extends Controller
             'status'     => 'pending',
         ]);
 
+        $this->beritahuDosen($student, "{$student->user->name} mengajukan bimbingan baru: \"{$request->title}\".", $request->activity);
+
         return redirect()->route('mahasiswa.bimbingan')
             ->with('success', 'Bimbingan berhasil ditambahkan.');
     }
@@ -103,10 +106,22 @@ class BimbinganController extends Controller
 
         $guidance->update($data);
 
+        if ($wasRejected) {
+            $this->beritahuDosen($student, "{$student->user->name} mengirim ulang revisi bimbingan: \"{$request->title}\".", $request->activity);
+        }
+
         return redirect()->route('mahasiswa.bimbingan')
             ->with('success', $wasRejected
                 ? 'Revisi bimbingan berhasil dikirim ulang ke dosen.'
                 : 'Bimbingan berhasil diperbarui.');
+    }
+
+    /** Beri tahu dosen pembimbing (plot mahasiswa, atau yang menempel di magang). */
+    private function beritahuDosen($student, string $pesan, ?string $detail = null): void
+    {
+        $lecturer = $student->lecturer ?? $student->activeInternship?->lecturer;
+
+        Notification::kirim($lecturer?->user_id, $pesan, 'bimbingan', $detail);
     }
 
     /**

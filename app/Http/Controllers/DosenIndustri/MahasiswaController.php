@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AssessmentComponent;
 use App\Models\Internship;
 use App\Models\LogBook;
+use App\Models\Notification;
 use App\Models\Student;
 use App\Models\StudentScore;
 use Illuminate\Http\Request;
@@ -97,6 +98,8 @@ class MahasiswaController extends Controller
         ]);
 
         $logBook->update(['industry_note' => $request->komentar]);
+
+        Notification::kirim($student->user_id, "Pembimbing industri mengomentari logbook \"{$logBook->title}\".", 'log_book', $request->komentar);
 
         return back()->with('success', 'Komentar berhasil dikirim.');
     }
