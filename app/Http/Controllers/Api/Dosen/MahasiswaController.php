@@ -169,6 +169,11 @@ class MahasiswaController extends ApiController
     {
         $internship = $this->internshipOf($request, $student);
 
+        // Paritas dengan web: magang yang sudah ditutup Kaprodi terkunci nilainya.
+        if ($internship->is_finished) {
+            return response()->json(['message' => 'Magang mahasiswa ini sudah ditandai selesai, sehingga nilainya terkunci. Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.'], 422);
+        }
+
         $request->validate([
             'scores'   => 'required|array',
             'scores.*' => 'nullable|numeric|min:1|max:10',

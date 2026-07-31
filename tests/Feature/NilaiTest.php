@@ -76,6 +76,11 @@ class NilaiTest extends FeatureTestCase
         $detail  = DetailedAssessmentComponent::whereHas('assessmentComponent',
             fn ($q) => $q->where('scorer_type', 'lecturer'))->firstOrFail();
 
+        // Penilaian terjadi SEBELUM magang ditutup — nilai justru salah satu
+        // syarat selesai magang. Fixture ini is_finished = true, sedangkan magang
+        // yang sudah selesai nilainya terkunci (lihat NilaiTerkunciTest).
+        $student->internships()->latest()->first()->update(['is_finished' => false]);
+
         $this->postJson("/api/dosen/mahasiswa/{$student->id}/nilai", ['scores' => [$detail->id => 15]])
             ->assertStatus(422);
 

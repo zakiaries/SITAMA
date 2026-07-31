@@ -73,9 +73,18 @@
   @endif
 </div>
 
+@if($internship->is_finished)
+  <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <strong>Nilai terkunci.</strong> Magang mahasiswa ini sudah ditandai selesai oleh Kaprodi,
+    sehingga nilainya tidak bisa diubah lagi. Bila ada yang perlu dikoreksi, minta Kaprodi
+    membuka kembali status selesai magangnya.
+  </div>
+@endif
+
 {{-- Form Nilai --}}
 <form method="POST" action="{{ route('dosen.mahasiswa.nilai.update', $student) }}">
   @csrf
+  <fieldset @disabled($internship->is_finished) style="border:none;padding:0;margin:0;{{ $internship->is_finished ? 'opacity:.6;' : '' }}">
 
   @php
     $componentIcons = ['clipboard', 'code', 'handshake', 'bulb'];
@@ -120,11 +129,14 @@
     $hasAnyScore = collect($components)->flatMap->detailedComponents
       ->flatMap(fn($d) => $d->scores)->isNotEmpty();
   @endphp
-  <div style="margin-top:8px;">
-    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
-      {{ $hasAnyScore ? 'Update Nilai' : 'Simpan Nilai' }}
-    </button>
-  </div>
+  @unless($internship->is_finished)
+    <div style="margin-top:8px;">
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
+        {{ $hasAnyScore ? 'Update Nilai' : 'Simpan Nilai' }}
+      </button>
+    </div>
+  @endunless
+  </fieldset>
 </form>
 
 @endsection

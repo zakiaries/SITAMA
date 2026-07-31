@@ -211,6 +211,28 @@ class MahasiswaController extends Controller
         return back()->with('success', "Magang {$student->user->name} berhasil ditandai selesai.");
     }
 
+    /**
+     * Buka kembali magang yang sudah ditandai selesai.
+     *
+     * Menandai selesai akan MENGUNCI nilai dari dosen pembimbing dan pembimbing
+     * industri. Tanpa jalan membuka kembali, nilai yang keliru mustahil
+     * dikoreksi — karena itu wewenang ini diberikan kepada Kaprodi, pihak yang
+     * menutup magangnya.
+     */
+    public function bukaKembaliFinish(Student $student)
+    {
+        $internship = $student->internships()->latest()->first();
+
+        if (! $internship || ! $internship->is_finished) {
+            return back()->with('error', 'Magang mahasiswa ini belum berstatus selesai.');
+        }
+
+        $internship->update(['is_finished' => false, 'finish_requested' => false]);
+
+        return back()->with('success',
+            "Status selesai magang {$student->user->name} dibuka kembali. Dosen pembimbing dan pembimbing industri bisa memperbaiki nilai, lalu mahasiswa mengajukan selesai magang lagi.");
+    }
+
     public function resetPassword(Request $request, Student $student)
     {
         $request->validate([

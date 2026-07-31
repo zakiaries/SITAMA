@@ -243,6 +243,17 @@
         <div style="background:var(--success-bg);border:1px solid #A7E8CF;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--success-text);">
           <x-icon name="check" :size="13"/> Magang ini sudah selesai.
         </div>
+        <p style="font-size:12.5px;color:var(--text-muted);margin:12px 0 10px;">
+          Nilai dari dosen pembimbing dan pembimbing industri terkunci selama status ini aktif.
+          Buka kembali hanya bila ada nilai atau data yang perlu dikoreksi.
+        </p>
+        <form method="POST" action="{{ route('kaprodi.mahasiswa.buka-finish', $student) }}"
+              data-confirm="Buka kembali status selesai magang {{ $student->user->name }}? Nilai akan bisa diubah lagi oleh pembimbing.">
+          @csrf
+          <button type="submit" class="btn btn-outline btn-sm">
+            <x-icon name="refresh" :size="14"/> Buka Kembali Status Selesai
+          </button>
+        </form>
       @elseif($internship->finish_requested)
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
           Mahasiswa mengajukan selesai magang. Periksa kelengkapan data, lalu ACC jika sudah sesuai.

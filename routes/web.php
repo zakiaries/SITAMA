@@ -180,6 +180,7 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:kaprodi'])
     Route::get('/mahasiswa',                              [KaprodiMahasiswaController::class, 'index'])->name('mahasiswa.index');
     Route::get('/mahasiswa/{student}',                    [KaprodiMahasiswaController::class, 'detail'])->name('mahasiswa.detail');
     Route::post('/mahasiswa/{student}/approve-finish',    [KaprodiMahasiswaController::class, 'approveFinish'])->name('mahasiswa.approve-finish');
+    Route::post('/mahasiswa/{student}/buka-finish',       [KaprodiMahasiswaController::class, 'bukaKembaliFinish'])->name('mahasiswa.buka-finish');
     Route::post('/mahasiswa/{student}/reset-password',    [KaprodiMahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
     Route::post('/mahasiswa/{student}/internship',      [KaprodiMahasiswaController::class, 'storeInternship'])->name('mahasiswa.internship.store');
     Route::post('/mahasiswa/{student}/assign-lecturer', [KaprodiMahasiswaController::class, 'assignLecturer'])->name('mahasiswa.assign');

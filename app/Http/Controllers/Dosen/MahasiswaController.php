@@ -188,6 +188,14 @@ class MahasiswaController extends Controller
         $lecturer   = $this->getLecturer();
         $internship = $this->getInternship($student, $lecturer);
 
+        // Magang yang sudah ditutup Kaprodi = jejak akademik yang sah; nilainya
+        // tak boleh berubah lagi. Bila memang perlu dikoreksi, Kaprodi membuka
+        // kembali status selesainya lebih dulu.
+        if ($internship->is_finished) {
+            return back()->with('error',
+                'Magang mahasiswa ini sudah ditandai selesai, sehingga nilainya terkunci. Minta Kaprodi membuka kembali status selesai bila ada nilai yang perlu dikoreksi.');
+        }
+
         $request->validate([
             'scores'   => 'required|array',
             'scores.*' => 'nullable|numeric|min:1|max:10',

@@ -63,8 +63,17 @@
   </div>
 </div>
 
+@if($internship->is_finished)
+  <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <strong>Penilaian terkunci.</strong> Magang mahasiswa ini sudah ditandai selesai oleh Kaprodi,
+    sehingga nilai dan catatan kinerja tidak bisa diubah lagi. Bila ada yang perlu dikoreksi,
+    hubungi Kaprodi untuk membuka kembali status selesai magangnya.
+  </div>
+@endif
+
 <form method="POST" action="{{ route('dosen-industri.mahasiswa.penilaian.simpan', $student) }}" id="form-penilaian">
   @csrf
+  <fieldset @disabled($internship->is_finished) style="border:none;padding:0;margin:0;{{ $internship->is_finished ? 'opacity:.6;' : '' }}">
 
   @php $icons = ['clipboard','code','handshake','bulb']; $i = 0; @endphp
   @foreach($components as $component)
@@ -112,9 +121,12 @@
     @endif
   </div>
 
-  <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
-    <x-icon name="save" :size="16"/> Simpan &amp; Kirim Penilaian
-  </button>
+  @unless($internship->is_finished)
+    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
+      <x-icon name="save" :size="16"/> Simpan &amp; Kirim Penilaian
+    </button>
+  @endunless
+  </fieldset>
 </form>
 
 @endsection

@@ -133,6 +133,13 @@ class MahasiswaController extends Controller
         $lecturer   = $this->getLecturer();
         $internship = $this->getInternship($student, $lecturer);
 
+        // Lihat catatan di Dosen\MahasiswaController::updateNilai — nilai magang
+        // yang sudah ditutup Kaprodi terkunci.
+        if ($internship->is_finished) {
+            return back()->with('error',
+                'Magang mahasiswa ini sudah ditandai selesai, sehingga penilaian terkunci. Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.');
+        }
+
         $request->validate([
             'scores'            => 'array',
             'scores.*'          => 'nullable|numeric|min:1|max:10',
