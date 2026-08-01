@@ -101,7 +101,7 @@
   @if($req->status === 'pending')
   <div style="display:flex;gap:10px;padding-top:14px;border-top:1px solid var(--border);">
     <form method="POST" action="{{ route('kaprodi.pengajuan-magang.approve', $req) }}"
-          onsubmit="return confirm('Setujui pengajuan magang {{ addslashes($student->user->name) }}?\nLink aktivasi akan dikirim ke email pembimbing industri.')">
+          data-confirm="Setujui pengajuan magang {{ $student->user->name }}? Link aktivasi akan dikirim ke email pembimbing industri.">
       @csrf
       <button type="submit" class="btn btn-primary btn-sm">
         <x-icon name="check" :size="14"/> Setujui & Kirim Link Aktivasi

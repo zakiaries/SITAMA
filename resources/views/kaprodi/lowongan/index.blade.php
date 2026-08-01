@@ -60,7 +60,7 @@
                 <button type="submit" class="btn btn-sm">{{ $l->status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}</button>
               </form>
               <form method="POST" action="{{ route('kaprodi.lowongan.destroy', $l) }}" style="display:inline;"
-                onsubmit="return confirm('Hapus lowongan ini?');">
+                data-confirm="Hapus lowongan {{ $l->title }}?" data-confirm-danger>
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-sm" style="color:var(--danger);border-color:var(--danger);">Hapus</button>
               </form>

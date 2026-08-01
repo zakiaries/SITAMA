@@ -96,7 +96,8 @@
         </div>
         <button type="submit" class="btn btn-primary btn-sm">Tetapkan &amp; Jadwalkan</button>
       </form>
-      <form method="POST" action="{{ route('dosen.seminar.destroy', $s) }}" style="margin-top:8px;" onsubmit="return confirm('Batalkan sesi ini?')">
+      <form method="POST" action="{{ route('dosen.seminar.destroy', $s) }}" style="margin-top:8px;"
+            data-confirm="Batalkan sesi seminar ini? Data penyaji &amp; daftar hadirnya ikut terhapus." data-confirm-danger>
         @csrf @method('DELETE')
         <button type="submit" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:none;">Batalkan Sesi</button>
       </form>
