@@ -1,4 +1,12 @@
-@php $sbUser = Auth::user(); @endphp
+@php
+  $sbUser = Auth::user();
+  // Penanda: hal yang menunggu keputusan kaprodi, dihitung persis sama dengan
+  // tab tujuannya supaya angkanya cocok setelah menu diklik.
+  //   Data Mahasiswa    -> tab "Menunggu" (mahasiswa baru daftar, belum bisa masuk)
+  //   Pengajuan Magang  -> tab "Menunggu" (permintaan akun industri)
+  $mhsMenunggu      = \App\Models\Student::where('status', 'pending')->count();
+  $pengajuanMenunggu = \App\Models\CompanyRequest::where('status', 'pending')->count();
+@endphp
 <div class="sidebar">
   <div class="sb-logo">
     <div class="name">SIMAMA</div>
@@ -17,6 +25,11 @@
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
       </svg>
       Data Mahasiswa
+      @if($mhsMenunggu > 0)
+        <span class="nav-badge" title="{{ $mhsMenunggu }} mahasiswa baru mendaftar dan menunggu persetujuan akun">
+          {{ $mhsMenunggu > 99 ? '99+' : $mhsMenunggu }}
+        </span>
+      @endif
     </a>
     <a class="nav-item {{ request()->routeIs('kaprodi.dosen.*') ? 'active' : '' }}" href="{{ route('kaprodi.dosen.index') }}">
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -29,9 +42,10 @@
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
       </svg>
       Pengajuan Magang
-      @php $pendingCount = \App\Models\CompanyRequest::where('status','pending')->count(); @endphp
-      @if($pendingCount > 0)
-        <span style="background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:auto;">{{ $pendingCount }}</span>
+      @if($pengajuanMenunggu > 0)
+        <span class="nav-badge" title="{{ $pengajuanMenunggu }} pengajuan akun industri menunggu review">
+          {{ $pengajuanMenunggu > 99 ? '99+' : $pengajuanMenunggu }}
+        </span>
       @endif
     </a>
     <a class="nav-item {{ request()->routeIs('kaprodi.lowongan.*') ? 'active' : '' }}" href="{{ route('kaprodi.lowongan.index') }}">
