@@ -108,6 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/mahasiswa/{student}/bimbingan/{guidance}/approve', [DsnMahasiswa::class, 'approveBimbingan']);
         Route::post('/mahasiswa/{student}/bimbingan/{guidance}/revisi', [DsnMahasiswa::class, 'revisiBimbingan']);
         Route::post('/mahasiswa/{student}/logbook/{logBook}/note', [DsnMahasiswa::class, 'logBookNote']);
+        Route::delete('/mahasiswa/{student}/logbook/{logBook}/note', [DsnMahasiswa::class, 'hapusLogBookNote']);
         Route::post('/mahasiswa/{student}/laporan/{report}/approve', [DsnMahasiswa::class, 'approveLaporan']);
         Route::post('/mahasiswa/{student}/laporan/{report}/revisi', [DsnMahasiswa::class, 'revisiLaporan']);
         Route::get('/mahasiswa/{student}/nilai', [DsnMahasiswa::class, 'nilaiPage']);

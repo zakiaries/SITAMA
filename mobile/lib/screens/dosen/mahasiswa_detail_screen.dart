@@ -30,6 +30,7 @@ class _DosenMahasiswaDetailState extends State<DosenMahasiswaDetail> {
   String get _token => context.read<AuthProvider>().token ?? '';
   int get _sid => widget.studentId;
   int _tab = 0; // 0 Bimbingan, 1 Log Book, 2 Laporan Akhir
+  int _logFilter = 0; // 0 Semua, 1 Belum Dicatat, 2 Sudah Dicatat
 
   @override
   void initState() {
@@ -144,10 +145,29 @@ class _DosenMahasiswaDetailState extends State<DosenMahasiswaDetail> {
                   else
                     ...guidances.map((g) => _GuidanceCard(g: g, onApprove: () => _approveGuidance(g), onRevisi: () => _revisiGuidance(g))),
                 ] else if (_tab == 1) ...[
-                  if (logbooks.isEmpty)
-                    const AppCard(child: Text('Belum ada log book.', style: TextStyle(color: AppColors.textMuted)))
-                  else
-                    ...logbooks.map((l) => _LogbookCard(l: l, onNote: () => _logbookNote(l))),
+                  // ── Filter segmented (seragam dgn pembimbing industri) ──
+                  Builder(builder: (_) {
+                    final belum = logbooks.where((l) => (l['lecturer_note'] ?? '').toString().isEmpty).toList();
+                    final sudah = logbooks.where((l) => (l['lecturer_note'] ?? '').toString().isNotEmpty).toList();
+                    final shown = _logFilter == 1 ? belum : _logFilter == 2 ? sudah : logbooks;
+                    return Column(children: [
+                      SegTabs(
+                        small: true,
+                        labels: ['Semua (${logbooks.length})', 'Belum Dicatat (${belum.length})', 'Sudah Dicatat (${sudah.length})'],
+                        index: _logFilter,
+                        onChanged: (i) => setState(() => _logFilter = i),
+                      ),
+                      const SizedBox(height: 12),
+                      if (shown.isEmpty)
+                        const AppCard(child: Text('Tidak ada log book pada filter ini.', style: TextStyle(color: AppColors.textMuted)))
+                      else
+                        ...shown.map((l) => _LogbookCard(
+                              l: l,
+                              onNote: () => _logbookNote(l),
+                              onHapusNote: () => _hapusLogbookNote(l),
+                            )),
+                    ]);
+                  }),
                 ] else ...[
                   if (report == null)
                     const AppCard(child: Text('Mahasiswa belum mengunggah laporan.', style: TextStyle(color: AppColors.textMuted)))
@@ -213,9 +233,29 @@ class _DosenMahasiswaDetailState extends State<DosenMahasiswaDetail> {
   }
 
   Future<void> _logbookNote(Map l) async {
-    final note = await showNoteDialog(context, title: 'Catatan Log Book', initial: l['lecturer_note'] ?? '', hint: 'Tulis catatan...');
+    final note = await showNoteDialog(context,
+        title: 'Catatan Log Book',
+        initial: l['lecturer_note'] ?? '',
+        hint: 'Tulis catatan...',
+        requiredNote: true,
+        okLabel: 'Kirim');
     if (note == null) return;
     _action(() => ApiClient.post('/dosen/mahasiswa/$_sid/logbook/${l['id']}/note', token: _token, body: {'note': note}));
+  }
+
+  Future<void> _hapusLogbookNote(Map l) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Hapus catatan?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Hapus')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    _action(() => ApiClient.delete('/dosen/mahasiswa/$_sid/logbook/${l['id']}/note', token: _token));
   }
 
   String _initials(String n) {
@@ -304,10 +344,13 @@ class _ReportCard extends StatelessWidget {
   }
 }
 
+/// Kartu log book sisi dosen — bentuknya disamakan dengan pembimbing industri:
+/// status "Dicatat/Belum", catatan tampil di blok bergaris, dan aksi
+/// Hapus/Catatan di kanan bawah.
 class _LogbookCard extends StatelessWidget {
   final Map l;
-  final VoidCallback onNote;
-  const _LogbookCard({required this.l, required this.onNote});
+  final VoidCallback onNote, onHapusNote;
+  const _LogbookCard({required this.l, required this.onNote, required this.onHapusNote});
   @override
   Widget build(BuildContext context) {
     final hasNote = (l['lecturer_note'] ?? '').toString().isNotEmpty;
@@ -315,20 +358,45 @@ class _LogbookCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text(l['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700))),
-          Text(l['date'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: hasNote ? AppColors.successBg : AppColors.warnBg,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(hasNote ? 'Dicatat' : 'Belum',
+                style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: hasNote ? AppColors.success : AppColors.warnText)),
+          ),
         ]),
+        Text(l['date'] ?? '', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
         const SizedBox(height: 6),
         Text(l['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
         if (hasNote)
-          Padding(padding: const EdgeInsets.only(top: 8), child: Text('Catatan Anda: ${l['lecturer_note']}', style: const TextStyle(fontSize: 12, color: AppColors.primary))),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(left: 10),
+            decoration: const BoxDecoration(border: Border(left: BorderSide(color: AppColors.primary, width: 3))),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Catatan Saya', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w700)),
+              Text('${l['lecturer_note']}', style: const TextStyle(fontSize: 13)),
+            ]),
+          ),
+        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          if (hasNote)
+            TextButton.icon(
+              onPressed: onHapusNote,
+              icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+              label: const Text('Hapus', style: TextStyle(color: AppColors.error)),
+            ),
+          TextButton.icon(
             onPressed: onNote,
             icon: const Icon(Icons.edit_note, size: 20),
-            label: Text(hasNote ? 'Ubah Catatan' : 'Beri Catatan'),
+            label: Text(hasNote ? 'Ubah' : 'Catatan'),
           ),
-        ),
+        ]),
       ]),
     );
   }

@@ -120,6 +120,57 @@ class ApiParitasWebTest extends FeatureTestCase
             ]);
     }
 
+    /**
+     * Catatan logbook dosen di mobile mengikuti web: wajib berisi, dan
+     * dikosongkan lewat tombol hapus (bukan menyimpan catatan kosong).
+     */
+    public function test_catatan_logbook_dosen_wajib_isi_dan_bisa_dihapus(): void
+    {
+        $student = $this->userByUsername('3.34.23.2.01')->student;
+        $lb = LogBook::create([
+            'student_id' => $student->id,
+            'title'      => 'Hari ke-1',
+            'activity'   => 'Perkenalan tim.',
+            'date'       => now()->subDay(),
+        ]);
+
+        $this->api('dosen1')
+            ->postJson("/api/dosen/mahasiswa/{$student->id}/logbook/{$lb->id}/note", ['note' => ''])
+            ->assertStatus(422);
+
+        $this->api('dosen1')
+            ->postJson("/api/dosen/mahasiswa/{$student->id}/logbook/{$lb->id}/note", ['note' => 'Kerja bagus.'])
+            ->assertOk();
+        $this->assertSame('Kerja bagus.', $lb->fresh()->lecturer_note);
+
+        $this->api('dosen1')
+            ->deleteJson("/api/dosen/mahasiswa/{$student->id}/logbook/{$lb->id}/note")
+            ->assertOk();
+        $this->assertNull($lb->fresh()->lecturer_note);
+    }
+
+    /** Kartu seminar membawa penanda kunci supaya UI mobile bisa menyembunyikan aksi. */
+    public function test_kartu_seminar_membawa_penanda_terkunci(): void
+    {
+        $dosen = $this->userByUsername('dosen1');
+
+        \App\Models\Seminar::create([
+            'lecturer_id'  => $dosen->lecturer->id,
+            'title'        => 'Sudah lewat',
+            'program'      => 'TI',
+            'status'       => 'scheduled',
+            'date'         => now()->subDay()->toDateString(),
+            'location'     => 'TI-01',
+            'access_token' => \Illuminate\Support\Str::random(48),
+        ]);
+
+        $this->api('dosen1')->getJson('/api/dosen/seminar')
+            ->assertOk()
+            ->assertJsonPath('sessions.0.date_passed', true)
+            ->assertJsonPath('sessions.0.can_edit', false)
+            ->assertJsonPath('sessions.0.hadir_url', null);
+    }
+
     public function test_field_lama_industri_tetap_ada(): void
     {
         $this->api('industri1')->getJson('/api/dosen-industri/dashboard')

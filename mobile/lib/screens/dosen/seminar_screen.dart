@@ -119,15 +119,20 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
 
   // ── Kartu sesi ─────────────────────────────────────────────────────────────
 
+  /// Lewat hari-H sesi dikunci (server juga menolak) — sesuai perilaku web.
+  /// Fallback ke status lama bila server belum mengirim field ini.
+  bool _terkunci(Map<String, dynamic> s) => s['date_passed'] == true;
+
   Widget _card(Map<String, dynamic> s) {
     final status = '${s['status'] ?? ''}';
     final presenters = List<Map<String, dynamic>>.from(s['presenters'] ?? []);
+    final terkunci = _terkunci(s);
     return AppCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(child: Text('${s['title'] ?? '-'}',
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5))),
         const SizedBox(width: 4),
-        if (status == 'draft' || status == 'scheduled')
+        if ((status == 'draft' || status == 'scheduled') && !terkunci)
           InkWell(
             onTap: () => _openEditDetail(s),
             borderRadius: BorderRadius.circular(8),
@@ -220,6 +225,7 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
     final guest = s['guest_count'] ?? 0;
     final minGuest = s['min_guests'] ?? 0;
     final met = guest is num && minGuest is num && guest >= minGuest;
+    final terkunci = _terkunci(s);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Wrap(spacing: 18, runSpacing: 8, children: [
         _meta('Tanggal', '${s['date'] ?? '-'}'),
@@ -229,12 +235,15 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
       ]),
       const SizedBox(height: 10),
       Row(children: [
-        Expanded(child: OutlinedButton.icon(
-          onPressed: () => _showQr(s),
-          icon: const Icon(Icons.qr_code_2, size: 18),
-          label: const Text('QR Hadir'),
-        )),
-        const SizedBox(width: 8),
+        // Lewat hari-H daftar hadir ditutup, jadi QR tak lagi ditawarkan.
+        if (!terkunci) ...[
+          Expanded(child: OutlinedButton.icon(
+            onPressed: () => _showQr(s),
+            icon: const Icon(Icons.qr_code_2, size: 18),
+            label: const Text('QR Hadir'),
+          )),
+          const SizedBox(width: 8),
+        ],
         Expanded(child: ElevatedButton(
           onPressed: met ? () => _confirmSahkan(s) : null,
           child: const Text('Sahkan'),
@@ -242,17 +251,32 @@ class _DosenSeminarTabState extends State<DosenSeminarTab> {
       ]),
       const SizedBox(height: 6),
       Row(children: [
-        Expanded(child: OutlinedButton(
-          onPressed: () => _openFinalize(s),
-          child: const Text('Ubah Jadwal'),
-        )),
-        const SizedBox(width: 8),
+        if (!terkunci) ...[
+          Expanded(child: OutlinedButton(
+            onPressed: () => _openFinalize(s),
+            child: const Text('Ubah Jadwal'),
+          )),
+          const SizedBox(width: 8),
+        ],
         Expanded(child: OutlinedButton(
           style: OutlinedButton.styleFrom(foregroundColor: AppColors.error, side: const BorderSide(color: AppColors.error)),
           onPressed: () => _confirmCancel(s),
           child: const Text('Batalkan'),
         )),
       ]),
+      if (terkunci)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.lock_outline, size: 14, color: AppColors.textMuted),
+            const SizedBox(width: 6),
+            Expanded(child: Text(
+              'Tanggal seminar sudah lewat, jadi jam, ruang, detail sesi, dan daftar hadir '
+              'tidak bisa diubah lagi. Yang tersisa tinggal mengesahkan sesi ini.',
+              style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted, height: 1.45),
+            )),
+          ]),
+        ),
       if (!met)
         Padding(
           padding: const EdgeInsets.only(top: 6),

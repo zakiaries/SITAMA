@@ -136,9 +136,22 @@ class MahasiswaController extends ApiController
     {
         $this->internshipOf($request, $student);
         abort_unless($logBook->student_id === $student->id, 404);
-        $request->validate(['note' => 'nullable|string']);
+        // Paritas web: catatan wajib berisi — mengosongkannya lewat tombol hapus.
+        $request->validate(['note' => 'required|string|max:1000'], [
+            'note.required' => 'Catatan tidak boleh kosong.',
+        ]);
         $logBook->update(['lecturer_note' => $request->input('note')]);
         return response()->json(['message' => 'Catatan logbook berhasil disimpan.']);
+    }
+
+    public function hapusLogBookNote(Request $request, Student $student, LogBook $logBook)
+    {
+        $this->internshipOf($request, $student);
+        abort_unless($logBook->student_id === $student->id, 404);
+
+        $logBook->update(['lecturer_note' => null]);
+
+        return response()->json(['message' => 'Catatan logbook berhasil dihapus.']);
     }
 
     public function nilaiPage(Request $request, Student $student)
