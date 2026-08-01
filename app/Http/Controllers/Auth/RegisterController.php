@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -59,6 +60,20 @@ class RegisterController extends Controller
             'academic_year' => $request->academic_year,
             'status'        => 'pending',
         ]);
+
+        // Pendaftar tak bisa masuk sampai akunnya disetujui, sementara Kaprodi
+        // tak punya alasan membuka Data Mahasiswa kalau tak merasa ada yang
+        // baru. Tanpa pemberitahuan ini, pendaftar bisa menunggu berhari-hari.
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::kirim(
+                $kaprodiId,
+                'Mahasiswa baru mendaftar: ' . $user->name,
+                'pendaftaran',
+                "NIM {$user->username} · {$request->the_class} · {$request->study_program}. "
+                . 'Menunggu persetujuan akun.',
+                '/kaprodi/mahasiswa?status=pending'
+            );
+        }
 
         return redirect()->route('login')
             ->with('success', 'Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan dari Kaprodi.');

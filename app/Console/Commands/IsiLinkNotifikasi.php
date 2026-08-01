@@ -177,6 +177,10 @@ class IsiLinkNotifikasi extends Command
             return '/kaprodi/pengajuan-magang';
         }
 
+        if ($n->category === 'pendaftaran') {
+            return '/kaprodi/mahasiswa?status=pending';
+        }
+
         if ($n->category !== 'selesai_magang') {
             return null;
         }

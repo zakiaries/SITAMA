@@ -53,6 +53,7 @@ class NotificationController extends Controller
             'pengajuan_magang'  => route('kaprodi.pengajuan-magang.index'),
             'pengajuan_seminar' => route('kaprodi.seminar.index'),
             'selesai_magang'    => route('kaprodi.mahasiswa.index'),
+            'pendaftaran'       => route('kaprodi.mahasiswa.index', ['status' => 'pending']),
             default             => route('kaprodi.notifikasi'),
         };
     }
