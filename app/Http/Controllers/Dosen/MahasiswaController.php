@@ -33,6 +33,26 @@ class MahasiswaController extends Controller
         return $internship;
     }
 
+    /**
+     * Magang yang sudah ditutup Kaprodi adalah jejak akademik yang sah: catatan
+     * logbook maupun nilainya tak boleh berubah lagi. Bila memang perlu
+     * dikoreksi, Kaprodi membuka kembali status selesainya lebih dulu — jadi
+     * kunci ini tetap punya jalan keluar, bukan jalan buntu.
+     *
+     * @return \Illuminate\Http\RedirectResponse|null null bila masih boleh diubah.
+     */
+    private function tolakBilaSelesai($internship, string $hal = 'catatan')
+    {
+        if (! $internship->is_finished) {
+            return null;
+        }
+
+        return back()->with('error',
+            "Magang mahasiswa ini sudah ditandai selesai, sehingga {$hal} terkunci. "
+            . 'Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.')
+            ->with('tab', 'logbook');
+    }
+
     public function detail(Request $request, Student $student)
     {
         $lecturer   = $this->getLecturer();
@@ -169,9 +189,13 @@ class MahasiswaController extends Controller
 
     public function logBookNote(Request $request, Student $student, LogBook $logBook)
     {
-        $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
         abort_unless($logBook->student_id === $student->id, 404);
+
+        if ($terkunci = $this->tolakBilaSelesai($internship)) {
+            return $terkunci;
+        }
 
         $request->validate(['note' => 'required|string|max:1000'], [
             'note.required' => 'Catatan tidak boleh kosong.',
@@ -184,9 +208,13 @@ class MahasiswaController extends Controller
 
     public function hapusLogBookNote(Student $student, LogBook $logBook)
     {
-        $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
         abort_unless($logBook->student_id === $student->id, 404);
+
+        if ($terkunci = $this->tolakBilaSelesai($internship)) {
+            return $terkunci;
+        }
 
         $logBook->update(['lecturer_note' => null]);
 

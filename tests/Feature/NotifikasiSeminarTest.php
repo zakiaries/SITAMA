@@ -77,8 +77,14 @@ class NotifikasiSeminarTest extends FeatureTestCase
         $student = $mhs->student;
         $lb      = LogBook::create(['student_id' => $student->id, 'title' => 'L1', 'activity' => 'a', 'date' => '2024-07-01']);
 
+        // Magang fixture-nya sudah is_finished, dan komentar logbook kini terkunci
+        // untuk magang yang selesai. Di alur nyata komentar terjadi saat magang
+        // masih berjalan, jadi kondisi itu yang dibuat di sini.
+        $student->internships()->latest('id')->first()->update(['is_finished' => false]);
+
         $this->actingAs($this->userByUsername('industri1'))
-            ->post("/dosen-industri/mahasiswa/{$student->id}/logbook/{$lb->id}/komentar", ['komentar' => 'Rapi.']);
+            ->post("/dosen-industri/mahasiswa/{$student->id}/logbook/{$lb->id}/komentar", ['komentar' => 'Rapi.'])
+            ->assertSessionHasNoErrors();
 
         $this->assertSame(1, Notification::where('user_id', $mhs->id)->where('category', 'log_book')->count());
     }

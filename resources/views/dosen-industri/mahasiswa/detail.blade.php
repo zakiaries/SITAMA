@@ -276,6 +276,14 @@
         </div>
       @endif
 
+      @if($internship->is_finished)
+        {{-- Magang sudah ditutup Kaprodi: komentar jadi jejak akademik yang sah.
+             Tombolnya dihilangkan, bukan cuma ditolak server. --}}
+        <div style="margin-top:8px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+          <x-icon name="lock" :size="13"/>
+          Magang sudah selesai — komentar terkunci.
+        </div>
+      @else
       <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;"
         onclick="document.getElementById('cf-{{ $lb->id }}').style.display = (document.getElementById('cf-{{ $lb->id }}').style.display==='block'?'none':'block')">
         @if($hasComment)<x-icon name="pencil" :size="14"/> Edit Komentar @else+ Komentar @endif
@@ -300,6 +308,7 @@
         </form>
         @endif
       </div>
+      @endif
     </div>
   </div>
 </div>

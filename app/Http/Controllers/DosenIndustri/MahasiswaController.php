@@ -32,6 +32,23 @@ class MahasiswaController extends Controller
         return $internship;
     }
 
+    /**
+     * Lihat catatan di Dosen\MahasiswaController::tolakBilaSelesai — magang yang
+     * sudah ditutup Kaprodi terkunci, termasuk komentar logbooknya.
+     *
+     * @return \Illuminate\Http\RedirectResponse|null null bila masih boleh diubah.
+     */
+    private function tolakBilaSelesai($internship, string $hal = 'komentar')
+    {
+        if (! $internship->is_finished) {
+            return null;
+        }
+
+        return back()->with('error',
+            "Magang mahasiswa ini sudah ditandai selesai, sehingga {$hal} terkunci. "
+            . 'Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.');
+    }
+
     public function detail(Request $request, Student $student)
     {
         $lecturer   = $this->getLecturer();
@@ -89,9 +106,13 @@ class MahasiswaController extends Controller
 
     public function kirimKomentar(Request $request, Student $student, LogBook $logBook)
     {
-        $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
         abort_unless($logBook->student_id === $student->id, 404);
+
+        if ($terkunci = $this->tolakBilaSelesai($internship)) {
+            return $terkunci;
+        }
 
         $request->validate(['komentar' => 'required|string|max:1000'], [
             'komentar.required' => 'Komentar tidak boleh kosong.',
@@ -106,9 +127,13 @@ class MahasiswaController extends Controller
 
     public function hapusKomentar(Student $student, LogBook $logBook)
     {
-        $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
         abort_unless($logBook->student_id === $student->id, 404);
+
+        if ($terkunci = $this->tolakBilaSelesai($internship)) {
+            return $terkunci;
+        }
 
         $logBook->update(['industry_note' => null]);
 
