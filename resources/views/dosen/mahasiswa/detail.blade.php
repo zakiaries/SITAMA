@@ -88,6 +88,34 @@
   cursor:pointer;text-decoration:none;transition:all .15s;
 }
 .filter-tab.active { background:var(--primary);color:#fff;border-color:var(--primary); }
+
+/* Logbook card (selaras dengan tampilan pembimbing industri) */
+.lb-card { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px; }
+.lb-card-head { display:flex;gap:12px;align-items:flex-start; }
+.lb-day-box {
+  width:46px;height:46px;border-radius:10px;background:var(--blue-tint);color:var(--primary);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;
+}
+.lb-day-box .num { font-size:15px;font-weight:800;line-height:1; }
+.lb-day-box .lbl { font-size:8px;text-transform:uppercase;margin-top:1px; }
+.lb-body  { flex:1;min-width:0; }
+.lb-title { font-size:14px;font-weight:700;color:var(--text); }
+.lb-date  { font-size:11px;color:var(--text-muted);margin-bottom:6px; }
+.lb-desc  { font-size:13px;color:var(--text);line-height:1.5;margin-bottom:8px; }
+.lb-badge-status { font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px;flex-shrink:0; }
+.bs-done { background:var(--success-bg);color:var(--success-text); }
+.bs-pending { background:var(--warn-bg);color:var(--warn-text); }
+
+.comment-box { background:var(--blue-tint);border:1px solid #C7DCFF;border-radius:8px;padding:10px 12px;margin-top:8px; }
+.comment-box .cb-label { font-size:10px;font-weight:700;color:var(--primary);margin-bottom:3px;text-transform:uppercase; }
+.comment-box .cb-text  { font-size:12px;color:var(--primary); }
+.comment-form { margin-top:10px; }
+.comment-input {
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:12px;font-family:inherit;resize:vertical;min-height:60px;outline:none;color:var(--text);
+}
+.comment-input:focus { border-color:var(--primary); }
+.comment-actions { display:flex;gap:8px;margin-top:8px; }
 </style>
 @endpush
 
@@ -316,35 +344,65 @@
           </form>
         </div>
         @forelse($logBooks as $lb)
-        <div class="bimb-item" id="logbook-{{ $lb->id }}">
-          <div class="bimb-header" onclick="toggle(this)">
-            <div style="flex:1;">
-              <div style="font-size:13px;font-weight:700;color:var(--text);">{{ $lb->title }}</div>
-              <div style="font-size:11px;color:var(--text-muted);">{{ $lb->date->format('d M Y') }}</div>
+        @php $dt = $lb->date; $hasNote = !empty($lb->lecturer_note); @endphp
+        <div class="lb-card" id="logbook-{{ $lb->id }}">
+          <div class="lb-card-head">
+            <div class="lb-day-box">
+              <div class="num">{{ $dt->format('d') }}</div>
+              <div class="lbl">{{ strtoupper($dt->locale('id')->isoFormat('MMM')) }}</div>
             </div>
-            <div class="chevron">▾</div>
-          </div>
-          <div class="bimb-body">
-            <div class="field-label">Aktivitas</div>
-            <div class="field-value" style="margin-bottom:10px;">{{ $lb->activity }}</div>
-            @if($lb->lecturer_note)
-              <div class="lecturer-note-box"><strong>Catatan:</strong> {{ $lb->lecturer_note }}</div>
-            @endif
-            <form method="POST" action="{{ route('dosen.mahasiswa.logbook.note', [$student, $lb]) }}"
-                  style="margin-top:10px;">
-              @csrf
-              <textarea name="note" class="note-input"
-                placeholder="Tambahkan catatan...">{{ $lb->lecturer_note }}</textarea>
-              <div class="action-row">
-                <button type="submit" class="btn btn-primary btn-sm">
-                  @if($lb->lecturer_note)<x-icon name="pencil" :size="14"/> Edit Catatan @else<x-icon name="save" :size="14"/> Simpan Catatan @endif
-                </button>
+            <div class="lb-body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                <div>
+                  <div class="lb-title">{{ $lb->title }}</div>
+                  <div class="lb-date">{{ $dt->format('d M Y') }}</div>
+                </div>
+                @if($hasNote)
+                  <span class="lb-badge-status bs-done" style="display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Dicatat</span>
+                @else
+                  <span class="lb-badge-status bs-pending">Belum</span>
+                @endif
               </div>
-            </form>
+              <div class="lb-desc">{{ $lb->activity }}</div>
+
+              @if($hasNote)
+                <div class="comment-box">
+                  <div class="cb-label"><x-icon name="message" :size="13"/> Catatan Saya</div>
+                  <div class="cb-text">{{ $lb->lecturer_note }}</div>
+                </div>
+              @endif
+
+              <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;"
+                onclick="document.getElementById('nf-{{ $lb->id }}').style.display = (document.getElementById('nf-{{ $lb->id }}').style.display==='block'?'none':'block')">
+                @if($hasNote)<x-icon name="pencil" :size="14"/> Edit Catatan @else+ Catatan @endif
+              </button>
+
+              <div id="nf-{{ $lb->id }}" class="comment-form" style="display:none;">
+                <form method="POST" action="{{ route('dosen.mahasiswa.logbook.note', [$student, $lb]) }}">
+                  @csrf
+                  <textarea name="note" class="comment-input" placeholder="Tambahkan catatan..." required>{{ $lb->lecturer_note }}</textarea>
+                  <div class="comment-actions">
+                    <button type="submit" class="btn btn-primary btn-sm"><x-icon name="send" :size="14"/> Kirim</button>
+                    @if($hasNote)
+                    <button type="button" class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:none;"
+                      onclick="confirmDialog('Hapus catatan?', function(){document.getElementById('del-note-{{ $lb->id }}').submit()}, 'danger')"><x-icon name="trash" :size="14"/> Hapus</button>
+                    @endif
+                  </div>
+                </form>
+                @if($hasNote)
+                <form id="del-note-{{ $lb->id }}" method="POST" action="{{ route('dosen.mahasiswa.logbook.note.hapus', [$student, $lb]) }}" style="display:none;">
+                  @csrf
+                  @method('DELETE')
+                </form>
+                @endif
+              </div>
+            </div>
           </div>
         </div>
         @empty
-          <p style="color:var(--text-muted);font-size:13px;padding:12px 0;">Belum ada data log book.</p>
+        <div style="text-align:center;padding:40px;color:var(--text-muted);">
+          <p>Tidak ada logbook pada filter ini.</p>
+        </div>
         @endforelse
       </div>
 
@@ -423,7 +481,7 @@ function switchTab(name, btn) {
   btn.classList.add('active');
 }
 
-@if(request()->has('filter') || request()->has('period'))
+@if(request()->has('filter') || request()->has('period') || session('tab') === 'logbook')
 document.addEventListener('DOMContentLoaded', function () {
   switchTab('logbook', document.querySelectorAll('.tab-btn')[1]);
 });

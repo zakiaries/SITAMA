@@ -132,6 +132,7 @@ Route::prefix('dosen')->name('dosen.')->middleware(['auth', 'role:lecturer'])->g
     Route::post('/mahasiswa/{student}/bimbingan/{guidance}/approve',  [DosenMahasiswaController::class, 'approveBimbingan'])->name('mahasiswa.bimbingan.approve');
     Route::post('/mahasiswa/{student}/bimbingan/{guidance}/revisi',   [DosenMahasiswaController::class, 'revisiBimbingan'])->name('mahasiswa.bimbingan.revisi');
     Route::post('/mahasiswa/{student}/logbook/{logBook}/note',        [DosenMahasiswaController::class, 'logBookNote'])->name('mahasiswa.logbook.note');
+    Route::delete('/mahasiswa/{student}/logbook/{logBook}/note',      [DosenMahasiswaController::class, 'hapusLogBookNote'])->name('mahasiswa.logbook.note.hapus');
     Route::get('/mahasiswa/{student}/nilai',                          [DosenMahasiswaController::class, 'nilaiPage'])->name('mahasiswa.nilai');
     Route::post('/mahasiswa/{student}/nilai',                         [DosenMahasiswaController::class, 'updateNilai'])->name('mahasiswa.nilai.update');
     Route::post('/mahasiswa/{student}/laporan/{report}/approve',      [DosenMahasiswaController::class, 'approveLaporan'])->name('mahasiswa.laporan.approve');

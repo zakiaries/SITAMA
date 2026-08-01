@@ -173,9 +173,24 @@ class MahasiswaController extends Controller
         $this->getInternship($student, $lecturer);
         abort_unless($logBook->student_id === $student->id, 404);
 
+        $request->validate(['note' => 'required|string|max:1000'], [
+            'note.required' => 'Catatan tidak boleh kosong.',
+        ]);
+
         $logBook->update(['lecturer_note' => $request->input('note')]);
 
-        return back()->with('success', 'Catatan logbook berhasil disimpan.');
+        return back()->with('success', 'Catatan logbook berhasil disimpan.')->with('tab', 'logbook');
+    }
+
+    public function hapusLogBookNote(Student $student, LogBook $logBook)
+    {
+        $lecturer = $this->getLecturer();
+        $this->getInternship($student, $lecturer);
+        abort_unless($logBook->student_id === $student->id, 404);
+
+        $logBook->update(['lecturer_note' => null]);
+
+        return back()->with('success', 'Catatan logbook berhasil dihapus.')->with('tab', 'logbook');
     }
 
     public function nilaiPage(Student $student)
