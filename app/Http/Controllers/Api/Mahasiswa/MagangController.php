@@ -159,6 +159,11 @@ class MagangController extends ApiController
                 'is_finished'       => (bool) $internship->is_finished,
                 'finish_requested'  => (bool) $internship->finish_requested,
                 'certificate_url'   => $internship->certificate_path ? Storage::url($internship->certificate_path) : null,
+                // Field lama di atas sengaja dipertahankan supaya APK yang sudah
+                // terpasang tetap jalan; tiga field ini tambahan.
+                'locked'            => $internship->terkunciUntukMahasiswa(),
+                'locked_reason'     => $internship->alasanTerkunci(),
+                'can_cancel_finish' => $internship->finish_requested && ! $internship->is_finished,
             ] : null,
             'finish_checklist'   => $checklist,
             'can_request_finish' => $canRequestFinish,

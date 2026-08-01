@@ -31,7 +31,13 @@ class LogBookController extends ApiController
             'industry_note' => $l->industry_note,
         ]);
 
-        return response()->json(['logbooks' => $logBooks]);
+        // Aturan terkunci dikirim dari server, bukan disimpulkan ulang di aplikasi:
+        // satu sumber kebenaran, dan teks alasannya tak perlu digandakan.
+        return response()->json([
+            'logbooks'      => $logBooks,
+            'locked'        => $this->alasanMagangTerkunci($student) !== null,
+            'locked_reason' => $this->alasanMagangTerkunci($student),
+        ]);
     }
 
     public function store(Request $request)

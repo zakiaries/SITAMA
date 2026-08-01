@@ -71,22 +71,30 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // FutureBuilder di atas header supaya tombol tambah ikut tahu keadaan
+    // terkunci — kalau tetap di dalam Expanded, headernya tak pernah menerima
+    // data dan tombolnya terlanjur ditawarkan.
     return Scaffold(
       backgroundColor: AppColors.warm,
-      body: Column(
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _future,
+        builder: (context, snap) {
+          final locked = snap.data?['locked'] == true;
+          final reason = '${snap.data?['locked_reason'] ?? ''}';
+          return Column(
         children: [
           AppHeader(
             title: 'Bimbingan',
             subtitle: 'Riwayat catatan bimbingan kamu',
-            trailing: HeaderAction(Icons.add, () => _openForm()),
+            trailing: locked ? null : HeaderAction(Icons.add, () => _openForm()),
             bottom: headerSearch(hint: 'Cari bimbingan', onChanged: (v) => setState(() => _q = v)),
           ),
+          if (locked && reason.isNotEmpty) LockedNotice(reason),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => _reload(),
-              child: FutureBuilder<Map<String, dynamic>>(
-                future: _future,
-                builder: (context, snap) {
+              child: Builder(
+                builder: (context) {
                   if (snap.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
@@ -115,9 +123,9 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
                           ])),
                         ])),
                       if (items.isEmpty)
-                        const EmptyState('Belum ada bimbingan',
+                        EmptyState('Belum ada bimbingan',
                             icon: Icons.menu_book_outlined,
-                            hint: 'Ajukan bimbingan lewat tombol + di kanan atas.')
+                            hint: locked ? null : 'Ajukan bimbingan lewat tombol + di kanan atas.')
                       else
                         ...items.map((g) {
                           final status = (g['status'] ?? '').toString();
@@ -154,7 +162,8 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
                                       label: const Text('Lihat File Bimbingan'),
                                     ),
                                   ),
-                                if (status != 'approved')
+                                // Terkunci: revisi, edit, dan hapus tak ditawarkan.
+                                if (status != 'approved' && !locked)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 8),
                                     child: Row(
@@ -194,6 +203,8 @@ class _BimbinganScreenState extends State<BimbinganScreen> {
             ),
           ),
         ],
+          );
+        },
       ),
     );
   }

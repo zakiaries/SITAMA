@@ -53,6 +53,34 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
     }
   }
 
+  Future<void> _cancelFinish() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Batalkan pengajuan?'),
+        content: const Text(
+            'Sertifikat, log book, dan bimbingan bisa kamu perbaiki lagi. '
+            'Pengajuan bisa dikirim ulang setelah selesai.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Tidak')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Batalkan')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    setState(() => _busy = true);
+    try {
+      await ApiClient.post('/mahasiswa/magang-saya/batal-selesai', token: _token);
+      if (mounted) showMessage(context, 'Pengajuan selesai magang dibatalkan.');
+      _reload();
+    } on ApiException catch (e) {
+      if (mounted) showMessage(context, e.message, error: true);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _requestFinish() async {
     setState(() => _busy = true);
     try {
@@ -92,6 +120,14 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
             final canFinish = snap.data!['can_request_finish'] == true;
             final finishRequested = internship['finish_requested'] == true;
             final hasCert = (internship['certificate_url'] ?? '').toString().isNotEmpty;
+            // Aturan terkunci datang dari server; fallback ke field lama supaya
+            // tetap benar bila APK ini dipakai dengan server versi sebelumnya.
+            final locked = internship['locked'] == true
+                || internship['is_finished'] == true
+                || finishRequested;
+            final lockedReason = '${internship['locked_reason'] ?? ''}';
+            final canCancel = internship['can_cancel_finish'] == true
+                || (finishRequested && internship['is_finished'] != true);
 
             return ListView(
               padding: const EdgeInsets.all(16),
@@ -127,11 +163,15 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
                       onPressed: () => _openFile('${internship['certificate_url']}'),
                       child: const Text('Lihat'),
                     ),
-                  TextButton(
-                    onPressed: _busy ? null : _uploadCertificate,
-                    child: Text(hasCert ? 'Ganti' : 'Unggah'),
-                  ),
+                  // Terkunci: sertifikat yang diperiksa Kaprodi tak boleh berubah.
+                  if (!locked)
+                    TextButton(
+                      onPressed: _busy ? null : _uploadCertificate,
+                      child: Text(hasCert ? 'Ganti' : 'Unggah'),
+                    ),
                 ])),
+                if (locked && lockedReason.isNotEmpty)
+                  LockedNotice(lockedReason, padding: const EdgeInsets.only(top: 10)),
 
                 if (internship['is_finished'] != true) ...[
                   const SectionTitle('Selesai Magang'),
@@ -163,13 +203,31 @@ class _MagangSayaScreenState extends State<MagangSayaScreen> {
                       );
                     }),
                     const SizedBox(height: 12),
-                    if (finishRequested)
+                    if (finishRequested) ...[
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(color: AppColors.warnBg, borderRadius: BorderRadius.circular(8)),
-                        child: const Text('Menunggu ACC Kaprodi.', style: TextStyle(color: AppColors.warnText)),
-                      )
+                        child: const Text(
+                          'Menunggu ACC Kaprodi. Selama menunggu, sertifikat, log book, dan '
+                          'bimbingan terkunci agar yang diperiksa sama dengan yang kamu ajukan.',
+                          style: TextStyle(color: AppColors.warnText),
+                        ),
+                      ),
+                      // Jalan keluar: tanpa ini mahasiswa yang salah unggah terjebak
+                      // — tak bisa memperbaiki apa pun, tak bisa menarik pengajuannya.
+                      if (canCancel) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: _busy ? null : _cancelFinish,
+                            icon: const Icon(Icons.undo, size: 18),
+                            label: const Text('Batalkan Pengajuan'),
+                          ),
+                        ),
+                      ],
+                    ]
                     else
                       SizedBox(
                         width: double.infinity,

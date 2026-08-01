@@ -12,7 +12,9 @@ class LogbookScreen extends StatefulWidget {
 }
 
 class _LogbookScreenState extends State<LogbookScreen> {
-  late Future<List<Map<String, dynamic>>> _future;
+  // Muat seluruh payload, bukan hanya daftarnya: keadaan terkunci ikut di sana
+  // dan dibutuhkan header (tombol tambah) maupun tiap kartu (ubah/hapus).
+  late Future<Map<String, dynamic>> _future;
   String _q = '';
 
   String get _token => context.read<AuthProvider>().token ?? '';
@@ -23,9 +25,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
     _future = _load();
   }
 
-  Future<List<Map<String, dynamic>>> _load() async {
+  Future<Map<String, dynamic>> _load() async {
     final data = await ApiClient.get('/mahasiswa/logbook', token: _token);
-    return List<Map<String, dynamic>>.from(data['logbooks'] ?? []);
+    return Map<String, dynamic>.from(data);
   }
 
   void _reload() => setState(() { _future = _load(); });
@@ -72,94 +74,112 @@ class _LogbookScreenState extends State<LogbookScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // FutureBuilder dinaikkan ke atas header supaya tombol tambah ikut tahu
+    // keadaan terkunci — kalau tetap di dalam Expanded, headernya tak pernah
+    // menerima data dan tombolnya terlanjur ditawarkan.
     return Scaffold(
       backgroundColor: AppColors.warm,
-      body: Column(
-        children: [
-          AppHeader(
-            title: 'Log Book',
-            subtitle: 'Catatan kegiatan harian magang',
-            trailing: HeaderAction(Icons.add, _openAdd),
-            bottom: headerSearch(hint: 'Cari kegiatan', onChanged: (v) => setState(() => _q = v)),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async => _reload(),
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _future,
-                builder: (context, snap) {
-                  if (snap.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snap.hasError) {
-                    return ErrorRetry(message: '${snap.error}', onRetry: _reload);
-                  }
-                  final all = snap.data!;
-                  final items = _q.trim().isEmpty
-                      ? all
-                      : all.where((l) => '${l['title']} ${l['activity']}'.toLowerCase().contains(_q.toLowerCase())).toList();
-                  if (items.isEmpty) {
-                    return ListView(children: const [
-                      EmptyState('Belum ada log book',
-                          icon: Icons.book_outlined,
-                          hint: 'Tambah kegiatan lewat tombol + di kanan atas.'),
-                    ]);
-                  }
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-                    children: items.map((l) {
-                      return AppCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                                  decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(999)),
-                                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                                    const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.primary),
-                                    const SizedBox(width: 5),
-                                    Text(l['date'] ?? '', style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
-                                  ]),
-                                ),
-                                const Spacer(),
-                                InkWell(
-                                  onTap: () => _openEdit(l),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                InkWell(
-                                  onTap: () => _delete(l['id']),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: Icon(Icons.delete_outline, size: 19, color: AppColors.error),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(l['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700)),
-                            const SizedBox(height: 3),
-                            Text(l['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
-                            if ((l['lecturer_note'] ?? '').toString().isNotEmpty)
-                              _Note('Catatan Dosen', l['lecturer_note'], AppColors.primary),
-                            if ((l['industry_note'] ?? '').toString().isNotEmpty)
-                              _Note('Catatan Pembimbing Industri', l['industry_note'], AppColors.success),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _future,
+        builder: (context, snap) {
+          final data   = snap.data;
+          final locked = data?['locked'] == true;
+          final reason = '${data?['locked_reason'] ?? ''}';
+
+          final all = List<Map<String, dynamic>>.from(data?['logbooks'] ?? const []);
+          final items = _q.trim().isEmpty
+              ? all
+              : all.where((l) => '${l['title']} ${l['activity']}'.toLowerCase().contains(_q.toLowerCase())).toList();
+
+          return Column(
+            children: [
+              AppHeader(
+                title: 'Log Book',
+                subtitle: 'Catatan kegiatan harian magang',
+                trailing: locked ? null : HeaderAction(Icons.add, _openAdd),
+                bottom: headerSearch(hint: 'Cari kegiatan', onChanged: (v) => setState(() => _q = v)),
               ),
-            ),
+              if (locked && reason.isNotEmpty) LockedNotice(reason),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async => _reload(),
+                  child: _isi(snap, items, locked),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _isi(AsyncSnapshot<Map<String, dynamic>> snap, List<Map<String, dynamic>> items, bool locked) {
+    if (snap.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (snap.hasError) {
+      return ErrorRetry(message: '${snap.error}', onRetry: _reload);
+    }
+    if (items.isEmpty) {
+      return ListView(children: [
+        EmptyState('Belum ada log book',
+            icon: Icons.book_outlined,
+            hint: locked ? null : 'Tambah kegiatan lewat tombol + di kanan atas.'),
+      ]);
+    }
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+      children: items.map((l) => _kartu(l, locked)).toList(),
+    );
+  }
+
+  Widget _kartu(Map<String, dynamic> l, bool locked) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(color: AppColors.blueTint, borderRadius: BorderRadius.circular(999)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.primary),
+                  const SizedBox(width: 5),
+                  Text(l['date'] ?? '', style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w700)),
+                ]),
+              ),
+              const Spacer(),
+              // Terkunci: ubah & hapus tak ditawarkan sama sekali.
+              if (!locked) ...[
+                InkWell(
+                  onTap: () => _openEdit(l),
+                  borderRadius: BorderRadius.circular(8),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                  ),
+                ),
+                const SizedBox(width: 2),
+                InkWell(
+                  onTap: () => _delete(l['id']),
+                  borderRadius: BorderRadius.circular(8),
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.delete_outline, size: 19, color: AppColors.error),
+                  ),
+                ),
+              ],
+            ],
           ),
+          const SizedBox(height: 8),
+          Text(l['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 3),
+          Text(l['activity'] ?? '', style: const TextStyle(fontSize: 13, height: 1.5)),
+          if ((l['lecturer_note'] ?? '').toString().isNotEmpty)
+            _Note('Catatan Dosen', l['lecturer_note'], AppColors.primary),
+          if ((l['industry_note'] ?? '').toString().isNotEmpty)
+            _Note('Catatan Pembimbing Industri', l['industry_note'], AppColors.success),
         ],
       ),
     );

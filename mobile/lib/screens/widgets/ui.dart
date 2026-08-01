@@ -134,6 +134,35 @@ class EmptyState extends StatelessWidget {
   }
 }
 
+/// Keterangan "terkunci" — dipakai saat server menolak perubahan, supaya
+/// tombolnya tak ditawarkan lalu gagal ketika ditekan. Alasannya datang dari
+/// server (`locked_reason`) agar teksnya tak digandakan di aplikasi.
+class LockedNotice extends StatelessWidget {
+  final String reason;
+  final EdgeInsetsGeometry padding;
+  const LockedNotice(this.reason, {super.key, this.padding = const EdgeInsets.fromLTRB(16, 12, 16, 0)});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: padding,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.warnBg,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Icon(Icons.lock_outline, size: 15, color: AppColors.warnText),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(reason,
+                  style: const TextStyle(fontSize: 12, color: AppColors.warnText, height: 1.45)),
+            ),
+          ]),
+        ),
+      );
+}
+
 void showMessage(BuildContext context, String message, {bool error = false}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(message),

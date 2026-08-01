@@ -163,6 +163,7 @@ class _DosenMahasiswaDetailState extends State<DosenMahasiswaDetail> {
                       else
                         ...shown.map((l) => _LogbookCard(
                               l: l,
+                              terkunci: internship['is_finished'] == true,
                               onNote: () => _logbookNote(l),
                               onHapusNote: () => _hapusLogbookNote(l),
                             )),
@@ -349,8 +350,9 @@ class _ReportCard extends StatelessWidget {
 /// Hapus/Catatan di kanan bawah.
 class _LogbookCard extends StatelessWidget {
   final Map l;
+  final bool terkunci;
   final VoidCallback onNote, onHapusNote;
-  const _LogbookCard({required this.l, required this.onNote, required this.onHapusNote});
+  const _LogbookCard({required this.l, required this.onNote, required this.onHapusNote, this.terkunci = false});
   @override
   Widget build(BuildContext context) {
     final hasNote = (l['lecturer_note'] ?? '').toString().isNotEmpty;
@@ -384,19 +386,32 @@ class _LogbookCard extends StatelessWidget {
               Text('${l['lecturer_note']}', style: const TextStyle(fontSize: 13)),
             ]),
           ),
-        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          if (hasNote)
+        // Magang sudah ditutup Kaprodi: catatan jadi jejak akademik yang sah,
+        // jadi tombolnya tak ditawarkan (server juga menolaknya).
+        if (terkunci)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Row(children: [
+              Icon(Icons.lock_outline, size: 14, color: AppColors.textMuted),
+              SizedBox(width: 6),
+              Expanded(child: Text('Magang sudah selesai — catatan terkunci.',
+                  style: TextStyle(fontSize: 11.5, color: AppColors.textMuted))),
+            ]),
+          )
+        else
+          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+            if (hasNote)
+              TextButton.icon(
+                onPressed: onHapusNote,
+                icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
+                label: const Text('Hapus', style: TextStyle(color: AppColors.error)),
+              ),
             TextButton.icon(
-              onPressed: onHapusNote,
-              icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
-              label: const Text('Hapus', style: TextStyle(color: AppColors.error)),
+              onPressed: onNote,
+              icon: const Icon(Icons.edit_note, size: 20),
+              label: Text(hasNote ? 'Ubah' : 'Catatan'),
             ),
-          TextButton.icon(
-            onPressed: onNote,
-            icon: const Icon(Icons.edit_note, size: 20),
-            label: Text(hasNote ? 'Ubah' : 'Catatan'),
-          ),
-        ]),
+          ]),
       ]),
     );
   }

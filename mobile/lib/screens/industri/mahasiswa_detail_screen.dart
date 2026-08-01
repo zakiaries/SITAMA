@@ -246,11 +246,24 @@ class _IndustriMahasiswaDetailState extends State<IndustriMahasiswaDetail> {
                               Text('${l['industry_note']}', style: const TextStyle(fontSize: 13)),
                             ]),
                           ),
-                        Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                          if (hasNote)
-                            TextButton.icon(onPressed: () => _hapusKomentar(l), icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error), label: const Text('Hapus', style: TextStyle(color: AppColors.error))),
-                          TextButton.icon(onPressed: () => _komentar(l), icon: const Icon(Icons.comment_outlined, size: 18), label: Text(hasNote ? 'Ubah' : 'Komentar')),
-                        ]),
+                        // Magang sudah ditutup Kaprodi: komentar jadi jejak akademik
+                        // yang sah, jadi tombolnya tak ditawarkan (server menolak juga).
+                        if (internship['is_finished'] == true)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Row(children: [
+                              Icon(Icons.lock_outline, size: 14, color: AppColors.textMuted),
+                              SizedBox(width: 6),
+                              Expanded(child: Text('Magang sudah selesai — komentar terkunci.',
+                                  style: TextStyle(fontSize: 11.5, color: AppColors.textMuted))),
+                            ]),
+                          )
+                        else
+                          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                            if (hasNote)
+                              TextButton.icon(onPressed: () => _hapusKomentar(l), icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error), label: const Text('Hapus', style: TextStyle(color: AppColors.error))),
+                            TextButton.icon(onPressed: () => _komentar(l), icon: const Icon(Icons.comment_outlined, size: 18), label: Text(hasNote ? 'Ubah' : 'Komentar')),
+                          ]),
                       ]),
                     );
                   }),

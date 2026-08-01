@@ -268,6 +268,47 @@ class IsianMahasiswaTerkunciTest extends FeatureTestCase
     }
 
     /**
+     * Aplikasi tak boleh menyimpulkan sendiri kapan terkunci — aturannya dikirim
+     * server supaya satu sumber, dan teks alasannya tak digandakan di Dart.
+     */
+    public function test_payload_api_membawa_keadaan_terkunci(): void
+    {
+        $mhs = $this->menungguAcc();
+
+        $magang = $this->actingAs($mhs, 'sanctum')->getJson('/api/mahasiswa/magang-saya')
+            ->assertOk()->json('internship');
+
+        $this->assertTrue($magang['locked']);
+        $this->assertTrue($magang['can_cancel_finish']);
+        $this->assertStringContainsString('menunggu ACC Kaprodi', $magang['locked_reason']);
+
+        // Field lama wajib tetap ada: APK yang sudah terpasang membacanya.
+        $this->assertArrayHasKey('is_finished', $magang);
+        $this->assertArrayHasKey('finish_requested', $magang);
+
+        foreach (['/api/mahasiswa/logbook', '/api/mahasiswa/bimbingan'] as $url) {
+            $data = $this->actingAs($mhs, 'sanctum')->getJson($url)->assertOk()->json();
+            $this->assertTrue($data['locked'], "{$url} tidak menandai terkunci.");
+            $this->assertNotEmpty($data['locked_reason'], "{$url} tidak menyertakan alasan.");
+        }
+    }
+
+    public function test_payload_api_tidak_terkunci_saat_magang_berjalan(): void
+    {
+        $mhs = $this->berjalan();
+
+        $magang = $this->actingAs($mhs, 'sanctum')->getJson('/api/mahasiswa/magang-saya')
+            ->assertOk()->json('internship');
+
+        $this->assertFalse($magang['locked']);
+        $this->assertFalse($magang['can_cancel_finish']);
+        $this->assertNull($magang['locked_reason']);
+
+        $data = $this->actingAs($mhs, 'sanctum')->getJson('/api/mahasiswa/logbook')->assertOk()->json();
+        $this->assertFalse($data['locked']);
+    }
+
+    /**
      * Pengajuan selesai lewat aplikasi dulu tak memberi tahu Kaprodi sama sekali
      * — jalur webnya memberi tahu, jalur API-nya tidak.
      */

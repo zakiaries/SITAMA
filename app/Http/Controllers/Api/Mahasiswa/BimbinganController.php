@@ -36,8 +36,10 @@ class BimbinganController extends ApiController
         $lecturer = $student->lecturer ?? $student->activeInternship?->lecturer;
 
         return response()->json([
-            'lecturer'  => $lecturer?->user?->name,
-            'guidances' => $guidances,
+            'lecturer'      => $lecturer?->user?->name,
+            'guidances'     => $guidances,
+            'locked'        => $this->alasanMagangTerkunci($student) !== null,
+            'locked_reason' => $this->alasanMagangTerkunci($student),
         ]);
     }
 
