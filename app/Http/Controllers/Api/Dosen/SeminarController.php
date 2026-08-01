@@ -90,16 +90,13 @@ class SeminarController extends ApiController
                 'student_id' => $student->id,
             ]);
 
-            if ($student->user) {
-                Notification::create([
-                    'user_id'     => $student->user->id,
-                    'message'     => 'Dosen membuka penjadwalan seminar: ' . $seminar->title,
-                    'date'        => now()->toDateString(),
-                    'category'    => 'seminar',
-                    'is_read'     => false,
-                    'detail_text' => 'Isi ketersediaan tanggalmu di menu Seminar agar dosen bisa menetapkan jadwal.',
-                ]);
-            }
+            Notification::kirim(
+                $student->user?->id,
+                'Dosen membuka penjadwalan seminar: ' . $seminar->title,
+                'seminar',
+                'Isi ketersediaan tanggalmu di menu Seminar agar dosen bisa menetapkan jadwal.',
+                "/mahasiswa/seminar/{$seminar->id}"
+            );
         }
 
         return response()->json(['message' => 'Sesi seminar dibuat. Mahasiswa diminta mengisi ketersediaan tanggal.', 'id' => $seminar->id], 201);
@@ -252,17 +249,10 @@ class SeminarController extends ApiController
     {
         $seminar->loadMissing('presenters.student.user');
         foreach ($seminar->presenters as $p) {
-            $userId = $p->student?->user?->id;
-            if ($userId) {
-                Notification::create([
-                    'user_id'     => $userId,
-                    'message'     => $message,
-                    'date'        => now()->toDateString(),
-                    'category'    => 'seminar',
-                    'is_read'     => false,
-                    'detail_text' => $detail,
-                ]);
-            }
+            Notification::kirim(
+                $p->student?->user?->id, $message, 'seminar', $detail,
+                "/mahasiswa/seminar/{$seminar->id}"
+            );
         }
     }
 

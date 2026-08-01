@@ -117,14 +117,13 @@ class MagangRequestController extends Controller
         // Beri tahu Kaprodi ada pengajuan magang baru yang perlu direview.
         $companyName = $company ? $company->name : $request->company_name;
         foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
-            Notification::create([
-                'user_id'     => $kaprodiId,
-                'message'     => 'Pengajuan magang baru dari ' . Auth::user()->name,
-                'date'        => now()->toDateString(),
-                'category'    => 'pengajuan_magang',
-                'is_read'     => false,
-                'detail_text' => 'Perusahaan: ' . $companyName . '. Menunggu review Kaprodi.',
-            ]);
+            Notification::kirim(
+                $kaprodiId,
+                'Pengajuan magang baru dari ' . Auth::user()->name,
+                'pengajuan_magang',
+                'Perusahaan: ' . $companyName . '. Menunggu review Kaprodi.',
+                '/kaprodi/pengajuan-magang'
+            );
         }
 
         return back()->with('success', 'Pengajuan magang berhasil dikirim. Menunggu review Kaprodi.');

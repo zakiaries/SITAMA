@@ -79,15 +79,16 @@ class MagangSayaController extends Controller
         $internship->update(['finish_requested' => true]);
 
         // Beri tahu Kaprodi ada pengajuan selesai magang yang perlu di-ACC.
+        // Tujuannya detail mahasiswa, bukan daftar: tombol ACC selesai magang ada
+        // di sana, dan tak ada tab di daftar yang menampilkan pengajuan ini.
         foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
-            Notification::create([
-                'user_id'     => $kaprodiId,
-                'message'     => 'Pengajuan selesai magang dari ' . Auth::user()->name,
-                'date'        => now()->toDateString(),
-                'category'    => 'selesai_magang',
-                'is_read'     => false,
-                'detail_text' => 'Perusahaan: ' . (optional($internship->company)->name ?? '-') . '. Menunggu ACC Kaprodi.',
-            ]);
+            Notification::kirim(
+                $kaprodiId,
+                'Pengajuan selesai magang dari ' . Auth::user()->name,
+                'selesai_magang',
+                'Perusahaan: ' . (optional($internship->company)->name ?? '-') . '. Menunggu ACC Kaprodi.',
+                "/kaprodi/mahasiswa/{$student->id}"
+            );
         }
 
         return back()->with('success', 'Pengajuan selesai magang berhasil dikirim. Menunggu ACC Kaprodi.');

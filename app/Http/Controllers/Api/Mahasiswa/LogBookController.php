@@ -98,20 +98,16 @@ class LogBookController extends ApiController
         $message = "{$student->user->name} mengisi log book baru: \"{$logBook->title}\".";
         $detail  = "Log book tanggal {$logBook->date->format('d M Y')}: {$logBook->activity}";
 
-        $userIds = collect([
-            $internship->lecturer?->user?->id,
-            $internship->lecturerIndustry?->user?->id,
-        ])->filter()->unique();
+        // Tujuannya beda per peran, jadi tak bisa disatukan dalam satu perulangan:
+        // masing-masing diarahkan ke logbook yang sama di portalnya sendiri.
+        Notification::kirim(
+            $internship->lecturer?->user?->id, $message, 'log_book', $detail,
+            "/dosen/mahasiswa/{$student->id}#logbook-{$logBook->id}"
+        );
 
-        foreach ($userIds as $userId) {
-            Notification::create([
-                'user_id'     => $userId,
-                'message'     => $message,
-                'date'        => now()->toDateString(),
-                'category'    => 'log_book',
-                'is_read'     => false,
-                'detail_text' => $detail,
-            ]);
-        }
+        Notification::kirim(
+            $internship->lecturerIndustry?->user?->id, $message, 'log_book', $detail,
+            "/dosen-industri/mahasiswa/{$student->id}#logbook-{$logBook->id}"
+        );
     }
 }

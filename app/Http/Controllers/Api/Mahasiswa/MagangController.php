@@ -99,14 +99,13 @@ class MagangController extends ApiController
         // Beri tahu Kaprodi ada pengajuan magang baru (sama seperti alur web).
         $companyName = $company ? $company->name : $request->company_name;
         foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
-            Notification::create([
-                'user_id'     => $kaprodiId,
-                'message'     => 'Pengajuan magang baru dari ' . $request->user()->name,
-                'date'        => now()->toDateString(),
-                'category'    => 'pengajuan_magang',
-                'is_read'     => false,
-                'detail_text' => 'Perusahaan: ' . $companyName . '. Menunggu review Kaprodi.',
-            ]);
+            Notification::kirim(
+                $kaprodiId,
+                'Pengajuan magang baru dari ' . $request->user()->name,
+                'pengajuan_magang',
+                'Perusahaan: ' . $companyName . '. Menunggu review Kaprodi.',
+                '/kaprodi/pengajuan-magang'
+            );
         }
 
         return response()->json(['message' => 'Pengajuan magang berhasil dikirim. Menunggu review Kaprodi.'], 201);
