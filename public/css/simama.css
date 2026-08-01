@@ -659,6 +659,14 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
   padding: 6px; display: flex; border-radius: 8px; line-height: 0;
 }
 .pw-eye:hover { color: var(--primary); }
+/* Edge menyisipkan tombol mata bawaannya sendiri (::-ms-reveal) di dalam field
+   password, muncul begitu field terisi/fokus. Berdampingan dengan .pw-eye
+   hasilnya DUA ikon mata yang membingungkan — di Chrome tidak terjadi karena
+   Chrome tak punya kontrol ini. Kita sembunyikan bawaannya dan tetap memakai
+   tombol sendiri supaya perilakunya sama di semua browser.
+   ::-ms-clear ikut dimatikan agar tombol "x" tak menabrak ikon mata. */
+.pw-wrap input::-ms-reveal,
+.pw-wrap input::-ms-clear { display: none; width: 0; height: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
