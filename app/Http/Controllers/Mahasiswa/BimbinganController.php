@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Mahasiswa;
 
+use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Http\Controllers\Controller;
 use App\Models\Guidance;
 use App\Models\Notification;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class BimbinganController extends Controller
 {
+    use MengunciSaatSelesaiMagang;
+
     public function index(Request $request)
     {
         $student  = Auth::user()->student;
@@ -25,8 +28,10 @@ class BimbinganController extends Controller
         $guidances = $query->get();
         // Dospem dari students.lecturer_id; fallback ke dospem yang menempel di internship.
         $lecturer  = $student->lecturer ?? $student->activeInternship?->lecturer;
+        // Terkunci setelah pengajuan selesai magang dikirim.
+        $terkunci  = $student->activeInternship?->alasanTerkunci();
 
-        return view('mahasiswa.bimbingan.index', compact('guidances', 'lecturer'));
+        return view('mahasiswa.bimbingan.index', compact('guidances', 'lecturer', 'terkunci'));
     }
 
     public function store(Request $request)
@@ -38,6 +43,10 @@ class BimbinganController extends Controller
         if (! ($student->lecturer_id ?? $student->activeInternship?->lecturer_id)) {
             return back()->with('error',
                 'Dosen pembimbing belum ditugaskan oleh Kaprodi. Kamu bisa mengajukan bimbingan setelah dosen pembimbingmu ditetapkan.');
+        }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
         }
 
         $request->validate([
@@ -80,6 +89,11 @@ class BimbinganController extends Controller
         if ($guidance->status === 'approved') {
             return back()->with('error', 'Bimbingan yang sudah disetujui dosen tidak bisa diubah.');
         }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
+        }
+
         $wasRejected = $guidance->status === 'rejected';
 
         $request->validate([
@@ -137,6 +151,10 @@ class BimbinganController extends Controller
 
         if ($guidance->status === 'approved') {
             return back()->with('error', 'Bimbingan yang sudah disetujui dosen tidak bisa dihapus.');
+        }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
         }
 
         if ($guidance->name_file) {

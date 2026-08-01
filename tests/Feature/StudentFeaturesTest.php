@@ -28,7 +28,7 @@ class StudentFeaturesTest extends FeatureTestCase
     public function test_bimbingan_tersimpan_dengan_dan_tanpa_lampiran(): void
     {
         Storage::fake('public');
-        $u = $this->userByUsername('3.34.23.2.01');
+        $u = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
 
         $this->from('/mahasiswa/bimbingan')->actingAs($u)->post('/mahasiswa/bimbingan', [
             'title' => 'Konsultasi tanpa file', 'activity' => 'bahas progres', 'date' => '2024-07-01',
@@ -52,7 +52,7 @@ class StudentFeaturesTest extends FeatureTestCase
 
     public function test_bimbingan_file_type_validated(): void
     {
-        $u = $this->userByUsername('3.34.23.2.01');
+        $u = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $this->from('/mahasiswa/bimbingan')->actingAs($u)->post('/mahasiswa/bimbingan', [
             'title' => 'B', 'activity' => 'a', 'date' => '2024-07-01',
             'file' => UploadedFile::fake()->create('x.exe', 20),
@@ -61,7 +61,7 @@ class StudentFeaturesTest extends FeatureTestCase
 
     public function test_activity_date_cannot_be_future(): void
     {
-        $u = $this->userByUsername('3.34.23.2.01');
+        $u = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $besok = now()->addDay()->toDateString();
         $this->from('/mahasiswa/logbook')->actingAs($u)->post('/mahasiswa/logbook',
             ['title' => 'L', 'activity' => 'a', 'date' => $besok])->assertSessionHasErrors('date');
@@ -71,7 +71,7 @@ class StudentFeaturesTest extends FeatureTestCase
 
     public function test_logbook_edit_owner_only(): void
     {
-        $u1 = $this->userByUsername('3.34.23.2.01');
+        $u1 = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $u2 = $this->userByUsername('3.34.23.2.02');
         $lb = LogBook::create(['student_id' => $u1->student->id, 'title' => 'ASLI', 'activity' => 'x', 'date' => '2024-07-01']);
 
@@ -105,7 +105,7 @@ class StudentFeaturesTest extends FeatureTestCase
 
     public function test_bimbingan_delete_rules(): void
     {
-        $u1 = $this->userByUsername('3.34.23.2.01');
+        $u1 = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $u2 = $this->userByUsername('3.34.23.2.02');
 
         $pending = Guidance::create(['student_id' => $u1->student->id, 'title' => 'P', 'activity' => 'a', 'date' => '2024-07-01', 'status' => 'pending']);

@@ -107,6 +107,7 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:studen
         Route::get('/magang-saya', [MagangSayaController::class, 'index'])->name('magang-saya');
         Route::post('/magang-saya/sertifikat', [MagangSayaController::class, 'uploadCertificate'])->name('magang-saya.sertifikat');
         Route::post('/magang-saya/ajukan-selesai', [MagangSayaController::class, 'requestFinish'])->name('magang-saya.ajukan-selesai');
+        Route::post('/magang-saya/batal-selesai',  [MagangSayaController::class, 'cancelFinish'])->name('magang-saya.batal-selesai');
 
         Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai');
 

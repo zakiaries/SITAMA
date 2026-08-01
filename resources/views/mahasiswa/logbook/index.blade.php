@@ -14,7 +14,11 @@
     </div>
   @endif
 
-  @if(!$canFill)
+  @if($terkunci)
+    <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      {{ $terkunci }}
+    </div>
+  @elseif(!$canFill)
     <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       Kamu belum memiliki magang aktif. Log book bisa diisi setelah pengajuan magangmu disetujui Kaprodi.
     </div>
@@ -29,7 +33,8 @@
     @if($canFill)
       <button class="btn btn-primary" onclick="document.getElementById('modal-logbook').classList.add('open')">+ Tambah Log Book</button>
     @else
-      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;" title="Belum ada magang aktif">+ Tambah Log Book</button>
+      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;"
+              title="{{ $terkunci ?? 'Belum ada magang aktif' }}">+ Tambah Log Book</button>
     @endif
   </div>
 
@@ -64,6 +69,7 @@
         <div class="field-value">{{ $lb->industry_note }}</div>
       </div>
       @endif
+      @unless($terkunci)
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button type="button" class="btn btn-outline btn-sm"
           onclick="openEditLogbook({{ $lb->id }}, @js($lb->title), '{{ $lb->date->format('Y-m-d') }}', @js($lb->activity))">
@@ -75,6 +81,7 @@
           <button type="submit" class="btn btn-danger btn-sm"><x-icon name="trash" :size="14"/> Hapus</button>
         </form>
       </div>
+      @endunless
     </div>
   </div>
   @empty

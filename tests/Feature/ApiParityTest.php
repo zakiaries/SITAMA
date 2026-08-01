@@ -21,7 +21,7 @@ class ApiParityTest extends FeatureTestCase
 
     public function test_logbook_update(): void
     {
-        $u  = $this->actingApi('3.34.23.2.01');
+        $u  = $this->magangBerjalan($this->actingApi('3.34.23.2.01'));
         $lb = LogBook::create(['student_id' => $u->student->id, 'title' => 'A', 'activity' => 'x', 'date' => '2024-07-01']);
 
         $this->putJson("/api/mahasiswa/logbook/{$lb->id}", ['title' => 'B', 'activity' => 'y', 'date' => '2024-07-02'])->assertOk();
@@ -34,7 +34,7 @@ class ApiParityTest extends FeatureTestCase
 
     public function test_bimbingan_destroy_rules(): void
     {
-        $u = $this->actingApi('3.34.23.2.01');
+        $u = $this->magangBerjalan($this->actingApi('3.34.23.2.01'));
         $g = Guidance::create(['student_id' => $u->student->id, 'title' => 'P', 'activity' => 'a', 'date' => '2024-07-01', 'status' => 'pending']);
         $this->deleteJson("/api/mahasiswa/bimbingan/{$g->id}")->assertOk();
         $this->assertNull(Guidance::find($g->id));

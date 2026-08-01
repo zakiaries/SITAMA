@@ -55,22 +55,31 @@
       </div>
     @endif
 
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-      Unggah sertifikat magang dari perusahaan (PDF/JPG/PNG, maks 10 MB).
-      {{ $internship->certificate_path ? 'Mengunggah ulang akan menggantikan file lama.' : '' }}
-    </div>
+    @if($internship->terkunciUntukMahasiswa())
+      {{-- Pengajuan selesai sudah dikirim: sertifikat yang diperiksa Kaprodi
+           tidak boleh berubah lagi. Formulirnya dihilangkan, bukan cuma ditolak. --}}
+      <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:flex-start;gap:6px;">
+        <span style="margin-top:1px;display:inline-flex;"><x-icon name="lock" :size="13"/></span>
+        <span>{{ $internship->alasanTerkunci() }}</span>
+      </div>
+    @else
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+        Unggah sertifikat magang dari perusahaan (PDF/JPG/PNG, maks 10 MB).
+        {{ $internship->certificate_path ? 'Mengunggah ulang akan menggantikan file lama.' : '' }}
+      </div>
 
-    <form method="POST" action="{{ route('mahasiswa.magang-saya.sertifikat') }}" enctype="multipart/form-data"
-          style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      @csrf
-      <input type="file" name="certificate" accept=".pdf,.jpg,.jpeg,.png" required>
-      <button type="submit" class="btn btn-primary btn-sm">
-        {{ $internship->certificate_path ? 'Ganti Sertifikat' : 'Unggah Sertifikat' }}
-      </button>
-    </form>
-    @error('certificate')
-      <div style="color:var(--danger);font-size:12px;margin-top:8px;">{{ $message }}</div>
-    @enderror
+      <form method="POST" action="{{ route('mahasiswa.magang-saya.sertifikat') }}" enctype="multipart/form-data"
+            style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        @csrf
+        <input type="file" name="certificate" accept=".pdf,.jpg,.jpeg,.png" required>
+        <button type="submit" class="btn btn-primary btn-sm">
+          {{ $internship->certificate_path ? 'Ganti Sertifikat' : 'Unggah Sertifikat' }}
+        </button>
+      </form>
+      @error('certificate')
+        <div style="color:var(--danger);font-size:12px;margin-top:8px;">{{ $message }}</div>
+      @enderror
+    @endif
   </div>
 
   {{-- Ajukan Selesai Magang --}}
@@ -116,7 +125,19 @@
     @else
       <div style="background:var(--warn-bg);border:1px solid #F3D9A0;border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--warn-text);">
         Pengajuan selesai magang sudah dikirim ke Kaprodi. Kaprodi akan memeriksa dan memberikan ACC.
+        Selama menunggu, sertifikat, log book, dan bimbingan terkunci agar yang diperiksa
+        sama dengan yang kamu ajukan.
       </div>
+
+      {{-- Jalan keluar: tanpa ini mahasiswa yang salah unggah akan terjebak —
+           tak bisa memperbaiki apa pun, tak bisa menarik pengajuannya. --}}
+      <form method="POST" action="{{ route('mahasiswa.magang-saya.batal-selesai') }}" style="margin-top:10px;">
+        @csrf
+        <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;"
+                onclick="return confirm('Batalkan pengajuan selesai magang? Kamu bisa mengajukannya lagi setelah selesai memperbaiki.')">
+          Batalkan Pengajuan
+        </button>
+      </form>
     @endif
   </div>
   @endif

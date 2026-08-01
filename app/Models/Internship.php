@@ -25,6 +25,37 @@ class Internship extends Model
         'finish_requested' => 'boolean',
     ];
 
+    /**
+     * Isian mahasiswa (sertifikat, logbook, bimbingan) sudah tidak boleh diubah.
+     *
+     * Berlaku sejak pengajuan selesai DIKIRIM, bukan hanya setelah di-ACC:
+     * pengajuan itu digerbangi checklist kelengkapan, jadi mengubah isinya
+     * sesudah dikirim membuat yang diperiksa Kaprodi berbeda dari yang diajukan.
+     *
+     * Selalu ada jalan keluar: selama belum di-ACC mahasiswa bisa membatalkan
+     * pengajuannya sendiri, dan setelah di-ACC Kaprodi bisa membuka kembali.
+     */
+    public function terkunciUntukMahasiswa(): bool
+    {
+        return $this->is_finished || $this->finish_requested;
+    }
+
+    /** Alasan terkunci, untuk pesan galat maupun keterangan di halaman. */
+    public function alasanTerkunci(): ?string
+    {
+        if ($this->is_finished) {
+            return 'Magang kamu sudah ditandai selesai oleh Kaprodi, jadi datanya terkunci. '
+                . 'Hubungi Kaprodi bila ada yang perlu diperbaiki.';
+        }
+
+        if ($this->finish_requested) {
+            return 'Pengajuan selesai magang sedang menunggu ACC Kaprodi, jadi datanya terkunci. '
+                . 'Batalkan pengajuan lebih dulu bila masih ada yang perlu diperbaiki.';
+        }
+
+        return null;
+    }
+
     public function student()
     {
         return $this->belongsTo(Student::class);

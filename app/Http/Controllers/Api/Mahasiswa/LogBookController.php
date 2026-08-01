@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Models\LogBook;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class LogBookController extends ApiController
 {
+    use MengunciSaatSelesaiMagang;
+
     public function index(Request $request)
     {
         $student = $this->currentStudent($request);
@@ -40,6 +43,10 @@ class LogBookController extends ApiController
             return response()->json(['message' => 'Kamu belum memiliki magang aktif. Log book bisa diisi setelah pengajuan magangmu disetujui Kaprodi.'], 422);
         }
 
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
@@ -63,6 +70,10 @@ class LogBookController extends ApiController
         $student = $this->currentStudent($request);
         abort_if($logBook->student_id !== $student->id, 403, 'Akses ditolak.');
 
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
@@ -82,6 +93,10 @@ class LogBookController extends ApiController
     {
         $student = $this->currentStudent($request);
         abort_if($logBook->student_id !== $student->id, 403, 'Akses ditolak.');
+
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
+        }
 
         $logBook->delete();
 

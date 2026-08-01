@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Models\Company;
 use App\Models\CompanyRequest;
 use App\Models\Internship;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
 
 class MagangController extends ApiController
 {
+    use MengunciSaatSelesaiMagang;
+
     /** GET /ajukan-magang */
     public function ajukanIndex(Request $request)
     {
@@ -173,6 +176,10 @@ class MagangController extends ApiController
             return response()->json(['message' => 'Belum ada data magang aktif.'], 422);
         }
 
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
+        }
+
         $request->validate([
             'certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
@@ -212,7 +219,53 @@ class MagangController extends ApiController
 
         $internship->update(['finish_requested' => true]);
 
+        // Jalur web memberi tahu Kaprodi, jalur ini tidak — akibatnya pengajuan
+        // dari aplikasi HP tak pernah sampai ke lonceng Kaprodi.
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::kirim(
+                $kaprodiId,
+                'Pengajuan selesai magang dari ' . $request->user()->name,
+                'selesai_magang',
+                'Perusahaan: ' . (optional($internship->company)->name ?? '-') . '. Menunggu ACC Kaprodi.',
+                "/kaprodi/mahasiswa/{$student->id}"
+            );
+        }
+
         return response()->json(['message' => 'Pengajuan selesai magang berhasil dikirim. Menunggu ACC Kaprodi.']);
+    }
+
+    /**
+     * POST /magang-saya/batal-selesai — paritas dengan web.
+     *
+     * Mengirim pengajuan mengunci sertifikat, logbook, dan bimbingan. Tanpa
+     * endpoint ini pengguna aplikasi yang salah unggah akan terjebak di HP-nya.
+     */
+    public function cancelFinish(Request $request)
+    {
+        $student    = $this->currentStudent($request);
+        $internship = $student->activeInternship()->first();
+
+        if (! $internship || ! $internship->finish_requested) {
+            return response()->json(['message' => 'Tidak ada pengajuan selesai magang yang bisa dibatalkan.'], 422);
+        }
+
+        if ($internship->is_finished) {
+            return response()->json(['message' => 'Magang sudah di-ACC Kaprodi, jadi pengajuannya tak bisa dibatalkan lagi. Hubungi Kaprodi bila ada yang perlu diperbaiki.'], 422);
+        }
+
+        $internship->update(['finish_requested' => false]);
+
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::kirim(
+                $kaprodiId,
+                $request->user()->name . ' membatalkan pengajuan selesai magang.',
+                'selesai_magang',
+                'Pengajuan ditarik kembali oleh mahasiswa untuk diperbaiki.',
+                "/kaprodi/mahasiswa/{$student->id}"
+            );
+        }
+
+        return response()->json(['message' => 'Pengajuan selesai magang dibatalkan. Sertifikat, logbook, dan bimbingan bisa kamu perbaiki lagi.']);
     }
 
     private function finishChecklist($student, $internship): array

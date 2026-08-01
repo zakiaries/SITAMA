@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Mahasiswa;
 
+use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Http\Controllers\Controller;
 use App\Models\Internship;
 use App\Models\Notification;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Storage;
 
 class MagangSayaController extends Controller
 {
+    use MengunciSaatSelesaiMagang;
+
     public function index()
     {
         $student = Auth::user()->student;
@@ -37,6 +40,10 @@ class MagangSayaController extends Controller
 
         if (!$internship) {
             return back()->with('error', 'Belum ada data magang aktif.');
+        }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
         }
 
         $request->validate([
@@ -92,6 +99,44 @@ class MagangSayaController extends Controller
         }
 
         return back()->with('success', 'Pengajuan selesai magang berhasil dikirim. Menunggu ACC Kaprodi.');
+    }
+
+    /**
+     * Batalkan pengajuan selesai magang selama Kaprodi belum meng-ACC.
+     *
+     * Mengirim pengajuan mengunci sertifikat, logbook, dan bimbingan. Tanpa
+     * tombol ini mahasiswa yang salah unggah akan terjebak: tak bisa memperbaiki
+     * apa pun, dan tak bisa menarik pengajuannya. Setelah di-ACC pembatalan
+     * bukan lagi haknya — yang membuka kembali adalah Kaprodi.
+     */
+    public function cancelFinish()
+    {
+        $student    = Auth::user()->student;
+        $internship = $student->activeInternship()->first();
+
+        if (! $internship || ! $internship->finish_requested) {
+            return back()->with('error', 'Tidak ada pengajuan selesai magang yang bisa dibatalkan.');
+        }
+
+        if ($internship->is_finished) {
+            return back()->with('error',
+                'Magang sudah di-ACC Kaprodi, jadi pengajuannya tak bisa dibatalkan lagi. Hubungi Kaprodi bila ada yang perlu diperbaiki.');
+        }
+
+        $internship->update(['finish_requested' => false]);
+
+        foreach (User::where('role', 'kaprodi')->pluck('id') as $kaprodiId) {
+            Notification::kirim(
+                $kaprodiId,
+                Auth::user()->name . ' membatalkan pengajuan selesai magang.',
+                'selesai_magang',
+                'Pengajuan ditarik kembali oleh mahasiswa untuk diperbaiki.',
+                "/kaprodi/mahasiswa/{$student->id}"
+            );
+        }
+
+        return back()->with('success',
+            'Pengajuan selesai magang dibatalkan. Sertifikat, logbook, dan bimbingan bisa kamu perbaiki lagi.');
     }
 
     private function finishChecklist($student, $internship): array

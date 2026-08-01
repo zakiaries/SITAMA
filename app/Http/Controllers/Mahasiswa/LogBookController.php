@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Mahasiswa;
 
+use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Http\Controllers\Controller;
 use App\Models\LogBook;
 use App\Models\Notification;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class LogBookController extends Controller
 {
+    use MengunciSaatSelesaiMagang;
+
     public function index(Request $request)
     {
         $student = Auth::user()->student;
@@ -22,12 +25,14 @@ class LogBookController extends Controller
 
         $logBooks = $query->get();
 
-        // Logbook = catatan kegiatan magang → hanya bisa diisi saat magang aktif.
+        // Logbook = catatan kegiatan magang → hanya bisa diisi saat magang aktif
+        // DAN belum diajukan selesai (lihat Internship::terkunciUntukMahasiswa).
         $internship  = $student->activeInternship()->first();
-        $canFill     = (bool) $internship;
+        $terkunci    = $internship?->alasanTerkunci();
+        $canFill     = $internship && ! $terkunci;
         $noLecturer  = $canFill && ! $internship->lecturer_id && ! $student->lecturer_id;
 
-        return view('mahasiswa.logbook.index', compact('logBooks', 'canFill', 'noLecturer'));
+        return view('mahasiswa.logbook.index', compact('logBooks', 'canFill', 'noLecturer', 'terkunci'));
     }
 
     public function store(Request $request)
@@ -38,6 +43,10 @@ class LogBookController extends Controller
         if (! $student->activeInternship()->exists()) {
             return back()->with('error',
                 'Kamu belum memiliki magang aktif. Log book bisa diisi setelah pengajuan magangmu disetujui Kaprodi.');
+        }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
         }
 
         $request->validate([
@@ -63,8 +72,14 @@ class LogBookController extends Controller
 
     public function update(Request $request, LogBook $logBook)
     {
-        if ($logBook->student_id !== Auth::user()->student->id) {
+        $student = Auth::user()->student;
+
+        if ($logBook->student_id !== $student->id) {
             abort(403);
+        }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
         }
 
         $request->validate([
@@ -111,9 +126,16 @@ class LogBookController extends Controller
 
     public function destroy(LogBook $logBook)
     {
-        if ($logBook->student_id !== Auth::user()->student->id) {
+        $student = Auth::user()->student;
+
+        if ($logBook->student_id !== $student->id) {
             abort(403);
         }
+
+        if ($terkunci = $this->tolakBilaTerkunci($student)) {
+            return $terkunci;
+        }
+
         $logBook->delete();
         return redirect()->route('mahasiswa.logbook')
             ->with('success', 'Log book berhasil dihapus.');

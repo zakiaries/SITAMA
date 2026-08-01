@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/magang-saya', [MhsMagang::class, 'magangSaya']);
         Route::post('/magang-saya/sertifikat', [MhsMagang::class, 'uploadCertificate']);
         Route::post('/magang-saya/ajukan-selesai', [MhsMagang::class, 'requestFinish']);
+        Route::post('/magang-saya/batal-selesai',  [MhsMagang::class, 'cancelFinish']);
 
         // Seminar model sesi-grup: mahasiswa penyaji isi ketersediaan + lihat jadwal.
         Route::get('/seminar', [MhsSeminar::class, 'index']);

@@ -17,7 +17,7 @@ class NotifikasiBisaDiklikTest extends FeatureTestCase
 {
     public function test_notifikasi_logbook_mengarah_ke_logbook_yang_dimaksud(): void
     {
-        $mhs   = $this->userByUsername('3.34.23.2.01');
+        $mhs   = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $dosen = $this->userByUsername('dosen1');
 
         $this->actingAs($mhs)->post('/mahasiswa/logbook', [
@@ -33,7 +33,7 @@ class NotifikasiBisaDiklikTest extends FeatureTestCase
     public function test_notifikasi_bimbingan_mengarah_ke_detail_mahasiswa(): void
     {
         Storage::fake('public');
-        $mhs   = $this->userByUsername('3.34.23.2.01');
+        $mhs   = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $dosen = $this->userByUsername('dosen1');
 
         $this->actingAs($mhs)->post('/mahasiswa/bimbingan', [

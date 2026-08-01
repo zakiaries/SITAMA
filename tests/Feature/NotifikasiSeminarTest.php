@@ -31,7 +31,7 @@ class NotifikasiSeminarTest extends FeatureTestCase
     public function test_bimbingan_baru_memberi_notifikasi_ke_dosen(): void
     {
         Storage::fake('public');
-        $mhs   = $this->mahasiswa();
+        $mhs   = $this->magangBerjalan($this->mahasiswa());
         $dosen = $this->userByUsername('dosen1');
 
         $this->actingAs($mhs)->post('/mahasiswa/bimbingan', [

@@ -26,7 +26,11 @@
     </div>
   </div>
 
-  @if(!$lecturer)
+  @if($terkunci)
+    <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+      {{ $terkunci }}
+    </div>
+  @elseif(!$lecturer)
     <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       Dosen pembimbing belum ditugaskan oleh Kaprodi. Kamu bisa mengajukan bimbingan setelah dosen pembimbingmu ditetapkan.
     </div>
@@ -34,10 +38,11 @@
 
   <div class="page-header">
     <div class="page-title">Daftar Bimbingan</div>
-    @if($lecturer)
+    @if($lecturer && !$terkunci)
       <button class="btn btn-primary" onclick="document.getElementById('modal-bimb').classList.add('open')">+ Tambah Bimbingan</button>
     @else
-      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;" title="Dosen pembimbing belum ditugaskan">+ Tambah Bimbingan</button>
+      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;"
+              title="{{ $terkunci ?? 'Dosen pembimbing belum ditugaskan' }}">+ Tambah Bimbingan</button>
     @endif
   </div>
 
@@ -81,7 +86,7 @@
         <a href="{{ Storage::url($g->name_file) }}" target="_blank">File Bimbingan</a>
       </div>
       @endif
-      @if($g->status !== 'approved')
+      @if($g->status !== 'approved' && !$terkunci)
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
         @if($g->status === 'rejected')
         <button class="btn btn-primary btn-sm"

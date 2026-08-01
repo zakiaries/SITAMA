@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Models\Guidance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class BimbinganController extends ApiController
 {
+    use MengunciSaatSelesaiMagang;
+
     public function index(Request $request)
     {
         $student = $this->currentStudent($request);
@@ -47,6 +50,10 @@ class BimbinganController extends ApiController
             return response()->json(['message' => 'Dosen pembimbing belum ditugaskan oleh Kaprodi. Kamu bisa mengajukan bimbingan setelah dosen pembimbingmu ditetapkan.'], 422);
         }
 
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
+        }
+
         $request->validate([
             'title'    => 'required|string|max:255',
             'activity' => 'required|string',
@@ -79,6 +86,11 @@ class BimbinganController extends ApiController
         if ($guidance->status === 'approved') {
             return response()->json(['message' => 'Bimbingan yang sudah disetujui dosen tidak bisa diubah.'], 422);
         }
+
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
+        }
+
         $wasRejected = $guidance->status === 'rejected';
 
         $request->validate([
@@ -112,6 +124,10 @@ class BimbinganController extends ApiController
 
         if ($guidance->status === 'approved') {
             return response()->json(['message' => 'Bimbingan yang sudah disetujui dosen tidak bisa dihapus.'], 422);
+        }
+
+        if ($terkunci = $this->tolakBilaTerkunciJson($student)) {
+            return $terkunci;
         }
 
         if ($guidance->name_file) {

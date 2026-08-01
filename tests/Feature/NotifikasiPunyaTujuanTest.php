@@ -131,7 +131,7 @@ class NotifikasiPunyaTujuanTest extends FeatureTestCase
      */
     public function test_logbook_via_api_memberi_tujuan_berbeda_untuk_dosen_dan_industri(): void
     {
-        $mhs      = $this->userByUsername('3.34.23.2.01');
+        $mhs      = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $dosen    = $this->userByUsername('dosen1');
         $industri = $this->userByUsername('industri1');
 
