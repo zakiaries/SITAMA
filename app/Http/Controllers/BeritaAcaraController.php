@@ -20,7 +20,7 @@ class BeritaAcaraController extends Controller
     {
         $seminar = Seminar::where('access_token', $token)->first();
 
-        if (! $seminar || $seminar->status !== 'scheduled') {
+        if (! $seminar || ! $seminar->daftarHadirTerbuka()) {
             return view('public.berita-acara-closed', ['seminar' => $seminar]);
         }
 
@@ -41,7 +41,7 @@ class BeritaAcaraController extends Controller
     {
         $seminar = Seminar::where('access_token', $token)->first();
 
-        if (! $seminar || $seminar->status !== 'scheduled') {
+        if (! $seminar || ! $seminar->daftarHadirTerbuka()) {
             return view('public.berita-acara-closed', ['seminar' => $seminar]);
         }
 

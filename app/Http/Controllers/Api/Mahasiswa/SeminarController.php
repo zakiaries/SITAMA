@@ -120,7 +120,7 @@ class SeminarController extends ApiController
         ]);
 
         $seminar = Seminar::where('access_token', $request->token)->first();
-        if (! $seminar || $seminar->status !== 'scheduled') {
+        if (! $seminar || ! $seminar->daftarHadirTerbuka()) {
             return response()->json(['message' => 'Sesi seminar tidak aktif untuk daftar hadir.'], 422);
         }
 

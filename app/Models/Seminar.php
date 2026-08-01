@@ -78,6 +78,31 @@ class Seminar extends Model
         return $this->guestCount() >= self::MIN_GUESTS;
     }
 
+    /**
+     * Tanggal sesi sudah terlewat (sebelum hari ini).
+     *
+     * Sesudah hari-H, seminarnya sudah berlangsung: mengubah jam, ruang, atau
+     * judul hanya akan membuat catatan tidak cocok dengan yang benar-benar
+     * terjadi — dan penyaji/audiens ikut menerima notifikasi perubahan yang
+     * menyesatkan. Yang masih boleh dilakukan dosen hanyalah mengesahkan.
+     */
+    public function jadwalSudahLewat(): bool
+    {
+        return $this->date !== null && $this->date->lt(today());
+    }
+
+    /**
+     * Daftar hadir (QR) masih boleh diisi.
+     *
+     * Absensi hanya masuk akal selama sesinya berlangsung. Lewat hari-H, QR
+     * ditutup — kalau tidak, tautan hadir yang sudah terlanjur dibuka masih bisa
+     * dipakai menambah audiens untuk seminar yang sudah selesai.
+     */
+    public function daftarHadirTerbuka(): bool
+    {
+        return $this->status === 'scheduled' && ! $this->jadwalSudahLewat();
+    }
+
     /** Interval rotasi QR daftar hadir (detik). */
     public const QR_INTERVAL = 20;
 

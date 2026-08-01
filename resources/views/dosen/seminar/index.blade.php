@@ -38,6 +38,8 @@
   ];
   $st = $stMap[$s->status] ?? [$s->status, 'var(--warm-2)', 'var(--text-secondary)'];
   $guests = $s->attendances->count();
+  // Lewat hari-H: sesi sudah berlangsung, jadi judul/deskripsi/jam/ruang dikunci.
+  $terkunci = $s->jadwalSudahLewat();
 @endphp
 <div class="card" style="margin-bottom:16px;">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
@@ -54,8 +56,12 @@
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
       <span class="badge" style="background:{{ $st[1] }};color:{{ $st[2] }};">{{ $st[0] }}</span>
-      @if(in_array($s->status, ['draft','scheduled']))
+      @if(in_array($s->status, ['draft','scheduled']) && ! $terkunci)
         <button type="button" class="btn btn-outline btn-sm" onclick="openEditSeminar({{ $s->id }}, @js($s->title), @js($s->description))"><x-icon name="pencil" :size="13"/> Ubah Detail</button>
+      @elseif($terkunci && $s->status !== 'completed')
+        <span style="font-size:11px;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;">
+          <x-icon name="lock" :size="12"/> Terkunci (tanggal sudah lewat)
+        </span>
       @endif
     </div>
   </div>
@@ -103,8 +109,10 @@
           Daftar hadir audiens:
           <strong style="color:{{ $guests >= \App\Models\Seminar::MIN_GUESTS ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ \App\Models\Seminar::MIN_GUESTS }}</strong>
         </div>
-        @if($s->access_token)
+        @if($s->access_token && ! $terkunci)
           <a href="{{ route('dosen.seminar.qr', $s) }}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600;">Tampilkan QR Daftar Hadir (layar) →</a>
+        @elseif($terkunci)
+          <span style="font-size:12px;color:var(--text-muted);">Daftar hadir ditutup</span>
         @endif
       </div>
       <form method="POST" action="{{ route('dosen.seminar.sahkan', $s) }}"
@@ -114,6 +122,15 @@
           <x-icon name="check" :size="14"/> Sahkan Seminar (Saksi)
         </button>
       </form>
+      @if($terkunci)
+        <div style="margin-top:10px;display:flex;align-items:flex-start;gap:8px;background:var(--warm);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--text-secondary);line-height:1.55;">
+          <span style="color:var(--text-muted);flex-shrink:0;margin-top:1px;"><x-icon name="lock" :size="13"/></span>
+          <span>
+            Tanggal seminar <strong style="color:var(--text);">{{ $s->date?->format('d M Y') }}</strong> sudah lewat,
+            jadi jam, ruang, dan detail sesi tidak bisa diubah lagi. Yang tersisa tinggal mengesahkan sesi ini.
+          </span>
+        </div>
+      @else
       <details style="margin-top:10px;">
         <summary style="font-size:12px;color:var(--primary);cursor:pointer;">Ubah jam / lokasi</summary>
         <form method="POST" action="{{ route('dosen.seminar.finalize', $s) }}" style="margin-top:8px;">
@@ -130,6 +147,7 @@
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Mahasiswa penyaji akan diberi tahu perubahannya.</div>
         </form>
       </details>
+      @endif
     </div>
 
   @elseif($s->status === 'completed')

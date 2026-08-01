@@ -115,6 +115,11 @@ class SeminarController extends ApiController
             return response()->json(['message' => 'Sesi ini tidak dapat dijadwalkan lagi.'], 422);
         }
 
+        // Paritas dengan web: lewat hari-H, jadwal & ruang dikunci.
+        if ($seminar->jadwalSudahLewat()) {
+            return response()->json(['message' => 'Tanggal seminar sudah lewat — jam dan ruang tidak bisa diubah lagi. Sesi tinggal disahkan.'], 422);
+        }
+
         // Paritas dengan web: tanggal ditetapkan sekali saat penjadwalan awal.
         // Sesi yang sudah terjadwal hanya boleh diubah jam dan lokasinya.
         $sudahTerjadwal = $seminar->status === 'scheduled';
@@ -199,6 +204,10 @@ class SeminarController extends ApiController
             return response()->json(['message' => 'Sesi yang sudah disahkan atau dibatalkan tidak bisa diubah.'], 422);
         }
 
+        if ($seminar->jadwalSudahLewat()) {
+            return response()->json(['message' => 'Tanggal seminar sudah lewat — detail sesi tidak bisa diubah lagi. Sesi tinggal disahkan.'], 422);
+        }
+
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
@@ -217,6 +226,10 @@ class SeminarController extends ApiController
 
         if ($seminar->status !== 'scheduled' || ! $seminar->access_token) {
             return response()->json(['message' => 'QR hanya tersedia untuk sesi terjadwal.'], 422);
+        }
+
+        if ($seminar->jadwalSudahLewat()) {
+            return response()->json(['message' => 'Tanggal seminar sudah lewat — daftar hadir ditutup. Sesi tinggal disahkan.'], 422);
         }
 
         $rt = $seminar->rotatingToken();
@@ -267,9 +280,12 @@ class SeminarController extends ApiController
             'guest_count'  => $s->attendances->count(),
             'min_guests'   => Seminar::MIN_GUESTS,
             'witnessed_at' => optional($s->witnessed_at)->toDateTimeString(),
+            // Lewat hari-H sesi dikunci: klien sebaiknya menyembunyikan form ubah.
+            'date_passed'  => $s->jadwalSudahLewat(),
+            'can_edit'     => in_array($s->status, ['draft', 'scheduled'], true) && ! $s->jadwalSudahLewat(),
             // Sertakan token rotating terkini agar QR yang ditampilkan valid saat dipindai.
             // Untuk QR yang berputar otomatis, klien memanggil endpoint qr secara berkala.
-            'hadir_url'    => ($s->status === 'scheduled' && $s->access_token)
+            'hadir_url'    => ($s->daftarHadirTerbuka() && $s->access_token)
                 ? url('/seminar/hadir/' . $s->access_token) . '?rt=' . $s->rotatingToken()
                 : null,
             'presenters'   => $s->presenters->map(fn ($p) => [

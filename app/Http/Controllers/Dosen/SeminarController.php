@@ -72,6 +72,10 @@ class SeminarController extends Controller
             return back()->with('error', 'QR daftar hadir hanya tersedia untuk sesi yang sudah dijadwalkan.');
         }
 
+        if ($seminar->jadwalSudahLewat()) {
+            return back()->with('error', 'Tanggal seminar sudah lewat — daftar hadir ditutup. Sesi tinggal disahkan.');
+        }
+
         $url   = url('/seminar/hadir/' . $seminar->access_token) . '?rt=' . $seminar->rotatingToken();
         $qrSvg = QrCode::format('svg')->size(320)->margin(1)->generate($url);
 
@@ -146,6 +150,10 @@ class SeminarController extends Controller
             return back()->with('error', 'Sesi ini tidak dapat dijadwalkan lagi.');
         }
 
+        if ($seminar->jadwalSudahLewat()) {
+            return back()->with('error', 'Tanggal seminar sudah lewat — jam dan ruang tidak bisa diubah lagi. Sesi tinggal disahkan.');
+        }
+
         // Tanggal ditetapkan SEKALI saat penjadwalan awal. Sesi yang sudah
         // terjadwal hanya boleh diubah jam dan lokasinya — mengganti tanggal
         // membatalkan kesiapan penyaji dan audiens yang sudah diberi tahu.
@@ -191,6 +199,10 @@ class SeminarController extends Controller
 
         if (! in_array($seminar->status, ['draft', 'scheduled'], true)) {
             return back()->with('error', 'Sesi yang sudah disahkan atau dibatalkan tidak bisa diubah.');
+        }
+
+        if ($seminar->jadwalSudahLewat()) {
+            return back()->with('error', 'Tanggal seminar sudah lewat — detail sesi tidak bisa diubah lagi. Sesi tinggal disahkan.');
         }
 
         $request->validate([
