@@ -89,6 +89,46 @@ class NotifikasiBisaDiklikTest extends FeatureTestCase
         $this->actingAs($mhs)->get("/mahasiswa/notifikasi/{$notif->id}/open")->assertForbidden();
     }
 
+    /**
+     * Kartu notifikasi sudah bisa diklik seluruhnya lewat .alert-link::after, jadi
+     * kartunya TIDAK boleh dibungkus <a> lagi. Anchor bersarang itu HTML tak sah:
+     * parser browser menutup paksa <a> luar, kartu jadi kosong dan isinya terlempar
+     * keluar. Ini pernah terjadi di halaman kaprodi.
+     *
+     * @dataProvider halamanNotifikasi
+     */
+    public function test_kartu_notifikasi_tidak_punya_anchor_bersarang(string $username, string $url): void
+    {
+        $user = $this->userByUsername($username);
+
+        Notification::create([
+            'user_id' => $user->id, 'message' => 'Pesan uji anchor', 'date' => now()->toDateString(),
+            'category' => 'pengajuan_magang', 'is_read' => false, 'detail_text' => 'Detail uji anchor',
+            'link' => '/kaprodi/mahasiswa',
+        ]);
+
+        $html = $this->actingAs($user)->get($url)->assertOk()
+            ->assertSee('Pesan uji anchor')
+            ->assertSee('Detail uji anchor')
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/<a\b[^>]*>(?:(?!<\/a>)[\s\S])*?<a\b/',
+            $html,
+            "Halaman {$url} memuat anchor bersarang — kartu notifikasi akan rusak di browser."
+        );
+    }
+
+    public static function halamanNotifikasi(): array
+    {
+        return [
+            'kaprodi'        => ['kaprodi', '/kaprodi/notifikasi'],
+            'dosen'          => ['dosen1', '/dosen/notifikasi'],
+            'dosen industri' => ['industri1', '/dosen-industri/notifikasi'],
+            'mahasiswa'      => ['3.34.23.2.01', '/mahasiswa/notifikasi'],
+        ];
+    }
+
     /** Halaman notifikasi merender tautannya, bukan teks mati. */
     public function test_halaman_notifikasi_merender_tautan(): void
     {

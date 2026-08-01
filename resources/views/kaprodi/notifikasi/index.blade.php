@@ -20,8 +20,10 @@
   </div>
 
   @forelse($notifications as $notif)
-  <a href="{{ route('kaprodi.notifikasi.open', $notif->id) }}" class="alert-box"
-     style="text-decoration:none;color:inherit;{{ $notif->is_read ? 'opacity:0.65;' : '' }}">
+  {{-- Kartunya sudah bisa diklik seluruhnya lewat .alert-link::after (stretched link),
+       jadi JANGAN bungkus lagi dengan <a>: anchor bersarang itu HTML tak sah dan
+       membuat browser menutup paksa <a> luar, sehingga kartu jadi kosong. --}}
+  <div class="alert-box" style="{{ $notif->is_read ? 'opacity:0.65;' : '' }}">
     <div class="alert-icon">
       <svg width="16" height="16" fill="none" stroke="#B9791A" stroke-width="2" viewBox="0 0 24 24">
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -42,9 +44,14 @@
     </div>
     <div class="alert-actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
       <div class="alert-time">{{ $notif->date->format('d M Y') }}</div>
-      <span style="color:var(--primary);font-size:12px;font-weight:600;white-space:nowrap;">Lihat →</span>
+      @unless($notif->is_read)
+        <form method="POST" action="{{ route('kaprodi.notifikasi.read', $notif->id) }}">
+          @csrf
+          <button type="submit" class="btn btn-outline btn-sm">Tandai dibaca</button>
+        </form>
+      @endunless
     </div>
-  </a>
+  </div>
   @empty
   <div style="text-align:center;padding:40px;color:var(--text-muted);">
     <p>Belum ada notifikasi.</p>
