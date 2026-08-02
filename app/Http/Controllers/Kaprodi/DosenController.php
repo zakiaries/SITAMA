@@ -21,7 +21,7 @@ class DosenController extends Controller
             'name'     => 'required|string|max:255',
             'username' => 'required|string|max:50|unique:users,username',
             'email'    => 'nullable|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ], [
             'name.required'     => 'Nama wajib diisi.',
             'username.required' => 'NIP / username wajib diisi.',
@@ -118,7 +118,7 @@ class DosenController extends Controller
     public function resetPassword(Request $request, Lecturer $lecturer)
     {
         $request->validate([
-            'new_password' => 'required|string|min:6|confirmed',
+            'new_password' => 'required|string|min:8|confirmed',
         ], [
             'new_password.required'  => 'Password baru wajib diisi.',
             'new_password.min'       => 'Password minimal 6 karakter.',

@@ -116,7 +116,7 @@
       <div class="form-group">
         <label>Password</label>
         <div class="pw-wrap">
-          <input type="password" name="password" placeholder="Min. 6 karakter" required>
+          <input type="password" name="password" placeholder="Min. 8 karakter" required minlength="8">
           <x-password-toggle />
         </div>
       </div>

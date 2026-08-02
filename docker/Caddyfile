@@ -12,12 +12,27 @@
     # Sajikan file statis (css/js/gambar/upload).
     file_server
 
-    # Header keamanan dasar.
+    # Header keamanan.
     header {
         X-Content-Type-Options nosniff
         X-Frame-Options SAMEORIGIN
-        Referrer-Policy no-referrer-when-downgrade
         -Server
+
+        # Dulu no-referrer-when-downgrade, yang tetap mengirim URL LENGKAP ke
+        # situs https lain. Sejak dokumen dilayani lewat URL bertanda tangan
+        # (BerkasController), URL itu sendiri adalah kredensial sementara —
+        # jangan sampai ikut bocor lewat header Referer.
+        Referrer-Policy strict-origin-when-cross-origin
+
+        # Paksa HTTPS untuk kunjungan berikutnya. Sengaja tanpa includeSubDomains
+        # dan tanpa preload: keduanya yang sulit dibatalkan bila nanti ada
+        # subdomain yang belum ber-TLS.
+        Strict-Transport-Security "max-age=31536000"
+
+        # Hanya arahan yang TIDAK menuntut penataan ulang kode. Halaman ini masih
+        # memakai style & handler inline di banyak tempat, jadi default-src atau
+        # script-src akan mematikan tampilan — itu pekerjaan terpisah.
+        Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
     }
 
     # Batas ukuran unggahan (laporan/foto).

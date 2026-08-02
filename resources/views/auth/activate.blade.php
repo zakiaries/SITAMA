@@ -64,7 +64,7 @@
         <label class="form-label">Password <span style="color:#dc2626;">*</span></label>
         <div class="pw-wrap">
           <input class="form-input" type="password" name="password"
-            placeholder="Minimal 6 karakter" required minlength="6" autocomplete="new-password">
+            placeholder="Minimal 8 karakter" required minlength="8" autocomplete="new-password">
           <x-password-toggle />
         </div>
         @error('password')<div class="error-msg">{{ $message }}</div>@enderror
@@ -73,7 +73,7 @@
         <label class="form-label">Konfirmasi Password <span style="color:#dc2626;">*</span></label>
         <div class="pw-wrap">
           <input class="form-input" type="password" name="password_confirmation"
-            placeholder="Ulangi password" required minlength="6" autocomplete="new-password">
+            placeholder="Ulangi password" required minlength="8" autocomplete="new-password">
           <x-password-toggle />
         </div>
       </div>

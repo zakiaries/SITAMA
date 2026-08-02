@@ -126,7 +126,7 @@ class MahasiswaController extends Controller
             'lecturer_industry_id' => 'nullable|exists:lecturers,id',
             'pic_name'             => 'required_without:lecturer_industry_id|nullable|string|max:255',
             'pic_username'         => 'required_without:lecturer_industry_id|nullable|string|max:50|unique:users,username',
-            'pic_password'         => 'required_without:lecturer_industry_id|nullable|string|min:6',
+            'pic_password'         => 'required_without:lecturer_industry_id|nullable|string|min:8',
             'pic_phone'            => ['nullable', 'string', 'max:50', 'regex:/^[0-9()+\-\s]{7,20}$/'],
             'position'             => 'nullable|string|max:255',
             'start_date'           => 'required|date',
@@ -240,7 +240,7 @@ class MahasiswaController extends Controller
     public function resetPassword(Request $request, Student $student)
     {
         $request->validate([
-            'new_password' => 'required|string|min:6|confirmed',
+            'new_password' => 'required|string|min:8|confirmed',
         ], [
             'new_password.required'  => 'Password baru wajib diisi.',
             'new_password.min'       => 'Password minimal 6 karakter.',

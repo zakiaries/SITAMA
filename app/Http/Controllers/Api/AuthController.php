@@ -165,7 +165,7 @@ class AuthController extends Controller
 
         $request->validate([
             'username' => 'required|string|max:50|unique:users,username',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ], [
             'username.required'  => 'Username wajib diisi.',
             'username.unique'    => 'Username sudah digunakan, pilih yang lain.',
