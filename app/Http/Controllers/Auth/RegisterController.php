@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
@@ -16,13 +17,42 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
+    /**
+     * Pendaftaran yang ditolak Kaprodi tak boleh mengunci NIM/email selamanya.
+     *
+     * Akun berstatus 'rejected' tak pernah bisa dipakai masuk, jadi menahannya
+     * hanya berarti orang yang bersangkutan tak bisa mendaftar ulang — persis
+     * yang terjadi: pendaftar dapat pesan "NIM sudah terdaftar" lalu terpaksa
+     * memakai NIM lain yang bukan miliknya.
+     */
+    private function pendaftaranDitolak(?User $user): bool
+    {
+        return $user !== null
+            && $user->role === 'student'
+            && $user->student?->status === 'rejected';
+    }
+
+    /** Aturan unik yang memberi pengecualian untuk pendaftaran yang ditolak. */
+    private function unikKecualiDitolak(string $kolom, string $pesan): \Closure
+    {
+        return function ($attribute, $value, $fail) use ($kolom, $pesan) {
+            $user = User::where($kolom, $value)->first();
+
+            if ($user !== null && ! $this->pendaftaranDitolak($user)) {
+                $fail($pesan);
+            }
+        };
+    }
+
     public function register(Request $request)
     {
         $request->validate([
             'name'          => 'required|string|max:255',
             // NIM Polines: 5 kelompok angka dipisah titik, mis. 3.34.23.2.12.
-            'username'      => ['required', 'string', 'max:50', 'unique:users,username', 'regex:/^\d+\.\d+\.\d+\.\d+\.\d+$/'],
-            'email'         => 'required|email|max:255|unique:users,email',
+            'username'      => ['required', 'string', 'max:50', 'regex:/^\d+\.\d+\.\d+\.\d+\.\d+$/',
+                                $this->unikKecualiDitolak('username', 'NIM sudah terdaftar.')],
+            'email'         => ['required', 'email', 'max:255',
+                                $this->unikKecualiDitolak('email', 'Email sudah terdaftar.')],
             'password'      => 'required|string|min:8|confirmed',
             'the_class'     => 'required|string|max:50',
             'study_program' => 'required|string|max:100',
@@ -44,22 +74,38 @@ class RegisterController extends Controller
             'academic_year.required' => 'Tahun akademik wajib diisi.',
         ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'username' => $request->username,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'student',
-        ]);
+        $user = DB::transaction(function () use ($request) {
+            // Bersihkan pendaftaran lama yang ditolak agar NIM/email-nya bebas.
+            // Akun itu tak pernah bisa dipakai masuk, jadi tak ada data yang
+            // hilang; tabel milik mahasiswa semuanya cascade dari users.
+            User::where('username', $request->username)
+                ->orWhere('email', $request->email)
+                ->get()
+                ->each(function (User $lama) {
+                    if ($this->pendaftaranDitolak($lama)) {
+                        $lama->delete();
+                    }
+                });
 
-        Student::create([
-            'user_id'       => $user->id,
-            'the_class'     => $request->the_class,
-            'study_program' => $request->study_program,
-            'major'         => $request->major,
-            'academic_year' => $request->academic_year,
-            'status'        => 'pending',
-        ]);
+            $user = User::create([
+                'name'     => $request->name,
+                'username' => $request->username,
+                'email'    => $request->email,
+                'password' => Hash::make($request->password),
+                'role'     => 'student',
+            ]);
+
+            Student::create([
+                'user_id'       => $user->id,
+                'the_class'     => $request->the_class,
+                'study_program' => $request->study_program,
+                'major'         => $request->major,
+                'academic_year' => $request->academic_year,
+                'status'        => 'pending',
+            ]);
+
+            return $user;
+        });
 
         // Pendaftar tak bisa masuk sampai akunnya disetujui, sementara Kaprodi
         // tak punya alasan membuka Data Mahasiswa kalau tak merasa ada yang
