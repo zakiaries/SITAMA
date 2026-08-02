@@ -35,7 +35,7 @@
   @php $act = session('activation_info'); @endphp
   <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;">
     <div style="font-weight:700;color:#15803d;margin-bottom:6px;">Link Aktivasi Baru Dibuat</div>
-    <div style="font-size:13px;color:#166534;margin-bottom:8px;">{!! $act['mail_status'] !!}</div>
+    <div style="font-size:13px;color:#166534;margin-bottom:8px;">{{ $act['mail_status'] }}</div>
     <div style="background:#dcfce7;border-radius:6px;padding:8px 12px;font-size:12px;word-break:break-all;display:flex;align-items:center;gap:10px;">
       <code style="flex:1;">{{ $act['activation_url'] }}</code>
       <button type="button" onclick="navigator.clipboard.writeText('{{ $act['activation_url'] }}')"

@@ -15,7 +15,7 @@
   @php $act = session('activation_info'); @endphp
   <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;">
     <div style="font-weight:700;color:#15803d;margin-bottom:6px;">Pengajuan Disetujui — Link Aktivasi Dibuat</div>
-    <div style="font-size:13px;color:#166534;margin-bottom:10px;">{!! $act['mail_status'] !!}</div>
+    <div style="font-size:13px;color:#166534;margin-bottom:10px;">{{ $act['mail_status'] }}</div>
     <div style="font-size:12px;color:#14532d;margin-bottom:8px;">
       <strong>Pembimbing:</strong> {{ $act['pic_name'] }} &middot; {{ $act['pic_email'] }}
     </div>

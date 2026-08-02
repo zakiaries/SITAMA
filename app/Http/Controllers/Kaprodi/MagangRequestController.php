@@ -145,9 +145,11 @@ class MagangRequestController extends Controller
         $activationUrl = url('/aktivasi/' . $token->token);
         try {
             Mail::to($picUser->email)->send(new PembimbingIndustriInvitation($token, $student->user->name));
-            $mailStatus = "Email aktivasi terkirim ke <strong>{$picUser->email}</strong>.";
+            // Teks polos, tanpa HTML: nilainya berasal dari email yang diisi
+            // MAHASISWA, dan dulu dirender mentah dengan {!! !!} di halaman Kaprodi.
+            $mailStatus = 'Email aktivasi terkirim ke ' . $picUser->email . '.';
         } catch (\Exception $e) {
-            $mailStatus = "Email gagal terkirim. Bagikan link aktivasi ini secara manual:";
+            $mailStatus = 'Email gagal terkirim. Bagikan link aktivasi ini secara manual:';
         }
 
         Notification::kirim($student->user_id, 'Pengajuan magang kamu disetujui Kaprodi.', 'pengajuan_magang',
@@ -245,9 +247,9 @@ class MagangRequestController extends Controller
 
         try {
             Mail::to($lecturer->user->email)->send(new PembimbingIndustriInvitation($token, $student->user->name));
-            $mailStatus = "Email aktivasi berhasil dikirim ulang ke <strong>{$lecturer->user->email}</strong>.";
+            $mailStatus = 'Email aktivasi berhasil dikirim ulang ke ' . $lecturer->user->email . '.';
         } catch (\Exception $e) {
-            $mailStatus = "Email gagal terkirim. Bagikan link ini secara manual:";
+            $mailStatus = 'Email gagal terkirim. Bagikan link ini secara manual:';
         }
 
         return back()
