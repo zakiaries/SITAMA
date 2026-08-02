@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvitationToken extends Model
 {
-    protected $fillable = ['user_id', 'token', 'expires_at'];
+    // `used_at` WAJIB ikut fillable. Tanpa itu, update(['used_at' => now()]) di
+    // ActivationController dibuang diam-diam oleh perlindungan mass-assignment —
+    // tanpa galat — sehingga tautan undangan tak pernah ditandai terpakai dan
+    // tetap sah sampai kedaluwarsa. Siapa pun yang memegang tautan itu bisa
+    // memakainya lagi untuk mengganti username & kata sandi akun tersebut.
+    protected $fillable = ['user_id', 'token', 'expires_at', 'used_at'];
 
     protected $casts = [
         'expires_at' => 'datetime',
