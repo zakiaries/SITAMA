@@ -131,10 +131,10 @@
 
       {{-- Jalan keluar: tanpa ini mahasiswa yang salah unggah akan terjebak —
            tak bisa memperbaiki apa pun, tak bisa menarik pengajuannya. --}}
-      <form method="POST" action="{{ route('mahasiswa.magang-saya.batal-selesai') }}" style="margin-top:10px;">
+      <form method="POST" action="{{ route('mahasiswa.magang-saya.batal-selesai') }}" style="margin-top:10px;"
+            data-confirm="Batalkan pengajuan selesai magang? Kamu bisa mengajukannya lagi setelah selesai memperbaiki.">
         @csrf
-        <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;"
-                onclick="return confirm('Batalkan pengajuan selesai magang? Kamu bisa mengajukannya lagi setelah selesai memperbaiki.')">
+        <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;">
           Batalkan Pengajuan
         </button>
       </form>
