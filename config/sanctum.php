@@ -46,7 +46,10 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Token aplikasi HP kedaluwarsa setelah 30 hari (satuan menit). Sebelumnya
+    // null = berlaku selamanya, sehingga HP yang hilang atau dipinjam tetap
+    // punya akses tanpa batas waktu. Bisa diatur lewat SANCTUM_EXPIRATION.
+    'expiration' => env('SANCTUM_EXPIRATION', 60 * 24 * 30),
 
     /*
     |--------------------------------------------------------------------------

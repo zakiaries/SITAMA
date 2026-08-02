@@ -14,6 +14,41 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
+     * Ganti kata sandi mencabut token aplikasi HP.
+     *
+     * Kata sandi berubah di 18 tempat (profil tiap peran di web & API, reset
+     * mandiri lewat email, reset oleh Kaprodi, aktivasi akun industri).
+     * Menambalnya satu per satu pasti menyisakan yang terlewat, jadi aturannya
+     * dipasang di sini — berlaku untuk semua jalur, termasuk yang dibuat nanti.
+     *
+     * Tanpa ini, mengganti kata sandi karena curiga akun disusupi sama sekali
+     * tak memutus akses lewat aplikasi: token Sanctum tetap sah.
+     *
+     * Token yang SEDANG dipakai sengaja dipertahankan bila pemiliknya sendiri
+     * yang mengganti sandi lewat API — aplikasi Flutter belum menangani 401,
+     * jadi mencabutnya akan membuat pengguna tersangkut tanpa penjelasan.
+     * Saat Kaprodi mereset sandi orang lain, $user bukan pengguna terautentikasi
+     * sehingga tak ada token yang dikecualikan — semuanya dicabut.
+     */
+    protected static function booted(): void
+    {
+        static::updated(function (self $user) {
+            if (! $user->wasChanged('password')) {
+                return;
+            }
+
+            $query   = $user->tokens();
+            $current = $user->currentAccessToken();
+
+            if ($current instanceof \Laravel\Sanctum\PersonalAccessToken) {
+                $query->whereKeyNot($current->getKey());
+            }
+
+            $query->delete();
+        });
+    }
+
+    /**
      * Kirim email reset password (dipicu password broker) — pakai Mailable
      * berbahasa Indonesia, link menuju halaman reset di website.
      */
