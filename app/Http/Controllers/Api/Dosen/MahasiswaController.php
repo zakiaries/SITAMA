@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Dosen;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\BerkasController;
 use App\Models\AssessmentComponent;
 use App\Models\Guidance;
 use App\Models\InternshipReport;
@@ -50,7 +51,7 @@ class MahasiswaController extends ApiController
             'date'          => optional($g->date)->toDateString(),
             'status'        => $g->status,
             'lecturer_note' => $g->lecturer_note,
-            'file_url'      => $g->name_file ? Storage::url($g->name_file) : null,
+            'file_url'      => $g->name_file ? BerkasController::tautanBertandaTangan('berkas.bimbingan', $g) : null,
         ]);
 
         $report = $student->report;
@@ -83,7 +84,7 @@ class MahasiswaController extends ApiController
                 'title'         => $report->title,
                 'status'        => $report->status,
                 'lecturer_note' => $report->lecturer_note,
-                'file_url'      => $report->file_path ? Storage::url($report->file_path) : null,
+                'file_url'      => $report->file_path ? BerkasController::tautanBertandaTangan('berkas.laporan', $report) : null,
             ] : null,
             'logbooks'  => $logQuery->get()->map(fn ($l) => [
                 'id'            => $l->id,

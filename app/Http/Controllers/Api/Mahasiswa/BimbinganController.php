@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Models\Guidance;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class BimbinganController extends ApiController
             'date'          => optional($g->date)->toDateString(),
             'status'        => $g->status,
             'lecturer_note' => $g->lecturer_note,
-            'file_url'      => $g->name_file ? Storage::url($g->name_file) : null,
+            'file_url'      => $g->name_file ? BerkasController::tautanBertandaTangan('berkas.bimbingan', $g) : null,
         ]);
 
         $lecturer = $student->lecturer ?? $student->activeInternship?->lecturer;
@@ -64,7 +65,7 @@ class BimbinganController extends ApiController
         ]);
 
         $nameFile = $request->hasFile('file')
-            ? $request->file('file')->store('guidances', 'public')
+            ? $request->file('file')->store('guidances', 'local')
             : null;
 
         Guidance::create([
@@ -109,7 +110,7 @@ class BimbinganController extends ApiController
             'status'   => 'pending',
         ];
         if ($request->hasFile('file')) {
-            $data['name_file'] = $request->file('file')->store('guidances', 'public');
+            $data['name_file'] = $request->file('file')->store('guidances', 'local');
         }
 
         $guidance->update($data);
@@ -133,7 +134,7 @@ class BimbinganController extends ApiController
         }
 
         if ($guidance->name_file) {
-            Storage::disk('public')->delete($guidance->name_file);
+            Storage::disk('local')->delete($guidance->name_file);
         }
 
         $guidance->delete();

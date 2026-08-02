@@ -27,7 +27,9 @@ class StudentFeaturesTest extends FeatureTestCase
     /** Bug produksi: bimbingan tak tersimpan sama sekali (Guidance::count()=0). */
     public function test_bimbingan_tersimpan_dengan_dan_tanpa_lampiran(): void
     {
-        Storage::fake('public');
+        // Lampiran bimbingan kini disimpan di disk privat, di luar public/,
+        // supaya tak bisa diunduh siapa pun yang tahu URL-nya (BerkasController).
+        Storage::fake('local');
         $u = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
 
         $this->from('/mahasiswa/bimbingan')->actingAs($u)->post('/mahasiswa/bimbingan', [
@@ -47,7 +49,7 @@ class StudentFeaturesTest extends FeatureTestCase
         $denganFile = Guidance::where('title', 'Konsultasi dengan file')->first();
         $this->assertNotNull($denganFile);
         $this->assertNotNull($denganFile->name_file);
-        Storage::disk('public')->assertExists($denganFile->name_file);
+        Storage::disk('local')->assertExists($denganFile->name_file);
     }
 
     public function test_bimbingan_file_type_validated(): void

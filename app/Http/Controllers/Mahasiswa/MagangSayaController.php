@@ -55,11 +55,11 @@ class MagangSayaController extends Controller
         ]);
 
         if ($internship->certificate_path) {
-            Storage::disk('public')->delete($internship->certificate_path);
+            Storage::disk('local')->delete($internship->certificate_path);
         }
 
         $internship->update([
-            'certificate_path' => $request->file('certificate')->store('certificates', 'public'),
+            'certificate_path' => $request->file('certificate')->store('certificates', 'local'),
         ]);
 
         return back()->with('success', 'Sertifikat magang berhasil diunggah.');

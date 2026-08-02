@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\Concerns\MengunciSaatSelesaiMagang;
 use App\Models\Company;
 use App\Models\CompanyRequest;
@@ -39,7 +40,7 @@ class MagangController extends ApiController
                 'start_date'       => optional($r->start_date)->toDateString(),
                 'status'           => $r->status,
                 'rejection_reason' => $r->rejection_reason,
-                'proof_url'        => $r->proof_file ? Storage::url($r->proof_file) : null,
+                'proof_url'        => $r->proof_file ? BerkasController::tautanBertandaTangan('berkas.bukti', $r) : null,
                 'created_at'       => $r->created_at->toDateTimeString(),
             ]),
         ]);
@@ -82,7 +83,7 @@ class MagangController extends ApiController
             'proof_file.max'                => 'Ukuran file maksimal 10 MB.',
         ]);
 
-        $proofPath = $request->file('proof_file')->store('magang-proofs', 'public');
+        $proofPath = $request->file('proof_file')->store('magang-proofs', 'local');
         $company   = $request->filled('company_id') ? Company::find($request->company_id) : null;
 
         CompanyRequest::create([
@@ -125,7 +126,7 @@ class MagangController extends ApiController
         }
 
         if ($magangRequest->proof_file) {
-            Storage::disk('public')->delete($magangRequest->proof_file);
+            Storage::disk('local')->delete($magangRequest->proof_file);
         }
 
         $magangRequest->delete();
@@ -158,7 +159,7 @@ class MagangController extends ApiController
                 'lecturer_industry' => $internship->lecturerIndustry?->user?->name,
                 'is_finished'       => (bool) $internship->is_finished,
                 'finish_requested'  => (bool) $internship->finish_requested,
-                'certificate_url'   => $internship->certificate_path ? Storage::url($internship->certificate_path) : null,
+                'certificate_url'   => $internship->certificate_path ? BerkasController::tautanBertandaTangan('berkas.sertifikat', $internship) : null,
                 // Field lama di atas sengaja dipertahankan supaya APK yang sudah
                 // terpasang tetap jalan; tiga field ini tambahan.
                 'locked'            => $internship->terkunciUntukMahasiswa(),
@@ -194,11 +195,11 @@ class MagangController extends ApiController
         ]);
 
         if ($internship->certificate_path) {
-            Storage::disk('public')->delete($internship->certificate_path);
+            Storage::disk('local')->delete($internship->certificate_path);
         }
 
         $internship->update([
-            'certificate_path' => $request->file('certificate')->store('certificates', 'public'),
+            'certificate_path' => $request->file('certificate')->store('certificates', 'local'),
         ]);
 
         return response()->json(['message' => 'Sertifikat magang berhasil diunggah.']);

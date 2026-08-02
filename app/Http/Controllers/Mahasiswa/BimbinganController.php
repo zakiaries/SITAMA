@@ -62,7 +62,7 @@ class BimbinganController extends Controller
 
         $nameFile = null;
         if ($request->hasFile('file')) {
-            $nameFile = $request->file('file')->store('guidances', 'public');
+            $nameFile = $request->file('file')->store('guidances', 'local');
         }
 
         Guidance::create([
@@ -115,7 +115,7 @@ class BimbinganController extends Controller
         ];
 
         if ($request->hasFile('file')) {
-            $data['name_file'] = $request->file('file')->store('guidances', 'public');
+            $data['name_file'] = $request->file('file')->store('guidances', 'local');
         }
 
         $guidance->update($data);
@@ -158,7 +158,7 @@ class BimbinganController extends Controller
         }
 
         if ($guidance->name_file) {
-            Storage::disk('public')->delete($guidance->name_file);
+            Storage::disk('local')->delete($guidance->name_file);
         }
 
         $guidance->delete();

@@ -41,7 +41,7 @@ class LaporanController extends Controller
             'file.max'      => 'Ukuran file maksimal 10 MB.',
         ]);
 
-        $path = $request->file('file')->store('reports', 'public');
+        $path = $request->file('file')->store('reports', 'local');
 
         if ($existing) {
             // Resubmit setelah revisi: ganti file, reset status.

@@ -59,7 +59,7 @@
 
       <div class="file-badge" style="margin-top:14px;">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <a href="{{ Storage::url($report->file_path) }}" target="_blank">Lihat File Laporan</a>
+        <a href="{{ route('berkas.laporan', $report) }}" target="_blank">Lihat File Laporan</a>
       </div>
 
       @if($report->lecturer_note)

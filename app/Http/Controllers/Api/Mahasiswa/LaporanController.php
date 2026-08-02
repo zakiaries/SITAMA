@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Mahasiswa;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\BerkasController;
 use App\Models\InternshipReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,7 @@ class LaporanController extends ApiController
                 'title'         => $report->title,
                 'status'        => $report->status,
                 'lecturer_note' => $report->lecturer_note,
-                'file_url'      => $report->file_path ? Storage::url($report->file_path) : null,
+                'file_url'      => $report->file_path ? BerkasController::tautanBertandaTangan('berkas.laporan', $report) : null,
                 'reviewed_at'   => optional($report->reviewed_at)->toDateTimeString(),
             ] : null,
         ]);
@@ -49,7 +50,7 @@ class LaporanController extends ApiController
             'file.max'      => 'Ukuran file maksimal 10 MB.',
         ]);
 
-        $path = $request->file('file')->store('reports', 'public');
+        $path = $request->file('file')->store('reports', 'local');
 
         if ($existing) {
             if ($existing->file_path) {

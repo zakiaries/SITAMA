@@ -35,6 +35,7 @@ use App\Http\Controllers\Kaprodi\ChatbotController as KaprodiChatbotController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
 use App\Http\Controllers\Kaprodi\NotificationController as KaprodiNotificationController;
 use App\Http\Controllers\BeritaAcaraController;
+use App\Http\Controllers\BerkasController;
 use Illuminate\Support\Facades\Route;
 
 // Root redirect ke login
@@ -44,6 +45,16 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::view('/tentang', 'public.about')->name('about');
 Route::view('/bantuan', 'public.help')->name('bantuan');
 Route::view('/kontak', 'public.contact')->name('contact');
+
+// Berkas dokumen mahasiswa. Sengaja TIDAK memakai middleware auth: controller
+// menerima dua cara masuk — sesi/token yang lolos pemeriksaan hak akses, atau
+// URL bertanda tangan berbatas waktu untuk aplikasi HP yang membuka berkas di
+// browser luar. Berkasnya sendiri kini di luar public/ sehingga tak bisa
+// diambil langsung dari web server.
+Route::get('/berkas/bimbingan/{guidance}',    [BerkasController::class, 'bimbingan'])->name('berkas.bimbingan');
+Route::get('/berkas/laporan/{report}',        [BerkasController::class, 'laporan'])->name('berkas.laporan');
+Route::get('/berkas/sertifikat/{internship}', [BerkasController::class, 'sertifikat'])->name('berkas.sertifikat');
+Route::get('/berkas/bukti/{magangRequest}',   [BerkasController::class, 'bukti'])->name('berkas.bukti');
 
 // Daftar hadir audiens seminar — wajib login (audiens = mahasiswa, anti-manipulasi)
 Route::get('/seminar/hadir/{token}',  [BeritaAcaraController::class, 'show'])->name('berita-acara.show')->middleware('auth');

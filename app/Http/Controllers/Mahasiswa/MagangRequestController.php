@@ -87,7 +87,7 @@ class MagangRequestController extends Controller
             'proof_file.max'                => 'Ukuran file maksimal 10 MB.',
         ]);
 
-        $proofPath = $request->file('proof_file')->store('magang-proofs', 'public');
+        $proofPath = $request->file('proof_file')->store('magang-proofs', 'local');
 
         $company = $request->filled('company_id')
             ? Company::find($request->company_id)
@@ -146,7 +146,7 @@ class MagangRequestController extends Controller
         }
 
         if ($magangRequest->proof_file) {
-            Storage::disk('public')->delete($magangRequest->proof_file);
+            Storage::disk('local')->delete($magangRequest->proof_file);
         }
 
         $magangRequest->delete();

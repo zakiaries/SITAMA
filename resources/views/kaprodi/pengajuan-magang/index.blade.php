@@ -90,7 +90,7 @@
   {{-- Bukti --}}
   @if($req->proof_file)
     <div style="margin-bottom:14px;">
-      <a href="{{ Storage::url($req->proof_file) }}" target="_blank"
+      <a href="{{ route('berkas.bukti', $req) }}" target="_blank"
         class="btn btn-outline btn-sm">
         <x-icon name="doc" :size="14"/> Lihat Bukti Penerimaan Magang
       </a>

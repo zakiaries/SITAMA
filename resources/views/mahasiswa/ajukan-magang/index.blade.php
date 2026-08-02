@@ -174,7 +174,7 @@
   </div>
   @if($req->proof_file)
     <div style="margin-top:8px;">
-      <a href="{{ Storage::url($req->proof_file) }}" target="_blank"
+      <a href="{{ route('berkas.bukti', $req) }}" target="_blank"
         style="font-size:12px;color:var(--primary);text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
         <x-icon name="doc" :size="13"/> Lihat Bukti Penerimaan
       </a>
