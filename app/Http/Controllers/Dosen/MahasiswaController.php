@@ -24,13 +24,34 @@ class MahasiswaController extends Controller
 
     private function getInternship(Student $student, $lecturer)
     {
-        $internship = $student->internships()
-            ->where('lecturer_id', $lecturer->id)
-            ->with('company')
-            ->first();
+        $internship = $this->magangOpsional($student, $lecturer);
 
         if (!$internship) abort(404, 'Data magang tidak ditemukan.');
         return $internship;
+    }
+
+    /** Magang bimbingan dosen ini, boleh null bila magangnya belum terbentuk. */
+    private function magangOpsional(Student $student, $lecturer)
+    {
+        return $student->internships()
+            ->where('lecturer_id', $lecturer->id)
+            ->with('company')
+            ->first();
+    }
+
+    /**
+     * Dosen berhak atas mahasiswa ini bila diplot Kaprodi ATAU tercatat di
+     * magangnya. Dulu keberadaan magang dipakai sekaligus sebagai pemeriksa
+     * hak akses, sehingga mahasiswa yang baru diplot tak bisa dibuka sama
+     * sekali — padahal bimbingannya sudah boleh masuk.
+     */
+    private function pastikanDibimbing(Student $student, $lecturer): void
+    {
+        abort_unless(
+            Student::whereKey($student->getKey())->dibimbingOleh($lecturer->id)->exists(),
+            404,
+            'Data mahasiswa tidak ditemukan.'
+        );
     }
 
     /**
@@ -55,8 +76,12 @@ class MahasiswaController extends Controller
 
     public function detail(Request $request, Student $student)
     {
-        $lecturer   = $this->getLecturer();
-        $internship = $this->getInternship($student, $lecturer);
+        $lecturer = $this->getLecturer();
+        $this->pastikanDibimbing($student, $lecturer);
+
+        // Boleh null: mahasiswa yang baru diplot belum punya magang, tapi
+        // bimbingannya sudah bisa masuk dan harus bisa ditanggapi.
+        $internship = $this->magangOpsional($student, $lecturer);
 
         $student->load([
             'user',
@@ -65,7 +90,7 @@ class MahasiswaController extends Controller
         ]);
 
         $assessments = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
-            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship->id)]);
+            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship?->id ?? 0)]);
         }])->get();
 
         $allScores = $assessments->flatMap(fn($c) => $c->detailedComponents)
@@ -114,7 +139,8 @@ class MahasiswaController extends Controller
     public function approveBimbingan(Request $request, Student $student, Guidance $guidance)
     {
         $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        // Bimbingan bisa masuk sebelum magang terbentuk, jadi jangan mensyaratkannya.
+        $this->pastikanDibimbing($student, $lecturer);
         abort_unless($guidance->student_id === $student->id, 404);
 
         $guidance->update([
@@ -130,7 +156,7 @@ class MahasiswaController extends Controller
     public function revisiBimbingan(Request $request, Student $student, Guidance $guidance)
     {
         $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $this->pastikanDibimbing($student, $lecturer);
         abort_unless($guidance->student_id === $student->id, 404);
 
         $request->validate(['note' => 'required|string'], [

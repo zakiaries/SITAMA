@@ -16,7 +16,7 @@ class DashboardController extends ApiController
         $ownScores        = fn ($q) => $q->where('scorer_type', 'lecturer');
         $gradedInternship = fn ($q) => $q->where('lecturer_id', $lecturer->id)->whereHas('scores', $ownScores);
 
-        $query = Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id))
+        $query = Student::dibimbingOleh($lecturer->id)
             ->with([
                 'user',
                 'internships' => fn ($q) => $q->where('lecturer_id', $lecturer->id)
@@ -29,7 +29,7 @@ class DashboardController extends ApiController
         if ($status === 'dinilai') {
             $query->whereHas('internships', $gradedInternship);
         } elseif ($status === 'belum') {
-            $query->whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores', $ownScores));
+            $query->whereDoesntHave('internships', $gradedInternship);
         }
 
         if ($request->filled('search')) {
@@ -74,11 +74,11 @@ class DashboardController extends ApiController
             ];
         });
 
-        $base = fn () => Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id));
+        $base = fn () => Student::dibimbingOleh($lecturer->id);
         $counts = [
             'semua'   => $base()->count(),
             'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),
-            'belum'   => $base()->whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id)->whereDoesntHave('scores', $ownScores))->count(),
+            'belum'   => $base()->whereDoesntHave('internships', $gradedInternship)->count(),
         ];
 
         return response()->json([
@@ -86,8 +86,8 @@ class DashboardController extends ApiController
             'counts'   => $counts,
             // Untuk badge di menu/appbar: total yang menunggu tanggapan dosen.
             'menunggu_tanggapan' => $lecturer->menungguTanggapanKampus(),
-            'majors'   => Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id))->distinct()->pluck('major'),
-            'years'    => Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id))->distinct()->pluck('academic_year'),
+            'majors'   => Student::dibimbingOleh($lecturer->id)->distinct()->pluck('major'),
+            'years'    => Student::dibimbingOleh($lecturer->id)->distinct()->pluck('academic_year'),
             'students' => $students,
         ]);
     }

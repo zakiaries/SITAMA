@@ -172,19 +172,31 @@
     <div class="card" style="margin-bottom:16px;">
       <div class="card-header" style="margin-bottom:12px;">
         <div class="card-title">Info Magang</div>
-        @if($internship->is_finished)
+        @if(!$internship)
+          <span style="background:var(--warn-bg);color:var(--warn-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Belum magang</span>
+        @elseif($internship->is_finished)
           <span style="background:var(--success-bg);color:var(--success-text);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;"><x-icon name="check" :size="12"/> Selesai</span>
         @else
           <span style="background:var(--blue-tint);color:var(--primary);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">Aktif</span>
         @endif
       </div>
-      <div class="info-row"><div class="info-key">Perusahaan</div><div class="info-val" style="color:var(--primary);font-weight:600;">{{ $internship->company->name ?? '-' }}</div></div>
-      <div class="info-row"><div class="info-key">Posisi</div><div class="info-val">{{ $internship->position }}</div></div>
-      <div class="info-row"><div class="info-key">Mulai</div><div class="info-val">{{ $internship->start_date->format('d M Y') }}</div></div>
-      <div class="info-row">
-        <div class="info-key">Selesai</div>
-        <div class="info-val">{{ $internship->end_date ? $internship->end_date->format('d M Y') : 'Belum selesai' }}</div>
-      </div>
+      @if($internship)
+        <div class="info-row"><div class="info-key">Perusahaan</div><div class="info-val" style="color:var(--primary);font-weight:600;">{{ $internship->company->name ?? '-' }}</div></div>
+        <div class="info-row"><div class="info-key">Posisi</div><div class="info-val">{{ $internship->position }}</div></div>
+        <div class="info-row"><div class="info-key">Mulai</div><div class="info-val">{{ optional($internship->start_date)->format('d M Y') ?? '-' }}</div></div>
+        <div class="info-row">
+          <div class="info-key">Selesai</div>
+          <div class="info-val">{{ $internship->end_date ? $internship->end_date->format('d M Y') : 'Belum selesai' }}</div>
+        </div>
+      @else
+        {{-- Sudah diplot Kaprodi tapi magangnya belum terbentuk. Bimbingan sudah
+             boleh masuk, jadi halaman ini tetap dibuka. --}}
+        <div style="font-size:12.5px;color:var(--text-muted);padding:2px 0 10px;">
+          Mahasiswa ini sudah diplot ke Anda, tetapi data magangnya belum dibuat Kaprodi.
+          Bimbingan tetap bisa diajukan dan Anda tanggapi; logbook, laporan, dan nilai
+          baru terbuka setelah magangnya disetujui.
+        </div>
+      @endif
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;">
         <div class="info-row"><div class="info-key">Kelas</div><div class="info-val">{{ $student->the_class }}</div></div>
         <div class="info-row"><div class="info-key">Jurusan</div><div class="info-val">{{ $student->major }}</div></div>
@@ -372,7 +384,7 @@
                 </div>
               @endif
 
-              @if($internship->is_finished)
+              @if($internship?->is_finished)
                 {{-- Magang sudah ditutup Kaprodi: catatan jadi jejak akademik yang
                      sah. Tombolnya dihilangkan, bukan cuma ditolak server. --}}
                 <div style="margin-top:8px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">

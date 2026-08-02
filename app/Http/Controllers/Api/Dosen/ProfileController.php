@@ -17,7 +17,7 @@ class ProfileController extends ApiController
         $lecturer = $this->currentLecturer($request, 'lecturer');
         $user     = $request->user();
 
-        $totalMahasiswa = Student::whereHas('internships', fn ($q) => $q->where('lecturer_id', $lecturer->id))->count();
+        $totalMahasiswa = Student::dibimbingOleh($lecturer->id)->count();
 
         return response()->json([
             'user' => [
