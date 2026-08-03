@@ -35,15 +35,22 @@ class MahasiswaDummy extends Command
         {--prodi=Teknik Informatika : Program studi}
         {--jurusan=Teknik Elektro : Jurusan}
         {--tahun=2023/2024 : Tahun akademik}
-        {--tahap=sedang-magang : sedang-magang | siap-selesai | selesai}
+        {--tahap=sedang-magang : sedang-magang | siap-dinilai | siap-selesai | selesai}
         {--dospem= : Username dosen pembimbing (default: dosen pertama yang ada)}
         {--password= : Password akun dummy — berlaku juga untuk pembimbing industri dummy (default: diacak lalu dicetak sekali)}
         {--hapus : Hapus akun dummy beserta seluruh data pendukungnya}
         {--force : Lewati konfirmasi saat menghapus}';
 
-    protected $description = 'Siapkan akun mahasiswa dummy untuk demo/uji (3 tahap: sedang-magang, siap-selesai, selesai)';
+    protected $description = 'Siapkan akun mahasiswa dummy untuk demo/uji (4 tahap: sedang-magang, siap-dinilai, siap-selesai, selesai)';
 
-    private const TAHAP = ['sedang-magang', 'siap-selesai', 'selesai'];
+    /**
+     * Tahapnya mengikuti urutan alur nyata, dan 'siap-dinilai' ada karena
+     * penilaian kini digerbangi kelengkapan mahasiswa: tanpa tahap ini tak ada
+     * satu pun akun uji yang bisa dipakai pembimbing untuk MENGISI nilai dari
+     * kosong — 'sedang-magang' tergerbang, 'siap-selesai' nilainya sudah ada,
+     * 'selesai' terkunci.
+     */
+    private const TAHAP = ['sedang-magang', 'siap-dinilai', 'siap-selesai', 'selesai'];
 
     public function handle(): int
     {
@@ -77,8 +84,17 @@ class MahasiswaDummy extends Command
         $this->isiLogbook($student, $internship);
         $this->isiBimbingan($student);
 
+        // Laporan akhir di-ACC = syarat kedua (setelah logbook) agar pembimbing
+        // boleh menilai. Lihat Internship::syaratPenilaian().
         if ($tahap !== 'sedang-magang') {
             $this->isiLaporan($student);
+        }
+
+        // Sertifikat & nilai sengaja BELUM ada di tahap 'siap-dinilai': itulah
+        // yang membuatnya berguna. Sertifikat memang bukan syarat penilaian —
+        // perusahaan sering menerbitkannya belakangan — jadi tahap ini juga
+        // menggambarkan keadaan yang lazim di lapangan.
+        if (! in_array($tahap, ['sedang-magang', 'siap-dinilai'], true)) {
             $this->isiSertifikat($internship);
             $this->isiNilai($internship);
         }
@@ -455,6 +471,9 @@ class MahasiswaDummy extends Command
         $this->newLine();
         $this->line(match ($tahap) {
             'sedang-magang' => 'Tahap: magang berjalan. Logbook & bimbingan terisi; laporan, sertifikat, dan nilai sengaja dibiarkan kosong.',
+            'siap-dinilai'  => 'Tahap: syarat penilaian terpenuhi (logbook lengkap + laporan di-ACC), nilai masih KOSONG. '
+                . 'Inilah akun untuk menguji dosen & pembimbing industri mengisi nilai. '
+                . 'Sertifikat sengaja belum ada — ia bukan syarat menilai.',
             'siap-selesai'  => 'Tahap: semua syarat lengkap — tombol "Ajukan Selesai Magang" di menu Magang Saya sudah bisa diklik.',
             'selesai'       => 'Tahap: magang sudah selesai — mahasiswa ini muncul di daftar peserta sesi seminar di portal dosen.',
         });
