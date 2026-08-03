@@ -62,6 +62,7 @@ class NotifikasiPunyaTujuanTest extends FeatureTestCase
             'position'     => 'Developer',
             'bidang'       => 'IT',
             'start_date'   => now()->addMonth()->toDateString(),
+            'end_date'     => now()->addMonths(4)->toDateString(),
             'proof_file'   => \Illuminate\Http\UploadedFile::fake()->create('bukti.pdf', 100, 'application/pdf'),
         ])->assertSessionHasNoErrors();
 

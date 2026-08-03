@@ -34,6 +34,7 @@ class FormMagangTakMenyisakanPilihanTest extends FeatureTestCase
             'company_name' => 'PT Baru Sejahtera',
             'pic_name'     => 'Budi Pembimbing',
             'start_date'   => now()->toDateString(),
+            'end_date'     => now()->addMonths(3)->toDateString(),
             'proof_file'   => UploadedFile::fake()->create('bukti.pdf', 100, 'application/pdf'),
         ], $ganti);
     }
@@ -149,6 +150,7 @@ class FormMagangTakMenyisakanPilihanTest extends FeatureTestCase
                 'company_name'         => 'PT Baru Sejahtera',
                 'lecturer_industry_id' => $industri->id,
                 'start_date'           => now()->toDateString(),
+                'end_date'             => now()->addMonths(3)->toDateString(),
             ])
             ->assertSessionHasErrors('proof_file');
 

@@ -74,7 +74,10 @@
           <div style="font-size:11.5px;color:var(--warning);">Perusahaan baru — akan didaftarkan saat disetujui</div>
         @endif
         <div><strong>Posisi:</strong> {{ $req->position ?? '-' }}</div>
-        <div><strong>Mulai:</strong> {{ $req->start_date?->format('d M Y') ?? '-' }}</div>
+        <div><strong>Periode:</strong>
+          {{ $req->start_date?->format('d M Y') ?? '-' }}
+          &ndash; {{ $req->end_date?->format('d M Y') ?? '-' }}
+        </div>
       </div>
     </div>
     <div>

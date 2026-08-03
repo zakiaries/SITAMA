@@ -80,6 +80,7 @@ class MagangRequestController extends Controller
                 'lecturer_industry_id' => $lecturer?->id,
                 'position'             => $magangRequest->position,
                 'start_date'           => $magangRequest->start_date ?? now(),
+                'end_date'             => $magangRequest->end_date,
                 'is_finished'          => false,
             ]);
 
@@ -127,6 +128,7 @@ class MagangRequestController extends Controller
             'lecturer_industry_id' => $lecturer->id,
             'position'             => $magangRequest->position,
             'start_date'           => $magangRequest->start_date ?? now(),
+            'end_date'             => $magangRequest->end_date,
             'is_finished'          => false,
         ]);
 

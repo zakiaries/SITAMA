@@ -12,13 +12,16 @@ class CompanyRequest extends Model
     protected $fillable = [
         'student_id', 'company_id', 'lecturer_industry_id',
         'company_name', 'company_address', 'company_field', 'company_phone', 'company_email',
-        'proof_file', 'position', 'bidang', 'start_date',
+        'proof_file', 'position', 'bidang', 'start_date', 'end_date',
         'pic_name', 'pic_email', 'pic_phone',
         'status', 'rejection_reason',
         'created_company_id', 'created_lecturer_id',
     ];
 
-    protected $casts = ['start_date' => 'date'];
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date'   => 'date',
+    ];
 
     public function student()
     {

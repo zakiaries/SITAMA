@@ -15,7 +15,7 @@ class StudentFeaturesTest extends FeatureTestCase
         $u = $this->userByUsername('3.34.23.2.01'); // magang selesai -> boleh ajukan lagi
         $base = fn ($phone) => [
             'company_name' => 'PT X', 'pic_name' => 'Budi', 'pic_phone' => $phone,
-            'start_date' => '2024-08-01', 'company_mode' => 'new',
+            'start_date' => '2024-08-01', 'end_date' => '2024-11-01', 'company_mode' => 'new',
             'proof_file' => UploadedFile::fake()->create('b.pdf', 20, 'application/pdf'),
         ];
         $this->from('/mahasiswa/ajukan-magang')->actingAs($u)->post('/mahasiswa/ajukan-magang', $base('abcxyz'))

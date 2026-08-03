@@ -80,12 +80,17 @@ class MagangRequestController extends Controller
             'position'     => 'nullable|string|max:255',
             'bidang'       => 'nullable|string|max:100',
             'start_date'   => 'required|date',
+            // Tanpa tanggal berakhir, internships.end_date tetap kosong dan
+            // seluruh halaman menampilkan "Belum selesai" selamanya.
+            'end_date'     => 'required|date|after:start_date',
             'proof_file'   => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
             'company_name.required_without' => 'Pilih perusahaan yang ada atau isi nama perusahaan baru.',
             'pic_name.required'             => 'Nama pembimbing industri wajib diisi.',
             'pic_phone.regex'               => 'Nomor HP tidak valid (hanya angka dan simbol + - ( ) spasi).',
             'start_date.required'           => 'Tanggal mulai magang wajib diisi.',
+            'end_date.required'             => 'Tanggal selesai magang wajib diisi.',
+            'end_date.after'                => 'Tanggal selesai harus setelah tanggal mulai.',
             'proof_file.required'           => 'Bukti penerimaan magang wajib diunggah.',
             'proof_file.mimes'              => 'Bukti harus berformat PDF atau gambar (JPG/PNG).',
             'proof_file.max'                => 'Ukuran file maksimal 10 MB.',
@@ -114,6 +119,7 @@ class MagangRequestController extends Controller
             'position'             => $request->position,
             'bidang'               => $request->bidang,
             'start_date'           => $request->start_date,
+            'end_date'             => $request->end_date,
             'proof_file'           => $proofPath,
             'status'               => 'pending',
         ]);

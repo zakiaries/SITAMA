@@ -33,7 +33,7 @@ class DospemWajibTest extends FeatureTestCase
 
         $this->from('/mahasiswa/ajukan-magang')->actingAs($u)->post('/mahasiswa/ajukan-magang', [
             'company_name' => 'PT Tanpa Dospem', 'pic_name' => 'Budi', 'pic_phone' => '08123456789',
-            'company_mode' => 'new', 'start_date' => '2024-08-01',
+            'company_mode' => 'new', 'start_date' => '2024-08-01', 'end_date' => '2024-11-01',
             'proof_file' => UploadedFile::fake()->create('b.pdf', 20, 'application/pdf'),
         ])->assertSessionHas('error');
 
@@ -49,7 +49,7 @@ class DospemWajibTest extends FeatureTestCase
 
         $this->from('/mahasiswa/ajukan-magang')->actingAs($u)->post('/mahasiswa/ajukan-magang', [
             'company_name' => 'PT Dengan Dospem', 'pic_name' => 'Budi', 'pic_phone' => '08123456789',
-            'company_mode' => 'new', 'start_date' => '2024-08-01',
+            'company_mode' => 'new', 'start_date' => '2024-08-01', 'end_date' => '2024-11-01',
             'proof_file' => UploadedFile::fake()->create('b.pdf', 20, 'application/pdf'),
         ])->assertSessionHasNoErrors();
 
@@ -89,7 +89,8 @@ class DospemWajibTest extends FeatureTestCase
         $this->from("/kaprodi/mahasiswa/{$student->id}")->actingAs($kaprodi)
             ->post("/kaprodi/mahasiswa/{$student->id}/internship", [
                 'company_name' => 'PT Catat', 'pic_name' => 'Budi', 'pic_username' => 'pic_baru',
-                'pic_password' => 'rahasia123', 'position' => 'Developer', 'start_date' => '2024-08-01',
+                'pic_password' => 'rahasia123', 'position' => 'Developer',
+                'start_date' => '2024-08-01', 'end_date' => '2024-11-01',
             ])->assertSessionHas('error');
 
         $this->assertSame(0, Internship::where('student_id', $student->id)->count());
@@ -112,7 +113,7 @@ class DospemWajibTest extends FeatureTestCase
         $this->withHeader('Authorization', "Bearer {$token}")
             ->postJson('/api/mahasiswa/ajukan-magang', [
                 'company_name' => 'PT API', 'pic_name' => 'Budi', 'pic_phone' => '08123456789',
-                'start_date' => '2024-08-01',
+                'start_date' => '2024-08-01', 'end_date' => '2024-11-01',
                 'proof_file' => UploadedFile::fake()->create('b.pdf', 20, 'application/pdf'),
             ])->assertStatus(422);
 

@@ -106,6 +106,7 @@ class PembimbingIndustriDiDropdownTest extends FeatureTestCase
             'lecturer_industry_id' => $lecturer->id,
             'position'             => 'Developer',
             'start_date'           => now()->addMonth()->toDateString(),
+            'end_date'             => now()->addMonths(4)->toDateString(),
             'proof_file'           => \Illuminate\Http\UploadedFile::fake()
                 ->create('bukti.pdf', 50, 'application/pdf'),
         ])->assertSessionHasNoErrors();

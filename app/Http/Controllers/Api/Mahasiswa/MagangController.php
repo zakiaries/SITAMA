@@ -38,6 +38,7 @@ class MagangController extends ApiController
                 'position'         => $r->position,
                 'bidang'           => $r->bidang,
                 'start_date'       => optional($r->start_date)->toDateString(),
+                'end_date'         => optional($r->end_date)->toDateString(),
                 'status'           => $r->status,
                 'rejection_reason' => $r->rejection_reason,
                 'proof_url'        => $r->proof_file ? BerkasController::tautanBertandaTangan('berkas.bukti', $r) : null,
@@ -72,12 +73,16 @@ class MagangController extends ApiController
             'position'     => 'nullable|string|max:255',
             'bidang'       => 'nullable|string|max:100',
             'start_date'   => 'required|date',
+            // Paritas dengan web: tanpa ini internships.end_date tetap kosong.
+            'end_date'     => 'required|date|after:start_date',
             'proof_file'   => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
             'company_name.required_without' => 'Pilih perusahaan yang ada atau isi nama perusahaan baru.',
             'pic_name.required'             => 'Nama pembimbing industri wajib diisi.',
             'pic_phone.regex'               => 'Nomor HP tidak valid (hanya angka dan simbol + - ( ) spasi).',
             'start_date.required'           => 'Tanggal mulai magang wajib diisi.',
+            'end_date.required'             => 'Tanggal selesai magang wajib diisi.',
+            'end_date.after'                => 'Tanggal selesai harus setelah tanggal mulai.',
             'proof_file.required'           => 'Bukti penerimaan magang wajib diunggah.',
             'proof_file.mimes'              => 'Bukti harus berformat PDF atau gambar (JPG/PNG).',
             'proof_file.max'                => 'Ukuran file maksimal 10 MB.',
@@ -96,6 +101,7 @@ class MagangController extends ApiController
             'position'     => $request->position,
             'bidang'       => $request->bidang,
             'start_date'   => $request->start_date,
+            'end_date'     => $request->end_date,
             'proof_file'   => $proofPath,
             'status'       => 'pending',
         ]);

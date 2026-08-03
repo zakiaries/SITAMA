@@ -94,6 +94,7 @@ class PengujianMahasiswaTest extends FeatureTestCase
             'position'     => 'Developer',
             'bidang'       => 'IT',
             'start_date'   => now()->addMonth()->toDateString(),
+            'end_date'     => now()->addMonths(4)->toDateString(),
         ];
 
         // Tanpa bukti penerimaan: ditolak dengan pesan validasi.

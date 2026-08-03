@@ -222,6 +222,7 @@ class KuotaLowonganTest extends FeatureTestCase
                 'company_id'  => $this->perusahaan()->id,
                 'pic_name'    => 'Budi Pembimbing',
                 'start_date'  => now()->toDateString(),
+                'end_date'    => now()->addMonths(3)->toDateString(),
                 'proof_file'  => \Illuminate\Http\UploadedFile::fake()->create('bukti.pdf', 100, 'application/pdf'),
             ])->assertSessionHasNoErrors();
 

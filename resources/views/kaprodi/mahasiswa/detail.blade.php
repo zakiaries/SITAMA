@@ -185,10 +185,17 @@
         <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Frontend Developer"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
       </div>
-      <div class="form-group" style="margin-bottom:16px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Tanggal Mulai <span style="color:var(--danger);">*</span></label>
-        <input type="date" name="start_date" value="{{ old('start_date', now()->toDateString()) }}" required
-          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div class="form-group" style="margin:0;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Tanggal Mulai <span style="color:var(--danger);">*</span></label>
+          <input type="date" name="start_date" value="{{ old('start_date', now()->toDateString()) }}" required
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">Tanggal Selesai <span style="color:var(--danger);">*</span></label>
+          <input type="date" name="end_date" value="{{ old('end_date', now()->addMonths(3)->toDateString()) }}" required
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+        </div>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">+ Catat Magang</button>
     </form>

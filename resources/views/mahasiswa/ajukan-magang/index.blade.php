@@ -137,13 +137,26 @@
         <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Backend Developer (Laravel)"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
       </div>
-      <div class="form-group" style="margin-bottom:18px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">
-          Tanggal Mulai <span style="color:var(--danger);">*</span>
-        </label>
-        <input type="date" name="start_date" value="{{ old('start_date') }}" required
-          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
-        @error('start_date')<div style="color:var(--danger);font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+        <div class="form-group" style="margin:0;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">
+            Tanggal Mulai <span style="color:var(--danger);">*</span>
+          </label>
+          <input type="date" name="start_date" value="{{ old('start_date') }}" required
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          @error('start_date')<div style="color:var(--danger);font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">
+            Tanggal Selesai <span style="color:var(--danger);">*</span>
+          </label>
+          <input type="date" name="end_date" value="{{ old('end_date') }}" required
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          @error('end_date')<div style="color:var(--danger);font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
+        </div>
+        <div style="grid-column:1 / -1;font-size:11.5px;color:var(--text-muted);margin-top:-6px;">
+          Sesuai periode di surat penerimaan magangmu. Tanggal ini yang tampil sebagai akhir magang di profil dan portal dosen.
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Kirim Pengajuan</button>
@@ -167,7 +180,8 @@
     <div>
       <div style="font-weight:700;font-size:14px;color:var(--text);">{{ $req->company_name }}</div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
-        {{ $req->position ?? '-' }} &middot; Mulai {{ $req->start_date?->format('d M Y') ?? '-' }}
+        {{ $req->position ?? '-' }} &middot;
+        {{ $req->start_date?->format('d M Y') ?? '-' }} &ndash; {{ $req->end_date?->format('d M Y') ?? '-' }}
       </div>
     </div>
     <span style="background:{{ $badge['bg'] }};color:{{ $badge['color'] }};font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;white-space:nowrap;">

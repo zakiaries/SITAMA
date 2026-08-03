@@ -130,6 +130,9 @@ class MahasiswaController extends Controller
             'pic_phone'            => ['nullable', 'string', 'max:50', 'regex:/^[0-9()+\-\s]{7,20}$/'],
             'position'             => 'nullable|string|max:255',
             'start_date'           => 'required|date',
+            // Sama seperti jalur pengajuan mahasiswa: tanpa ini end_date tetap
+            // kosong dan halaman-halaman menampilkan "Belum selesai" selamanya.
+            'end_date'             => 'required|date|after:start_date',
         ], [
             'pic_phone.regex'                 => 'Nomor HP tidak valid (hanya angka dan simbol + - ( ) spasi).',
             'company_name.required_without'   => 'Pilih perusahaan yang ada atau isi nama perusahaan baru.',
@@ -139,6 +142,8 @@ class MahasiswaController extends Controller
             'pic_password.required_without'   => 'Password pembimbing industri wajib diisi.',
             'pic_password.min'                => 'Password minimal 8 karakter.',
             'start_date.required'             => 'Tanggal mulai magang wajib diisi.',
+            'end_date.required'               => 'Tanggal selesai magang wajib diisi.',
+            'end_date.after'                  => 'Tanggal selesai harus setelah tanggal mulai.',
         ]);
 
         // Resolve company
@@ -180,6 +185,7 @@ class MahasiswaController extends Controller
             'lecturer_industry_id' => $lecturerIndustryId,
             'position'             => $request->position,
             'start_date'           => $request->start_date,
+            'end_date'             => $request->end_date,
             'is_finished'          => false,
         ]);
 
