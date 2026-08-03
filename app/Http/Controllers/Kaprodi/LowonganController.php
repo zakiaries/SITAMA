@@ -60,7 +60,16 @@ class LowonganController extends Controller
         $data    = $this->validateData($request);
         $company = $this->resolveCompany($data);
 
-        $lowongan->update($this->listingPayload($data, $company));
+        // Status TIDAK ikut diubah saat menyunting. listingPayload() selalu
+        // menulis 'active' karena dipakai bersama store(), sehingga menyunting
+        // lowongan yang sedang dinonaktifkan diam-diam menghidupkannya lagi —
+        // Kaprodi memperbaiki satu salah ketik, lowongannya kembali tampil ke
+        // mahasiswa tanpa ada yang memintanya. Menyalakan/mematikan lowongan
+        // punya tombolnya sendiri (toggle).
+        $payload = $this->listingPayload($data, $company);
+        unset($payload['status']);
+
+        $lowongan->update($payload);
 
         return redirect()->route('kaprodi.lowongan.index')
             ->with('success', 'Lowongan magang berhasil diperbarui.');
