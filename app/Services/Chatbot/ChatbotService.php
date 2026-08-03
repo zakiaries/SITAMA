@@ -174,10 +174,18 @@ class ChatbotService
     {
         $q = ' ' . mb_strtolower($query) . ' ';
 
+        // CATATAN: 'magang di ' pernah ada di daftar ini dan harus tetap tidak
+        // ada. "di" adalah kata depan biasa, sehingga pemicu itu ikut menangkap
+        // kalimat tanya prosedural — termasuk entri KB-nya sendiri, "Bagaimana
+        // cara mengajukan magang di SIMAMA?". Akibatnya chatbot tak bisa
+        // menjawab pertanyaan yang disalin persis dari basis pengetahuannya:
+        // FAQ-nya mencetak cosine 0,63, lalu diabaikan karena jalur rekomendasi
+        // pulang lebih dulu. Maksud pencarian yang sungguhan tetap tertangkap
+        // 'magang dimana'/'magang di mana' di bawah, atau lewat skor lowongan.
         $triggers = [
             'rekomendasi', 'rekomen', 'cari magang', 'carikan', 'nyari magang',
             'mencari magang', 'cari tempat', 'tempat magang', 'lowongan',
-            'magang di ', 'magang bidang', 'pengen magang', 'pengin magang',
+            'magang bidang', 'pengen magang', 'pengin magang',
             'mau magang', 'ingin magang', 'magang dimana', 'magang di mana',
             'saran tempat', 'saran magang', 'magang yang', 'magang untuk', 'magang buat',
         ];
