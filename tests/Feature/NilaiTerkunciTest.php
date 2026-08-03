@@ -98,6 +98,9 @@ class NilaiTerkunciTest extends FeatureTestCase
 
         $this->assertFalse((bool) $student->internships()->latest()->first()->is_finished);
 
+        // Nilai baru terbuka setelah logbook & laporan mahasiswa rampung.
+        $this->siapDinilai($student->user);
+
         $this->actingAs($this->userByUsername('dosen1'))
             ->post("/dosen/mahasiswa/{$student->id}/nilai", ['scores' => [$detailId => 9]])
             ->assertSessionHasNoErrors();

@@ -80,6 +80,8 @@ class NilaiTest extends FeatureTestCase
         // syarat selesai magang. Fixture ini is_finished = true, sedangkan magang
         // yang sudah selesai nilainya terkunci (lihat NilaiTerkunciTest).
         $student->internships()->latest()->first()->update(['is_finished' => false]);
+        // Nilai baru terbuka setelah logbook & laporan mahasiswa rampung.
+        $this->siapDinilai($student->user);
 
         $this->postJson("/api/dosen/mahasiswa/{$student->id}/nilai", ['scores' => [$detail->id => 15]])
             ->assertStatus(422);

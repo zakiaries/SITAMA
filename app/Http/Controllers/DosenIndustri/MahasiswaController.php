@@ -151,8 +151,10 @@ class MahasiswaController extends Controller
                 ->where('scorer_type', 'lecturer_industry')]);
         }])->get();
 
+        $belumSiapDinilai = $internship->alasanBelumSiapDinilai();
+
         return view('dosen-industri.mahasiswa.penilaian', compact(
-            'student', 'internship', 'components'
+            'student', 'internship', 'components', 'belumSiapDinilai'
         ));
     }
 
@@ -166,6 +168,11 @@ class MahasiswaController extends Controller
         if ($internship->is_finished) {
             return back()->with('error',
                 'Magang mahasiswa ini sudah ditandai selesai, sehingga penilaian terkunci. Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.');
+        }
+
+        // Sama seperti dosen kampus: mahasiswa harus merampungkan magangnya dulu.
+        if ($alasan = $internship->alasanBelumSiapDinilai()) {
+            return back()->with('error', $alasan);
         }
 
         $request->validate([

@@ -40,6 +40,61 @@ class Internship extends Model
         return $this->is_finished || $this->finish_requested;
     }
 
+    /**
+     * Kelengkapan mahasiswa yang harus ada sebelum pembimbing boleh menilai.
+     *
+     * Penilaian menilai keseluruhan magang, jadi tak masuk akal diisi saat
+     * mahasiswanya baru mengisi tiga logbook dan laporannya belum ada.
+     *
+     * Sertifikat SENGAJA tidak jadi syarat, meski ia bagian dari checklist
+     * selesai magang: sebagian perusahaan baru menerbitkannya jauh setelah
+     * magang berakhir, dan menahan penilaian karena itu menghukum mahasiswa atas
+     * hal yang bukan kendalinya.
+     *
+     * Nilai kedua pembimbing juga tidak ikut — justru itulah yang sedang
+     * digerbangi. Checklist selesai magang menuntut syarat di sini DITAMBAH
+     * sertifikat dan kedua nilai, sehingga urutannya jalan satu arah: mahasiswa
+     * melengkapi → pembimbing menilai → mahasiswa mengajukan selesai → Kaprodi
+     * meng-ACC. Menggerbangi nilai dengan is_finished akan membuat keduanya
+     * saling menunggu dan tak ada yang bisa bergerak.
+     */
+    public function syaratPenilaian(): array
+    {
+        $student = $this->student;
+
+        return [
+            'laporan' => $student?->report?->status === 'approved',
+            'logbook' => ($student?->logBooks()->count() ?? 0) >= self::MIN_LOGBOOK,
+        ];
+    }
+
+    public function siapDinilai(): bool
+    {
+        return ! in_array(false, $this->syaratPenilaian(), true);
+    }
+
+    /**
+     * Kenapa nilai belum bisa diisi — disusun untuk dibaca PEMBIMBING, bukan
+     * mahasiswa, sehingga menyebut apa yang perlu diselesaikan mahasiswanya.
+     */
+    public function alasanBelumSiapDinilai(): ?string
+    {
+        if ($this->siapDinilai()) {
+            return null;
+        }
+
+        $syarat  = $this->syaratPenilaian();
+        $logbook = $this->student?->logBooks()->count() ?? 0;
+
+        $kurang = array_filter([
+            $syarat['logbook'] ? null : "logbook belum lengkap (baru {$logbook} dari " . self::MIN_LOGBOOK . ')',
+            $syarat['laporan'] ? null : 'laporan akhir belum di-ACC dosen pembimbing',
+        ]);
+
+        return 'Penilaian belum bisa diisi karena mahasiswa ini belum menyelesaikan magangnya: '
+            . implode(', ', $kurang) . '.';
+    }
+
     /** Alasan terkunci, untuk pesan galat maupun keterangan di halaman. */
     public function alasanTerkunci(): ?string
     {

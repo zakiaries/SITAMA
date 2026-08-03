@@ -176,6 +176,9 @@ class MahasiswaController extends ApiController
         return response()->json([
             'student'    => ['name' => $student->user->name, 'username' => $student->user->username],
             'components' => $components,
+            // Supaya Flutter bisa menonaktifkan formnya, bukan menunggu 422.
+            'can_score'    => $internship->siapDinilai() && ! $internship->is_finished,
+            'score_locked' => $internship->alasanBelumSiapDinilai(),
         ]);
     }
 
@@ -186,6 +189,11 @@ class MahasiswaController extends ApiController
         // Paritas dengan web: magang yang sudah ditutup Kaprodi terkunci nilainya.
         if ($internship->is_finished) {
             return response()->json(['message' => 'Magang mahasiswa ini sudah ditandai selesai, sehingga nilainya terkunci. Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.'], 422);
+        }
+
+        // Paritas dengan web: mahasiswa harus merampungkan magangnya dulu.
+        if ($alasan = $internship->alasanBelumSiapDinilai()) {
+            return response()->json(['message' => $alasan], 422);
         }
 
         $request->validate([

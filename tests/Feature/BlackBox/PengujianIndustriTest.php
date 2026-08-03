@@ -150,7 +150,8 @@ class PengujianIndustriTest extends FeatureTestCase
     /** U-09 — Pembimbing industri mengisi nilai sesuai komponen perannya. */
     public function test_u09_industri_mengisi_nilai(): void
     {
-        $mhs      = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
+        // Nilai baru terbuka setelah mahasiswa merampungkan logbook & laporan.
+        $mhs      = $this->siapDinilai($this->magangBerjalan($this->userByUsername('3.34.23.2.01')));
         $industri = $this->userByUsername('industri1');
 
         $this->actingAs($industri)

@@ -258,7 +258,9 @@ class MahasiswaController extends Controller
                 ->where('scorer_type', 'lecturer')]);
         }])->get();
 
-        return view('dosen.mahasiswa.nilai', compact('student', 'internship', 'components'));
+        $belumSiapDinilai = $internship->alasanBelumSiapDinilai();
+
+        return view('dosen.mahasiswa.nilai', compact('student', 'internship', 'components', 'belumSiapDinilai'));
     }
 
     public function updateNilai(Request $request, Student $student)
@@ -272,6 +274,12 @@ class MahasiswaController extends Controller
         if ($internship->is_finished) {
             return back()->with('error',
                 'Magang mahasiswa ini sudah ditandai selesai, sehingga nilainya terkunci. Minta Kaprodi membuka kembali status selesai bila ada nilai yang perlu dikoreksi.');
+        }
+
+        // Nilai baru boleh diisi setelah mahasiswa merampungkan magangnya:
+        // logbook lengkap, laporan akhir di-ACC, sertifikat terunggah.
+        if ($alasan = $internship->alasanBelumSiapDinilai()) {
+            return back()->with('error', $alasan);
         }
 
         $request->validate([

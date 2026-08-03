@@ -122,7 +122,9 @@ class PengujianDosenTest extends FeatureTestCase
     /** U-09 — Dosen mengisi nilai; nilai tampil pada rekapitulasi mahasiswa. */
     public function test_u09_dosen_mengisi_nilai(): void
     {
-        $mhs   = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
+        // Nilai baru terbuka setelah mahasiswa merampungkan logbook & laporan —
+        // di alur nyata dosen tak pernah bisa menilai sebelum itu.
+        $mhs   = $this->siapDinilai($this->magangBerjalan($this->userByUsername('3.34.23.2.01')));
         $dosen = $this->userByUsername('dosen1');
 
         $this->actingAs($dosen)->get("/dosen/mahasiswa/{$mhs->student->id}/nilai")->assertOk();

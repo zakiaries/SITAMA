@@ -79,12 +79,21 @@
     sehingga nilainya tidak bisa diubah lagi. Bila ada yang perlu dikoreksi, minta Kaprodi
     membuka kembali status selesai magangnya.
   </div>
+@elseif($belumSiapDinilai)
+  {{-- Nilai menilai keseluruhan magang, jadi baru dibuka setelah mahasiswanya
+       merampungkan logbook, laporan akhir, dan sertifikat. --}}
+  <div style="background:var(--warn-bg);border:1px solid #F0DCA4;color:var(--warn-text);padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
+    <strong>Belum bisa dinilai.</strong> {{ $belumSiapDinilai }}
+    Formulir ini akan terbuka sendiri setelah mahasiswa melengkapinya.
+  </div>
 @endif
+
+@php $nilaiTerkunci = $internship->is_finished || $belumSiapDinilai; @endphp
 
 {{-- Form Nilai --}}
 <form method="POST" action="{{ route('dosen.mahasiswa.nilai.update', $student) }}">
   @csrf
-  <fieldset @disabled($internship->is_finished) style="border:none;padding:0;margin:0;{{ $internship->is_finished ? 'opacity:.6;' : '' }}">
+  <fieldset @disabled($nilaiTerkunci) style="border:none;padding:0;margin:0;{{ $nilaiTerkunci ? 'opacity:.6;' : '' }}">
 
   @php
     $componentIcons = ['clipboard', 'code', 'handshake', 'bulb'];
@@ -129,7 +138,7 @@
     $hasAnyScore = collect($components)->flatMap->detailedComponents
       ->flatMap(fn($d) => $d->scores)->isNotEmpty();
   @endphp
-  @unless($internship->is_finished)
+  @unless($nilaiTerkunci)
     <div style="margin-top:8px;">
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:15px;">
         {{ $hasAnyScore ? 'Update Nilai' : 'Simpan Nilai' }}
