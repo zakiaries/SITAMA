@@ -117,7 +117,9 @@
       Isi data magang mahasiswa. Jika perusahaan atau pembimbing belum ada, isi langsung di bawah.
     </p>
 
-    <form method="POST" action="{{ route('kaprodi.mahasiswa.internship.store', $student) }}">
+    {{-- autocomplete="off" — alasan sama seperti form Ajukan Magang mahasiswa:
+         peramban memulihkan pilihan dropdown sendiri saat halaman dimuat ulang. --}}
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.internship.store', $student) }}" autocomplete="off">
       @csrf
 
       {{-- PERUSAHAAN --}}

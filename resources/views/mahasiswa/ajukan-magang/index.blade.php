@@ -41,7 +41,13 @@
       Isi data magang dan upload bukti penerimaan. Kaprodi akan mereview dan menghubungkan ke sistem.
     </p>
 
-    <form method="POST" action="{{ route('mahasiswa.ajukan-magang.store') }}" enctype="multipart/form-data">
+    {{-- autocomplete="off": tanpa ini peramban memulihkan sendiri isi form saat
+         halaman dimuat ulang atau dibuka lewat tombol Kembali, sehingga
+         pembimbing yang tadi dipilih tetap terpasang di dropdown padahal
+         pengajuannya sudah terkirim. Sisi server sudah bersih — form ini hanya
+         dirender saat mahasiswa memang boleh mengajukan, dan old() cuma terisi
+         bila validasi gagal. --}}
+    <form method="POST" action="{{ route('mahasiswa.ajukan-magang.store') }}" enctype="multipart/form-data" autocomplete="off">
       @csrf
 
       {{-- BUKTI PENERIMAAN --}}
