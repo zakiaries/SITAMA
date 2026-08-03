@@ -80,14 +80,35 @@ class JobListing extends Model
         return $this->punyaKuota() && $this->jumlahTerisi() >= $this->quota;
     }
 
-    /** Ringkasan singkat untuk ditampilkan, mis. "2 dari 3 terisi". */
+    /**
+     * Ringkasan kuota, mis. "2 dari 3 mahasiswa di perusahaan ini".
+     *
+     * Kalimatnya sengaja menyebut PERUSAHAAN, bukan lowongan. Dulu berbunyi
+     * "2 dari 3 terisi", yang terbaca seolah menghitung pelamar lowongan ini —
+     * padahal yang dihitung mahasiswa yang sedang magang di perusahaannya,
+     * karena tak ada kolom yang mengikat magang ke lowongan tertentu. Bila satu
+     * perusahaan punya dua lowongan, keduanya menampilkan angka yang sama, dan
+     * kalimat lama membuat itu tampak seperti kesalahan hitung.
+     */
     public function ringkasanKuota(): ?string
     {
         if (! $this->punyaKuota()) {
             return null;
         }
 
-        return $this->jumlahTerisi() . ' dari ' . $this->quota . ' terisi';
+        return $this->jumlahTerisi() . ' dari ' . $this->quota . ' mahasiswa di perusahaan ini';
+    }
+
+    /** Keterangan panjang untuk tooltip/penjelasan di halaman detail. */
+    public function penjelasanKuota(): ?string
+    {
+        if (! $this->punyaKuota()) {
+            return null;
+        }
+
+        return 'Kuota dicatat Kaprodi untuk ' . $this->company_display_name
+            . ', dihitung dari mahasiswa yang sedang magang di sana — bukan per lowongan. '
+            . 'Angka ini penanda, bukan pembatas: pengajuanmu tetap bisa dikirim.';
     }
 
     /**

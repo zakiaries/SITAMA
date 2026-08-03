@@ -141,7 +141,7 @@ class KuotaLowonganTest extends FeatureTestCase
 
         $this->assertSame(2, $lowongan->fresh()->jumlahTerisi());
         $this->assertFalse($lowongan->fresh()->penuh());
-        $this->assertSame('2 dari 3 terisi', $lowongan->fresh()->ringkasanKuota());
+        $this->assertSame('2 dari 3 mahasiswa di perusahaan ini', $lowongan->fresh()->ringkasanKuota());
     }
 
     public function test_penuh_saat_terisi_mencapai_kuota(): void
@@ -190,7 +190,7 @@ class KuotaLowonganTest extends FeatureTestCase
 
         $this->actingAs($this->userByUsername('3.34.23.2.02'))
             ->get(route('mahasiswa.lowongan'))->assertOk()
-            ->assertSee('1 dari 3 terisi');
+            ->assertSee('1 dari 3 mahasiswa di perusahaan ini');
     }
 
     public function test_mahasiswa_melihat_penanda_penuh(): void
@@ -201,6 +201,37 @@ class KuotaLowonganTest extends FeatureTestCase
         $this->actingAs($this->userByUsername('3.34.23.2.02'))
             ->get(route('mahasiswa.lowongan.detail', $lowongan))->assertOk()
             ->assertSee('Penuh');
+    }
+
+    /**
+     * Kalimatnya harus menyebut PERUSAHAAN, bukan lowongan.
+     *
+     * "2 dari 3 terisi" terbaca seolah menghitung pelamar lowongan ini, padahal
+     * yang dihitung mahasiswa yang magang di perusahaannya. Bila satu
+     * perusahaan punya dua lowongan, keduanya menampilkan angka yang sama —
+     * dengan kalimat lama itu tampak seperti kesalahan hitung.
+     */
+    public function test_kalimat_kuota_menyebut_perusahaan_bukan_lowongan(): void
+    {
+        $lowongan = $this->lowongan(['quota' => 3]);
+        $this->isiMagangBerjalan(1);
+
+        $ringkasan = $lowongan->fresh()->ringkasanKuota();
+
+        $this->assertStringContainsString('perusahaan', $ringkasan,
+            'Kalimat kuota tak menyebut perusahaan, jadi angkanya mudah disalahpahami.');
+        $this->assertStringContainsString('bukan per lowongan', $lowongan->fresh()->penjelasanKuota());
+    }
+
+    /** Dua lowongan di perusahaan yang sama memang menampilkan angka yang sama. */
+    public function test_dua_lowongan_satu_perusahaan_berbagi_hitungan(): void
+    {
+        $pertama = $this->lowongan(['quota' => 3, 'title' => 'Back End']);
+        $kedua   = $this->lowongan(['quota' => 3, 'title' => 'Front End']);
+        $this->isiMagangBerjalan(2);
+
+        $this->assertSame(2, $pertama->fresh()->jumlahTerisi());
+        $this->assertSame(2, $kedua->fresh()->jumlahTerisi());
     }
 
     /** Inti keputusannya: penuh hanya penanda, bukan pembatas. */

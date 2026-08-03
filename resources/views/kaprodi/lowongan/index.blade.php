@@ -51,8 +51,9 @@
                  ini; kuota penanda saja, pengajuan tak pernah ditolak karenanya. --}}
             <td style="padding:11px 14px;white-space:nowrap;">
               @if($l->punyaKuota())
-                <span title="{{ $l->jumlahTerisi() }} mahasiswa sedang magang di perusahaan ini">
+                <span title="{{ $l->penjelasanKuota() }}">
                   {{ $l->jumlahTerisi() }} / {{ $l->quota }}
+                  <span style="color:var(--text-muted);font-size:11px;">di perusahaan</span>
                 </span>
                 @if($l->penuh())
                   <span style="background:var(--warn-bg);color:var(--warn-text);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:4px;">Penuh</span>

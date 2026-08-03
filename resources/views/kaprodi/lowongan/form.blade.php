@@ -74,6 +74,8 @@
         <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">
           Kosongkan bila tak dibatasi. Angka ini <strong>penanda saja</strong> — sistem menampilkan berapa yang terisi
           dan menandai lowongan penuh, tapi tidak menghalangi mahasiswa mengajukan.
+          Terisi dihitung dari <strong>mahasiswa yang sedang magang di perusahaan ini</strong>, bukan per lowongan:
+          bila satu perusahaan punya beberapa lowongan, angkanya sama untuk semuanya.
         </div>
       </div>
       <div style="grid-column:1 / -1;">

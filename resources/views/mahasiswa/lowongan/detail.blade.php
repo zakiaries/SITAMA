@@ -33,10 +33,12 @@
     @endif
   </div>
 
-  @if($jobListing->penuh())
+  @if($jobListing->punyaKuota())
     <p style="font-size:12px;color:var(--text-muted);margin:12px 0 0;">
-      Kuota yang dicatat Kaprodi sudah terisi. Kamu tetap boleh mengajukan — angka ini penanda,
-      bukan pembatas — tapi sebaiknya pastikan dulu ke perusahaannya bahwa masih ada tempat.
+      {{ $jobListing->penjelasanKuota() }}
+      @if($jobListing->penuh())
+        Karena sudah terisi, sebaiknya pastikan dulu ke perusahaannya bahwa masih ada tempat.
+      @endif
     </p>
   @endif
 </div>
