@@ -37,9 +37,20 @@ gagal() { printf '[%s] GAGAL: %s\n' "$(date +%H:%M:%S)" "$*" >&2; exit 1; }
 
 # Baca kredensial dari .env tanpa meng-eval seluruh berkasnya (nilai bisa
 # mengandung karakter yang ditafsirkan shell).
+#
+# Tanpa pipa: `... | head -1` mengandung jebakan yang sama seperti `grep -q` di
+# bawah — head menutup pipa setelah baris pertama, dan dengan pipefail itu
+# membuat pembacaan yang berhasil tampak gagal. Kebetulan tak menggigit karena
+# .env kecil dan muat di penyangga pipa, tapi itu bukan jaminan.
 baca_env() {
-  local kunci="$1"
-  sed -n "s/^${kunci}=//p" .env | head -1 | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//"
+  local nilai
+  nilai="$(awk -F'=' -v k="$1" '$1 == k { sub(/^[^=]*=/, ""); print; exit }' .env)"
+
+  # Kupas tanda kutip pembungkus bila ada.
+  nilai="${nilai%\"}"; nilai="${nilai#\"}"
+  nilai="${nilai%\'}"; nilai="${nilai#\'}"
+
+  printf '%s' "$nilai"
 }
 
 DB_NAMA="$(baca_env DB_DATABASE)"
@@ -71,10 +82,17 @@ UKURAN=$(stat -c%s "$SQL_GZ" 2>/dev/null || echo 0)
 [ "$UKURAN" -gt 1024 ] || gagal "Dump hanya $UKURAN byte — hampir pasti kosong. Cadangan lama TIDAK dihapus."
 
 gzip -t "$SQL_GZ" || gagal "Berkas gzip rusak: $SQL_GZ"
-zcat "$SQL_GZ" | grep -q 'CREATE TABLE' \
+
+# Sengaja memakai `grep -c`, BUKAN `grep -q`. Dengan `set -o pipefail`, `grep -q`
+# berhenti pada kecocokan pertama lalu menutup pipa — zcat kena SIGPIPE dan
+# seluruh pipa dilaporkan gagal justru KARENA polanya ditemukan. `grep -c`
+# membaca sampai habis, jadi tak ada yang menutup pipa lebih awal.
+JML_TABEL=$(zcat "$SQL_GZ" | grep -c 'CREATE TABLE' || true)
+JML_TABEL=${JML_TABEL:-0}
+
+[ "$JML_TABEL" -gt 0 ] \
   || gagal "Dump tak memuat satu pun CREATE TABLE. Cadangan lama TIDAK dihapus."
 
-JML_TABEL=$(zcat "$SQL_GZ" | grep -c 'CREATE TABLE' || true)
 pesan "Basis data OK — $JML_TABEL tabel, $(du -h "$SQL_GZ" | cut -f1)."
 
 # ── 2. Berkas unggahan ──────────────────────────────────────────────────────
