@@ -227,6 +227,16 @@ class _LowonganScreenState extends State<LowonganScreen> {
         Wrap(spacing: 14, runSpacing: 4, children: [
           if (location.isNotEmpty) _meta('📍', location),
           if (division.isNotEmpty) _meta('🏷️', division),
+          // Kuota penanda saja — lowongan penuh tetap boleh diajukan.
+          if (l['quota_summary'] != null)
+            Text(
+              (l['quota_full'] == true) ? '👥 Kuota penuh' : '👥 ${l['quota_summary']}',
+              style: TextStyle(
+                fontSize: 11.5,
+                color: (l['quota_full'] == true) ? AppColors.warnText : AppColors.textMuted,
+                fontWeight: (l['quota_full'] == true) ? FontWeight.w700 : FontWeight.normal,
+              ),
+            ),
         ]),
         const SizedBox(height: 10),
         const Text('Lihat detail →',
@@ -298,6 +308,8 @@ class _LowonganDetailScreenState extends State<LowonganDetailScreen> {
       if ('${l['location'] ?? ''}'.isNotEmpty) 'Lokasi: ${l['location']}',
       if ('${l['job_type'] ?? ''}'.isNotEmpty) 'Tipe: ${l['job_type']}',
       if ('${l['bidang'] ?? ''}'.isNotEmpty) 'Bidang: ${l['bidang']}',
+      if (l['quota_summary'] != null)
+        'Kuota: ${l['quota_summary']}${l['quota_full'] == true ? ' · Penuh' : ''}',
     ];
     final skills = List<String>.from((l['skills'] ?? []).map((e) => '$e')).where((s) => s.isNotEmpty).toList();
     final desc = '${l['description'] ?? ''}';
@@ -323,6 +335,14 @@ class _LowonganDetailScreenState extends State<LowonganDetailScreen> {
           if (chips.isNotEmpty) ...[
             const SizedBox(height: 14),
             Wrap(spacing: 8, runSpacing: 8, children: chips.map(_infoChip).toList()),
+          ],
+          // Kuota dihitung per PERUSAHAAN, bukan per lowongan — dijelaskan di
+          // sini supaya angkanya tak terbaca sebagai kesalahan hitung ketika
+          // satu perusahaan punya beberapa lowongan.
+          if (l['quota_note'] != null) ...[
+            const SizedBox(height: 12),
+            Text('${l['quota_note']}',
+                style: const TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.5)),
           ],
         ])),
         if (desc.isNotEmpty)

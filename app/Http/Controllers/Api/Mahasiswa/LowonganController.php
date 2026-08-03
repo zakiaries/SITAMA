@@ -32,6 +32,8 @@ class LowonganController extends ApiController
 
         $listings = (clone $base)
             ->with('company')
+            // Hitung sekali lewat subquery, bukan satu query per baris.
+            ->withCount('magangBerjalan')
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                 ->where('title', 'like', "%{$q}%")
                 ->orWhere('company_name', 'like', "%{$q}%")
@@ -68,7 +70,7 @@ class LowonganController extends ApiController
             404
         );
 
-        $jobListing->load('company');
+        $jobListing->load('company')->loadCount('magangBerjalan');
 
         return response()->json(['listing' => $this->detail($jobListing)]);
     }
@@ -85,6 +87,13 @@ class LowonganController extends ApiController
             'division'     => $l->division,
             'location'     => $l->location,
             'job_type'     => $l->job_type,
+            // Kuota penanda, bukan pembatas — pengajuan tetap dibuka meski
+            // penuh. Kalimat siap pakainya ikut dikirim supaya aplikasi tak
+            // menyusun ulang dan berisiko beda bunyi dengan web.
+            'quota'         => $l->punyaKuota() ? $l->quota : null,
+            'quota_filled'  => $l->punyaKuota() ? $l->jumlahTerisi() : null,
+            'quota_full'    => $l->penuh(),
+            'quota_summary' => $l->ringkasanKuota(),
         ];
     }
 
@@ -94,6 +103,7 @@ class LowonganController extends ApiController
         return array_merge($this->card($l), [
             'description' => $l->description,
             'skills'      => is_array($l->skills) ? $l->skills : [],
+            'quota_note'  => $l->penjelasanKuota(),
         ]);
     }
 }

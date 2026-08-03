@@ -19,6 +19,13 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
   final Map<int, TextEditingController> _controllers = {};
   bool _saving = false;
 
+  // Nilai baru boleh diisi setelah mahasiswa merampungkan magangnya (logbook
+  // lengkap + laporan akhir di-ACC). Server menolak dengan 422, tapi menunggu
+  // penolakan itu berarti dosen sudah terlanjur mengetik seluruh skornya —
+  // jadi keadaannya dibaca di muka lewat can_score/score_locked.
+  bool _bolehMenilai = true;
+  String? _alasanTerkunci;
+
   String get _token => context.read<AuthProvider>().token ?? '';
 
   @override
@@ -37,6 +44,10 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
 
   Future<List<Map<String, dynamic>>> _load() async {
     final data = await ApiClient.get('/dosen/mahasiswa/${widget.studentId}/nilai', token: _token);
+    // Server lama tak mengirim can_score — anggap boleh, biar tak mengunci
+    // formulir hanya karena aplikasinya lebih baru dari servernya.
+    _bolehMenilai = data['can_score'] as bool? ?? true;
+    _alasanTerkunci = data['score_locked'] as String?;
     final comps = List<Map<String, dynamic>>.from(data['components'] ?? []);
     for (final c in comps) {
       for (final d in List<Map<String, dynamic>>.from(c['details'] ?? [])) {
@@ -88,6 +99,24 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
               const Text('Isi skor 1–10 per sub-komponen. Nilai dosen berbobot: Proposal 20% + Laporan 80%.',
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               const SizedBox(height: 12),
+              if (!_bolehMenilai) ...[
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Belum bisa dinilai',
+                          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.warnText)),
+                      const SizedBox(height: 4),
+                      Text(
+                        _alasanTerkunci ??
+                            'Mahasiswa ini belum menyelesaikan magangnya. Formulir akan terbuka sendiri setelah dilengkapi.',
+                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
               ...comps.map((c) {
                 final details = List<Map<String, dynamic>>.from(c['details'] ?? []);
                 return AppCard(
@@ -109,6 +138,7 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
                                 width: 84,
                                 child: TextField(
                                   controller: _controllers[d['id']],
+                                  enabled: _bolehMenilai,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   textAlign: TextAlign.center,
                                   decoration: const InputDecoration(hintText: '1-10', isDense: true),
@@ -127,10 +157,10 @@ class _DosenNilaiScreenState extends State<DosenNilaiScreen> {
       bottomSheet: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: _saving ? null : _save,
+          onPressed: (_saving || !_bolehMenilai) ? null : _save,
           child: _saving
               ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-              : const Text('Simpan Nilai'),
+              : Text(_bolehMenilai ? 'Simpan Nilai' : 'Belum bisa dinilai'),
         ),
       ),
     );

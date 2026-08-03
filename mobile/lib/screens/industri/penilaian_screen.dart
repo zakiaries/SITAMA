@@ -19,6 +19,12 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
   final _notes = TextEditingController();
   bool _saving = false;
 
+  // Sama seperti portal dosen: penilaian baru terbuka setelah mahasiswa
+  // merampungkan magangnya. Dibaca di muka lewat can_score/score_locked supaya
+  // pembimbing tak mengetik seluruh skor lalu ditolak 422 di ujung.
+  bool _bolehMenilai = true;
+  String? _alasanTerkunci;
+
   String get _token => context.read<AuthProvider>().token ?? '';
 
   @override
@@ -39,6 +45,10 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
   Future<Map<String, dynamic>> _load() async {
     final data = await ApiClient.get('/dosen-industri/mahasiswa/${widget.studentId}/penilaian', token: _token);
     final m = Map<String, dynamic>.from(data);
+    // Server lama tak mengirim can_score — anggap boleh, biar formulir tak
+    // terkunci hanya karena aplikasinya lebih baru dari servernya.
+    _bolehMenilai = m['can_score'] as bool? ?? true;
+    _alasanTerkunci = m['score_locked'] as String?;
     _notes.text = m['performance_notes'] ?? '';
     for (final c in List<Map<String, dynamic>>.from(m['components'] ?? [])) {
       for (final d in List<Map<String, dynamic>>.from(c['details'] ?? [])) {
@@ -92,6 +102,24 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
               const Text('Isi skor 1–10 per komponen. Nilai industri = rata-rata seluruh komponen.',
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               const SizedBox(height: 12),
+              if (!_bolehMenilai) ...[
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Belum bisa dinilai',
+                          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.warnText)),
+                      const SizedBox(height: 4),
+                      Text(
+                        _alasanTerkunci ??
+                            'Mahasiswa ini belum menyelesaikan magangnya. Formulir akan terbuka sendiri setelah dilengkapi.',
+                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
               ...comps.map((c) {
                 final details = List<Map<String, dynamic>>.from(c['details'] ?? []);
                 return AppCard(
@@ -106,6 +134,7 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
                               width: 84,
                               child: TextField(
                                 controller: _scores[d['id']],
+                                enabled: _bolehMenilai,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 textAlign: TextAlign.center,
                                 decoration: const InputDecoration(hintText: '1-10', isDense: true),
@@ -119,6 +148,7 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
               const SectionTitle('Catatan Kinerja'),
               AppCard(child: TextField(
                 controller: _notes,
+                enabled: _bolehMenilai,
                 maxLines: 4,
                 decoration: const InputDecoration(hintText: 'Catatan kinerja mahasiswa (opsional)...', border: InputBorder.none, filled: false),
               )),
@@ -129,10 +159,10 @@ class _IndustriPenilaianScreenState extends State<IndustriPenilaianScreen> {
       bottomSheet: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: _saving ? null : _save,
+          onPressed: (_saving || !_bolehMenilai) ? null : _save,
           child: _saving
               ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-              : const Text('Simpan Penilaian'),
+              : Text(_bolehMenilai ? 'Simpan Penilaian' : 'Belum bisa dinilai'),
         ),
       ),
     );

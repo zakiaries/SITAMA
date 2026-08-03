@@ -177,7 +177,7 @@ class _AjukanMagangScreenState extends State<AjukanMagangScreen> {
 
   String _reqSubtitle(Map<String, dynamic> r) {
     final pos = '${r['position'] ?? ''}'.isNotEmpty ? '${r['position']}' : '${r['bidang'] ?? '-'}';
-    return '$pos · mulai ${r['start_date'] ?? '-'}';
+    return '$pos · ${r['start_date'] ?? '-'} – ${r['end_date'] ?? '-'}';
   }
 }
 
@@ -209,6 +209,7 @@ class _AjukanFormState extends State<_AjukanForm> {
   final _position = TextEditingController();
   String? _bidang;
   DateTime? _startDate;
+  DateTime? _endDate;
   String? _proofPath;
   bool _saving = false;
   String? _error;
@@ -234,19 +235,27 @@ class _AjukanFormState extends State<_AjukanForm> {
     super.dispose();
   }
 
-  String? get _startStr => _startDate == null ? null
-      : '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
+  static String _fmt(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  String? get _startStr => _startDate == null ? null : _fmt(_startDate!);
+  String? get _endStr => _endDate == null ? null : _fmt(_endDate!);
 
   Future<void> _save() async {
     if (_companyId == null && _companyName.text.trim().isEmpty) { setState(() => _error = 'Pilih perusahaan atau isi nama perusahaan baru.'); return; }
     if (_picName.text.trim().isEmpty) { setState(() => _error = 'Nama pembimbing industri wajib diisi.'); return; }
     if (_startStr == null) { setState(() => _error = 'Tanggal mulai wajib diisi.'); return; }
+    // Dijaga di sini juga, bukan hanya mengandalkan 422 dari server: pesan
+    // server baru muncul setelah berkas bukti terlanjur terunggah.
+    if (_endStr == null) { setState(() => _error = 'Tanggal selesai wajib diisi.'); return; }
+    if (!_endDate!.isAfter(_startDate!)) { setState(() => _error = 'Tanggal selesai harus setelah tanggal mulai.'); return; }
     if (_proofPath == null) { setState(() => _error = 'Bukti penerimaan magang wajib diunggah.'); return; }
 
     setState(() { _saving = true; _error = null; });
     final fields = <String, String>{
       'pic_name': _picName.text.trim(),
       'start_date': _startStr!,
+      'end_date': _endStr!,
       if (_companyId != null) 'company_id': '$_companyId' else 'company_name': _companyName.text.trim(),
       if (_picEmail.text.trim().isNotEmpty) 'pic_email': _picEmail.text.trim(),
       if (_picPhone.text.trim().isNotEmpty) 'pic_phone': _picPhone.text.trim(),
@@ -319,6 +328,26 @@ class _AjukanFormState extends State<_AjukanForm> {
                 },
                 child: InputDecorator(decoration: const InputDecoration(labelText: 'Tanggal Mulai *'), child: Text(_startStr ?? 'Pilih tanggal')),
               ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () async {
+                  // Batas bawahnya mengikuti tanggal mulai supaya periode
+                  // terbalik tak mungkin dipilih sejak awal.
+                  final batas = _startDate?.add(const Duration(days: 1)) ?? DateTime(2020);
+                  final awal = _endDate ?? _startDate?.add(const Duration(days: 90)) ?? DateTime.now();
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: awal.isBefore(batas) ? batas : awal,
+                    firstDate: batas,
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setState(() => _endDate = picked);
+                },
+                child: InputDecorator(decoration: const InputDecoration(labelText: 'Tanggal Selesai *'), child: Text(_endStr ?? 'Pilih tanggal')),
+              ),
+              const SizedBox(height: 4),
+              const Text('Sesuai periode di surat penerimaan magangmu. Tanggal ini yang tampil sebagai akhir magang di profil dan portal dosen.',
+                  style: TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: () async {

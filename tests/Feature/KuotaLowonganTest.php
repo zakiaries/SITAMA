@@ -234,6 +234,47 @@ class KuotaLowonganTest extends FeatureTestCase
         $this->assertSame(2, $kedua->fresh()->jumlahTerisi());
     }
 
+    // ── Paritas API mobile ──────────────────────────────────────────────────
+
+    public function test_api_daftar_lowongan_mengirim_kuota(): void
+    {
+        $this->lowongan(['quota' => 3]);
+        $this->isiMagangBerjalan(1);
+
+        \Laravel\Sanctum\Sanctum::actingAs($this->userByUsername('3.34.23.2.02'));
+
+        $this->getJson('/api/mahasiswa/lowongan')->assertOk()
+            ->assertJsonPath('listings.0.quota', 3)
+            ->assertJsonPath('listings.0.quota_filled', 1)
+            ->assertJsonPath('listings.0.quota_full', false)
+            ->assertJsonPath('listings.0.quota_summary', '1 dari 3 mahasiswa di perusahaan ini');
+    }
+
+    public function test_api_detail_lowongan_menjelaskan_kuota(): void
+    {
+        $lowongan = $this->lowongan(['quota' => 1]);
+        $this->isiMagangBerjalan(1);
+
+        \Laravel\Sanctum\Sanctum::actingAs($this->userByUsername('3.34.23.2.02'));
+
+        $this->getJson("/api/mahasiswa/lowongan/{$lowongan->id}")->assertOk()
+            ->assertJsonPath('listing.quota_full', true)
+            ->assertJsonPath('listing.quota_note', fn ($n) => str_contains($n, 'bukan per lowongan'));
+    }
+
+    /** Kuota kosong dikirim null, bukan angka karangan. */
+    public function test_api_mengirim_null_bila_kuota_tak_diisi(): void
+    {
+        $this->lowongan(['quota' => null]);
+
+        \Laravel\Sanctum\Sanctum::actingAs($this->userByUsername('3.34.23.2.02'));
+
+        $this->getJson('/api/mahasiswa/lowongan')->assertOk()
+            ->assertJsonPath('listings.0.quota', null)
+            ->assertJsonPath('listings.0.quota_summary', null)
+            ->assertJsonPath('listings.0.quota_full', false);
+    }
+
     /** Inti keputusannya: penuh hanya penanda, bukan pembatas. */
     public function test_lowongan_penuh_tetap_bisa_diajukan(): void
     {
