@@ -70,7 +70,10 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'showForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
+// Pendaftaran satu-satunya jalur publik yang membuat data. Dibatasi agar tak
+// bisa dibanjiri: akun spam memang tak berdaya (semuanya menunggu persetujuan
+// Kaprodi), tapi banjirnya menenggelamkan tab "Menunggu" dan lonceng Kaprodi.
+Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
 
 // Lupa / reset password (mandiri, via link ke email terdaftar)
 // throttle backstop anti spam email / tebak token (cukup longgar utk WiFi kampus share-IP).

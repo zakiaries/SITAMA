@@ -156,6 +156,18 @@
           </div>
         </div>
 
+        {{-- Perangkap bot (honeypot). Disembunyikan dari layar, dilewati keyboard
+             (tabindex -1), dan diabaikan pembaca layar (aria-hidden), jadi manusia
+             tak pernah mengisinya. Pengisi otomatis juga tak mengenali namanya.
+             Kalau terisi, pendaftaran ditolak diam-diam. Lebih murah daripada
+             CAPTCHA: tanpa pihak ketiga, tanpa kunci API, dan tanpa gesekan. --}}
+        <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;"
+             aria-hidden="true">
+          <label for="catatan_tambahan">Jangan diisi</label>
+          <input type="text" id="catatan_tambahan" name="catatan_tambahan"
+                 tabindex="-1" autocomplete="off">
+        </div>
+
         <button type="submit" class="btn an" style="animation-delay:.36s">Daftar Sekarang</button>
       </form>
 

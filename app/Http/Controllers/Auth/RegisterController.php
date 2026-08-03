@@ -46,6 +46,14 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+        // Perangkap bot: field ini tersembunyi di formulir, jadi hanya pengisi
+        // otomatis yang mengisinya. Dijawab seolah berhasil — memberi tahu bot
+        // bahwa ia tertangkap hanya membantunya menyesuaikan diri.
+        if (filled($request->input('catatan_tambahan'))) {
+            return redirect()->route('login')
+                ->with('success', 'Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan dari Kaprodi.');
+        }
+
         $request->validate([
             'name'          => 'required|string|max:255',
             // NIM Polines: 5 kelompok angka dipisah titik, mis. 3.34.23.2.12.
