@@ -154,6 +154,57 @@ docker compose exec app php artisan view:cache
 
 ---
 
+## Cadangan (backup)
+
+Sistem ini menyimpan logbook, laporan, sertifikat, dan **nilai** mahasiswa —
+data yang tak bisa dibuat ulang. `docker compose down -v`, migrasi keliru, atau
+disk gagal akan menghapusnya tanpa jalan pulang. Pasang cadangan sebelum
+pengguna sungguhan mulai mengisi data.
+
+### Jalankan sekali dulu untuk membuktikan berhasil
+```bash
+cd /var/www/simama
+bash docker/backup.sh
+```
+Keluarannya harus menyebut jumlah tabel dan ukuran berkas. Kalau dump kosong
+atau kredensial salah, skrip berhenti dan **tidak** menghapus cadangan lama.
+
+### Jadwalkan harian (02:00)
+```bash
+sudo crontab -e
+```
+Tambahkan satu baris:
+```
+0 2 * * * cd /var/www/simama && bash docker/backup.sh >> /var/log/simama-backup.log 2>&1
+```
+
+Cadangan tersimpan di `/var/backups/simama`, disimpan 14 hari
+(ubah dengan `SIMAMA_KEEP_DAYS=30`).
+
+### Salin keluar VPS — ini yang membuatnya jadi cadangan sungguhan
+Cadangan di VPS yang sama hanya melindungi dari migrasi keliru dan penghapusan
+tak sengaja. Ia tidak menolong bila VPS-nya sendiri hilang. Tarik ke laptopmu
+secara berkala (jalankan dari laptop, bukan server):
+```bash
+scp -r root@IP_VPS:/var/backups/simama ~/cadangan-simama
+```
+
+### Memulihkan
+```bash
+# Basis data
+zcat /var/backups/simama/db-STEMPEL.sql.gz \
+  | docker compose exec -T -e MYSQL_PWD="SANDI_DB" db mariadb --user=USER NAMA_DB
+
+# Berkas unggahan (dari akar proyek)
+tar -xzf /var/backups/simama/storage-STEMPEL.tar.gz
+docker compose exec app chown -R www-data:www-data storage
+```
+
+> Uji pemulihan **sekali** saat santai. Cadangan yang tak pernah dicoba pulih
+> belum tentu cadangan.
+
+---
+
 ## Troubleshooting
 - **Belum HTTPS / Caddy error** → `docker compose logs web`. Pastikan A record sudah benar
   (`ping domain`), port 80/443 terbuka, dan `APP_DOMAIN` di `.env` = domainmu.
