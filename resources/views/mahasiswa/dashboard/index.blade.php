@@ -7,21 +7,9 @@
   <div class="greeting-sub">Selamat datang kembali</div>
   <div class="greeting-name">Halo, {{ $user->name }}</div>
 
-  {{-- Notifikasi --}}
-  @foreach($notifications as $notif)
-  <div class="alert-box">
-    <div class="alert-icon">
-      <svg width="16" height="16" fill="none" stroke="#B9791A" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-      </svg>
-    </div>
-    <div>
-      <div class="alert-title">{{ $notif->message }}</div>
-      <div class="alert-body">{{ ucfirst($notif->category) }}</div>
-    </div>
-    <div class="alert-time">{{ $notif->date->format('Y-m-d') }}</div>
-  </div>
-  @endforeach
+  {{-- Notifikasi pindah ke panel melayang di lonceng (x-notif-bell): kartunya
+       dulu menumpuk di sini, mendorong turun statistik, tak bisa diklik maupun
+       ditutup, dan tak terlihat dari halaman lain. --}}
 
   {{-- Stats --}}
   <div class="grid-4">

@@ -7,14 +7,7 @@
     <span style="font-size:11px;color:var(--primary);background:var(--primary-light);border:1px solid var(--primary-light);padding:3px 10px;border-radius:20px;font-weight:600;display:inline-flex;align-items:center;gap:5px;">
       <x-icon name="factory" :size="12"/> Pembimbing Industri
     </span>
-    <a class="notif-btn" href="{{ route('dosen-industri.notifikasi') }}" style="text-decoration:none;color:inherit;" title="Notifikasi">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-      </svg>
-      @if(Auth::user()->notifications()->where('is_read', false)->count() > 0)
-        <div class="notif-dot"></div>
-      @endif
-    </a>
+    <x-notif-bell peran="dosen-industri" />
     <style>
       .user-dd > summary{list-style:none;cursor:pointer;outline:none;}
       .user-dd > summary::-webkit-details-marker{display:none;}

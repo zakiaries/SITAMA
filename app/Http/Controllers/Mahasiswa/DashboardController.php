@@ -18,7 +18,6 @@ class DashboardController extends Controller
         $daysInternship = 0;
         $latestGuidances = collect();
         $latestLogBooks  = collect();
-        $notifications   = collect();
 
         if ($student) {
             $student->loadMissing('lecturer.user');
@@ -40,8 +39,9 @@ class DashboardController extends Controller
                 ->orderByDesc('updated_at')->take(3)->get();
         }
 
-        $notifications = $user->notifications()
-            ->where('is_read', false)->orderByDesc('created_at')->take(5)->get();
+        // Notifikasi tak lagi diambil di sini: isinya kini ditampilkan panel
+        // melayang di lonceng (komponen x-notif-bell), yang menyiapkan datanya
+        // sendiri agar tersedia di seluruh halaman, bukan cuma di dashboard.
 
         // Seminar umum + seminar yang diajukan mahasiswa ini (bukan punya mahasiswa lain).
         $seminarsCount = \App\Models\Seminar::whereNull('student_id')
@@ -51,7 +51,7 @@ class DashboardController extends Controller
         return view('mahasiswa.dashboard.index', compact(
             'user', 'student', 'internship',
             'logBooksCount', 'guidancesDone', 'daysInternship', 'seminarsCount',
-            'latestGuidances', 'latestLogBooks', 'notifications'
+            'latestGuidances', 'latestLogBooks'
         ));
     }
 }

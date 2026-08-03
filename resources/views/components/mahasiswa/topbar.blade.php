@@ -4,14 +4,7 @@
 <div class="topbar">
   <div class="tb-title">{{ $title ?? 'Dashboard' }}</div>
   <div class="tb-right">
-    <a class="notif-btn" href="{{ route('mahasiswa.notifikasi') }}" style="text-decoration:none;color:inherit;" title="Notifikasi">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-      </svg>
-      @if(Auth::user()->notifications()->where('is_read', false)->count() > 0)
-        <div class="notif-dot"></div>
-      @endif
-    </a>
+    <x-notif-bell peran="mahasiswa" />
     <style>
       .user-dd > summary{list-style:none;cursor:pointer;outline:none;}
       .user-dd > summary::-webkit-details-marker{display:none;}
