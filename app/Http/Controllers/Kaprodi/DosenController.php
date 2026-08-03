@@ -28,7 +28,7 @@ class DosenController extends Controller
             'username.unique'   => 'NIP / username sudah terdaftar.',
             'email.unique'      => 'Email sudah terdaftar.',
             'password.required' => 'Password wajib diisi.',
-            'password.min'      => 'Password minimal 6 karakter.',
+            'password.min'      => 'Password minimal 8 karakter.',
         ]);
 
         $user = User::create([
@@ -121,7 +121,7 @@ class DosenController extends Controller
             'new_password' => 'required|string|min:8|confirmed',
         ], [
             'new_password.required'  => 'Password baru wajib diisi.',
-            'new_password.min'       => 'Password minimal 6 karakter.',
+            'new_password.min'       => 'Password minimal 8 karakter.',
             'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 

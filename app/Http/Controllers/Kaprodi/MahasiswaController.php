@@ -137,7 +137,7 @@ class MahasiswaController extends Controller
             'pic_username.required_without'   => 'Username pembimbing industri wajib diisi.',
             'pic_username.unique'             => 'Username sudah dipakai, gunakan username lain.',
             'pic_password.required_without'   => 'Password pembimbing industri wajib diisi.',
-            'pic_password.min'                => 'Password minimal 6 karakter.',
+            'pic_password.min'                => 'Password minimal 8 karakter.',
             'start_date.required'             => 'Tanggal mulai magang wajib diisi.',
         ]);
 
@@ -243,7 +243,7 @@ class MahasiswaController extends Controller
             'new_password' => 'required|string|min:8|confirmed',
         ], [
             'new_password.required'  => 'Password baru wajib diisi.',
-            'new_password.min'       => 'Password minimal 6 karakter.',
+            'new_password.min'       => 'Password minimal 8 karakter.',
             'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 

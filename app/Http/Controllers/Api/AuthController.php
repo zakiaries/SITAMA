@@ -170,7 +170,7 @@ class AuthController extends Controller
             'username.required'  => 'Username wajib diisi.',
             'username.unique'    => 'Username sudah digunakan, pilih yang lain.',
             'password.required'  => 'Password wajib diisi.',
-            'password.min'       => 'Password minimal 6 karakter.',
+            'password.min'       => 'Password minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 

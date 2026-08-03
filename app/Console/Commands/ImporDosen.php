@@ -102,7 +102,7 @@ class ImporDosen extends Command
         $seragam  = $this->option('password') ?: null;
 
         if ($seragam !== null && strlen($seragam) < 6) {
-            $this->error('Password minimal 6 karakter (mengikuti aturan form Tambah Dosen).');
+            $this->error('Password minimal 8 karakter (mengikuti aturan form Tambah Dosen).');
 
             return self::FAILURE;
         }

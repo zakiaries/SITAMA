@@ -19,20 +19,24 @@ class MagangRequestController extends Controller
         $requests = CompanyRequest::where('student_id', $student->id)->latest()->get();
         $companies = Company::orderBy('name')->get();
 
-        // Pembimbing industri yang SUDAH terdaftar (dari magang sebelumnya) —
-        // ditampilkan berlabel perusahaan agar mahasiswa berikutnya tinggal pilih.
-        $existingPics = \App\Models\Internship::whereNotNull('lecturer_industry_id')
-            ->with(['lecturerIndustry.user', 'company'])
+        // Pembimbing industri yang sudah TERDAFTAR DI SISTEM, dari sumber mana pun:
+        // dibuatkan Kaprodi lewat menu Data Dosen, maupun lahir dari pengajuan
+        // magang mahasiswa sebelumnya.
+        //
+        // Dulu daftarnya dibangun dari tabel internships, sehingga akun yang baru
+        // dibuat Kaprodi tak pernah muncul — ia belum menempel di magang mana pun.
+        // Nama perusahaan tetap ditampilkan bila pembimbingnya pernah menangani
+        // magang, sebagai penanda bagi mahasiswa; kalau belum, namanya saja.
+        $existingPics = \App\Models\Lecturer::whereHas('user', fn ($u) => $u->where('role', 'lecturer_industry'))
+            ->with(['user', 'industryInternships.company'])
             ->get()
-            ->groupBy('lecturer_industry_id')
-            ->map(function ($group) {
-                $first = $group->first();
-                return [
-                    'id'      => $first->lecturer_industry_id,
-                    'name'    => $first->lecturerIndustry->user->name ?? 'Pembimbing',
-                    'company' => $group->pluck('company.name')->filter()->unique()->implode(', '),
-                ];
-            })->values();
+            ->sortBy(fn ($l) => $l->user->name ?? '')
+            ->map(fn ($l) => [
+                'id'      => $l->id,
+                'name'    => $l->user->name ?? 'Pembimbing',
+                'company' => $l->industryInternships->pluck('company.name')
+                    ->filter()->unique()->implode(', '),
+            ])->values();
 
         $hasActiveInternship = $student->internships()->where('is_finished', false)->exists();
         $hasPending          = $requests->where('status', 'pending')->isNotEmpty();
