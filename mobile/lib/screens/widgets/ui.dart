@@ -271,7 +271,7 @@ class StatStrip extends StatelessWidget {
 }
 
 // ── Avatar user: foto profil bila ada, kalau tidak inisial namanya ──
-/// Padanan komponen <x-avatar> di web. Dipakai di SEMUA tempat yang
+/// Padanan komponen `<x-avatar>` di web. Dipakai di SEMUA tempat yang
 /// menampilkan orang lain (daftar & detail mahasiswa), supaya foto profil
 /// tak cuma terlihat di halaman profil sendiri.
 class UserAvatar extends StatelessWidget {
