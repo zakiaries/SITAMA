@@ -29,6 +29,7 @@ class LowonganController extends Controller
 
         $listings = (clone $base)
             ->with('company')
+            ->withCount('magangBerjalan')
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                 ->where('title', 'like', "%{$q}%")
                 ->orWhere('company_name', 'like', "%{$q}%")
@@ -61,7 +62,7 @@ class LowonganController extends Controller
             404
         );
 
-        $jobListing->load('company');
+        $jobListing->load('company')->loadCount('magangBerjalan');
 
         return view('mahasiswa.lowongan.detail', compact('jobListing'));
     }

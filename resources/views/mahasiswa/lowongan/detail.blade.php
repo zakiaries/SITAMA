@@ -25,7 +25,20 @@
     @foreach($chips as $chip)
       <span style="background:var(--bg);border:1px solid var(--border);font-size:12px;padding:5px 11px;border-radius:8px;color:var(--text);">{{ $chip }}</span>
     @endforeach
+    {{-- Kuota penanda saja — pengajuan tetap dibuka meski penuh. --}}
+    @if($jobListing->punyaKuota())
+      <span style="background:{{ $jobListing->penuh() ? 'var(--warn-bg)' : 'var(--bg)' }};border:1px solid {{ $jobListing->penuh() ? '#F0DCA4' : 'var(--border)' }};font-size:12px;padding:5px 11px;border-radius:8px;color:{{ $jobListing->penuh() ? 'var(--warn-text)' : 'var(--text)' }};">
+        Kuota: {{ $jobListing->ringkasanKuota() }}{{ $jobListing->penuh() ? ' · Penuh' : '' }}
+      </span>
+    @endif
   </div>
+
+  @if($jobListing->penuh())
+    <p style="font-size:12px;color:var(--text-muted);margin:12px 0 0;">
+      Kuota yang dicatat Kaprodi sudah terisi. Kamu tetap boleh mengajukan — angka ini penanda,
+      bukan pembatas — tapi sebaiknya pastikan dulu ke perusahaannya bahwa masih ada tempat.
+    </p>
+  @endif
 </div>
 
 @if($jobListing->description)

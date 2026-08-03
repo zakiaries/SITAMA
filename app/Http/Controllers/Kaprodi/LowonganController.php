@@ -23,6 +23,7 @@ class LowonganController extends Controller
 
         $listings = JobListing::query()
             ->with('company')
+            ->withCount('magangBerjalan')
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                 ->where('title', 'like', "%{$q}%")
                 ->orWhere('company_name', 'like', "%{$q}%")
@@ -92,11 +93,15 @@ class LowonganController extends Controller
             'division'        => 'nullable|string|max:255',
             'location'        => 'nullable|string|max:255',
             'job_type'        => 'nullable|string|max:100',
+            'quota'           => 'nullable|integer|min:1|max:999',
             'skills'          => 'nullable|string|max:1000',
             'description'     => 'nullable|string',
         ], [
             'company_name.required' => 'Nama perusahaan wajib diisi.',
             'title.required'        => 'Judul/posisi lowongan wajib diisi.',
+            'quota.integer'         => 'Kuota harus berupa angka.',
+            'quota.min'             => 'Kuota minimal 1. Kosongkan bila tidak dibatasi.',
+            'quota.max'             => 'Kuota maksimal 999.',
         ]);
     }
 
@@ -133,6 +138,8 @@ class LowonganController extends Controller
             'skills'          => $skills,
             'location'        => $data['location'] ?? null,
             'job_type'        => $data['job_type'] ?? null,
+            // Kosong = tak dibatasi; tak ada penanda kuota yang ditampilkan.
+            'quota'           => $data['quota'] ?? null,
             'status'          => 'active',
         ];
     }

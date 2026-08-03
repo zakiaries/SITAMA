@@ -61,6 +61,12 @@
         <div style="display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--text-muted);margin-top:10px;">
           @if($l->location)<span>📍 {{ $l->location }}</span>@endif
           @if($l->division)<span>🏷️ {{ $l->division }}</span>@endif
+          {{-- Kuota penanda saja: lowongan penuh tetap boleh diajukan. --}}
+          @if($l->punyaKuota())
+            <span style="{{ $l->penuh() ? 'color:var(--warn-text);font-weight:700;' : '' }}">
+              👥 {{ $l->penuh() ? 'Kuota penuh' : $l->ringkasanKuota() }}
+            </span>
+          @endif
         </div>
         {{-- Aksi: selalu menempel di bawah --}}
         <div style="margin-top:auto;padding-top:12px;font-size:12px;color:var(--primary);font-weight:600;">Lihat detail →</div>

@@ -68,6 +68,14 @@
         <label style="{{ $lbl }}">Tipe</label>
         <input type="text" name="job_type" value="{{ $fld('job_type') }}" style="{{ $inp }}" placeholder="mis. WFO / Hybrid / Remote">
       </div>
+      <div>
+        <label style="{{ $lbl }}">Kuota <span style="color:var(--text-muted);font-weight:400;">(opsional)</span></label>
+        <input type="number" name="quota" value="{{ $fld('quota') }}" min="1" max="999" style="{{ $inp }}" placeholder="mis. 3">
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">
+          Kosongkan bila tak dibatasi. Angka ini <strong>penanda saja</strong> — sistem menampilkan berapa yang terisi
+          dan menandai lowongan penuh, tapi tidak menghalangi mahasiswa mengajukan.
+        </div>
+      </div>
       <div style="grid-column:1 / -1;">
         <label style="{{ $lbl }}">Keahlian / Skill <span style="color:var(--text-muted);font-weight:400;">(pisahkan dengan koma)</span></label>
         <input type="text" name="skills" value="{{ old('skills', $skillsText) }}" style="{{ $inp }}" placeholder="mis. Laravel, MySQL, Git">

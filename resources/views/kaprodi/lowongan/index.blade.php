@@ -31,6 +31,7 @@
           <th style="padding:11px 14px;">Posisi</th>
           <th style="padding:11px 14px;">Perusahaan</th>
           <th style="padding:11px 14px;">Lokasi</th>
+          <th style="padding:11px 14px;">Kuota</th>
           <th style="padding:11px 14px;">Status</th>
           <th style="padding:11px 14px;text-align:right;">Aksi</th>
         </tr>
@@ -46,6 +47,20 @@
               @endif
             </td>
             <td style="padding:11px 14px;color:var(--text-muted);">{{ $l->location ?: '-' }}</td>
+            {{-- Terisi dihitung dari mahasiswa yang SEDANG magang di perusahaan
+                 ini; kuota penanda saja, pengajuan tak pernah ditolak karenanya. --}}
+            <td style="padding:11px 14px;white-space:nowrap;">
+              @if($l->punyaKuota())
+                <span title="{{ $l->jumlahTerisi() }} mahasiswa sedang magang di perusahaan ini">
+                  {{ $l->jumlahTerisi() }} / {{ $l->quota }}
+                </span>
+                @if($l->penuh())
+                  <span style="background:var(--warn-bg);color:var(--warn-text);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:4px;">Penuh</span>
+                @endif
+              @else
+                <span style="color:var(--text-muted);" title="Kuota tidak dibatasi">—</span>
+              @endif
+            </td>
             <td style="padding:11px 14px;">
               @if($l->status === 'active')
                 <span style="background:var(--success-bg);color:var(--success-text);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;">Aktif</span>
