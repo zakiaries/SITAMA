@@ -54,7 +54,10 @@ class ImporDosen extends Command
             ['199107302019031010', 'NURSENO BAYU AJI, S.Kom., M.Kom.'],
             ['198504102014041002', 'PRAYITNO, S.ST., M.T.'],
             ['196810252000121001', 'TRI RAHARJO YUDANTORO, S.Kom., M.Kom.'],
-            ['198703272019022012', 'WIKTASARI, S.T., M.Kom'],
+            // TMT-nya 201903, bukan 201902 — dicocokkan ke profil resmi di
+            // web.polines.ac.id/id/sdm. NIP dipakai sebagai username login, jadi
+            // satu digit meleset membuat dosennya tak bisa masuk.
+            ['198703272019032012', 'WIKTASARI, S.T., M.Kom'],
         ],
     ];
 
