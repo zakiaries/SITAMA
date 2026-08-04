@@ -213,6 +213,38 @@ class ImporPesertaTest extends FeatureTestCase
         $this->assertNotNull($dosen->lecturer);
     }
 
+    /**
+     * Sandi pembimbing diacak di dalam perintah. Kalau tak ikut dicetak,
+     * akunnya ada tapi tak seorang pun bisa masuk — dan satu-satunya jalan
+     * keluar tinggal reset satu per satu lewat portal Kaprodi.
+     */
+    public function test_kredensial_pembimbing_baru_ikut_dicetak(): void
+    {
+        $this->tulisCsv([$this->barisLengkap([
+            'dospem'              => 'TAHAN PRAHARA, S.KOM., M.KOM.',
+            'pembimbing_industri' => 'Diaz Rizka Wibowo',
+        ])]);
+
+        $this->impor()
+            ->expectsOutputToContain('TAHAN PRAHARA, S.KOM., M.KOM.')
+            ->expectsOutputToContain('Diaz Rizka Wibowo')
+            ->assertSuccessful();
+    }
+
+    /** Sandi yang dicetak itu benar-benar bisa dipakai masuk. */
+    public function test_dosen_baru_bisa_masuk_dengan_sandinya(): void
+    {
+        $this->tulisCsv([$this->barisLengkap(['dospem' => 'TAHAN PRAHARA, S.KOM., M.KOM.'])]);
+        $this->impor(['--password' => 'rahasia123'])->assertSuccessful();
+
+        $dosen = User::where('name', 'TAHAN PRAHARA, S.KOM., M.KOM.')->firstOrFail();
+
+        $this->post('/login', ['username' => $dosen->username, 'password' => 'rahasia123'])
+            ->assertRedirect();
+
+        $this->assertAuthenticated();
+    }
+
     /** Nama yang cuma berbagi satu kata bukan orang yang sama. */
     public function test_nama_mirip_tak_tertukar(): void
     {

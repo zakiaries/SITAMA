@@ -64,6 +64,18 @@ class ImporPeserta extends Command
     /** @var array<string, int> nama ternormalisasi => lecturers.id */
     private array $cacheDosen = [];
 
+    /**
+     * Kredensial pembimbing yang akunnya baru lahir di jalannya perintah ini.
+     *
+     * Wajib dikumpulkan dan dicetak: sandinya diacak di dalam perintah, jadi
+     * kalau tak ditampilkan sekali pun, akunnya ada tapi tak seorang pun bisa
+     * masuk — dan satu-satunya jalan keluar tinggal reset satu per satu lewat
+     * portal Kaprodi.
+     *
+     * @var array<int, array{0:string,1:string,2:string,3:string}>
+     */
+    private array $kredensialPembimbing = [];
+
     private array $ringkas = [
         'mhs_baru' => 0, 'mhs_diperbarui' => 0,
         'dosen_baru' => 0, 'industri_baru' => 0,
@@ -219,6 +231,7 @@ class ImporPeserta extends Command
         }
 
         $username = $this->usernameUnik($target, $peran === 'lecturer' ? '' : 'pic.');
+        $sandi    = $this->option('password') ?: $this->sandiMudah();
 
         $user = User::create([
             'name'     => $nama,
@@ -227,10 +240,17 @@ class ImporPeserta extends Command
             // tetap bisa dibuat; selama masih placeholder, reset mandiri lewat
             // email TIDAK akan sampai — Kaprodi yang mereset lewat portal.
             'email'    => $username . '@simama.local',
-            'password' => Hash::make($this->option('password') ?: Str::random(14)),
+            'password' => Hash::make($sandi),
             'role'     => $peran,
             'is_activated' => true,
         ]);
+
+        $this->kredensialPembimbing[] = [
+            $username,
+            $nama,
+            $peran === 'lecturer' ? 'Dosen pembimbing' : 'Pembimbing industri',
+            $sandi,
+        ];
 
         $this->ringkas[$peran === 'lecturer' ? 'dosen_baru' : 'industri_baru']++;
 
@@ -426,6 +446,14 @@ class ImporPeserta extends Command
 
         if ($kredensial !== []) {
             $this->table(['NIM (username)', 'Nama', 'Kelas', 'Kata sandi'], $kredensial);
+        }
+
+        if ($this->kredensialPembimbing !== []) {
+            $this->newLine();
+            $this->table(['Username', 'Nama', 'Peran', 'Kata sandi'], $this->kredensialPembimbing);
+        }
+
+        if ($kredensial !== [] || $this->kredensialPembimbing !== []) {
             $this->warn('Kata sandi di atas HANYA ditampilkan sekali. Simpan sebelum menutup terminal.');
         }
 
