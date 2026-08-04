@@ -109,6 +109,52 @@ class ImporPesertaTest extends FeatureTestCase
             'Email karangan di domain kampus bisa mengirim tautan reset ke orang lain.');
     }
 
+    /**
+     * Pola kampus: namadepan.nimtanpatitik@domain
+     * (contoh nyata: lanang.33423212@mhs.polines.ac.id).
+     */
+    public function test_email_kampus_disusun_dari_nama_dan_nim(): void
+    {
+        $this->tulisCsv([$this->barisLengkap()]);
+        $this->impor(['--email-kampus' => 'mhs.polines.ac.id'])->assertSuccessful();
+
+        $this->assertSame(
+            'adriansyah.43323001@mhs.polines.ac.id',
+            User::where('username', '4.33.23.0.01')->firstOrFail()->email
+        );
+    }
+
+    /** Inisial dilewati: "M. MUCHLAS HUDAWAN" -> muchlas, bukan m. */
+    public function test_inisial_dilewati_saat_menyusun_email(): void
+    {
+        $this->tulisCsv([$this->barisLengkap([
+            'nim' => '4.33.22.1.13', 'nama' => 'M. MUCHLAS HUDAWAN',
+        ])]);
+        $this->impor(['--email-kampus' => 'mhs.polines.ac.id'])->assertSuccessful();
+
+        $this->assertSame(
+            'muchlas.43322113@mhs.polines.ac.id',
+            User::where('username', '4.33.22.1.13')->firstOrFail()->email
+        );
+    }
+
+    /**
+     * NIM ikut di dalam alamat, dan NIM itu unik — jadi alamat yang polanya
+     * meleset pun tak mungkin jatuh ke kotak masuk mahasiswa lain.
+     */
+    public function test_email_kampus_selalu_unik_per_mahasiswa(): void
+    {
+        $this->tulisCsv([
+            $this->barisLengkap(['nim' => '4.33.23.0.01', 'nama' => 'BUDI SANTOSO']),
+            $this->barisLengkap(['nim' => '4.33.23.1.09', 'nama' => 'BUDI RAHARJO']),
+        ]);
+        $this->impor(['--email-kampus' => 'mhs.polines.ac.id'])->assertSuccessful();
+
+        $email = User::whereIn('username', ['4.33.23.0.01', '4.33.23.1.09'])->pluck('email');
+
+        $this->assertCount(2, $email->unique(), 'Dua mahasiswa bernama depan sama berbagi alamat email.');
+    }
+
     /** Jalan keluarnya: mahasiswa mengisi email aslinya sendiri lewat Profil. */
     public function test_mahasiswa_bisa_mengganti_emailnya_sendiri(): void
     {

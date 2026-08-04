@@ -45,6 +45,7 @@ class ImporPeserta extends Command
         {--jurusan=Teknik Elektro : Jurusan}
         {--tahun=2026/2027 : Tahun akademik}
         {--password= : Samakan kata sandi semua akun baru (default: acak per akun)}
+        {--email-kampus= : Susun email kampus dari nama+NIM, mis. mhs.polines.ac.id}
         {--pratinjau : Tampilkan rencananya saja, tidak menulis apa pun}';
 
     protected $description = 'Impor peserta magang dari CSV plotting prodi (akun mahasiswa + dosen + data magang)';
@@ -266,16 +267,7 @@ class ImporPeserta extends Command
             $user  = User::create([
                 'name'         => $row['nama'],
                 'username'     => $row['nim'],
-                // Daftar plotting prodi hanya memuat nomor HP, tak ada email.
-                // Domain .local dipakai SENGAJA, bukan @student.polines.ac.id:
-                // domain itu milik kampus, dan alamat karangan di sana bisa saja
-                // benar-benar ada milik orang lain — tautan reset kata sandi
-                // mahasiswa akan terkirim ke orang asing. Dengan .local
-                // pengiriman mustahil sejak awal.
-                //
-                // Mahasiswa bisa mengisi email aslinya sendiri lewat Profil bila
-                // ingin memakai reset mandiri; sebelum itu, Kaprodi yang mereset.
-                'email'        => str_replace('.', '', $row['nim']) . '@simama.local',
+                'email'        => $this->email($row),
                 'password'     => Hash::make($sandi),
                 'role'         => 'student',
                 'is_activated' => true,
@@ -337,6 +329,52 @@ class ImporPeserta extends Command
         );
 
         $this->ringkas['magang']++;
+    }
+
+    /**
+     * Alamat email akun mahasiswa.
+     *
+     * Daftar plotting prodi hanya memuat nomor HP, tak ada satu pun email, jadi
+     * alamatnya harus disusun sendiri.
+     *
+     * Bawaannya placeholder @simama.local: pengiriman ke sana mustahil, jadi tak
+     * mungkin ada surat nyasar. Konsekuensinya "Lupa Password" tak berfungsi dan
+     * Kaprodi yang mereset.
+     *
+     * Dengan --email-kampus, alamatnya disusun mengikuti pola kampus
+     * "namadepan.nimtanpatitik@domain" (mis. lanang.33423212@mhs.polines.ac.id)
+     * sehingga reset mandiri lewat email bisa dipakai. Ini AMAN meski polanya
+     * ternyata meleset: NIM ikut di dalam alamat dan NIM itu unik, jadi alamat
+     * yang salah paling banter memantul — ia tak mungkin jatuh ke kotak masuk
+     * mahasiswa lain.
+     */
+    private function email(array $row): string
+    {
+        $nim = str_replace('.', '', $row['nim']);
+        $domain = trim((string) $this->option('email-kampus'));
+
+        if ($domain === '') {
+            return $nim . '@simama.local';
+        }
+
+        return $this->namaDepan($row['nama']) . '.' . $nim . '@' . ltrim($domain, '@');
+    }
+
+    /**
+     * Nama depan untuk alamat email. Inisial dilewati — "M. MUCHLAS HUDAWAN"
+     * memberi "muchlas", bukan "m", karena alamat kampus tak memakai inisial.
+     */
+    private function namaDepan(string $nama): string
+    {
+        foreach (preg_split('/\s+/', trim($nama), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $kata) {
+            $bersih = preg_replace('/[^a-z]/', '', strtolower($kata));
+
+            if (strlen($bersih) >= 2) {
+                return $bersih;
+            }
+        }
+
+        return 'mahasiswa';
     }
 
     /** Kata sandi yang mudah ditulis tangan di kertas dan diketik ulang. */
@@ -408,11 +446,22 @@ class ImporPeserta extends Command
         }
 
         $this->newLine();
+
+        if (trim((string) $this->option('email-kampus')) !== '') {
+            $this->line('Email disusun mengikuti pola kampus, jadi "Lupa Password" bisa dipakai.');
+            $this->line('Bila ada alamat yang ternyata meleset, suratnya memantul (tak nyasar ke');
+            $this->line('orang lain karena NIM ikut di dalam alamat) — mahasiswa tinggal');
+            $this->line('membetulkannya sendiri di menu Profil, atau minta Kaprodi mereset.');
+
+            return;
+        }
+
         $this->warn('Daftar plotting tak memuat email, jadi semua akun memakai alamat');
         $this->warn('placeholder @simama.local. Akibatnya "Lupa Password" TIDAK akan sampai.');
         $this->line('Dua jalan yang tersedia:');
         $this->line('  1. Kaprodi mereset kata sandi lewat Data Mahasiswa (tanpa perlu email).');
         $this->line('  2. Mahasiswa mengisi email aslinya sendiri di menu Profil setelah masuk,');
         $this->line('     setelah itu reset mandiri lewat email berfungsi seperti biasa.');
+        $this->line('Pakai --email-kampus=mhs.polines.ac.id bila ingin alamat kampus disusun otomatis.');
     }
 }
