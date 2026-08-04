@@ -91,6 +91,40 @@ class ImporPesertaTest extends FeatureTestCase
         $this->assertSame('2026/2027', $student->academic_year);
     }
 
+    /**
+     * Daftar plotting hanya memuat nomor HP. Alamat karangan di domain kampus
+     * berbahaya: bila alamat itu ternyata ada dan dipakai orang lain, tautan
+     * reset kata sandi mahasiswa terkirim ke pihak yang tak berhak. Domain
+     * .local membuat pengiriman mustahil sejak awal.
+     */
+    public function test_email_memakai_placeholder_bukan_domain_kampus(): void
+    {
+        $this->tulisCsv([$this->barisLengkap()]);
+        $this->impor()->assertSuccessful();
+
+        $email = User::where('username', '4.33.23.0.01')->firstOrFail()->email;
+
+        $this->assertStringEndsWith('@simama.local', $email);
+        $this->assertStringNotContainsString('polines.ac.id', $email,
+            'Email karangan di domain kampus bisa mengirim tautan reset ke orang lain.');
+    }
+
+    /** Jalan keluarnya: mahasiswa mengisi email aslinya sendiri lewat Profil. */
+    public function test_mahasiswa_bisa_mengganti_emailnya_sendiri(): void
+    {
+        $this->tulisCsv([$this->barisLengkap()]);
+        $this->impor(['--password' => 'rahasia123'])->assertSuccessful();
+
+        $user = User::where('username', '4.33.23.0.01')->firstOrFail();
+
+        $this->actingAs($user)->put('/mahasiswa/profile', [
+            'name'  => $user->name,
+            'email' => 'adriansyah.asli@gmail.com',
+        ]);
+
+        $this->assertSame('adriansyah.asli@gmail.com', $user->fresh()->email);
+    }
+
     public function test_mahasiswa_bisa_masuk_dengan_sandi_yang_dicetak(): void
     {
         $this->tulisCsv([$this->barisLengkap()]);

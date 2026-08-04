@@ -136,7 +136,10 @@ class SimulasiMagang extends Command
             $user = User::create([
                 'name'         => (string) $this->option('nama'),
                 'username'     => $nim,
-                'email'        => Str::slug($nim, '_') . '@student.polines.ac.id',
+                // Placeholder .local, bukan domain kampus sungguhan — alamat
+                // karangan di domain orang lain bisa mengirim tautan reset kata
+                // sandi ke pihak yang tak berhak.
+                'email'        => Str::slug($nim, '_') . '@simama.local',
                 'password'     => Hash::make($passwordBaru),
                 'role'         => 'student',
                 'is_activated' => true,

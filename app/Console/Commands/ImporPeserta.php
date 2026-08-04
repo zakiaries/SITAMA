@@ -266,7 +266,16 @@ class ImporPeserta extends Command
             $user  = User::create([
                 'name'         => $row['nama'],
                 'username'     => $row['nim'],
-                'email'        => str_replace('.', '', $row['nim']) . '@student.polines.ac.id',
+                // Daftar plotting prodi hanya memuat nomor HP, tak ada email.
+                // Domain .local dipakai SENGAJA, bukan @student.polines.ac.id:
+                // domain itu milik kampus, dan alamat karangan di sana bisa saja
+                // benar-benar ada milik orang lain — tautan reset kata sandi
+                // mahasiswa akan terkirim ke orang asing. Dengan .local
+                // pengiriman mustahil sejak awal.
+                //
+                // Mahasiswa bisa mengisi email aslinya sendiri lewat Profil bila
+                // ingin memakai reset mandiri; sebelum itu, Kaprodi yang mereset.
+                'email'        => str_replace('.', '', $row['nim']) . '@simama.local',
                 'password'     => Hash::make($sandi),
                 'role'         => 'student',
                 'is_activated' => true,
@@ -397,5 +406,13 @@ class ImporPeserta extends Command
             $this->line('Akun pembimbing industri dibuat TANPA mengirim email undangan.');
             $this->line('Bagikan kredensialnya sendiri, atau reset lewat portal Kaprodi.');
         }
+
+        $this->newLine();
+        $this->warn('Daftar plotting tak memuat email, jadi semua akun memakai alamat');
+        $this->warn('placeholder @simama.local. Akibatnya "Lupa Password" TIDAK akan sampai.');
+        $this->line('Dua jalan yang tersedia:');
+        $this->line('  1. Kaprodi mereset kata sandi lewat Data Mahasiswa (tanpa perlu email).');
+        $this->line('  2. Mahasiswa mengisi email aslinya sendiri di menu Profil setelah masuk,');
+        $this->line('     setelah itu reset mandiri lewat email berfungsi seperti biasa.');
     }
 }
