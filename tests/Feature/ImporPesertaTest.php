@@ -214,6 +214,30 @@ class ImporPesertaTest extends FeatureTestCase
     }
 
     /**
+     * Prodi dosen TIDAK boleh disimpulkan dari prodi mahasiswanya.
+     *
+     * Pembimbingan lintas prodi hal biasa — dosen D4 rutin membimbing mahasiswa
+     * D3. Daftar plotting tak memuat prodi dosen, jadi menebaknya berarti
+     * menuliskan data yang belum tentu benar ke halaman Data Dosen.
+     */
+    public function test_prodi_dosen_tidak_ditebak_dari_prodi_mahasiswa(): void
+    {
+        $this->tulisCsv([$this->barisLengkap(['dospem' => 'TAHAN PRAHARA, S.KOM., M.KOM.'])]);
+        $this->impor(['--prodi' => 'Teknologi Rekayasa Komputer'])->assertSuccessful();
+
+        $dosen = User::where('name', 'TAHAN PRAHARA, S.KOM., M.KOM.')->firstOrFail();
+
+        $this->assertNull($dosen->lecturer->study_program,
+            'Prodi dosen ditebak dari prodi mahasiswanya — padahal bisa berbeda.');
+
+        // Mahasiswanya sendiri tetap memakai prodi dari opsi.
+        $this->assertSame(
+            'Teknologi Rekayasa Komputer',
+            Student::whereHas('user', fn ($q) => $q->where('username', '4.33.23.0.01'))->firstOrFail()->study_program
+        );
+    }
+
+    /**
      * Sandi pembimbing diacak di dalam perintah. Kalau tak ikut dicetak,
      * akunnya ada tapi tak seorang pun bisa masuk — dan satu-satunya jalan
      * keluar tinggal reset satu per satu lewat portal Kaprodi.

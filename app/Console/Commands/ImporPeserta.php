@@ -226,13 +226,6 @@ class ImporPeserta extends Command
 
         foreach (Lecturer::with('user')->get() as $l) {
             if ($l->user && $l->user->role === $peran && $this->orangSama($target, $this->kunciNama($l->user->name))) {
-                // Isi prodi yang masih kosong — kolomnya baru ada belakangan,
-                // jadi dosen yang lahir sebelum itu perlu ditambal. Yang SUDAH
-                // terisi tak disentuh: bisa jadi sengaja diatur berbeda.
-                if ($peran === 'lecturer' && ! $l->study_program) {
-                    $l->update(['study_program' => (string) $this->option('prodi')]);
-                }
-
                 return $this->cacheDosen[$kunci] = $l->id;
             }
         }
@@ -261,13 +254,13 @@ class ImporPeserta extends Command
 
         $this->ringkas[$peran === 'lecturer' ? 'dosen_baru' : 'industri_baru']++;
 
-        // Prodi dosen diisi dari prodi mahasiswa yang dibimbingnya — daftar
-        // plotting tak memuatnya sendiri. Pembimbing industri dibiarkan kosong:
-        // mereka dari perusahaan, bukan bagian dari program studi mana pun.
-        return $this->cacheDosen[$kunci] = Lecturer::create([
-            'user_id'       => $user->id,
-            'study_program' => $peran === 'lecturer' ? (string) $this->option('prodi') : null,
-        ])->id;
+        // Prodi dosen SENGAJA dibiarkan kosong. Sempat kuisi dari prodi
+        // mahasiswa yang dibimbingnya, dan itu keliru: pembimbingan lintas
+        // prodi hal biasa — dosen D4 rutin membimbing mahasiswa D3. Daftar
+        // plotting tak memuat prodi dosen, jadi tak ada yang bisa disimpulkan.
+        // Kaprodi mengisinya sendiri; sampai itu terjadi, "Belum diisi" adalah
+        // jawaban yang jujur.
+        return $this->cacheDosen[$kunci] = Lecturer::create(['user_id' => $user->id])->id;
     }
 
     private function usernameUnik(array $kataNama, string $awalan): string
