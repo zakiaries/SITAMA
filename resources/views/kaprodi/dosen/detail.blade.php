@@ -54,6 +54,12 @@
         <span style="margin-left:6px;background:{{ $isIndustry ? 'var(--warn-bg)' : 'var(--blue-tint)' }};color:{{ $isIndustry ? 'var(--warn-text)' : 'var(--primary)' }};font-size:10px;font-weight:600;padding:1px 8px;border-radius:12px;">
           {{ $isIndustry ? 'Pembimbing Industri' : 'Dosen Kampus' }}
         </span>
+        {{-- Prodi hanya bermakna untuk dosen kampus. --}}
+        @unless($isIndustry)
+          <span style="margin-left:4px;background:{{ $lecturer->study_program ? 'var(--primary-light)' : 'var(--warm)' }};color:{{ $lecturer->study_program ? 'var(--primary-text)' : 'var(--text-muted)' }};font-size:10px;font-weight:600;padding:1px 8px;border-radius:12px;">
+            {{ $lecturer->labelProdi() }}
+          </span>
+        @endunless
         &middot; {{ $students->count() }} mahasiswa{{ $isIndustry ? ' yang dibimbing di industri' : ' bimbingan' }}
       </div>
     </div>

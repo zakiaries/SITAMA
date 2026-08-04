@@ -66,6 +66,12 @@ class ImporDosen extends Command
         'ti' => 'Teknologi Rekayasa Komputer (D4)',
     ];
 
+    /** Nilai yang DISIMPAN di lecturers.study_program (label di atas untuk layar). */
+    private const PRODI = [
+        'ik' => 'Teknik Informatika',
+        'ti' => 'Teknologi Rekayasa Komputer',
+    ];
+
     /**
      * Kata-kata pendek tanpa ejaan rancu, dipakai menyusun password yang mudah
      * ditulis tangan dan diketik ulang. Sengaja tidak memakai huruf/angka yang
@@ -127,6 +133,14 @@ class ImporDosen extends Command
 
                 // Akun sudah ada: setel ulang passwordnya bila diminta, kalau tidak lewati.
                 if ($akun) {
+                    // Prodi TETAP diselaraskan meski akunnya dilewati. Kolomnya
+                    // baru ada belakangan, jadi akun lama lahir tanpa prodi —
+                    // menjalankan ulang perintah ini adalah cara mengisinya
+                    // tanpa SQL manual.
+                    if ($akun->lecturer) {
+                        $akun->lecturer->update(['study_program' => self::PRODI[$kode]]);
+                    }
+
                     if (! $this->option('setel-ulang')) {
                         $baris[] = [$nip, $nama, self::LABEL[$kode], 'dilewati (sudah ada)', '—'];
                         $dilewati++;
@@ -143,7 +157,7 @@ class ImporDosen extends Command
 
                 $password = $seragam ?: Str::random(12);
 
-                DB::transaction(function () use ($nip, $nama, $password) {
+                DB::transaction(function () use ($nip, $nama, $password, $kode) {
                     $user = User::create([
                         'name'         => $nama,
                         'username'     => $nip,
@@ -156,7 +170,10 @@ class ImporDosen extends Command
                         'is_activated' => true,
                     ]);
 
-                    Lecturer::create(['user_id' => $user->id]);
+                    Lecturer::create([
+                        'user_id'       => $user->id,
+                        'study_program' => self::PRODI[$kode],
+                    ]);
                 });
 
                 $baris[] = [$nip, $nama, self::LABEL[$kode], 'dibuat', $password];

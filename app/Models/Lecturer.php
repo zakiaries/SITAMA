@@ -9,7 +9,36 @@ class Lecturer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id'];
+    protected $fillable = ['user_id', 'study_program'];
+
+    /**
+     * Program studi yang dikenal, beserta labelnya di layar.
+     *
+     * Kuncinya nilai yang disimpan — disamakan dengan students.study_program
+     * agar dosen dan mahasiswa bisa dibandingkan tanpa penerjemahan.
+     */
+    public const PRODI = [
+        'Teknik Informatika'          => 'Teknik Informatika (D3)',
+        'Teknologi Rekayasa Komputer' => 'Teknologi Rekayasa Komputer (D4)',
+    ];
+
+    /** Label untuk ditampilkan; yang kosong jujur disebut belum diisi. */
+    public function labelProdi(): string
+    {
+        return self::PRODI[$this->study_program] ?? 'Belum diisi';
+    }
+
+    /** Saring menurut prodi; 'kosong' menjaring yang belum diisi. */
+    public function scopeProdi($query, ?string $prodi)
+    {
+        if ($prodi === null || $prodi === '' || $prodi === 'semua') {
+            return $query;
+        }
+
+        return $prodi === 'kosong'
+            ? $query->whereNull('study_program')
+            : $query->where('study_program', $prodi);
+    }
 
     public function user()
     {

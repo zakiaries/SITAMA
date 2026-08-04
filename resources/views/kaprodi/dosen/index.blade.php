@@ -53,11 +53,38 @@
   </button>
 </div>
 
+{{-- Penyaring prodi hanya untuk dosen kampus — pembimbing industri datang dari
+     perusahaan, bukan dari program studi mana pun. --}}
+@if($tab !== 'industri')
+  @php
+    $pilihanProdi = ['semua' => 'Semua']
+      + \App\Models\Lecturer::PRODI
+      + ['kosong' => 'Belum diisi'];
+    $aktif = $prodi ?: 'semua';
+  @endphp
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    @foreach($pilihanProdi as $nilai => $label)
+      @continue($nilai === 'kosong' && ($prodiCounts['kosong'] ?? 0) === 0)
+      <a href="{{ route('kaprodi.dosen.index', array_filter(['tab' => $tab, 'search' => request('search'), 'prodi' => $nilai === 'semua' ? null : $nilai])) }}"
+         style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;text-decoration:none;font-size:12.5px;font-weight:600;
+                border:1.5px solid {{ $aktif === $nilai ? 'var(--primary)' : 'var(--border)' }};
+                background:{{ $aktif === $nilai ? 'var(--primary-light)' : 'transparent' }};
+                color:{{ $aktif === $nilai ? 'var(--primary-text)' : 'var(--text-secondary)' }};">
+        {{ $label }}
+        <span style="font-size:11px;opacity:.75;">{{ $prodiCounts[$nilai] ?? 0 }}</span>
+      </a>
+    @endforeach
+  </div>
+@endif
+
 <form method="GET" action="{{ route('kaprodi.dosen.index') }}">
   <input type="hidden" name="tab" value="{{ $tab }}">
+  @if($tab !== 'industri' && $prodi)
+    <input type="hidden" name="prodi" value="{{ $prodi }}">
+  @endif
   <div class="search-bar">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input name="search" placeholder="Cari nama {{ $tab === 'industri' ? 'pembimbing industri' : 'dosen' }}..." value="{{ request('search') }}">
+    <input name="search" placeholder="Cari nama atau NIP {{ $tab === 'industri' ? 'pembimbing industri' : 'dosen' }}..." value="{{ request('search') }}">
   </div>
 </form>
 
@@ -80,7 +107,16 @@
   <x-avatar :user="$lec->user" class="dosen-av" style="background:{{ $color['bg'] }};color:{{ $color['text'] }};" />
   <div class="dosen-info">
     <div class="dosen-name">{{ $lec->user->name ?? '-' }}</div>
-    <div class="dosen-user">{{ $lec->user->username ?? '-' }}</div>
+    <div class="dosen-user">
+      {{ $lec->user->username ?? '-' }}
+      @if($tab !== 'industri')
+        <span style="margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;
+                     background:{{ $lec->study_program ? 'var(--blue-tint)' : 'var(--warm)' }};
+                     color:{{ $lec->study_program ? 'var(--primary)' : 'var(--text-muted)' }};">
+          {{ $lec->labelProdi() }}
+        </span>
+      @endif
+    </div>
     <div class="cap-bar-label"><span>{{ $tab === 'industri' ? 'Mahasiswa dibimbing' : 'Mahasiswa bimbingan' }}</span><span>{{ $count }}/{{ $max }}</span></div>
     <div class="cap-bar-track"><div class="cap-bar-fill" style="width:{{ $pct }}%;"></div></div>
   </div>

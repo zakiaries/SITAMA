@@ -33,7 +33,10 @@
   <div class="card">
     <div class="card-title" style="margin-bottom:14px;">Informasi Akun</div>
     <div class="info-row"><div class="info-key">Nama</div><div class="info-val">{{ $user->name }}</div></div>
-    <div class="info-row"><div class="info-key">Username</div><div class="info-val">{{ $user->username }}</div></div>
+    {{-- NIP disimpan sebagai username: sistem tak punya kolom NIP tersendiri,
+         dan perintah impor memakai NIP sebagai identitas masuk. --}}
+    <div class="info-row"><div class="info-key">NIP / Username</div><div class="info-val">{{ $user->username }}</div></div>
+    <div class="info-row"><div class="info-key">Program Studi</div><div class="info-val">{{ $user->lecturer?->labelProdi() ?? 'Belum diisi' }}</div></div>
     <div class="info-row"><div class="info-key">Email</div><div class="info-val">{{ $user->email }}</div></div>
     <div class="info-row"><div class="info-key">Role</div><div class="info-val">
       <span style="background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">

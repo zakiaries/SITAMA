@@ -51,10 +51,14 @@ class DosenController extends Controller
     {
         $search = $request->input('search');
         $tab    = $request->input('tab', 'dosen');
+        // Penyaring prodi hanya berlaku untuk dosen kampus; pembimbing industri
+        // datang dari perusahaan, bukan dari program studi mana pun.
+        $prodi  = $tab === 'industri' ? null : $request->input('prodi');
 
         $role = $tab === 'industri' ? 'lecturer_industry' : 'lecturer';
 
         $query = Lecturer::with('user')
+            ->prodi($prodi)
             ->whereHas('user', fn($u) => $u->where('role', $role));
 
         if ($role === 'lecturer_industry') {
@@ -76,14 +80,25 @@ class DosenController extends Controller
                 ->orWhere('username', 'like', "%$search%"));
         }
 
-        $lecturers = $query->get();
+        // Diurutkan menurut nama: tanpa ini urutannya mengikuti id, sehingga
+        // akun yang dibuat belakangan nongol di antara nama berhuruf A.
+        $lecturers = $query->get()->sortBy(fn ($l) => strtolower($l->user->name ?? ''))->values();
 
         $counts = [
             'dosen'   => Lecturer::whereHas('user', fn($u) => $u->where('role', 'lecturer'))->count(),
             'industri'=> Lecturer::whereHas('user', fn($u) => $u->where('role', 'lecturer_industry'))->count(),
         ];
 
-        return view('kaprodi.dosen.index', compact('lecturers', 'tab', 'counts'));
+        // Jumlah per prodi untuk lencana penyaring — dihitung tanpa memakai
+        // penyaring itu sendiri, supaya angkanya tetap utuh saat sedang disaring.
+        $dasarProdi   = Lecturer::whereHas('user', fn ($u) => $u->where('role', 'lecturer'));
+        $prodiCounts  = ['semua' => (clone $dasarProdi)->count()];
+        foreach (array_keys(Lecturer::PRODI) as $nilai) {
+            $prodiCounts[$nilai] = (clone $dasarProdi)->where('study_program', $nilai)->count();
+        }
+        $prodiCounts['kosong'] = (clone $dasarProdi)->whereNull('study_program')->count();
+
+        return view('kaprodi.dosen.index', compact('lecturers', 'tab', 'counts', 'prodi', 'prodiCounts'));
     }
 
     public function detail(Lecturer $lecturer)
