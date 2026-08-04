@@ -6,85 +6,170 @@ Tempel isi di bawah (mulai dari "Lanjutkan pengerjaan") sebagai pesan pertama di
 
 Lanjutkan pengerjaan **SIMAMA** (sistem informasi magang, Laravel 9 + Flutter, TA D3 Polines).
 Kode di `D:\SITAMA\SITAMA-web`, branch produksi **`web`** (repo `zakiaries/SITAMA`).
-Baca dulu memory-ku (MEMORY.md + project_*.md) untuk konteks.
+Baca dulu memory-ku (MEMORY.md + `project_*.md`, terutama `project_utang_pasca_sidang.md`).
 
-## Status: LIVE & sehat
+## Status: LIVE, berisi DATA SUNGGUHAN, uji coba dimulai 4 Agustus 2026
 
-- **Web + API ter-deploy** di **https://simama.site** (HTTPS aktif).
-- VPS Rumahweb Ubuntu, IP **202.10.38.76** → `ssh root@202.10.38.76` (pakai `tmux`, koneksi suka drop).
-  Login pakai password (Claude tak punya akses SSH — semua perintah server dijalankan user).
-- Stack **Docker Compose** di `/var/www/simama`: Caddy (auto-HTTPS) + PHP-FPM + MariaDB. Panduan: `DEPLOY_DOCKER.md`.
-- Login Kaprodi: `kaprodi` / `SimamaKaprodi2026` (harus diganti).
-- **SMTP AKTIF** (Gmail App Password, pengirim `SIMAMA <lanangbayup@gmail.com>`) → reset password
-  mandiri & email aktivasi pembimbing industri sudah berfungsi. Uji: `php artisan simama:tes-email <tujuan>`.
-- **54 feature test** (`php artisan test`; butuh MySQL XAMPP lokal nyala — sering mati/crash, nyalakan dulu).
+- **https://simama.site** — Docker Compose di `/var/www/simama` (Caddy + PHP-FPM + MariaDB).
+- VPS **Rumahweb**, IP `202.10.38.76`. Domain + DNS di **Hostinger** (ns `dns-parking.com`).
+  Claude tak punya akses SSH — semua perintah server dijalankan user.
+- **347 feature test hijau** (`php artisan test`; butuh MySQL XAMPP di `D:\xampp` nyala).
+- SMTP aktif (Gmail App Password, pengirim `SIMAMA <lanangbayup@gmail.com>`).
 
-### Alur update ke server (wajib urut)
+### Isi produksi per 4 Agustus 2026
+
+| Peran | Jumlah | Sandi |
+|---|---|---|
+| Mahasiswa | 89 (76 hasil impor + 13 sisa uji) | `magang2026` |
+| Dosen | 26 | `dospem2026` |
+| Pembimbing industri | 22 | `magang2026` |
+| Kaprodi | 1 (`kaprodi`) | `SimamaKaprodi2026` |
+
+76 mahasiswa D4 Teknologi Rekayasa Komputer (TI-3A/3B/3C), semuanya sudah **diplot dospem**,
+**52 di antaranya magangnya sudah tercatat**, 24 mengajukan sendiri lewat aplikasi.
+Email mahasiswa memakai pola kampus `namadepan.nimtanpatitik@mhs.polines.ac.id` (terverifikasi
+sampai), sehingga **Lupa Password berfungsi untuk mahasiswa**. Email dosen masih
+`@simama.local` → reset dosen lewat Kaprodi.
+
+### Cadangan — sudah berjalan dan TERBUKTI
+
+- `docker/backup.sh`, cron harian **02:00**, simpan 14 hari di `/var/backups/simama`.
+- Sudah diuji pulih ke basis data sementara: **29 tabel**.
+- Salinan lokal: `C:\Users\ASUS\Downloads\cadangan-simama\`.
+- Salinan produksi terimpor di MySQL lokal sebagai basis data **`simama_produksi`**
+  (terpisah dari `sitama` yang dipakai ngoding — jangan tertukar).
+
+### Alur deploy
 ```bash
-cd /var/www/simama
-git checkout -- storage 2>/dev/null   # buang perubahan .gitignore placeholder
-git pull origin web
-docker compose exec app php artisan migrate --force   # bila ada migrasi baru
-docker compose exec app php artisan route:clear       # bila ada rute baru
-docker compose exec app php artisan view:clear        # bila ada perubahan blade (SERING)
-docker compose exec app php artisan config:clear      # bila .env berubah
-docker compose up -d --build                          # HANYA bila Dockerfile berubah
+cd /var/www/simama && git pull origin web \
+  && docker compose exec -T app php artisan migrate --force \
+  && docker compose exec -T app php artisan config:cache \
+  && docker compose exec -T app php artisan route:cache \
+  && docker compose exec -T app php artisan view:cache
 ```
-Menjalankan artisan sebagai user web (hindari file cache/log jadi milik root):
-`docker compose exec -u www-data -e HOME=/tmp app php artisan ...`
 
-## Yang TERSISA
+---
 
-1. **Mobile Flutter belum pernah diuji** (tugas partner `zakiaries`). Base URL sudah ke produksi
-   (`AppConfig.useProduction = true` → `https://simama.site/api`). Partner harus
-   `flutter pub get && flutter build apk --release` (ada dependensi baru `mobile_scanner`).
-   **Penting:** API berubah sesi ini — `GET /api/mahasiswa/ajukan-magang` kini mengembalikan
-   `has_lecturer`, dan `POST` ditolak 422 bila mahasiswa belum diplot dospem.
-2. **Jam Operasional di halaman Kontak belum dikonfirmasi** (Senin–Jumat 08.00–16.00, Sabtu
-   08.00–12.00). Angka lama yang kemungkinan karangan seperti data kontak sebelumnya — sengaja
-   tidak ditebak. Tanyakan user: benarkan / ganti / hapus kartunya.
-3. **Dua command data dummy yang tumpang tindih**: `simama:mahasiswa-dummy` (Claude) dan
-   `simama:simulasi-magang` (partner). Perlu disepakati satu supaya data uji tak saling menimpa.
-4. Opsional: pindah pengirim email ke `noreply@simama.site` (domain sudah dimiliki) lewat
-   Brevo/Resend/Mailgun + record SPF/DKIM. Nol perubahan kode, cukup `MAIL_*` di `.env`.
+## YANG TERSISA
 
-## Selesai di sesi 2026-07-30 (commit `e8fd24c` … `48ee17e`, semua pushed)
+### 1. Belum dideploy — 4 commit, salah satunya bawa migrasi
+`619334c`, `d38c682`, `ec95bbf`, `ef07ccd` (penyaring prodi Data Dosen).
+Setelah deploy, jalankan sekali untuk mengisi prodi 19 dosen + membetulkan NIP Wiktasari:
+```bash
+cd /var/www/simama && docker compose exec -T app php artisan simama:impor-dosen --prodi=semua
+```
+Tidak menyentuh kata sandi.
 
-- **PRIORITAS 1 lama (bimbingan tak tersimpan) — SELESAI & diagnosanya dulu SALAH ARAH.**
-  Penyebab asli `Guidance::count()=0` adalah **modal Tambah Bimbingan yang hilang** (sudah difix
-  `914ce2d`); kegagalan tes partner sesudahnya karena **akun mahasiswa belum diplot dospem**.
-  Batas upload PHP **tidak pernah** jadi penyebab (server sudah 12M/15M sebelum sesi ini) dan
-  rebuild Docker tak dibutuhkan. Bimbingan kini tersimpan dengan lampiran & di-ACC dosen.
-- `e8fd24c` Kegagalan validasi kini **dicatat ke log**; POST yang body-nya dibuang karena
-  melebihi `post_max_size` tak lagi dibalas "sesi kedaluwarsa" tapi "file terlalu besar".
-- `6ade180` **Foto profil** tampil di semua tempat (komponen `<x-avatar>`, 21 titik).
-- `3a284ea` **Ikon mata** show/hide di SEMUA field password (15 field).
-- `d69de14` **Magang wajib punya dospem** sebelum terbentuk — gerbang di Ajukan Magang (mahasiswa),
-  approve pengajuan & catat-magang (kaprodi), dan API mobile.
-- `0da2b07` **Kontak POLINES resmi** (data lama karangan: alamat Malang!) + form "Kirim Pesan"
-  atrapa diganti; **detail mahasiswa portal industri** diperkaya.
-- `29b9ac3`/`88f2e55` Command **`simama:mahasiswa-dummy`** (3 tahap, idempoten, `--hapus`).
-- `2680e93` **Fix hitungan mahasiswa bimbingan** di Data Dosen kaprodi (tab industri selalu 0).
-- `fb608e4` **Penanda unggahan baru** (badge sidebar + titik merah kartu) untuk dosen & industri.
-- `48ee17e` Command **`simama:tes-email`** untuk mendiagnosa SMTP.
+### 2. Menunggu keputusan/info user
+- **Prodi Tahan Prahara** — partner bilang "kecuali Tahan, ketiganya D3 (IK)", jadi kemungkinan
+  D4 TI, tapi belum dikonfirmasi eksplisit. Jangan diisi sebelum dipastikan.
+- **Prodi Eri Eli Lavindi, Suko Tyas Pernanda, Muttabik Fathul Lathief** → Teknik Informatika (D3).
+  Perintahnya sudah disiapkan, belum dijalankan.
+- **NIP/NIDN + email Eri & Suko** — keduanya TIDAK ADA di direktori SDM Polines
+  (`web.polines.ac.id/id/sdm`); kemungkinan tenaga pengajar non-PNS tanpa NIP. User akan tanya
+  di kampus.
+- **Pembersihan sampah produksi** — 9 akun mahasiswa uji (`tes1`, `tes3`, `putri maria`,
+  `wertyuiop[;lkmnbvcdfghjkl;'`, dll.) + 3 dosen karangan (`dosen1`/ayu lestari,
+  `dosen2`/fauzi ali, `widi santoso`). User menunda. **Jangan hapus tanpa perintah eksplisit.**
+  JANGAN hapus: akun user (`3.34.23.2.12`), partner (`3.34.23.2.15`),
+  `3.34.23.2.55` (simulasi lengkap sampai seminar), `3.34.23.2.99` (dummy 3 tahap).
+
+### 3. Flutter — analyze bersih, build APK belum tuntas
+- Flutter **3.44.8** (sudah di-upgrade dari 3.35.4). `flutter analyze` → **No issues found**.
+- `flutter build apk --release` gagal karena kompilasi inkremental Kotlin tak bisa menghitung
+  jalur relatif antar-drive (proyek di `D:`, pub cache di `C:`). Sudah diperbaiki dengan
+  `kotlin.incremental=false` (`778279e`) + `flutter clean`, **tapi build belum diulang**.
+- Temuan penting: `penilaian_screen.dart` **tak pernah bisa dikompilasi** sejak dulu (impor
+  `app_theme.dart` hilang) — baru ketahuan setelah analyze pertama kali dijalankan.
+
+### 4. Laporan — partner yang menulis
+Prompt untuk Claude-nya sudah diberikan user. Berkas rujukan chatbot:
+`C:\Users\ASUS\Downloads\Penjelasan TF-IDF dan Cosine Similarity - SIMAMA.txt` (12 bagian,
+angka nyata, siap dibawa bimbingan).
+
+### 5. Utang pasca-sidang
+Lihat `project_utang_pasca_sidang.md` — 5 hal yang **sengaja** dibiarkan (sandi seragam, email
+dosen placeholder, magang lama tanpa layar edit periode, pengirim email Gmail pribadi, kuota
+per perusahaan). Semuanya keputusan sadar, bukan cacat terlewat.
+
+---
+
+## Selesai di sesi 2026-08-03/04 — 19 commit (`5ca0c75` … `ef07ccd`), semua pushed
+
+**Enam bug dari partner + empat cacat kecil**
+- `5ca0c75` Nilai baru bisa diisi setelah mahasiswa merampungkan magangnya (logbook lengkap +
+  laporan di-ACC). Sertifikat SENGAJA bukan syarat — perusahaan sering terlambat menerbitkan.
+- `aca0c68` Notifikasi pindah ke panel melayang di lonceng (keempat peran).
+- `5ceaf63` Dropdown pembimbing: `autocomplete="off"` (peramban yang mengisi ulang, bukan server).
+- `eca7f59` Kuota lowongan + penanda terisi/penuh. `2ae4b1a` Bonus: 500 saat Tipe dikosongkan.
+- `8c619dc` `end_date` akhirnya terisi — diminta sejak pengajuan, terbawa ke magang.
+- `b6045a7` Lowongan nonaktif tak lagi hidup lagi saat disunting.
+- `bfd71f4` Peran mati `industri` dibuang dari enum.
+- `293a03e` Kuota diperjelas: dihitung per perusahaan, bukan per lowongan.
+
+**Chatbot**
+- `364d66c` Pemicu `'magang di '` dibuang. Sebelumnya entri KB sendiri ("Bagaimana cara
+  mengajukan magang di SIMAMA?") dijawab daftar lowongan padahal TF-IDF sudah menghitung 0,63.
+  TF-IDF/cosine/ambang **tidak disentuh** — Bab 3 tetap berlaku. Tabel 4.6 & 4.7 diuji ulang:
+  6/6, angka identik.
+
+**Operasional**
+- `17f3b24`/`2060256` Skrip cadangan harian + perbaikan pemeriksanya (jebakan
+  `set -o pipefail` + `grep -q`: grep berhenti di kecocokan pertama → SIGPIPE → pipa dilaporkan
+  gagal JUSTRU karena polanya ketemu).
+- `249099e` `simama:impor-peserta` — impor 76 peserta dari CSV plotting prodi.
+- `6bb7c5e` Opsi `--email-kampus`. `d4493cd` Email placeholder, bukan domain kampus.
+- `619334c` Kredensial dosen & pembimbing industri ikut dicetak.
+- `a02e9c7` Tahap dummy `siap-dinilai`.
+- `d38c682` NIP Wiktasari dibetulkan (TMT 201903, bukan 201902).
+- `ec95bbf` Penyaring prodi di Data Dosen + urut nama + placeholder sebut NIP.
+
+**Mobile**
+- `67964df` Disamakan dengan web (end_date wajib, `can_score`/`score_locked`, kuota lowongan).
+- `8cb0a8b` Impor tema yang hilang. `778279e` `kotlin.incremental=false`.
+
+---
 
 ## Catatan penting (mahal didapat, jangan diulang)
 
-- **`LOG_LEVEL` server sudah dinaikkan `error` → `warning`.** Sebelumnya semua kegagalan validasi
-  dan penolakan guard tak meninggalkan jejak apa pun, sehingga diagnosa terpaksa menebak.
-  **Jangan turunkan lagi.** Kalau ada laporan "gagal tanpa pesan", cek `storage/logs/laravel.log` dulu.
-- **Jangan percaya "tidak ada error di log" sebagai bukti** sebelum memastikan log memang ditulis
-  (level, channel, kepemilikan file).
-- Saat mengubah banyak blade, **jangan pakai regex/script otomatis** — sudah pernah merusak layout.
-  Edit manual, lalu verifikasi `php artisan view:cache`.
-- **Nama kolom yang mudah keliru**: komentar dosen di logbook = `lecturer_note` (BUKAN `note`);
-  komentar industri = `industry_note`. Keduanya kolom terpisah, jadi penanda dua peran saling bebas.
-- **Dua kolom dospem**: `students.lecturer_id` (hasil plot Kaprodi, sumber kebenaran) dan
-  `internships.lecturer_id` (dipakai portal dosen memfilter). `assignLecturer` sudah menyinkronkan
-  keduanya, dan sejak `d69de14` magang tak bisa lahir tanpa dospem.
-- Guard yang sudah ada: **logbook** butuh magang aktif; **bimbingan** butuh dospem; **ajukan magang**
-  butuh dospem. Kalau partner melapor "tak bisa mengisi", cek dulu apakah akunnya memenuhi syarat —
-  bukan bug.
-- Rubrik nilai sesuai form resmi (dosen: Proposal 20% + Laporan 80%; industri 8 komponen; skala 1–10;
-  nilai akhir = rata dosen + rata industri, maks 20). Lihat `project_nilai_rework.md`.
-- Semua pekerjaan sudah ter-commit & ter-push ke branch `web`.
+### Kesalahan yang SUDAH pernah dibuat sesi ini
+- **JANGAN menyimpulkan prodi dosen dari prodi mahasiswanya.** Pembimbingan lintas prodi hal
+  biasa — user sendiri D3 (IK) dibimbing dosen D4. Sempat ditulis begitu, lalu dicabut
+  (`ef07ccd`). Kalau tak diketahui, biarkan kosong dan tampilkan "Belum diisi".
+- **JANGAN mengarang alamat email di domain milik institusi.** Sempat memakai
+  `@student.polines.ac.id`; kalau alamat karangan itu ternyata ada dan dipakai orang lain,
+  tautan reset kata sandi terkirim ke pihak tak berhak. `@simama.local` aman karena pengiriman
+  mustahil. Pola kampus (`--email-kampus`) aman **karena NIM ikut di dalam alamat** sehingga
+  unik per orang.
+- **Perbaikan chatbot "dahulukan FAQ bila skor unggul" TERBUKTI LEBIH BURUK** — merusak tiga
+  permintaan rekomendasi. Diuji sebelum dipakai, lalu dibuang. Yang benar: buang pemicunya.
+
+### Lingkungan (Windows)
+- `mysql.exe` ada di **`D:\xampp\mysql\bin\`**, tidak di PATH. Laragon di `C:\` kosong.
+- Perintah berawalan `/d/...` untuk **Git Bash**; di PowerShell pakai `D:\...` dan `&` bila dikutip.
+  PowerShell 5.1 **tidak mengenal `&&`**.
+- `scp` Windows: satu berkas per perintah. `scp host:"/a /b" tujuan` dibaca sebagai SATU nama.
+- Dump MariaDB diawali `/*M!999999\- enable the sandbox mode */` yang **ditolak klien MySQL**.
+  Buang baris itu sebelum impor.
+- Excel merusak NIP 18 digit & nomor HP jadi notasi ilmiah. Buka `.tsv` lewat
+  Data → From Text/CSV, set kolomnya sebagai **Text**.
+
+### Domain & alur yang mudah keliru
+- **Dua kolom dospem**: `students.lecturer_id` (plot Kaprodi, sumber kebenaran) dan
+  `internships.lecturer_id` (dipakai portal dosen). `assignLecturer` menyinkronkan keduanya.
+- **Bimbingan butuh dospem, BUKAN magang** — ini disengaja (dospem membimbing proposal sebelum
+  magang ada). Pernah dilaporkan sebagai bug, lalu dikonfirmasi user sebagai rancangan.
+- **NIP disimpan sebagai `users.username`** — tak ada kolom NIP tersendiri. Pencarian di Data
+  Dosen mencakup name ATAU username, jadi cari-per-NIP sudah lama bekerja.
+- Gerbang yang ada: logbook butuh magang aktif; bimbingan butuh dospem; ajukan magang butuh
+  dospem; nilai butuh logbook lengkap + laporan di-ACC. Kalau ada laporan "tak bisa mengisi",
+  cek dulu syaratnya — biasanya bukan bug.
+- `LOG_LEVEL` server sudah `warning`. **Jangan turunkan.** Cek `storage/logs/laravel.log` dulu
+  sebelum menebak.
+- Saat mengubah banyak blade, **jangan pakai regex otomatis** — pernah merusak layout.
+
+### Cara kerja yang diminta user
+- **Verifikasi manual milik user & partner.** Claude cukup: perbaiki → `php artisan test` → commit
+  → push. Jangan menyuruh user membuka browser untuk mengecek.
+- **Satu bug satu commit**, supaya user bisa memeriksa bertahap.
+- Badan commit menjelaskan **sebab**, bukan daftar perubahan.
