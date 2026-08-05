@@ -60,6 +60,7 @@
     <div class="hero-role">Pembimbing Industri</div>
     <div class="hero-name">{{ $user->name }}</div>
     <form method="GET" action="{{ route('dosen-industri.dashboard') }}">
+      <input type="hidden" name="periode" value="{{ $periode }}">
       <div class="hero-search">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -67,6 +68,15 @@
         <input name="search" placeholder="Cari nama mahasiswa atau jurusan..." value="{{ request('search') }}">
       </div>
     </form>
+
+    {{-- Hanya muncul bila pembimbing ini pernah membimbing lebih dari satu
+         angkatan; kalau cuma satu, dropdown-nya tak menawarkan pilihan apa pun. --}}
+    @if($periodeList->count() > 1)
+      <form method="GET" action="{{ route('dosen-industri.dashboard') }}" style="margin-top:10px;">
+        <input type="hidden" name="search" value="{{ request('search') }}">
+        <x-periode-select :periode="$periode" :list="$periodeList"/>
+      </form>
+    @endif
   </div>
 </div>
 

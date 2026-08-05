@@ -103,12 +103,7 @@
         <option value="{{ $major }}" {{ request('jurusan') === $major ? 'selected' : '' }}>{{ $major }}</option>
       @endforeach
     </select>
-    <select name="tahun" class="filter-select" onchange="this.form.submit()">
-      <option value="">Semua Tahun</option>
-      @foreach($years as $year)
-        <option value="{{ $year }}" {{ request('tahun') === $year ? 'selected' : '' }}>{{ $year }}</option>
-      @endforeach
-    </select>
+    <x-periode-select :periode="$periode" :list="$periodeList"/>
   </form>
 </div>
 
@@ -116,7 +111,7 @@
 <div class="dz-tabs">
   @php $statusTabs = ['semua' => 'Semua', 'belum' => 'Belum Dinilai', 'dinilai' => 'Sudah Dinilai']; @endphp
   @foreach($statusTabs as $key => $label)
-    <a href="{{ route('dosen.dashboard', array_merge(request()->only('search', 'jurusan', 'tahun'), ['status' => $key])) }}"
+    <a href="{{ route('dosen.dashboard', array_merge(request()->only('search', 'jurusan'), ['status' => $key, 'periode' => $periode])) }}"
        class="dz-tab {{ $status === $key ? 'active' : '' }}">{{ $label }} ({{ $counts[$key] }})</a>
   @endforeach
 </div>

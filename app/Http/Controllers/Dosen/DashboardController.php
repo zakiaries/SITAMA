@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\Period;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -51,14 +52,26 @@ class DashboardController extends Controller
             $query->where('major', $request->jurusan);
         }
 
-        if ($request->filled('tahun')) {
-            $query->where('academic_year', $request->tahun);
-        }
+        // Penyaring periode, sama seperti portal Kaprodi. Yang lama membaca
+        // students.academic_year — teks bebas yang diketik sendiri mahasiswa —
+        // sehingga dropdownnya berisi nilai seperti "2023/2026".
+        //
+        // Bedanya dengan Kaprodi: daftar periode di sini hanya yang dosen ini
+        // memang punya bimbingan di dalamnya. Menawarkan periode kosong pada
+        // dosen yang tak mengajar di angkatan itu hanya jadi pilihan buntu.
+        $periodeList = Period::whereHas('students', fn($q) => $q->dibimbingOleh($lecturer->id))
+            ->terbaru()->get();
+
+        $periode = $request->input('periode') ?: $this->periodeBawaan($periodeList);
+
+        Period::terapkan($query, $periode);
 
         $students = $query->get();
 
-        // Hitungan untuk tab status (mengabaikan filter status, tetap ikut filter dasar bimbingan dosen).
-        $base = fn() => Student::dibimbingOleh($lecturer->id);
+        // Hitungan untuk tab status (mengabaikan filter status, tetap ikut
+        // filter dasar bimbingan dosen DAN periode yang sedang dilihat — angka
+        // di tab harus menjawab pertanyaan yang sama dengan daftarnya).
+        $base = fn() => Period::terapkan(Student::dibimbingOleh($lecturer->id), $periode);
         $counts = [
             'semua'   => $base()->count(),
             'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),
@@ -67,8 +80,29 @@ class DashboardController extends Controller
 
         $majors = Student::dibimbingOleh($lecturer->id)->distinct()->pluck('major');
 
-        $years = Student::dibimbingOleh($lecturer->id)->distinct()->pluck('academic_year');
+        return view('dosen.dashboard.index', compact(
+            'user', 'lecturer', 'students', 'majors', 'status', 'counts',
+            'periode', 'periodeList'
+        ));
+    }
 
-        return view('dosen.dashboard.index', compact('user', 'lecturer', 'students', 'majors', 'years', 'status', 'counts'));
+    /**
+     * Periode yang ditampilkan lebih dulu bagi seorang dosen.
+     *
+     * Periode berjalan jadi acuan, seperti di portal Kaprodi — TAPI hanya bila
+     * dosen ini punya bimbingan di dalamnya. Dosen yang giliran prodinya belum
+     * tiba akan membuka dashboard dan melihat layar kosong tanpa penjelasan,
+     * padahal bimbingannya ada di periode sebelumnya. Dalam hal itu, yang
+     * ditampilkan adalah periode terbarunya sendiri.
+     */
+    private function periodeBawaan($periodeList): string
+    {
+        $bawaan = Period::pilihanBawaan();
+
+        if (Period::menyaring($bawaan) && $periodeList->contains('id', (int) $bawaan)) {
+            return $bawaan;
+        }
+
+        return (string) ($periodeList->first()?->id ?? Period::PILIHAN_SEMUA);
     }
 }

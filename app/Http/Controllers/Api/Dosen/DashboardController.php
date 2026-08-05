@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Dosen;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Models\Period;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -42,9 +43,15 @@ class DashboardController extends ApiController
         if ($request->filled('jurusan')) {
             $query->where('major', $request->jurusan);
         }
-        if ($request->filled('tahun')) {
-            $query->where('academic_year', $request->tahun);
-        }
+        // Paritas dengan web: menyaring per periode, bukan per academic_year
+        // yang dulu diketik sendiri mahasiswa. `tahun` versi lama diabaikan
+        // agar APK yang belum diperbarui tak mendadak menampilkan daftar kosong.
+        $periodeList = Period::whereHas('students', fn ($q) => $q->dibimbingOleh($lecturer->id))
+            ->terbaru()->get();
+
+        $periode = $request->input('periode') ?: $this->periodeBawaan($periodeList);
+
+        Period::terapkan($query, $periode);
 
         $students = $query->get()->map(function ($student) {
             $internship = $student->internships->first();
@@ -74,7 +81,7 @@ class DashboardController extends ApiController
             ];
         });
 
-        $base = fn () => Student::dibimbingOleh($lecturer->id);
+        $base = fn () => Period::terapkan(Student::dibimbingOleh($lecturer->id), $periode);
         $counts = [
             'semua'   => $base()->count(),
             'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),
@@ -87,8 +94,24 @@ class DashboardController extends ApiController
             // Untuk badge di menu/appbar: total yang menunggu tanggapan dosen.
             'menunggu_tanggapan' => $lecturer->menungguTanggapanKampus(),
             'majors'   => Student::dibimbingOleh($lecturer->id)->distinct()->pluck('major'),
-            'years'    => Student::dibimbingOleh($lecturer->id)->distinct()->pluck('academic_year'),
+            'periode'  => $periode,
+            'periods'  => $periodeList->map(fn ($p) => ['id' => $p->id, 'label' => $p->label]),
+            // `years` dipertahankan (kosong) supaya APK lama yang membacanya tak
+            // pecah; layar dosen di Flutter perlu beralih ke `periods`.
+            'years'    => [],
             'students' => $students,
         ]);
+    }
+
+    /** Sama seperti web: periode berjalan, kecuali dosen ini tak punya bimbingan di sana. */
+    private function periodeBawaan($periodeList): string
+    {
+        $bawaan = Period::pilihanBawaan();
+
+        if (Period::menyaring($bawaan) && $periodeList->contains('id', (int) $bawaan)) {
+            return $bawaan;
+        }
+
+        return (string) ($periodeList->first()?->id ?? Period::PILIHAN_SEMUA);
     }
 }

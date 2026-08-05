@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\DosenIndustri;
 
 use App\Http\Controllers\Controller;
+use App\Models\Period;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,19 @@ class DashboardController extends Controller
             });
         }
 
+        // Pembimbing industri yang dipakai perusahaan yang sama tiap tahun akan
+        // menumpuk bimbingan lintas angkatan, sampai tak jelas lagi siapa yang
+        // sedang ia bimbing sekarang. Daftarnya hanya memuat periode yang ia
+        // memang punya bimbingan di dalamnya.
+        $periodeList = Period::whereHas('students', fn($q) => $q->whereHas(
+            'internships',
+            fn($i) => $i->where('lecturer_industry_id', $lecturer->id)
+        ))->terbaru()->get();
+
+        $periode = $request->input('periode') ?: $this->periodeBawaan($periodeList);
+
+        Period::terapkan($query, $periode);
+
         $students = $query->get();
 
         $totalMahasiswa = $students->count();
@@ -39,7 +53,24 @@ class DashboardController extends Controller
         $belumDikomen   = $students->sum(fn($s) => $s->logBooks->whereNull('industry_note')->count());
 
         return view('dosen-industri.dashboard.index', compact(
-            'user', 'lecturer', 'students', 'totalMahasiswa', 'aktif', 'belumDikomen'
+            'user', 'lecturer', 'students', 'totalMahasiswa', 'aktif', 'belumDikomen',
+            'periode', 'periodeList'
         ));
+    }
+
+    /**
+     * Periode berjalan jadi acuan, tapi hanya bila pembimbing ini punya
+     * bimbingan di dalamnya — kalau tidak, ia membuka dashboard dan melihat
+     * layar kosong padahal bimbingannya ada di angkatan sebelumnya.
+     */
+    private function periodeBawaan($periodeList): string
+    {
+        $bawaan = Period::pilihanBawaan();
+
+        if (Period::menyaring($bawaan) && $periodeList->contains('id', (int) $bawaan)) {
+            return $bawaan;
+        }
+
+        return (string) ($periodeList->first()?->id ?? Period::PILIHAN_SEMUA);
     }
 }
