@@ -21,15 +21,16 @@ Baca dulu memory-ku (MEMORY.md + `project_*.md`, terutama `project_utang_pasca_s
 | Peran | Jumlah | Sandi |
 |---|---|---|
 | Mahasiswa | 89 (76 hasil impor + 13 sisa uji) | `magang2026` |
-| Dosen | 26 | `dospem2026` |
+| Dosen | 26 | `bimbing2026` (diganti 5 Agt, dulu `dospem2026`) |
 | Pembimbing industri | 22 | `magang2026` |
 | Kaprodi | 1 (`kaprodi`) | `SimamaKaprodi2026` |
 
 76 mahasiswa D4 Teknologi Rekayasa Komputer (TI-3A/3B/3C), semuanya sudah **diplot dospem**,
 **52 di antaranya magangnya sudah tercatat**, 24 mengajukan sendiri lewat aplikasi.
 Email mahasiswa memakai pola kampus `namadepan.nimtanpatitik@mhs.polines.ac.id` (terverifikasi
-sampai), sehingga **Lupa Password berfungsi untuk mahasiswa**. Email dosen masih
-`@simama.local` → reset dosen lewat Kaprodi.
+sampai), sehingga **Lupa Password berfungsi untuk mahasiswa**. Email dosen kini **24 dari 26
+sudah asli** (`@polines.ac.id`, dikumpulkan dari direktori SDM) → Lupa Password jalan untuk
+mereka. Sisa 2 placeholder: Eri Eli Lavindi & Suko Tyas Pernanda → reset lewat Kaprodi.
 
 ### Cadangan — sudah berjalan dan TERBUKTI
 
@@ -52,19 +53,21 @@ cd /var/www/simama && git pull origin web \
 
 ## YANG TERSISA
 
-### 1. Belum dideploy — 4 commit, salah satunya bawa migrasi
-`619334c`, `d38c682`, `ec95bbf`, `ef07ccd` (penyaring prodi Data Dosen).
-Setelah deploy, jalankan sekali untuk mengisi prodi 19 dosen + membetulkan NIP Wiktasari:
-```bash
-cd /var/www/simama && docker compose exec -T app php artisan simama:impor-dosen --prodi=semua
-```
-Tidak menyentuh kata sandi.
+### 1. ~~Belum dideploy — 4 commit~~ SELESAI 5 Agt
+`619334c`, `d38c682`, `ec95bbf`, `ef07ccd` sudah live, dan `simama:impor-dosen --prodi=semua`
+sudah dijalankan. Terbukti dari halaman Data Dosen: penyaring prodi muncul dengan
+**TI D3 = 14, TRK D4 = 8, Belum diisi = 4** (total 26) — cocok dengan roster kode
+(11 IK + 8 TI) ditambah Eri, Suko, Muttabik yang prodinya ikut terisi.
+
+Wiktasari **tidak berduplikat**: akunnya di produksi sudah memakai NIP yang benar
+(`198703272019032012`), sehingga rerun menemukannya dan melewatinya, bukan membuat akun baru.
 
 ### 2. Menunggu keputusan/info user
 - **Prodi Tahan Prahara** — partner bilang "kecuali Tahan, ketiganya D3 (IK)", jadi kemungkinan
-  D4 TI, tapi belum dikonfirmasi eksplisit. Jangan diisi sebelum dipastikan.
-- **Prodi Eri Eli Lavindi, Suko Tyas Pernanda, Muttabik Fathul Lathief** → Teknik Informatika (D3).
-  Perintahnya sudah disiapkan, belum dijalankan.
+  D4 TI, tapi belum dikonfirmasi eksplisit. Jangan diisi sebelum dipastikan. Ia salah satu dari
+  4 kartu "Belum diisi"; tiga sisanya dosen karangan yang menunggu dibersihkan.
+- ~~**Prodi Eri Eli Lavindi, Suko Tyas Pernanda, Muttabik Fathul Lathief**~~ SUDAH terisi
+  Teknik Informatika (D3).
 - **NIP/NIDN + email Eri & Suko** — keduanya TIDAK ADA di direktori SDM Polines
   (`web.polines.ac.id/id/sdm`); kemungkinan tenaga pengajar non-PNS tanpa NIP. User akan tanya
   di kampus.
@@ -74,11 +77,12 @@ Tidak menyentuh kata sandi.
   JANGAN hapus: akun user (`3.34.23.2.12`), partner (`3.34.23.2.15`),
   `3.34.23.2.55` (simulasi lengkap sampai seminar), `3.34.23.2.99` (dummy 3 tahap).
 
-### 3. Flutter — analyze bersih, build APK belum tuntas
+### 3. Flutter — APK jalan di HP, sisa rapi-rapi UI
 - Flutter **3.44.8** (sudah di-upgrade dari 3.35.4). `flutter analyze` → **No issues found**.
-- `flutter build apk --release` gagal karena kompilasi inkremental Kotlin tak bisa menghitung
-  jalur relatif antar-drive (proyek di `D:`, pub cache di `C:`). Sudah diperbaiki dengan
-  `kotlin.incremental=false` (`778279e`) + `flutter clean`, **tapi build belum diulang**.
+- `flutter build apk --release` **sudah berhasil** setelah `kotlin.incremental=false` (`778279e`)
+  + `flutter clean` — dulu gagal karena kompilasi inkremental Kotlin tak bisa menghitung jalur
+  relatif antar-drive (proyek di `D:`, pub cache di `C:`). Aplikasi sudah terpasang & berfungsi
+  di HP user; **sisa keluhan hanya UI yang kurang rapi**, belum dirinci bagian mana.
 - Temuan penting: `penilaian_screen.dart` **tak pernah bisa dikompilasi** sejak dulu (impor
   `app_theme.dart` hilang) — baru ketahuan setelah analyze pertama kali dijalankan.
 
@@ -161,6 +165,17 @@ per perusahaan). Semuanya keputusan sadar, bukan cacat terlewat.
   magang ada). Pernah dilaporkan sebagai bug, lalu dikonfirmasi user sebagai rancangan.
 - **NIP disimpan sebagai `users.username`** — tak ada kolom NIP tersendiri. Pencarian di Data
   Dosen mencakup name ATAU username, jadi cari-per-NIP sudah lama bekerja.
+- **Ganti sandi massal: WAJIB `->get()->each()`, JANGAN `->update()` massal.** `User::booted()`
+  mencabut token Sanctum tiap sandi berubah, dan itu model event — update query-builder
+  melewatinya diam-diam, menyisakan orang yang tetap bisa jalan di aplikasi HP dengan sandi
+  lama. `$casts` juga tak punya `password => hashed`, jadi `bcrypt()` manual memang perlu.
+  `laravel/tinker` ada di `require` (bukan `require-dev`), jadi selamat dari `--no-dev`:
+  ```bash
+  docker compose exec -T app php artisan tinker --execute='App\Models\User::where("role","lecturer")->get()->each(fn($u)=>$u->update(["password"=>bcrypt("SANDI")]));'
+  ```
+  **`simama:impor-dosen --setel-ulang --password=` hanya menyentuh 19 dosen di roster kode,
+  bukan 26** — 4 dosen sungguhan (Eri, Suko, Muttabik, Tahan) lahir dari `impor-peserta` dan
+  tak ada di roster. Jangan pakai perintah itu untuk operasi sandi menyeluruh.
 - Gerbang yang ada: logbook butuh magang aktif; bimbingan butuh dospem; ajukan magang butuh
   dospem; nilai butuh logbook lengkap + laporan di-ACC. Kalau ada laporan "tak bisa mengisi",
   cek dulu syaratnya — biasanya bukan bug.
