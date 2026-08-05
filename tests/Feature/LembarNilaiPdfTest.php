@@ -176,6 +176,12 @@ class LembarNilaiPdfTest extends FeatureTestCase
         $industri = $this->render('pdf-industri');
         $this->assertStringContainsString('Pembimbing Industri,', $industri);
         $this->assertStringNotContainsString('Dosen Pembimbing,', $industri);
+
+        // Pembimbing industri cukup namanya. Yang tersimpan untuk mereka adalah
+        // nama pengguna untuk masuk sistem, bukan nomor induk kepegawaian —
+        // mencetaknya sebagai NIP akan memalsukan keterangan.
+        $this->assertStringNotContainsString('NIP', $industri);
+        $this->assertStringContainsString('NIP.', $dosen);
     }
 
     /** Identitas mengikuti form: nama, NIM, tempat magang, alamat. */

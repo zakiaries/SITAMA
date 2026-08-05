@@ -96,8 +96,11 @@
       Semarang, {{ now()->translatedFormat('d F Y') }}<br>
       Pembimbing Industri,
       <div class="sign-space"></div>
-      ({{ $internship->lecturerIndustry->user->name ?? '.....................................' }})<br>
-      NIP/NIK. {{ $internship->lecturerIndustry->user->username ?? '' }}
+      {{-- Tanpa baris NIP/NIK. Yang tersimpan untuk pembimbing industri adalah
+           nama pengguna untuk masuk sistem ("industri1"), bukan nomor induk
+           kepegawaian mana pun — mencetaknya sebagai NIP justru memalsukan
+           keterangan di dokumen yang ditandatangani. --}}
+      ({{ $internship->lecturerIndustry->user->name ?? '.....................................' }})
     </td>
   </tr>
 </table>
