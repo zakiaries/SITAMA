@@ -450,8 +450,9 @@ class SimulasiMagang extends Command
 
         $seminar = Seminar::create([
             'lecturer_id' => $dospem->id,
-            'title'       => 'Seminar Hasil Magang ' . $student->academic_year,
+            'title'       => 'Seminar Hasil Magang ' . ($student->period?->label ?? $student->academic_year),
             'program'     => $student->study_program ?: 'Magang',
+            'period_id'   => $student->period_id,
             'organizer'   => $dospem->user->name ?? '-',
             'description' => 'Seminar hasil pelaksanaan magang mahasiswa Program Studi '
                 . ($student->study_program ?: '-') . ' Politeknik Negeri Semarang.',

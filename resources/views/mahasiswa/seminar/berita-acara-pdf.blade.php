@@ -13,18 +13,14 @@
       $logoData = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
   }
 
-  // Semester & tahun akademik diturunkan dari tanggal seminar (kalender Polines:
-  // Gasal ~Agu–Jan, Genap ~Feb–Jul).
-  $tgl   = $seminar->date ?? now();
-  $bulan = (int) $tgl->format('n');
-  $tahun = (int) $tgl->format('Y');
-  if ($bulan >= 8) {          // Agu–Des → Gasal, TA thn/thn+1
-      $semester = 'Gasal'; $ta = $tahun . '/' . ($tahun + 1);
-  } elseif ($bulan == 1) {    // Jan → Gasal, TA thn-1/thn
-      $semester = 'Gasal'; $ta = ($tahun - 1) . '/' . $tahun;
-  } else {                     // Feb–Jul → Genap, TA thn-1/thn
-      $semester = 'Genap'; $ta = ($tahun - 1) . '/' . $tahun;
-  }
+  // Semester & tahun akademik diambil dari PERIODE MAGANG-nya, bukan dihitung
+  // dari tanggal seminar. Seminar berlangsung sesudah magang dan kadang jatuh
+  // di semester berikutnya, jadi menebaknya dari tanggal seminar mencetak
+  // periode yang bukan milik mahasiswanya — di dokumen yang ditandatangani.
+  $tgl      = $seminar->date ?? now();
+  $dokumen  = $seminar->periodeDokumen();
+  $semester = $dokumen['semester'];
+  $ta       = $dokumen['tahun_akademik'];
 
   $presenters = $seminar->presenters;
   $firstMajor = optional(optional($presenters->first())->student)->major;

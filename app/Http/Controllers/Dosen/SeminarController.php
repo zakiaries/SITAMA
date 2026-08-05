@@ -115,6 +115,10 @@ class SeminarController extends Controller
             'lecturer_id' => $lecturer->id,
             'title'       => $request->title,
             'program'     => $validStudents->first()->study_program ?: 'Magang',
+            // Periode magang yang diseminarkan, diambil dari penyajinya. Berita
+            // acara mencantumkannya, dan menebaknya dari tanggal seminar salah:
+            // seminar berlangsung sesudah magang, kadang di semester berikutnya.
+            'period_id'   => $validStudents->first()->period_id,
             'organizer'   => Auth::user()->name,
             'status'      => 'draft',
         ]);

@@ -24,7 +24,7 @@ class Seminar extends Model
     public const MIN_AUDIENCE = 15;
 
     protected $fillable = [
-        'lecturer_id', 'title', 'program', 'date', 'time', 'location', 'organizer',
+        'lecturer_id', 'title', 'program', 'period_id', 'date', 'time', 'location', 'organizer',
         'description', 'qr_code', 'status', 'student_id',
         'rejection_reason', 'access_token', 'witnessed_at',
     ];
@@ -38,6 +38,45 @@ class Seminar extends Model
     public function lecturer()
     {
         return $this->belongsTo(Lecturer::class);
+    }
+
+    /** Periode magang yang diseminarkan. */
+    public function period()
+    {
+        return $this->belongsTo(Period::class);
+    }
+
+    /**
+     * Semester & tahun akademik untuk kepala berita acara.
+     *
+     * Diambil dari PERIODE MAGANG-nya, bukan dari tanggal seminar. Seminar
+     * berlangsung sesudah magang dan kadang jatuh di semester berikutnya:
+     * mahasiswa yang magang pada Genap 2025/2026 lalu seminarnya Agustus 2026
+     * akan menerima dokumen bertuliskan "Gasal 2026/2027" bila tanggal seminar
+     * yang dijadikan acuan — periode yang bukan miliknya, di berkas yang
+     * ditandatangani.
+     *
+     * Sesi lama yang periodenya tak diketahui jatuh kembali ke tanggal seminar,
+     * karena dokumen dengan tahun akademik yang mendekati tetap lebih berguna
+     * daripada dokumen dengan bagian yang kosong.
+     *
+     * @return array{semester: string, tahun_akademik: string}
+     */
+    public function periodeDokumen(): array
+    {
+        if ($this->period) {
+            return [
+                'semester'       => Period::SEMESTER[$this->period->semester] ?? $this->period->semester,
+                'tahun_akademik' => $this->period->academic_year,
+            ];
+        }
+
+        [$tahun, $semester] = Period::dariTanggal($this->date ?? now());
+
+        return [
+            'semester'       => Period::SEMESTER[$semester] ?? $semester,
+            'tahun_akademik' => $tahun,
+        ];
     }
 
     /** Mahasiswa penyaji dalam sesi ini (beserta ketersediaan tanggalnya). */
