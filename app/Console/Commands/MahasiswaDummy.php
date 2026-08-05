@@ -9,6 +9,7 @@ use App\Models\Internship;
 use App\Models\InternshipReport;
 use App\Models\Lecturer;
 use App\Models\LogBook;
+use App\Models\Period;
 use App\Models\Student;
 use App\Models\StudentScore;
 use App\Models\User;
@@ -161,11 +162,17 @@ class MahasiswaDummy extends Command
     {
         $student = Student::firstOrNew(['user_id' => $user->id]);
 
+        $penempatan = Period::penempatanPendaftarBaru();
+
         $student->fill([
             'the_class'     => (string) $this->option('kelas'),
             'study_program' => (string) $this->option('prodi'),
             'major'         => (string) $this->option('jurusan'),
-            'academic_year' => (string) $this->option('tahun'),
+            // Ikut periode berjalan supaya akun uji muncul di layar Kaprodi
+            // yang menyaring per periode — kalau tidak, ia lahir langsung
+            // tersembunyi dan mengecoh yang sedang menguji.
+            'period_id'     => $penempatan['period_id'],
+            'academic_year' => $penempatan['academic_year'] ?: (string) $this->option('tahun'),
             'status'        => 'active',
             'lecturer_id'   => $dospem->id,
         ])->save();

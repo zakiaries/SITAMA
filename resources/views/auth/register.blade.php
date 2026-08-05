@@ -147,12 +147,28 @@
         <div class="an" style="animation-delay:.28s">
           <div class="seclabel">Data Akademik</div>
           <div class="row-2">
-            <div class="field"><label>Program Studi</label><input type="text" name="study_program" value="{{ old('study_program') }}" placeholder="cth: Teknik Informatika" required></div>
+            {{-- Pilihan, bukan ketikan: teks bebas dulu melahirkan dua ejaan
+                 untuk satu prodi yang sama. --}}
+            <div class="field">
+              <label>Program Studi</label>
+              <select name="study_program" required>
+                <option value="" disabled {{ old('study_program') ? '' : 'selected' }}>Pilih program studi</option>
+                @foreach(\App\Models\Student::PRODI as $prodi)
+                  <option value="{{ $prodi }}" {{ old('study_program') === $prodi ? 'selected' : '' }}>{{ $prodi }}</option>
+                @endforeach
+              </select>
+            </div>
             <div class="field"><label>Jurusan</label><input type="text" name="major" value="{{ old('major') }}" placeholder="cth: TI" required></div>
           </div>
           <div class="row-2">
             <div class="field"><label>Kelas</label><input type="text" name="the_class" value="{{ old('the_class') }}" placeholder="cth: TI-6A" required></div>
-            <div class="field"><label>Tahun Akademik</label><input type="text" name="academic_year" value="{{ old('academic_year') }}" placeholder="cth: 2024/2025" required></div>
+            {{-- Tahun akademik tak lagi diminta: ia mengikuti periode magang
+                 yang sedang berjalan, jadi pendaftar tak bisa lagi salah ketik. --}}
+            <div class="field">
+              <label>Periode Magang</label>
+              <input type="text" value="{{ $periodeBerjalan?->label ?? 'Belum dibuka' }}" disabled
+                     style="background:var(--bg-soft,#f5f5f5);color:var(--text-muted,#777);cursor:not-allowed;">
+            </div>
           </div>
         </div>
 

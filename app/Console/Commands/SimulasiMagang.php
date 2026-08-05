@@ -9,6 +9,7 @@ use App\Models\Internship;
 use App\Models\InternshipReport;
 use App\Models\Lecturer;
 use App\Models\LogBook;
+use App\Models\Period;
 use App\Models\Seminar;
 use App\Models\SeminarPresenter;
 use App\Models\Student;
@@ -161,11 +162,16 @@ class SimulasiMagang extends Command
     {
         $student = Student::firstOrNew(['user_id' => $user->id]);
 
+        $penempatan = Period::penempatanPendaftarBaru();
+
         $student->fill([
             'the_class'     => (string) $this->option('kelas'),
             'study_program' => (string) $this->option('prodi'),
             'major'         => (string) $this->option('jurusan'),
-            'academic_year' => (string) $this->option('tahun'),
+            // Ikut periode berjalan supaya akun simulasi muncul di layar
+            // Kaprodi yang menyaring per periode.
+            'period_id'     => $penempatan['period_id'],
+            'academic_year' => $penempatan['academic_year'] ?: (string) $this->option('tahun'),
             'status'        => 'active',
             'lecturer_id'   => $dospem->id,
         ])->save();

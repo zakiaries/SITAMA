@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Company;
 use App\Models\Internship;
 use App\Models\Lecturer;
+use App\Models\Period;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -282,6 +283,8 @@ class ImporPeserta extends Command
     /** @return string|null kata sandi bila akunnya baru dibuat */
     private function pastikanMahasiswa(array $row, ?int $dosenId): ?string
     {
+        $penempatan = Period::penempatanPendaftarBaru();
+
         $user = User::where('username', $row['nim'])->first();
 
         if ($user) {
@@ -307,7 +310,11 @@ class ImporPeserta extends Command
                 'the_class'     => $row['kelas'] ?: null,
                 'study_program' => (string) $this->option('prodi'),
                 'major'         => (string) $this->option('jurusan'),
-                'academic_year' => (string) $this->option('tahun'),
+                // Periode yang berjalan jadi acuan; --tahun hanya dipakai bila
+                // Kaprodi belum menetapkan periode aktif, supaya perintah lama
+                // tetap berjalan seperti sebelumnya.
+                'period_id'     => $penempatan['period_id'],
+                'academic_year' => $penempatan['academic_year'] ?: (string) $this->option('tahun'),
                 // Langsung aktif: plotting dari prodi, bukan pendaftaran yang
                 // masih perlu ditimbang Kaprodi.
                 'status'        => 'active',

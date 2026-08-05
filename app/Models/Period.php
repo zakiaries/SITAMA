@@ -71,6 +71,35 @@ class Period extends Model
         return static::aktif()->first();
     }
 
+    /**
+     * Isian periode untuk mahasiswa yang baru lahir, dari periode yang berjalan.
+     *
+     * Dipakai SEMUA jalur pembuatan mahasiswa — pendaftaran web, pendaftaran
+     * lewat aplikasi HP, impor peserta, dan perintah dummy — supaya tak ada
+     * satu pun jalur yang melahirkan mahasiswa tanpa periode. Satu yang
+     * terlewat sudah cukup membuat orang lenyap dari layar Kaprodi, karena
+     * daftarnya menyaring per periode.
+     *
+     * `academic_year` ikut diisi dari periode, bukan lagi diketik pendaftar.
+     * Kolomnya masih dibaca dashboard dosen, ekspor, dan endpoint mobile, jadi
+     * ia tetap terisi — bedanya sekarang nilainya lahir dari sistem sehingga
+     * tak mungkin lagi berisi "2023/2026".
+     *
+     * Bila Kaprodi belum menetapkan periode aktif, keduanya dibiarkan kosong:
+     * menebak periode lebih berbahaya daripada mengosongkannya, karena yang
+     * kosong masih terlihat lewat pilihan "Tanpa periode" dan bisa dibetulkan,
+     * sedangkan yang salah tempat terlihat benar dan tak pernah diperiksa.
+     */
+    public static function penempatanPendaftarBaru(): array
+    {
+        $periode = static::sekarang();
+
+        return [
+            'period_id'     => $periode?->id,
+            'academic_year' => $periode?->academic_year,
+        ];
+    }
+
     /** Nilai penyaring yang bukan id periode. */
     const PILIHAN_SEMUA = 'semua';
 

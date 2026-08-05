@@ -4,17 +4,21 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Models\Period;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
 {
     public function showForm()
     {
-        return view('auth.register');
+        // Pendaftar diberi tahu periode mana yang akan ia masuki, supaya ia tak
+        // menebak-nebak setelah isian "Tahun Akademik" ditiadakan.
+        return view('auth.register', ['periodeBerjalan' => Period::sekarang()]);
     }
 
     /**
@@ -63,9 +67,14 @@ class RegisterController extends Controller
                                 $this->unikKecualiDitolak('email', 'Email sudah terdaftar.')],
             'password'      => 'required|string|min:8|confirmed',
             'the_class'     => 'required|string|max:50',
-            'study_program' => 'required|string|max:100',
+            // Daftar tertutup: teks bebas dulu melahirkan dua ejaan untuk satu
+            // prodi yang sama.
+            'study_program' => ['required', Rule::in(Student::PRODI)],
             'major'         => 'required|string|max:100',
-            'academic_year' => 'required|string|max:20',
+            // `academic_year` SENGAJA tak lagi diminta. Dulu diketik sendiri
+            // pendaftar dan menghasilkan nilai seperti "2023/2026" — rentang
+            // tiga tahun yang bukan tahun akademik — yang merusak penyaring
+            // Kaprodi. Sekarang diturunkan dari periode yang sedang berjalan.
         ], [
             'name.required'          => 'Nama wajib diisi.',
             'username.required'      => 'NIM wajib diisi.',
@@ -77,9 +86,9 @@ class RegisterController extends Controller
             'password.min'           => 'Password minimal 8 karakter.',
             'password.confirmed'     => 'Konfirmasi password tidak cocok.',
             'the_class.required'     => 'Kelas wajib diisi.',
-            'study_program.required' => 'Program studi wajib diisi.',
+            'study_program.required' => 'Program studi wajib dipilih.',
+            'study_program.in'       => 'Program studi tidak dikenal.',
             'major.required'         => 'Jurusan wajib diisi.',
-            'academic_year.required' => 'Tahun akademik wajib diisi.',
         ]);
 
         $user = DB::transaction(function () use ($request) {
@@ -103,14 +112,13 @@ class RegisterController extends Controller
                 'role'     => 'student',
             ]);
 
-            Student::create([
+            Student::create(array_merge([
                 'user_id'       => $user->id,
                 'the_class'     => $request->the_class,
                 'study_program' => $request->study_program,
                 'major'         => $request->major,
-                'academic_year' => $request->academic_year,
                 'status'        => 'pending',
-            ]);
+            ], Period::penempatanPendaftarBaru()));
 
             return $user;
         });

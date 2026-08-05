@@ -13,6 +13,21 @@ class Student extends Model
         'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'period_id', 'status', 'lecturer_id',
     ];
 
+    /**
+     * Program studi yang memakai SIMAMA — daftar tertutup, bukan teks bebas.
+     *
+     * Dulu diketik sendiri mahasiswa saat mendaftar, dan hasilnya satu prodi
+     * tercatat dalam dua ejaan ("Teknik Rekayasa Komputer" vs "Teknologi
+     * Rekayasa Komputer"), yang membuat pengelompokan per prodi bocor.
+     *
+     * Harus sama persis dengan nilai di ImporDosen::PRODI, karena dosen dan
+     * mahasiswa dibandingkan lewat kolom ini tanpa penerjemahan.
+     */
+    const PRODI = [
+        'Teknik Informatika',
+        'Teknologi Rekayasa Komputer',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -12,7 +12,9 @@ class RegistrationTest extends FeatureTestCase
         return [
             'name' => 'Calon', 'username' => $nim, 'email' => 'calon_' . md5($nim) . '@x.ac.id',
             'password' => 'password123', 'password_confirmation' => 'password123',
-            'the_class' => 'TI-1A', 'study_program' => 'TI', 'major' => 'Informatika', 'academic_year' => '2023/2024',
+            // Prodi kini daftar tertutup (Student::PRODI), bukan teks bebas.
+            // `academic_year` sengaja tak dikirim: ia mengikuti periode berjalan.
+            'the_class' => 'TI-1A', 'study_program' => 'Teknik Informatika', 'major' => 'Informatika',
         ];
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\InvitationToken;
+use App\Models\Period;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -95,9 +97,14 @@ class AuthController extends Controller
             'email'         => 'required|email|max:255|unique:users,email',
             'password'      => 'required|string|min:8|confirmed',
             'the_class'     => 'required|string|max:50',
-            'study_program' => 'required|string|max:100',
+            // Disamakan dengan web: daftar tertutup. Aplikasi HP versi lama
+            // yang masih mengirim prodi ketikan bebas akan ditolak 422 dengan
+            // pesan yang jelas — layar daftar di Flutter perlu diubah jadi
+            // dropdown, dan APK-nya dibangun ulang.
+            'study_program' => ['required', Rule::in(Student::PRODI)],
             'major'         => 'required|string|max:100',
-            'academic_year' => 'required|string|max:20',
+            // `academic_year` tak lagi diminta; kalau versi lama tetap
+            // mengirimnya, ia diabaikan, bukan ditolak.
         ], [
             'name.required'          => 'Nama wajib diisi.',
             'username.required'      => 'NIM wajib diisi.',
@@ -109,9 +116,9 @@ class AuthController extends Controller
             'password.min'           => 'Password minimal 8 karakter.',
             'password.confirmed'     => 'Konfirmasi password tidak cocok.',
             'the_class.required'     => 'Kelas wajib diisi.',
-            'study_program.required' => 'Program studi wajib diisi.',
+            'study_program.required' => 'Program studi wajib dipilih.',
+            'study_program.in'       => 'Program studi tidak dikenal.',
             'major.required'         => 'Jurusan wajib diisi.',
-            'academic_year.required' => 'Tahun akademik wajib diisi.',
         ]);
 
         $user = User::create([
@@ -122,14 +129,13 @@ class AuthController extends Controller
             'role'     => 'student',
         ]);
 
-        Student::create([
+        Student::create(array_merge([
             'user_id'       => $user->id,
             'the_class'     => $request->the_class,
             'study_program' => $request->study_program,
             'major'         => $request->major,
-            'academic_year' => $request->academic_year,
             'status'        => 'pending',
-        ]);
+        ], Period::penempatanPendaftarBaru()));
 
         return response()->json([
             'message' => 'Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan dari Kaprodi.',
