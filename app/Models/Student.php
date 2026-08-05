@@ -10,12 +10,25 @@ class Student extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'status', 'lecturer_id',
+        'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'period_id', 'status', 'lecturer_id',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Periode magang yang diikuti.
+     *
+     * Menggantikan peran `academic_year` sebagai penanda angkatan. Kolom lama
+     * masih terisi dan masih dibaca beberapa tempat (dashboard dosen, ekspor
+     * Excel, endpoint mobile), jadi keduanya berdampingan sampai pemakainya
+     * dipindahkan.
+     */
+    public function period()
+    {
+        return $this->belongsTo(Period::class);
     }
 
     public function internships()
