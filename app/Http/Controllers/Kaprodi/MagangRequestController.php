@@ -11,6 +11,7 @@ use App\Models\InvitationToken;
 use App\Models\JobListing;
 use App\Models\Lecturer;
 use App\Models\Notification;
+use App\Models\Period;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,12 +30,23 @@ class MagangRequestController extends Controller
             'rejected' => CompanyRequest::where('status', 'rejected')->count(),
         ];
 
-        $requests = CompanyRequest::with(['student.user', 'company', 'createdLecturer.user'])
+        $requests = CompanyRequest::with(['student.user', 'student.period', 'company', 'createdLecturer.user'])
             ->where('status', $status)
             ->latest()
             ->get();
 
-        return view('kaprodi.pengajuan-magang.index', compact('requests', 'status', 'counts'));
+        // Magang berjalan selang-seling: saat satu prodi magang, prodi lain
+        // tidak. Pengajuan dari prodi yang belum gilirannya DITANDAI, bukan
+        // ditolak — yang terkena justru mahasiswa mengulang, cuti, atau magang
+        // mandiri di luar jadwal angkatannya, dan merekalah yang paling butuh
+        // ditimbang manusia. Menutup pintunya berarti satu-satunya jalan keluar
+        // adalah Kaprodi mengubah periode aktif, yang berdampak ke semua orang
+        // demi satu kasus.
+        $periodeBerjalan = Period::sekarang();
+
+        return view('kaprodi.pengajuan-magang.index', compact(
+            'requests', 'status', 'counts', 'periodeBerjalan'
+        ));
     }
 
     public function approve(Request $request, CompanyRequest $magangRequest)

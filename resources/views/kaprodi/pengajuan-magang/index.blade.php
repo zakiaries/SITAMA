@@ -64,6 +64,24 @@
     <div style="font-size:11px;color:var(--text-muted);">{{ $req->created_at->format('d M Y H:i') }}</div>
   </div>
 
+  {{-- Magang berjalan selang-seling: saat satu prodi magang, prodi lain tidak.
+       Pengajuan dari prodi yang belum gilirannya DITANDAI, bukan ditolak — yang
+       terkena biasanya mahasiswa mengulang, cuti, atau magang mandiri di luar
+       jadwal angkatannya, dan justru merekalah yang perlu ditimbang manusia. --}}
+  @if($periodeBerjalan && ! $periodeBerjalan->menerimaProdi($student->study_program ?? null))
+    <div style="background:var(--warn-bg);border:1px solid #F3D9A0;color:var(--warn-text);padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start;">
+      <span style="font-size:15px;line-height:1;">⚠️</span>
+      <span>
+        <strong>Di luar prodi peserta periode ini.</strong>
+        {{ $periodeBerjalan->label }} untuk
+        {{ implode(' & ', $periodeBerjalan->study_programs ?? []) }},
+        sedangkan mahasiswa ini {{ $student->study_program ?: 'belum terisi prodinya' }}.
+        Biasanya berarti ia mengulang, cuti, atau magang mandiri di luar jadwal
+        angkatannya — tetap bisa disetujui bila memang begitu.
+      </span>
+    </div>
+  @endif
+
   {{-- Detail grid --}}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
     <div>
