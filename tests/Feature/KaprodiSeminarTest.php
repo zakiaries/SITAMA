@@ -43,7 +43,10 @@ class KaprodiSeminarTest extends FeatureTestCase
     public function test_rotating_qr_attendance(): void
     {
         $dosen = Lecturer::whereHas('user', fn ($q) => $q->where('username', 'dosen1'))->first();
-        $sem   = Seminar::create(['lecturer_id' => $dosen->id, 'title' => 'S', 'program' => 'TI', 'status' => 'scheduled', 'access_token' => Str::random(48)]);
+        // Bertanggal hari ini & tanpa jam: daftar hadir kini digerbangi hari-H,
+        // dan jam yang kosong membuatnya terbuka sepanjang hari itu. Yang diuji
+        // di sini rotasi QR-nya, bukan gerbang jadwalnya.
+        $sem   = Seminar::create(['lecturer_id' => $dosen->id, 'title' => 'S', 'program' => 'TI', 'status' => 'scheduled', 'date' => today()->toDateString(), 'access_token' => Str::random(48)]);
         $stu   = $this->userByUsername('3.34.23.2.01');
         $rt    = $sem->rotatingToken();
 

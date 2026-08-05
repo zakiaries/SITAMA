@@ -91,16 +91,90 @@ class Seminar extends Model
         return $this->date !== null && $this->date->lt(today());
     }
 
+    /** Toleransi datang lebih awal & sesi molor, dalam menit. */
+    public const HADIR_TOLERANSI_AWAL  = 30;
+    public const HADIR_TOLERANSI_AKHIR = 60;
+
     /**
      * Daftar hadir (QR) masih boleh diisi.
      *
-     * Absensi hanya masuk akal selama sesinya berlangsung. Lewat hari-H, QR
-     * ditutup — kalau tidak, tautan hadir yang sudah terlanjur dibuka masih bisa
-     * dipakai menambah audiens untuk seminar yang sudah selesai.
+     * Dulu terbuka sejak DETIK dosen menetapkan jadwal — audiens bisa mengisi
+     * daftar hadir berminggu-minggu sebelum seminarnya berlangsung, yang
+     * membuat syarat minimal audiens kehilangan artinya: ia mestinya bukti
+     * orang benar-benar datang, bukan bukti orang pernah membuka tautan.
+     *
+     * Kini digerbangi hari-H, dan bila jamnya bisa dibaca, jam itu juga.
      */
     public function daftarHadirTerbuka(): bool
     {
-        return $this->status === 'scheduled' && ! $this->jadwalSudahLewat();
+        if ($this->status !== 'scheduled' || $this->date === null) {
+            return false;
+        }
+
+        if (! $this->date->isSameDay(today())) {
+            return false;
+        }
+
+        $jendela = $this->jendelaJam();
+
+        return $jendela === null || now()->between($jendela[0], $jendela[1]);
+    }
+
+    /**
+     * Rentang jam daftar hadir, dibaca dari kolom `time`.
+     *
+     * Kolomnya teks bebas ("09.00 - 11.00 WIB", "09:00", "pagi"), jadi jamnya
+     * DIBACA sebisanya, bukan dituntut. Kalau tak terbaca, kembalikan null dan
+     * biarkan hari-H saja yang menggerbangi — mengunci audiens di tengah
+     * seminar yang sedang berlangsung karena dosennya menulis "pagi" jauh lebih
+     * merugikan daripada membiarkan absensi terbuka sehari penuh.
+     *
+     * @return array{0: \Illuminate\Support\Carbon, 1: \Illuminate\Support\Carbon}|null
+     */
+    public function jendelaJam(): ?array
+    {
+        if (! preg_match_all('/(\d{1,2})[.:](\d{2})/', (string) $this->time, $cocok, PREG_SET_ORDER)) {
+            return null;
+        }
+
+        $jam = fn (array $m) => $this->date->copy()
+            ->setTime(min((int) $m[1], 23), min((int) $m[2], 59));
+
+        $mulai = $jam($cocok[0])->subMinutes(self::HADIR_TOLERANSI_AWAL);
+
+        $selesai = isset($cocok[1])
+            ? $jam($cocok[1])->addMinutes(self::HADIR_TOLERANSI_AKHIR)
+            : $jam($cocok[0])->addHours(4);
+
+        // Jam selesai lebih kecil dari mulai (mis. salah ketik) — jangan
+        // menghasilkan rentang kosong yang mengunci semua orang.
+        return $selesai->lte($mulai) ? null : [$mulai, $selesai];
+    }
+
+    /** Kenapa daftar hadir tertutup — untuk pesan di layar, bukan sekadar 404. */
+    public function alasanHadirTertutup(): ?string
+    {
+        if ($this->daftarHadirTerbuka()) {
+            return null;
+        }
+
+        if ($this->status !== 'scheduled') {
+            return 'Daftar hadir hanya dibuka untuk seminar yang sudah dijadwalkan.';
+        }
+
+        if ($this->date === null) {
+            return 'Jadwal seminar ini belum ditetapkan dosen pembimbing.';
+        }
+
+        if ($this->date->gt(today())) {
+            return 'Daftar hadir baru dibuka pada hari seminar, ' . $this->date->translatedFormat('d F Y') . '.';
+        }
+
+        if ($this->date->lt(today())) {
+            return 'Seminar ini sudah berlangsung pada ' . $this->date->translatedFormat('d F Y') . '.';
+        }
+
+        return 'Daftar hadir hanya dibuka pada jam seminar' . ($this->time ? " ({$this->time})" : '') . '.';
     }
 
     /** Interval rotasi QR daftar hadir (detik). */

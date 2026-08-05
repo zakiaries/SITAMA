@@ -237,6 +237,11 @@ class PengujianMahasiswaTest extends FeatureTestCase
     /** U-11 — Audiens login lalu menekan tombol hadir melalui QR Code. */
     public function test_u11_presensi_qr_audiens(): void
     {
+        // Waktu dibekukan ke tengah sesi. Daftar hadir kini digerbangi jam
+        // seminar, jadi tanpa ini hasil pengujian bergantung pada pukul berapa
+        // suite dijalankan — pagi lulus, malam gagal.
+        \Illuminate\Support\Carbon::setTestNow(today()->setTime(10, 0));
+
         $dosen   = $this->userByUsername('dosen1');
         $penyaji = $this->userByUsername('3.34.23.2.01');
         $audiens = $this->userByUsername('3.34.23.2.02');
@@ -277,6 +282,8 @@ class PengujianMahasiswaTest extends FeatureTestCase
 
         $this->assertSame(1, $seminar->fresh()->attendances()->count(),
             'Kehadiran tercatat ganda untuk satu akun.');
+
+        \Illuminate\Support\Carbon::setTestNow();
     }
 
     /** U-13 — Mengajukan pertanyaan prosedur magang kepada chatbot. */

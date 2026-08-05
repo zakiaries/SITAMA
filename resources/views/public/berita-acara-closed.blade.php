@@ -20,7 +20,11 @@
       <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
     <h1>Berita Acara Tidak Aktif</h1>
-    <p>Tautan daftar hadir ini tidak valid atau seminarnya belum/ tidak lagi berlangsung. Silakan hubungi penyaji seminar.</p>
+    {{-- Sebutkan sebabnya bila diketahui: "belum dibuka" dan "sudah lewat" itu
+         dua keadaan yang sangat berbeda bagi audiens yang berdiri di depan QR,
+         dan menyamakannya berujung jadi pertanyaan ke dosen. --}}
+    <p>{{ $seminar?->alasanHadirTertutup()
+        ?? 'Tautan daftar hadir ini tidak valid. Silakan hubungi penyaji seminar.' }}</p>
   </div>
 </body>
 </html>
