@@ -58,7 +58,7 @@
   </div>
 
   <div style="font-size:12px;color:var(--text-secondary);">
-    Audiens hadir: <strong style="color:{{ $guests >= \App\Models\Seminar::MIN_GUESTS ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ \App\Models\Seminar::MIN_GUESTS }}</strong>
+    Audiens hadir: <strong style="color:{{ $guests >= $seminar->minGuests() ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ $seminar->minGuests() }}</strong>
     @if($seminar->status === 'completed') &middot; disahkan {{ $seminar->witnessed_at?->format('d M Y H:i') }}@endif
   </div>
 </div>

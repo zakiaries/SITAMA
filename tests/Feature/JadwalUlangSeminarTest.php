@@ -33,6 +33,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'         => today()->addDays(7)->toDateString(),
             'time'         => '09.00 - 11.00 WIB',
             'location'     => 'Ruang TI-01',
+            'min_guests' => 15,
             'access_token' => Str::random(48),
         ], $ganti));
 
@@ -58,6 +59,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'     => $baru,
             'time'     => '13.00 - 15.00 WIB',
             'location' => 'Ruang TI-02',
+            'min_guests' => 15,
         ])->assertRedirect();
 
         $seminar->refresh();
@@ -76,6 +78,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'     => $baru,
             'time'     => '09.00 - 11.00 WIB',
             'location' => 'Ruang TI-01',
+            'min_guests' => 15,
         ])->assertRedirect();
 
         $this->assertSame($baru, $seminar->fresh()->date->toDateString());
@@ -93,6 +96,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'     => today()->addDays(21)->toDateString(),
             'time'     => '09.00 - 11.00 WIB',
             'location' => 'Ruang TI-01',
+            'min_guests' => 15,
         ]);
 
         $notif = Notification::where('user_id', $mahasiswa->id)->latest('id')->first();
@@ -115,6 +119,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'     => $seminar->date->toDateString(),
             'time'     => '13.00 - 15.00 WIB',
             'location' => 'Ruang TI-01',
+            'min_guests' => 15,
         ]);
 
         $notif = Notification::where('user_id', $mahasiswa->id)->latest('id')->first();
@@ -130,6 +135,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'     => today()->subDay()->toDateString(),
             'time'     => '09.00 - 11.00 WIB',
             'location' => 'Ruang TI-01',
+            'min_guests' => 15,
         ])->assertSessionHasErrors('date');
     }
 
@@ -142,6 +148,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             'date'     => today()->addDays(30)->toDateString(),
             'time'     => '09.00 - 11.00 WIB',
             'location' => 'Ruang TI-01',
+            'min_guests' => 15,
         ])->assertSessionHas('error');
 
         $this->assertSame($semula, $seminar->fresh()->date->toDateString());
@@ -157,6 +164,7 @@ class JadwalUlangSeminarTest extends FeatureTestCase
             ->post(route('dosen.seminar.finalize', $seminar), [
                 'date'     => today()->addDays(30)->toDateString(),
                 'location' => 'Ruang Lain',
+                'min_guests' => 15,
             ]);
 
         $this->assertSame($semula, $seminar->fresh()->date->toDateString());

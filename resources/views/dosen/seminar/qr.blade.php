@@ -34,7 +34,7 @@
   <div class="qrbox">{!! $qrSvg !!}</div>
   <div class="bar"><span></span></div>
 
-  <div class="count">{{ $guests }} / {{ \App\Models\Seminar::MIN_GUESTS }} audiens hadir</div>
+  <div class="count">{{ $guests }} / {{ $seminar->minGuests() }} audiens hadir</div>
   <div class="live"><span class="dot"></span> QR berganti otomatis — pindai langsung dari layar</div>
   <div class="hint">Audiens: buka kamera / scanner, pindai QR di layar ini, login SIMAMA, lalu tekan <strong>Saya Hadir</strong>. Tautan hasil screenshot/share akan kedaluwarsa.</div>
 

@@ -66,7 +66,7 @@
         <div><div style="font-size:11px;color:var(--text-muted);">Tanggal</div><div style="font-size:13px;font-weight:600;">{{ $s->date?->format('d M Y') ?? '-' }}</div></div>
         <div><div style="font-size:11px;color:var(--text-muted);">Waktu</div><div style="font-size:13px;font-weight:600;">{{ $s->time ?? '-' }}</div></div>
         <div><div style="font-size:11px;color:var(--text-muted);">Ruang</div><div style="font-size:13px;font-weight:600;">{{ $s->location ?? '-' }}</div></div>
-        <div><div style="font-size:11px;color:var(--text-muted);">Audiens</div><div style="font-size:13px;font-weight:600;color:{{ $guests >= \App\Models\Seminar::MIN_GUESTS ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ \App\Models\Seminar::MIN_GUESTS }}</div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);">Audiens</div><div style="font-size:13px;font-weight:600;color:{{ $guests >= $s->minGuests() ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ $s->minGuests() }}</div></div>
       </div>
       <a href="{{ route('mahasiswa.seminar.detail', $s->id) }}" class="btn btn-primary btn-sm"><x-icon name="qr" :size="14"/> QR & Daftar Hadir</a>
     </div>

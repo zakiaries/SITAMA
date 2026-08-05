@@ -112,40 +112,50 @@ class SeminarController extends ApiController
             return response()->json(['message' => 'Sesi ini tidak dapat dijadwalkan lagi.'], 422);
         }
 
-        // Paritas dengan web: lewat hari-H, jadwal & ruang dikunci.
-        if ($seminar->jadwalSudahLewat()) {
-            return response()->json(['message' => 'Tanggal seminar sudah lewat — jam dan ruang tidak bisa diubah lagi. Sesi tinggal disahkan.'], 422);
-        }
-
-        // Paritas dengan web: tanggal ditetapkan sekali saat penjadwalan awal.
-        // Sesi yang sudah terjadwal hanya boleh diubah jam dan lokasinya.
-        $sudahTerjadwal = $seminar->status === 'scheduled';
+        // Paritas dengan web: tanggal BOLEH dipindahkan, termasuk untuk sesi
+        // yang tanggalnya telanjur lewat — dosen yang berhalangan harus bisa
+        // menjadwalkan ulang tanpa membatalkan sesinya. Penguncian lama dicabut
+        // di sisi web, dan lupa dibawa ke sini.
+        $sebelumnya = $seminar->date?->copy();
 
         $request->validate([
-            'date'     => ($sudahTerjadwal ? 'nullable' : 'required') . '|date|after_or_equal:today',
+            'date'     => 'required|date|after_or_equal:today',
             'time'     => 'nullable|string|max:50',
             'location' => 'required|string|max:255',
+            // Nullable, beda dari web: APK yang beredar belum mengirimnya, dan
+            // menolak permintaannya akan mematikan penjadwalan lewat HP. Yang
+            // tak mengirim tetap memakai angka sesi yang berlaku.
+            'min_guests' => 'nullable|integer|min:1|max:100',
         ], [
+            'date.required'       => 'Tanggal seminar wajib diisi.',
             'date.after_or_equal' => 'Tanggal tidak boleh sebelum hari ini.',
             'location.required'   => 'Ruang/tempat wajib diisi.',
         ]);
 
         $seminar->update([
-            'date'         => $sudahTerjadwal ? $seminar->date : $request->date,
+            'date'         => $request->date,
             'time'         => $request->time,
             'location'     => $request->location,
+            'min_guests'   => $request->input('min_guests', $seminar->minGuests()),
             'status'       => 'scheduled',
             'access_token' => $seminar->access_token ?: Str::random(48),
         ]);
 
+        $berubah = $sebelumnya !== null && ! $sebelumnya->isSameDay($seminar->date);
+
+        $rincian = 'Tanggal ' . $seminar->date->format('d M Y')
+            . ($seminar->time ? ' pukul ' . $seminar->time : '')
+            . ' di ' . $seminar->location . '.';
+
         $this->notifyPresenters(
             $seminar,
-            'Jadwal seminar ditetapkan: ' . $seminar->title,
-            'Tanggal ' . $seminar->date->format('d M Y') . ($seminar->time ? ' pukul ' . $seminar->time : '')
-                . ' di ' . $seminar->location . '.'
+            ($berubah ? 'Jadwal seminar DIUBAH: ' : 'Jadwal seminar ditetapkan: ') . $seminar->title,
+            $berubah ? "Semula {$sebelumnya->format('d M Y')}. {$rincian}" : $rincian
         );
 
-        return response()->json(['message' => 'Jadwal seminar ditetapkan. Mahasiswa penyaji telah diberi tahu.']);
+        return response()->json(['message' => $berubah
+            ? 'Jadwal seminar dipindahkan. Mahasiswa penyaji telah diberi tahu perubahannya.'
+            : 'Jadwal seminar ditetapkan. Mahasiswa penyaji telah diberi tahu.']);
     }
 
     /** POST /dosen/seminar/{seminar}/sahkan — sahkan sesi selesai (butuh audiens minimal). */
@@ -158,8 +168,8 @@ class SeminarController extends ApiController
             return response()->json(['message' => 'Hanya sesi terjadwal yang bisa disahkan.'], 422);
         }
 
-        if ($seminar->guestCount() < Seminar::MIN_GUESTS) {
-            return response()->json(['message' => 'Belum memenuhi minimal ' . Seminar::MIN_GUESTS
+        if (! $seminar->guestMet()) {
+            return response()->json(['message' => 'Belum memenuhi minimal ' . $seminar->minGuests()
                 . ' audiens (' . $seminar->guestCount() . ' hadir). Sesi belum bisa disahkan.'], 422);
         }
 
@@ -236,7 +246,7 @@ class SeminarController extends ApiController
             'rt'          => $rt,
             'interval'    => Seminar::QR_INTERVAL,
             'guest_count' => $seminar->attendances()->count(),
-            'min_guests'  => Seminar::MIN_GUESTS,
+            'min_guests'  => $seminar->minGuests(),
         ]);
     }
 
@@ -268,7 +278,7 @@ class SeminarController extends ApiController
             'time'         => $s->time,
             'location'     => $s->location,
             'guest_count'  => $s->attendances->count(),
-            'min_guests'   => Seminar::MIN_GUESTS,
+            'min_guests'   => $s->minGuests(),
             'witnessed_at' => optional($s->witnessed_at)->toDateTimeString(),
             // Lewat hari-H sesi dikunci: klien sebaiknya menyembunyikan form ubah.
             'date_passed'  => $s->jadwalSudahLewat(),

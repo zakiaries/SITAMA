@@ -33,6 +33,7 @@ class SeminarTerkunciTest extends FeatureTestCase
             'date'         => $tanggal,
             'time'         => '09.00 - 11.00 WIB',
             'location'     => 'Ruang Seminar TI-01',
+            'min_guests' => 15,
             'access_token' => Str::random(48),
         ]);
     }
@@ -54,6 +55,7 @@ class SeminarTerkunciTest extends FeatureTestCase
             ->post("/dosen/seminar/{$s->id}/finalize", [
                 'time'     => '13.00 - 15.00 WIB',
                 'location' => 'Ruang Lain',
+                'min_guests' => 15,
             ])
             ->assertSessionHasErrors('date');
 
@@ -72,6 +74,7 @@ class SeminarTerkunciTest extends FeatureTestCase
                 'date'     => $s->date->toDateString(),
                 'time'     => '13.00 - 15.00 WIB',
                 'location' => 'Ruang Lain',
+                'min_guests' => 15,
             ])
             ->assertSessionHasErrors('date');
     }
@@ -96,6 +99,7 @@ class SeminarTerkunciTest extends FeatureTestCase
                 'date'     => $hariIni->date->toDateString(),
                 'time'     => '13.00 - 15.00 WIB',
                 'location' => 'Ruang Seminar TI-02',
+                'min_guests' => 15,
             ])
             ->assertSessionHas('success');
 

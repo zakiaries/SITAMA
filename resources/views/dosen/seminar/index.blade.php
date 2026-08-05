@@ -95,6 +95,12 @@
           <input type="date" name="date" min="{{ now()->toDateString() }}" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <input type="text" name="time" placeholder="Waktu (mis. 09:00-11:00)" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           <input type="text" name="location" placeholder="Ruang/tempat" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+          {{-- Diatur bersama jadwal: tiap dosen punya pertimbangan berbeda, dan
+               sesi dengan satu penyaji tak menuntut audiens sebanyak sesi
+               dengan enam penyaji. --}}
+          <input type="number" name="min_guests" value="{{ $s->minGuests() }}" min="1" max="100" required
+                 title="Jumlah audiens minimal agar sesi bisa disahkan"
+                 placeholder="Min. audiens" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
         </div>
         <button type="submit" class="btn btn-primary btn-sm">Tetapkan &amp; Jadwalkan</button>
       </form>
@@ -110,7 +116,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
         <div style="font-size:12px;color:var(--text-secondary);">
           Daftar hadir audiens:
-          <strong style="color:{{ $guests >= \App\Models\Seminar::MIN_GUESTS ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ \App\Models\Seminar::MIN_GUESTS }}</strong>
+          <strong style="color:{{ $guests >= $s->minGuests() ? 'var(--success-text)' : 'var(--warn-text)' }};">{{ $guests }}/{{ $s->minGuests() }}</strong>
         </div>
         @if($s->access_token && ! $terkunci)
           <a href="{{ route('dosen.seminar.qr', $s) }}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600;">Tampilkan QR Daftar Hadir (layar) →</a>
@@ -121,11 +127,11 @@
       <form method="POST" action="{{ route('dosen.seminar.sahkan', $s) }}"
             data-confirm="Sahkan bahwa seminar ini telah berlangsung dan selesai?">
         @csrf
-        @php $cukupAudiens = $guests >= \App\Models\Seminar::MIN_GUESTS; @endphp
+        @php $cukupAudiens = $guests >= $s->minGuests(); @endphp
         {{-- Warna tombol menandakan keadaannya: biru saat bisa ditekan, abu-abu
              saat belum bisa. Gayanya diurus .btn:disabled di simama.css. --}}
         <button type="submit" class="btn btn-primary btn-sm" @disabled(! $cukupAudiens)
-          title="{{ $cukupAudiens ? 'Sahkan sesi ini' : 'Audiens baru ' . $guests . ' dari ' . \App\Models\Seminar::MIN_GUESTS . ' — belum bisa disahkan' }}">
+          title="{{ $cukupAudiens ? 'Sahkan sesi ini' : 'Audiens baru ' . $guests . ' dari ' . $s->minGuests() . ' — belum bisa disahkan' }}">
           <x-icon name="check" :size="14"/> Sahkan Seminar (Saksi)
         </button>
       </form>
@@ -158,6 +164,9 @@
             <input type="date" name="date" value="{{ $s->date?->toDateString() }}" min="{{ now()->toDateString() }}" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
             <input type="text" name="time" value="{{ $s->time }}" placeholder="Waktu (mis. 09:00-11:00)" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
             <input type="text" name="location" value="{{ $s->location }}" placeholder="Ruang/tempat" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
+            <input type="number" name="min_guests" value="{{ $s->minGuests() }}" min="1" max="100" required
+                   title="Jumlah audiens minimal agar sesi bisa disahkan"
+                   placeholder="Min. audiens" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           </div>
           <button type="submit" class="btn btn-outline btn-sm">Simpan Perubahan</button>
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Mahasiswa penyaji akan diberi tahu perubahannya.</div>

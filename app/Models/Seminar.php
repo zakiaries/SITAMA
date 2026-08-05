@@ -17,15 +17,28 @@ class Seminar extends Model
 {
     use HasFactory;
 
-    /** Jumlah minimal audiens (login) yang mengisi daftar hadir per sesi. */
+    /**
+     * Jumlah minimal audiens BAWAAN untuk sesi baru.
+     *
+     * Angka yang berlaku disimpan per sesi di kolom `min_guests` — tiap dosen
+     * punya pertimbangan berbeda. Tetapan ini hanya isian awalnya, dan
+     * dipertahankan supaya sesi lama tetap memakai angka yang berlaku saat ia
+     * dibuat.
+     */
     public const MIN_GUESTS = 15;
+
+    /** Jumlah audiens minimal yang berlaku untuk sesi INI. */
+    public function minGuests(): int
+    {
+        return $this->min_guests ?? self::MIN_GUESTS;
+    }
 
     /** Legacy: dipakai API mobile lama. Dipertahankan agar tidak error saat referensi. */
     public const MIN_AUDIENCE = 15;
 
     protected $fillable = [
-        'lecturer_id', 'title', 'program', 'period_id', 'date', 'time', 'location', 'organizer',
-        'description', 'qr_code', 'status', 'student_id',
+        'lecturer_id', 'title', 'program', 'period_id', 'date', 'time', 'location', 'min_guests',
+        'organizer', 'description', 'qr_code', 'status', 'student_id',
         'rejection_reason', 'access_token', 'witnessed_at',
     ];
 
@@ -114,7 +127,7 @@ class Seminar extends Model
 
     public function guestMet(): bool
     {
-        return $this->guestCount() >= self::MIN_GUESTS;
+        return $this->guestCount() >= $this->minGuests();
     }
 
     /**

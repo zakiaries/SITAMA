@@ -164,7 +164,7 @@ class SeminarController extends ApiController
             'time'             => $s->time,
             'location'         => $s->location,
             'guest_count'      => $s->attendances->count(),
-            'min_guests'       => Seminar::MIN_GUESTS,
+            'min_guests'       => $s->minGuests(),
             'witnessed_at'     => optional($s->witnessed_at)->toDateTimeString(),
             // Ketersediaan yang kuisi (hanya relevan saat draft).
             'available_dates'  => $row->available_dates,

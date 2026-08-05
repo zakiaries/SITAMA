@@ -5,7 +5,7 @@
 
 <a href="{{ route('mahasiswa.seminar') }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);text-decoration:none;margin-bottom:14px;">← Kembali</a>
 
-@php $guests = $seminar->attendances->count(); $min = \App\Models\Seminar::MIN_GUESTS; @endphp
+@php $guests = $seminar->attendances->count(); $min = $seminar->minGuests(); @endphp
 
 <div class="card" style="margin-bottom:16px;">
   <div style="font-size:16px;font-weight:700;color:var(--text);">{{ $seminar->title }}</div>

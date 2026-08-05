@@ -173,16 +173,28 @@ class SeminarController extends Controller
             'date'     => 'required|date|after_or_equal:today',
             'time'     => 'nullable|string|max:50',
             'location' => 'required|string|max:255',
+            // Diatur bersama jadwal, bukan di layar terpisah: tiap dosen punya
+            // pertimbangan berbeda, dan sesi dengan satu penyaji tak menuntut
+            // audiens sebanyak sesi dengan enam penyaji.
+            //
+            // Minimal 1, bukan 0. Nol berarti sesi bisa disahkan tanpa seorang
+            // pun hadir, dan syarat audiens kehilangan seluruh gunanya —
+            // padahal daftar hadir itulah bukti seminarnya benar berlangsung.
+            'min_guests' => 'required|integer|min:1|max:100',
         ], [
             'date.required'       => 'Tanggal seminar wajib diisi.',
             'date.after_or_equal' => 'Tanggal tidak boleh sebelum hari ini.',
             'location.required'   => 'Ruang/tempat wajib diisi.',
+            'min_guests.required' => 'Jumlah audiens minimal wajib diisi.',
+            'min_guests.min'      => 'Jumlah audiens minimal setidaknya 1.',
+            'min_guests.max'      => 'Jumlah audiens minimal terlalu besar (maksimal 100).',
         ]);
 
         $seminar->update([
             'date'         => $request->date,
             'time'         => $request->time,
             'location'     => $request->location,
+            'min_guests'   => $request->min_guests,
             'status'       => 'scheduled',
             'access_token' => $seminar->access_token ?: Str::random(48),
         ]);
@@ -243,8 +255,8 @@ class SeminarController extends Controller
             return back()->with('error', 'Hanya sesi terjadwal yang bisa disahkan.');
         }
 
-        if ($seminar->guestCount() < Seminar::MIN_GUESTS) {
-            return back()->with('error', 'Belum memenuhi minimal ' . Seminar::MIN_GUESTS
+        if (! $seminar->guestMet()) {
+            return back()->with('error', 'Belum memenuhi minimal ' . $seminar->minGuests()
                 . ' audiens (' . $seminar->guestCount() . ' hadir). Sesi belum bisa disahkan.');
         }
 

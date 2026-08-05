@@ -133,6 +133,7 @@ class NotifikasiSeminarTest extends FeatureTestCase
             'date'        => now()->addDays(7)->toDateString(),
             'time'        => '09.00 - 11.00',
             'location'    => 'Ruang A',
+            'min_guests' => 15,
         ]);
         SeminarPresenter::create(['seminar_id' => $seminar->id, 'student_id' => $student->id]);
 
@@ -142,6 +143,7 @@ class NotifikasiSeminarTest extends FeatureTestCase
             'date'     => $tanggalBaru,
             'time'     => '13.00 - 15.00',
             'location' => 'Ruang B',
+            'min_guests' => 15,
         ]);
 
         $seminar->refresh();

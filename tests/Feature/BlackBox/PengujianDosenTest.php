@@ -178,6 +178,7 @@ class PengujianDosenTest extends FeatureTestCase
             'date'     => $tanggal,
             'time'     => '09.00 - 11.00',
             'location' => 'Ruang Seminar TI-01',
+            'min_guests' => 15,
         ])->assertSessionHasNoErrors();
 
         $seminar->refresh();
@@ -202,6 +203,7 @@ class PengujianDosenTest extends FeatureTestCase
             'date'         => now()->toDateString(),
             'time'         => '09.00 - 11.00',
             'location'     => 'Ruang TI-01',
+            'min_guests' => 15,
             'access_token' => Str::random(48),
         ]);
         SeminarPresenter::create(['seminar_id' => $seminar->id, 'student_id' => $penyaji->student->id]);
