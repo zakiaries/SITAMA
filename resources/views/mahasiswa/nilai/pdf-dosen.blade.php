@@ -51,9 +51,8 @@
       ],
   ];
 
-  $skorButir = function ($detail) {
-      return optional($detail?->scores->first())->score;
-  };
+  $barisButir = fn ($detail) => $detail?->scores->first();
+  $skorButir  = fn ($detail) => optional($barisButir($detail))->score;
 
   $semuaSkor = collect();
 @endphp
@@ -82,9 +81,11 @@
     </tr>
     @forelse($baris as $b)
       @php
-        $skor = null;
+        $skor = null; $ket = null;
         if ($b['nilai']) {
-            $skor = $skorButir($butir[$urutan] ?? null);
+            $rowSkor = $barisButir($butir[$urutan] ?? null);
+            $skor    = optional($rowSkor)->score;
+            $ket     = optional($rowSkor)->note;
             $urutan++;
             if ($skor !== null) $semuaSkor->push($skor);
         }
@@ -95,7 +96,7 @@
         @for($n = 1; $n <= 10; $n++)
           <td class="sk">{{ $b['nilai'] && (int) round((float) $skor) === $n ? '√' : '' }}</td>
         @endfor
-        <td class="ket"></td>
+        <td class="ket">{{ $ket }}</td>
       </tr>
     @empty
       {{-- Rubrik tak dikenali susunan resmi: cetak apa adanya agar lembarnya

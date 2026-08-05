@@ -54,7 +54,8 @@
 
   @foreach($industri as $komponen)
     @php
-      $skor = optional($komponen->detailedComponents->first()?->scores->first())->score;
+      $baris = $komponen->detailedComponents->first()?->scores->first();
+      $skor  = optional($baris)->score;
       if ($skor !== null) $semuaSkor->push($skor);
       $sub = $rincian[$komponen->name] ?? [];
     @endphp
@@ -67,7 +68,9 @@
       @for($n = 1; $n <= 10; $n++)
         <td class="sk">{{ (int) round((float) $skor) === $n ? '√' : '' }}</td>
       @endfor
-      <td class="ket"></td>
+      {{-- Keterangan yang diisi pembimbing industri saat menilai. Tetap kosong
+           bila ia tak mengisinya, supaya masih bisa ditulis tangan. --}}
+      <td class="ket">{{ $baris?->note }}</td>
     </tr>
   @endforeach
 

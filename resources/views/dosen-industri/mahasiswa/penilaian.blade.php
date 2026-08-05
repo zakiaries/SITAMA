@@ -96,15 +96,27 @@
     </div>
     <div class="assess-body">
       @foreach($component->detailedComponents as $detail)
-      @php $current = $detail->scores->first()?->score; @endphp
+      @php
+        $baris   = $detail->scores->first();
+        $current = $baris?->score;
+      @endphp
       <div class="score-row">
         <div class="score-label">{{ $detail->name }}</div>
         <div class="score-input-wrap">
           <input type="number" name="scores[{{ $detail->id }}]" class="score-input js-score"
                  value="{{ $current !== null ? rtrim(rtrim(number_format($current,1),'0'),'.') : '' }}"
                  placeholder="1 - 10" min="1" max="10" step="0.5" oninput="clampScore(this);hitungRata()">
-          <span class="score-max">/100</span>
+          <span class="score-max">/10</span>
         </div>
+      </div>
+      {{-- Keterangan mengikuti kolom yang sama di form resmi, dan di sana ia
+           benar-benar dipakai ("Sangat baik", "Cukup baik dalam sikap kerja").
+           Isian ini ikut tercetak di lembar nilai yang dibawa mahasiswa. --}}
+      <div style="padding:0 0 12px 0;">
+        <input type="text" name="notes[{{ $detail->id }}]" maxlength="255"
+               value="{{ $baris?->note }}"
+               placeholder="Keterangan (opsional) — mis. Sangat baik dalam menjalani tugas"
+               style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-size:12.5px;font-family:inherit;color:var(--text);outline:none;">
       </div>
       @endforeach
     </div>

@@ -180,8 +180,15 @@ class MahasiswaController extends Controller
         $request->validate([
             'scores'            => 'array',
             'scores.*'          => 'nullable|numeric|min:1|max:10',
+            // Keterangan per komponen, mengikuti kolom KETERANGAN di form resmi.
+            // Pendek karena di formnya memang satu baris ("Sangat baik",
+            // "Cukup baik dalam sikap kerja"), bukan paragraf.
+            'notes'             => 'array',
+            'notes.*'           => 'nullable|string|max:255',
             'performance_notes' => 'nullable|string|max:2000',
         ]);
+
+        $catatan = (array) $request->input('notes', []);
 
         foreach ((array) $request->scores as $detailId => $score) {
             if ($score !== null && $score !== '') {
@@ -191,7 +198,12 @@ class MahasiswaController extends Controller
                         'detailed_assessment_component_id' => $detailId,
                         'scorer_type'                       => 'lecturer_industry',
                     ],
-                    ['score' => $score]
+                    [
+                        'score' => $score,
+                        // Dikosongkan bila penilai menghapus isinya, bukan
+                        // dipertahankan diam-diam.
+                        'note'  => trim((string) ($catatan[$detailId] ?? '')) ?: null,
+                    ]
                 );
             }
         }
