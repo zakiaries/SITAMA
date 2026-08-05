@@ -58,9 +58,12 @@
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
       Lowongan Magang
     </a>
+    {{-- Layar presentasi, bukan topi wisuda: topi sudah dipakai Data Dosen, dan
+         ikon yang sama untuk dua menu berbeda membuat keduanya kehilangan arti.
+         Rupanya disamakan dengan menu Seminar di portal dosen & mahasiswa. --}}
     <a class="nav-item {{ request()->routeIs('kaprodi.seminar.*') ? 'active' : '' }}" href="{{ route('kaprodi.seminar.index') }}">
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        <rect x="2" y="3" width="20" height="12" rx="1"/><path d="M12 15v4"/><path d="M8 21l4-2 4 2"/>
       </svg>
       Seminar
     </a>

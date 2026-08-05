@@ -36,8 +36,11 @@
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
           Laporan Akhir
         </a>
+        {{-- Layar presentasi, bukan topi wisuda: topi sudah dipakai induknya
+             (Kampus), dan dua ikon serupa bertumpuk membuat keduanya sama-sama
+             kehilangan arti. --}}
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.seminar') ? 'active' : '' }}" href="{{ route('mahasiswa.seminar') }}">
-          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="12" rx="1"/><path d="M12 15v4"/><path d="M8 21l4-2 4 2"/></svg>
           Seminar
         </a>
       </div>
@@ -51,12 +54,16 @@
         <span class="nav-caret">▾</span>
       </div>
       <div class="nav-sub">
+        {{-- Kartu identitas: ini catatan penempatan MILIK SENDIRI, bukan koper
+             seperti induknya (Industri). --}}
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.magang-saya') ? 'active' : '' }}" href="{{ route('mahasiswa.magang-saya') }}">
-          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M7.5 17.5c1.2-2.3 7.8-2.3 9 0"/></svg>
           Magang Saya
         </a>
+        {{-- Daftar berpoin: yang dicari di sini deretan lowongan, dan koper
+             ketiga berturut-turut membuat ketiganya tak terbedakan. --}}
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.lowongan*') ? 'active' : '' }}" href="{{ route('mahasiswa.lowongan') }}">
-          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
           Lowongan Magang
         </a>
         <a class="nav-item nav-sub-item {{ request()->routeIs('mahasiswa.ajukan-magang') ? 'active' : '' }}" href="{{ route('mahasiswa.ajukan-magang') }}">

@@ -25,8 +25,10 @@
     </a>
     <a class="nav-item {{ request()->routeIs('dosen.seminar.*') ? 'active' : '' }}"
        href="{{ route('dosen.seminar.index') }}">
+      {{-- Rupanya disamakan dengan menu Seminar di portal kaprodi & mahasiswa:
+           satu konsep sebaiknya punya satu ikon di seluruh aplikasi. --}}
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        <rect x="2" y="3" width="20" height="12" rx="1"/><path d="M12 15v4"/><path d="M8 21l4-2 4 2"/>
       </svg>
       Seminar Magang
     </a>
