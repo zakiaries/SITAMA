@@ -92,9 +92,19 @@ h1, h2, h3 { letter-spacing: -0.02em; }
   height: 100vh;
   border-right: 1px solid var(--border-subtle);
 }
+/* Tingginya DIPATOK sama dengan .topbar, bukan dibiarkan mengikuti isinya.
+   Dulu padding 18/14 + dua baris teks menghasilkan ±71px sementara topbar
+   dipatok 60px, sehingga garis bawah sidebar dan garis bawah header utama
+   meleset ±11px — terlihat jelas sebagai dua garis yang tak menyambung.
+   Dengan tinggi yang sama (dan box-sizing: border-box yang berlaku global),
+   keduanya sejajar apa pun isi teksnya. */
 .sb-logo {
-  padding: 18px 20px 14px;
+  height: var(--topbar-h);
+  padding: 0 20px;
   border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .sb-logo .name { color: var(--text); font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
 .sb-logo .sub  { color: var(--text-secondary); font-size: 10px; letter-spacing: 0.2px; margin-top: 3px; font-weight: 500; }
