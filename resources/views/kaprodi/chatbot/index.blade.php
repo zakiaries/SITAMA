@@ -10,9 +10,9 @@
 @endif
 
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+  {{-- Judulnya sudah tercetak di header atas; keterangannya yang tetap berguna. --}}
   <div>
-    <div class="page-title">FAQ Chatbot</div>
-    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+    <div style="color:var(--text-secondary);font-size:13px;">
       Basis pengetahuan yang dipakai chatbot mahasiswa. Perubahan langsung melatih ulang model TF-IDF.
     </div>
   </div>

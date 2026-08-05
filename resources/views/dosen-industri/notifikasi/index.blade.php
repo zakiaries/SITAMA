@@ -9,8 +9,8 @@
     </div>
   @endif
 
-  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-    <div class="page-title">Notifikasi</div>
+  {{-- Judulnya sudah tercetak di header atas; barisnya disisakan untuk tombol. --}}
+  <div class="page-header" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;">
     @if($unreadCount > 0)
       <form method="POST" action="{{ route('dosen-industri.notifikasi.read-all') }}">
         @csrf

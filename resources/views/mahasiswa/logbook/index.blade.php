@@ -28,12 +28,13 @@
     </div>
   @endif
 
-  <div class="page-header">
-    <div class="page-title">Log Book</div>
+  {{-- Judulnya sudah tercetak di header atas; barisnya disisakan untuk tombol. --}}
+  <div class="page-header" style="justify-content:flex-end;">
     @if($canFill)
       <button class="btn btn-primary" onclick="document.getElementById('modal-logbook').classList.add('open')">+ Tambah Log Book</button>
     @else
-      <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;"
+      {{-- Gaya matinya diurus .btn:disabled di simama.css, bukan opacity setempat. --}}
+      <button class="btn btn-primary" disabled
               title="{{ $terkunci ?? 'Belum ada magang aktif' }}">+ Tambah Log Book</button>
     @endif
   </div>

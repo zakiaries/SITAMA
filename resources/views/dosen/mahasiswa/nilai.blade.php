@@ -54,9 +54,12 @@
 {{-- Header --}}
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
   <a href="{{ route('dosen.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>
+  {{-- "Input Nilai" sudah tercetak di header atas. Yang membedakan halaman ini
+       dari halaman nilai mahasiswa lain adalah NAMANYA, jadi itu yang dinaikkan
+       jadi judul — bukan sekadar menghapus yang berulang. --}}
   <div>
-    <div class="page-title" style="margin-bottom:2px;">Input Nilai</div>
-    <div style="font-size:12px;color:var(--text-muted);">{{ $student->user->name }} — {{ $student->user->username }}</div>
+    <div class="page-title" style="margin-bottom:2px;">{{ $student->user->name }}</div>
+    <div style="font-size:12px;color:var(--text-muted);">{{ $student->user->username }}</div>
   </div>
 </div>
 

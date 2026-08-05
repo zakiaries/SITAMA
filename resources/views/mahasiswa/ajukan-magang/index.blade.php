@@ -35,8 +35,9 @@
 
 @else
   {{-- Form Ajukan Magang --}}
+  {{-- Tanpa judul kartu: kartu ini SATU-SATUNYA isi halaman, dan judulnya sudah
+       tercetak di header atas. --}}
   <div class="card" style="margin-bottom:20px;">
-    <div class="card-title" style="margin-bottom:4px;">Ajukan Magang</div>
     <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:16px;">
       Isi data magang dan upload bukti penerimaan. Kaprodi akan mereview dan menghubungkan ke sistem.
     </p>

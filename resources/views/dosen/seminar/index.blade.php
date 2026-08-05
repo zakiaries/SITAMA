@@ -13,9 +13,9 @@
 @endif
 
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+  {{-- Judulnya sudah tercetak di header atas; keterangannya yang tetap berguna. --}}
   <div>
-    <div class="page-title">Seminar Magang</div>
-    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+    <div style="color:var(--text-secondary);font-size:13px;">
       Buat sesi seminar untuk mahasiswa bimbingan yang sudah selesai magang. Mereka maju bergantian dalam satu sesi.
     </div>
   </div>

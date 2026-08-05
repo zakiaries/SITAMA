@@ -59,9 +59,11 @@
 
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
   <a href="{{ route('dosen-industri.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm"><x-icon name="arrow-left" :size="14"/> Kembali</a>
+  {{-- "Penilaian Akhir" sudah tercetak di header atas; nama mahasiswanya yang
+       membedakan halaman ini, jadi itu yang dinaikkan jadi judul. --}}
   <div>
-    <div class="page-title" style="margin-bottom:2px;">Penilaian Akhir</div>
-    <div style="font-size:12px;color:var(--text-muted);">{{ $student->user->name }} · {{ $internship->position }}</div>
+    <div class="page-title" style="margin-bottom:2px;">{{ $student->user->name }}</div>
+    <div style="font-size:12px;color:var(--text-muted);">{{ $internship->position }}</div>
   </div>
 </div>
 

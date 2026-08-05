@@ -56,12 +56,10 @@
     {{-- Pengaturan --}}
     <div class="card">
       <div class="card-title" style="margin-bottom:14px;">Pengaturan Akun</div>
+      {{-- Baris "Edit Profil" dibuang: ia membuka modal yang sama persis dengan
+           tombol Edit Profil di kartu identitas atas. Yang dipertahankan
+           tombolnya, karena ia menempel pada data yang disuntingnya. --}}
       <div class="settings">
-        <div class="setting-row" onclick="document.getElementById('modal-edit-profile').classList.add('open')">
-          <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></div>
-          <div class="setting-main"><div class="setting-label">Edit Profil</div><div class="setting-desc">Ubah nama, email, atau password</div></div>
-          <svg class="setting-arr" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
         <a href="{{ route('bantuan') }}" class="setting-row" style="text-decoration:none;color:inherit;">
           <div class="setting-ic"><svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
           <div class="setting-main"><div class="setting-label">Help &amp; Support</div><div class="setting-desc">Bantuan dan pusat dukungan</div></div>

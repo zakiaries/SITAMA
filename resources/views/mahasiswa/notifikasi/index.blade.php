@@ -9,8 +9,10 @@
     </div>
   @endif
 
-  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-    <div class="page-title">Notifikasi</div>
+  {{-- Judulnya sudah tercetak di header atas; mengulangnya di sini membuat kata
+       yang sama muncul dua kali bertumpuk. Barisnya disisakan untuk tombolnya,
+       jadi perataannya dipindah ke kanan. --}}
+  <div class="page-header" style="display:flex;align-items:center;justify-content:flex-end;gap:12px;">
     @if($unreadCount > 0)
       <form method="POST" action="{{ route('mahasiswa.notifikasi.read-all') }}">
         @csrf
