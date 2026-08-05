@@ -17,7 +17,7 @@
   <select name="periode" onchange="this.form.submit()">
     @foreach($list as $p)
       <option value="{{ $p->id }}" {{ (string) $periode === (string) $p->id ? 'selected' : '' }}>
-        {{ $p->label }}{{ $p->is_active ? ' — berjalan' : '' }}
+        {{ $p->label }}
       </option>
     @endforeach
 
