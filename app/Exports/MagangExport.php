@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Internship;
+use App\Models\Period;
 use App\Models\Student;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -13,22 +14,30 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Collection;
 
+/**
+ * Rekap magang per PERIODE.
+ *
+ * Dulu disaring `students.academic_year` — teks bebas yang diketik sendiri
+ * mahasiswa — sehingga rekap satu angkatan bisa bocor ke angkatan lain hanya
+ * karena bedanya penulisan. Sekarang memakai penyaring yang sama persis dengan
+ * dashboard, supaya angka di layar dan angka di berkas tak mungkin berbeda.
+ */
 class MagangExport implements WithMultipleSheets
 {
-    public function __construct(private ?string $tahun = null) {}
+    public function __construct(private ?string $periode = null) {}
 
     public function sheets(): array
     {
         return [
-            new MagangRingkasanSheet($this->tahun),
-            new MagangDetailSheet($this->tahun),
+            new MagangRingkasanSheet($this->periode),
+            new MagangDetailSheet($this->periode),
         ];
     }
 }
 
 class MagangRingkasanSheet implements FromCollection, WithHeadings, WithTitle, ShouldAutoSize, WithStyles
 {
-    public function __construct(private ?string $tahun) {}
+    public function __construct(private ?string $periode) {}
 
     public function title(): string { return 'Ringkasan'; }
 
@@ -39,8 +48,12 @@ class MagangRingkasanSheet implements FromCollection, WithHeadings, WithTitle, S
 
     public function collection(): Collection
     {
-        $base = Student::where('status', 'active')->when($this->tahun, fn($q) => $q->where('academic_year', $this->tahun));
-        $intBase = Internship::when($this->tahun, fn($q) => $q->whereHas('student', fn($s) => $s->where('academic_year', $this->tahun)));
+        $base = Period::terapkan(Student::where('status', 'active'), $this->periode);
+
+        $intBase = Internship::when(
+            Period::menyaring($this->periode),
+            fn($q) => $q->whereHas('student', fn($s) => Period::terapkan($s, $this->periode))
+        );
 
         $total   = (clone $base)->count();
         $belum   = (clone $base)->whereDoesntHave('internships')->count();
@@ -49,7 +62,8 @@ class MagangRingkasanSheet implements FromCollection, WithHeadings, WithTitle, S
         $companies = $intBase->clone()->distinct('company_id')->count('company_id');
 
         return collect([
-            ['Total Mahasiswa Aktif' . ($this->tahun ? " TA {$this->tahun}" : ''), $total],
+            ['Periode', Period::labelPilihan($this->periode)],
+            ['Total Mahasiswa Aktif', $total],
             ['Belum Magang', $belum],
             ['Sedang Magang', $aktif],
             ['Selesai Magang', $selesai],
@@ -68,14 +82,14 @@ class MagangRingkasanSheet implements FromCollection, WithHeadings, WithTitle, S
 
 class MagangDetailSheet implements FromCollection, WithHeadings, WithTitle, ShouldAutoSize, WithStyles
 {
-    public function __construct(private ?string $tahun) {}
+    public function __construct(private ?string $periode) {}
 
     public function title(): string { return 'Data Mahasiswa'; }
 
     public function headings(): array
     {
         return [
-            'No', 'Nama Mahasiswa', 'NIM', 'Program Studi', 'Kelas', 'Tahun Akademik',
+            'No', 'Nama Mahasiswa', 'NIM', 'Program Studi', 'Kelas', 'Periode Magang',
             'Status Magang', 'Perusahaan', 'Posisi', 'Mulai Magang', 'Selesai',
             'Dosen Pembimbing', 'Pembimbing Industri', 'Jumlah Logbook',
         ];
@@ -83,17 +97,18 @@ class MagangDetailSheet implements FromCollection, WithHeadings, WithTitle, Shou
 
     public function collection(): Collection
     {
-        $students = Student::with([
+        $query = Student::with([
                 'user',
+                'period',
                 'internships.company',
                 'internships.lecturer.user',
                 'internships.lecturerIndustry.user',
                 'logBooks',
             ])
             ->where('status', 'active')
-            ->when($this->tahun, fn($q) => $q->where('academic_year', $this->tahun))
-            ->orderBy('study_program')
-            ->get();
+            ->orderBy('study_program');
+
+        $students = Period::terapkan($query, $this->periode)->get();
 
         $rows = collect();
         $i = 1;
@@ -111,7 +126,7 @@ class MagangDetailSheet implements FromCollection, WithHeadings, WithTitle, Shou
                 $student->nim ?? '-',
                 $student->study_program ?? '-',
                 $student->the_class ?? '-',
-                $student->academic_year ?? '-',
+                $student->period?->label ?? '-',
                 $status,
                 $internship?->company?->name ?? '-',
                 $internship?->position ?? '-',

@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Internship;
 use App\Models\Lecturer;
 use App\Models\Notification;
+use App\Models\Period;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,11 +20,30 @@ class MahasiswaController extends Controller
         $status = $request->input('status', 'pending');
         $search = $request->input('search');
 
+        $periode      = $request->input('periode') ?: Period::pilihanBawaan();
+        $periodeList  = Period::terbaru()->get();
+        $tanpaPeriode = Student::whereNull('period_id')->count();
+
+        /**
+         * Tab "Menunggu" SENGAJA lepas dari penyaring periode.
+         *
+         * Pendaftar baru belum diterima ke angkatan mana pun — persetujuan
+         * Kaprodi-lah yang menempatkannya. Menyaringnya berarti menyembunyikan
+         * justru orang yang menunggu ditindak, dan Kaprodi akan menyimpulkan
+         * tak ada pendaftar padahal ada.
+         */
+        $disaring = $status !== 'pending';
+
         $query = Student::with([
             'user',
             'lecturer.user',
+            'period',
             'internships' => fn($q) => $q->with(['company', 'lecturer.user'])->latest(),
         ]);
+
+        if ($disaring) {
+            Period::terapkan($query, $periode);
+        }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -58,13 +78,17 @@ class MahasiswaController extends Controller
 
         $students = $query->get();
 
+        // Angka di tab harus menjawab pertanyaan yang sama dengan isi daftarnya,
+        // jadi ikut disaring periode — kecuali "Menunggu", sesuai alasan di atas.
+        $dalamPeriode = fn() => Period::terapkan(Student::query(), $periode);
+
         $counts = [
             'pending'      => Student::where('status', 'pending')->count(),
-            'semua'        => Student::where('status', 'active')->count(),
-            'aktif'        => Student::where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', false))->count(),
-            'selesai'      => Student::where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', true))->count(),
-            'belum_magang' => Student::where('status', 'active')->whereDoesntHave('internships')->count(),
-            'rejected'     => Student::where('status', 'rejected')->count(),
+            'semua'        => $dalamPeriode()->where('status', 'active')->count(),
+            'aktif'        => $dalamPeriode()->where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', false))->count(),
+            'selesai'      => $dalamPeriode()->where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', true))->count(),
+            'belum_magang' => $dalamPeriode()->where('status', 'active')->whereDoesntHave('internships')->count(),
+            'rejected'     => $dalamPeriode()->where('status', 'rejected')->count(),
         ];
 
         // Dropdown "Plot Dosen" hanya untuk dosen kampus (role lecturer), BUKAN
@@ -72,7 +96,10 @@ class MahasiswaController extends Controller
         $lecturers = Lecturer::whereHas('user', fn($q) => $q->where('role', 'lecturer'))
             ->with('user')->get();
 
-        return view('kaprodi.mahasiswa.index', compact('students', 'status', 'counts', 'lecturers'));
+        return view('kaprodi.mahasiswa.index', compact(
+            'students', 'status', 'counts', 'lecturers',
+            'periode', 'periodeList', 'tanpaPeriode', 'disaring'
+        ));
     }
 
     public function approve(Student $student)

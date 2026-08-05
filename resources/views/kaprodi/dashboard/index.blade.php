@@ -84,20 +84,12 @@
 
 {{-- Filter & Export --}}
 <div class="filter-bar">
-  <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;">Filter Tahun Akademik</div>
+  <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;">Periode Magang</div>
   <form method="GET" action="{{ route('kaprodi.dashboard') }}" style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;">
-    <select name="tahun" onchange="this.form.submit()">
-      <option value="">Semua Tahun</option>
-      @foreach($tahunList as $t)
-        <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>{{ $t }}</option>
-      @endforeach
-    </select>
-    @if($tahun)
-      <a href="{{ route('kaprodi.dashboard') }}" class="btn btn-outline btn-sm">Reset</a>
-    @endif
+    <x-periode-select :periode="$periode" :list="$periodeList" :tanpa="$tanpaPeriode"/>
   </form>
   <div class="export-btns">
-    <a href="{{ route('kaprodi.dashboard.export-excel', $tahun ? ['tahun' => $tahun] : []) }}"
+    <a href="{{ route('kaprodi.dashboard.export-excel', ['periode' => $periode]) }}"
        class="btn btn-sm" style="background:#16a34a;color:#fff;border:none;display:flex;align-items:center;gap:6px;">
       <x-icon name="doc" :size="14"/> Excel
     </a>

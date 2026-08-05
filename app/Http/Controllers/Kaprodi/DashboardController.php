@@ -7,29 +7,44 @@ use App\Http\Controllers\Controller;
 use App\Models\Internship;
 use App\Models\Lecturer;
 use App\Models\LogBook;
+use App\Models\Period;
 use App\Models\Seminar;
 use App\Models\Student;
 use App\Models\StudentScore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $user      = Auth::user();
-        $tahun     = $request->input('tahun');
-        $tahunList = Student::where('status', 'active')
-            ->distinct()->orderByDesc('academic_year')->pluck('academic_year');
+        $user = Auth::user();
+
+        // Penyaring periode menggantikan penyaring "tahun akademik" yang lama.
+        // Yang lama membaca students.academic_year — teks bebas yang diketik
+        // sendiri mahasiswa — sehingga dropdown-nya berisi nilai seperti
+        // "2023/2026" dan angkanya tak bisa dipercaya.
+        $periode      = $request->input('periode') ?: Period::pilihanBawaan();
+        $periodeList  = Period::terbaru()->get();
+        $tanpaPeriode = Student::whereNull('period_id')->count();
 
         // Base scopes
-        $studentBase   = Student::where('status', 'active')->when($tahun, fn($q) => $q->where('academic_year', $tahun));
-        $internshipBase = Internship::when($tahun, fn($q) => $q->whereHas('student', fn($s) => $s->where('academic_year', $tahun)));
+        $studentBase = Period::terapkan(Student::where('status', 'active'), $periode);
+
+        $internshipBase = Internship::when(
+            Period::menyaring($periode),
+            fn($q) => $q->whereHas('student', fn($s) => Period::terapkan($s, $periode))
+        );
 
         // ── Stat cards ──────────────────────────────────────────────
-        $totalMahasiswa   = (clone $studentBase)->count();
+        $totalMahasiswa = (clone $studentBase)->count();
+
+        // Pendaftar baru SENGAJA tidak ikut disaring: ia belum diterima ke
+        // angkatan mana pun — persetujuan Kaprodi-lah yang menempatkannya.
+        // Menyaringnya berarti menyembunyikan justru orang yang butuh tindakan.
         $pendingMahasiswa = Student::where('status', 'pending')->count();
         $belumMagang      = (clone $studentBase)->whereDoesntHave('internships')->count();
         $aktif            = (clone $studentBase)->whereHas('internships', fn($q) => $q->where('is_finished', false))->count();
@@ -108,7 +123,7 @@ class DashboardController extends Controller
         $pendingList = Student::with('user')->where('status', 'pending')->latest()->take(3)->get();
 
         return view('kaprodi.dashboard.index', compact(
-            'user', 'tahun', 'tahunList',
+            'user', 'periode', 'periodeList', 'tanpaPeriode',
             'totalMahasiswa', 'pendingMahasiswa', 'belumMagang', 'aktif', 'selesai',
             'totalDosen', 'totalSeminar', 'pendingList',
             'chartStatus', 'chartCompanies', 'chartProdi', 'chartLogbook', 'chartNilai'
@@ -117,9 +132,16 @@ class DashboardController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $tahun    = $request->input('tahun');
-        $filename = 'rekap-magang' . ($tahun ? "-{$tahun}" : '') . '-' . now()->format('Ymd') . '.xlsx';
+        $periode = $request->input('periode') ?: Period::pilihanBawaan();
+        $label   = Period::labelPilihan($periode);
 
-        return Excel::download(new MagangExport($tahun), $filename);
+        // Periodenya masuk nama berkas supaya rekap dua angkatan tak tertukar
+        // saat sama-sama tersimpan di folder unduhan.
+        $slug = Str::slug($label);
+
+        return Excel::download(
+            new MagangExport($periode),
+            "rekap-magang-{$slug}-" . now()->format('Ymd') . '.xlsx'
+        );
     }
 }

@@ -46,9 +46,19 @@
   <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">{{ session('error') }}</div>
 @endif
 
+{{-- Periode --}}
+<form method="GET" action="{{ route('kaprodi.mahasiswa.index') }}"
+      style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+  <input type="hidden" name="status" value="{{ $status }}">
+  <input type="hidden" name="search" value="{{ request('search') }}">
+  <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;">Periode Magang</div>
+  <x-periode-select :periode="$periode" :list="$periodeList" :tanpa="$tanpaPeriode"/>
+</form>
+
 {{-- Search --}}
 <form method="GET" action="{{ route('kaprodi.mahasiswa.index') }}">
   <input type="hidden" name="status" value="{{ $status }}">
+  <input type="hidden" name="periode" value="{{ $periode }}">
   <div class="search-bar">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
     <input name="search" placeholder="Cari nama atau NIM..." value="{{ request('search') }}">
@@ -61,12 +71,21 @@
     $tabs = ['pending'=>'Menunggu','semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang','rejected'=>'Ditolak'];
   @endphp
   @foreach($tabs as $key => $label)
-  <a href="{{ route('kaprodi.mahasiswa.index', ['status' => $key, 'search' => request('search')]) }}"
+  <a href="{{ route('kaprodi.mahasiswa.index', ['status' => $key, 'search' => request('search'), 'periode' => $periode]) }}"
      class="filter-tab {{ $status === $key ? 'active' : '' }}">
     {{ $label }} ({{ $counts[$key] }})
   </a>
   @endforeach
 </div>
+
+@unless($disaring)
+  {{-- Tab Menunggu lepas dari penyaring periode; katakan terus terang supaya
+       angka yang beda dari tab lain tidak terbaca sebagai kekeliruan. --}}
+  <div class="info-note" style="margin-bottom:12px;">
+    Pendaftar baru ditampilkan seluruhnya, lintas periode — mereka belum masuk
+    angkatan mana pun sampai kamu menyetujuinya.
+  </div>
+@endunless
 
 {{-- Info penjelasan saat di tab Menunggu --}}
 @if($status === 'pending')

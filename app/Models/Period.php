@@ -71,6 +71,64 @@ class Period extends Model
         return static::aktif()->first();
     }
 
+    /** Nilai penyaring yang bukan id periode. */
+    const PILIHAN_SEMUA = 'semua';
+
+    /** Mahasiswa yang belum masuk periode mana pun (`period_id` kosong). */
+    const PILIHAN_TANPA = 'tanpa';
+
+    /**
+     * Pilihan penyaring bawaan: periode yang sedang berjalan.
+     *
+     * Kaprodi membuka halaman dan langsung melihat angkatan yang sedang ia urus,
+     * bukan tumpukan semua angkatan sejak sistem dipakai — itu keluhan yang
+     * membuat penyaring ini dibuat.
+     *
+     * Bila belum ada periode aktif, sengaja TIDAK menyaring apa pun: menyaring
+     * ke periode yang tak ada akan menyodorkan halaman kosong tanpa penjelasan,
+     * dan itu lebih membingungkan daripada daftar yang panjang.
+     */
+    public static function pilihanBawaan(): string
+    {
+        return (string) (static::sekarang()?->id ?? self::PILIHAN_SEMUA);
+    }
+
+    /** Apakah pilihan ini benar-benar mempersempit daftar. */
+    public static function menyaring(?string $pilihan): bool
+    {
+        return $pilihan !== null && $pilihan !== '' && $pilihan !== self::PILIHAN_SEMUA;
+    }
+
+    /**
+     * Terapkan penyaring pada query apa pun yang punya kolom `period_id`.
+     *
+     * Dipakai bersama oleh dashboard, daftar mahasiswa, dan ekspor Excel supaya
+     * ketiganya tak mungkin berbeda aturan — angka di kartu, isi daftar, dan isi
+     * berkas ekspor harus menjawab pertanyaan yang sama.
+     */
+    public static function terapkan($query, ?string $pilihan, string $kolom = 'period_id')
+    {
+        if (! self::menyaring($pilihan)) {
+            return $query;
+        }
+
+        return $pilihan === self::PILIHAN_TANPA
+            ? $query->whereNull($kolom)
+            : $query->where($kolom, $pilihan);
+    }
+
+    /** Label pilihan, untuk judul halaman & nama berkas ekspor. */
+    public static function labelPilihan(?string $pilihan): string
+    {
+        if (! self::menyaring($pilihan)) {
+            return 'Semua periode';
+        }
+
+        return $pilihan === self::PILIHAN_TANPA
+            ? 'Tanpa periode'
+            : (static::find($pilihan)?->label ?? 'Semua periode');
+    }
+
     /**
      * Jadikan periode ini satu-satunya yang aktif.
      *
