@@ -39,10 +39,10 @@
   background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;
   display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;
 }
-.filter-bar select {
-  padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;
-  color:var(--text);background:#fff;outline:none;cursor:pointer;min-width:180px;
-}
+{{-- Aturan `.filter-bar select` dibuang: pemilih periode kini punya gayanya
+     sendiri di simama.css dan dipakai bersama halaman Data Mahasiswa. Selama
+     aturan lokal ini ada, dropdown di dua halaman itu tampak berbeda padahal
+     komponennya sama. --}}
 .export-btns { display:flex;gap:8px;margin-left:auto; }
 </style>
 @endpush
