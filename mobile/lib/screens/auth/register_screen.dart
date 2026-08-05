@@ -17,22 +17,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _passwordConfirm = TextEditingController();
-  final _studyProgram = TextEditingController();
   final _major = TextEditingController();
   final _theClass = TextEditingController();
-  final _academicYear = TextEditingController();
   bool _saving = false;
   String? _error;
 
+  /// Prodi yang memakai SIMAMA. Harus sama persis dengan Student::PRODI di sisi
+  /// web — server menolak nilai di luar daftar ini. Dulu isian teks bebas, dan
+  /// hasilnya satu prodi tercatat dalam dua ejaan.
+  static const _daftarProdi = <String>[
+    'Teknik Informatika',
+    'Teknologi Rekayasa Komputer',
+  ];
+  String? _studyProgram;
+
+  // Tahun akademik tak lagi dikirim: server menurunkannya dari periode magang
+  // yang sedang berjalan, jadi pendaftar tak bisa lagi salah ketik.
+
   @override
   void dispose() {
-    for (final c in [_name, _username, _email, _password, _passwordConfirm, _studyProgram, _major, _theClass, _academicYear]) {
+    for (final c in [_name, _username, _email, _password, _passwordConfirm, _major, _theClass]) {
       c.dispose();
     }
     super.dispose();
   }
 
   Future<void> _submit() async {
+    if (_studyProgram == null) {
+      setState(() => _error = 'Pilih program studi lebih dulu.');
+      return;
+    }
+
     setState(() { _saving = true; _error = null; });
     try {
       final msg = await context.read<AuthProvider>().register({
@@ -41,10 +56,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'email': _email.text.trim(),
         'password': _password.text,
         'password_confirmation': _passwordConfirm.text,
-        'study_program': _studyProgram.text.trim(),
+        'study_program': _studyProgram,
         'major': _major.text.trim(),
         'the_class': _theClass.text.trim(),
-        'academic_year': _academicYear.text.trim(),
       });
       if (!mounted) return;
       showMessage(context, msg);
@@ -77,13 +91,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         const SizedBox(height: 10),
         AuthPasswordField(controller: _passwordConfirm, hint: 'Konfirmasi Password'),
         authSectionLabel('Data Akademik'),
-        TextField(controller: _studyProgram, decoration: authField('Program Studi', Icons.school_outlined)),
+        DropdownButtonFormField<String>(
+          initialValue: _studyProgram,
+          decoration: authField('Program Studi', Icons.school_outlined),
+          items: [
+            for (final prodi in _daftarProdi)
+              DropdownMenuItem(value: prodi, child: Text(prodi)),
+          ],
+          onChanged: (nilai) => setState(() => _studyProgram = nilai),
+        ),
         const SizedBox(height: 10),
         TextField(controller: _major, decoration: authField('Jurusan', Icons.account_balance_outlined)),
         const SizedBox(height: 10),
         TextField(controller: _theClass, decoration: authField('Kelas', Icons.class_outlined)),
-        const SizedBox(height: 10),
-        TextField(controller: _academicYear, decoration: authField('Tahun Akademik (2024/2025)', Icons.calendar_today_outlined)),
         const SizedBox(height: 18),
         authPrimaryButton('Daftar Sekarang', _saving ? null : _submit, loading: _saving),
       ],
