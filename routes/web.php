@@ -32,6 +32,7 @@ use App\Http\Controllers\Kaprodi\MagangRequestController as KaprodiMagangRequest
 use App\Http\Controllers\Kaprodi\SeminarController as KaprodiSeminarController;
 use App\Http\Controllers\Kaprodi\LowonganController as KaprodiLowonganController;
 use App\Http\Controllers\Kaprodi\ChatbotController as KaprodiChatbotController;
+use App\Http\Controllers\Kaprodi\PeriodeController as KaprodiPeriodeController;
 use App\Http\Controllers\Kaprodi\ProfileController as KaprodiProfileController;
 use App\Http\Controllers\Kaprodi\NotificationController as KaprodiNotificationController;
 use App\Http\Controllers\BeritaAcaraController;
@@ -204,6 +205,10 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:kaprodi'])
     Route::post('/mahasiswa/{student}/internship',      [KaprodiMahasiswaController::class, 'storeInternship'])->name('mahasiswa.internship.store');
     Route::post('/mahasiswa/{student}/assign-lecturer', [KaprodiMahasiswaController::class, 'assignLecturer'])->name('mahasiswa.assign');
     Route::post('/mahasiswa/{student}/status',          [KaprodiMahasiswaController::class, 'ubahStatus'])->name('mahasiswa.status');
+
+    Route::get('/periode',                     [KaprodiPeriodeController::class, 'index'])->name('periode');
+    Route::post('/periode/{period}/prodi',     [KaprodiPeriodeController::class, 'prodi'])->name('periode.prodi');
+    Route::post('/periode/{period}/aktifkan',  [KaprodiPeriodeController::class, 'aktifkan'])->name('periode.aktifkan');
     Route::post('/mahasiswa/{student}/approve',         [KaprodiMahasiswaController::class, 'approve'])->name('mahasiswa.approve');
     Route::post('/mahasiswa/{student}/reject',          [KaprodiMahasiswaController::class, 'reject'])->name('mahasiswa.reject');
 

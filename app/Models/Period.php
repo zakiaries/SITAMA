@@ -100,6 +100,120 @@ class Period extends Model
         ];
     }
 
+    /**
+     * Tahun akademik & semester dari sebuah tanggal.
+     *
+     * Gasal berjalan Agustus–Januari, Genap Februari–Juli. Januari sengaja
+     * dihitung sebagai EKOR Gasal tahun sebelumnya, bukan awal sesuatu yang
+     * baru — magang yang dimulai Agustus baru berakhir di bulan itu.
+     */
+    public static function dariTanggal(\DateTimeInterface $tanggal): array
+    {
+        $tahun = (int) $tanggal->format('Y');
+        $bulan = (int) $tanggal->format('n');
+
+        if ($bulan >= 8) {
+            return [$tahun . '/' . ($tahun + 1), 'gasal'];
+        }
+
+        return $bulan === 1
+            ? [($tahun - 1) . '/' . $tahun, 'gasal']
+            : [($tahun - 1) . '/' . $tahun, 'genap'];
+    }
+
+    /** Jendela tanggal sebuah periode, diturunkan dari kalender akademik. */
+    public static function jendela(string $tahunAkademik, string $semester): array
+    {
+        [$awal, $akhir] = array_map('intval', explode('/', $tahunAkademik));
+
+        return $semester === 'gasal'
+            ? [sprintf('%d-08-01', $awal), sprintf('%d-01-31', $akhir)]
+            : [sprintf('%d-02-01', $akhir), sprintf('%d-07-31', $akhir)];
+    }
+
+    /** Periode sebelum/sesudah, satu langkah semester. */
+    public static function langkah(string $tahunAkademik, string $semester, int $arah): array
+    {
+        [$a, $b] = array_map('intval', explode('/', $tahunAkademik));
+
+        if ($arah > 0) {
+            return $semester === 'gasal'
+                ? [$tahunAkademik, 'genap']
+                : [($a + 1) . '/' . ($b + 1), 'gasal'];
+        }
+
+        return $semester === 'genap'
+            ? [$tahunAkademik, 'gasal']
+            : [($a - 1) . '/' . ($b - 1), 'genap'];
+    }
+
+    /**
+     * Pastikan baris periode di sekitar hari ini sudah ada.
+     *
+     * Periode TIDAK diketik siapa pun: ia fakta kalender, seperti di Simadu
+     * yang daftarnya sudah terisi sampai bertahun-tahun ke belakang tanpa ada
+     * yang pernah "membuat" 2019/2020 Gasal. Kaprodi hanya memutuskan mana yang
+     * aktif dan prodi mana yang ikut — dua hal yang memang tak bisa disimpulkan
+     * sistem dari kalender.
+     *
+     * Idempoten: dipanggil tiap kali halaman Periode dibuka.
+     */
+    public static function siapkanKalender(int $mundur = 2, int $maju = 2): void
+    {
+        [$tahun, $semester] = static::dariTanggal(now());
+
+        // Mundur dulu ke titik awal, lalu maju satu-satu supaya prodi tiap
+        // periode baru bisa dipilihkan bergantian dari periode SEBELUMNYA.
+        foreach (range(1, $mundur) as $ignored) {
+            [$tahun, $semester] = static::langkah($tahun, $semester, -1);
+        }
+
+        foreach (range(0, $mundur + $maju) as $ignored) {
+            static::pastikanAda($tahun, $semester);
+            [$tahun, $semester] = static::langkah($tahun, $semester, 1);
+        }
+    }
+
+    /**
+     * Buat baris periode bila belum ada, dengan prodi peserta dipilihkan
+     * BERGANTIAN dari periode sebelumnya.
+     *
+     * Magang berjalan selang-seling: saat Teknik Informatika magang, Teknologi
+     * Rekayasa Komputer tidak, dan sebaliknya. Polanya dipakai sebagai USULAN,
+     * bukan aturan yang ditanamkan di kode — dua angkatan belum cukup jadi
+     * hukum, dan aturan yang tertanam berarti harus deploy ulang begitu
+     * kurikulum bergeser. Kaprodi selalu bisa mengubahnya.
+     */
+    public static function pastikanAda(string $tahunAkademik, string $semester): self
+    {
+        $ada = static::where('academic_year', $tahunAkademik)
+            ->where('semester', $semester)->first();
+
+        if ($ada) {
+            return $ada;
+        }
+
+        [$mulai, $selesai] = static::jendela($tahunAkademik, $semester);
+        [$tSebelum, $sSebelum] = static::langkah($tahunAkademik, $semester, -1);
+
+        $sebelumnya = static::where('academic_year', $tSebelum)
+            ->where('semester', $sSebelum)->first();
+
+        $usulan = $sebelumnya
+            ? array_values(array_diff(Student::PRODI, $sebelumnya->study_programs ?? []))
+            : [];
+
+        return static::create([
+            'academic_year'   => $tahunAkademik,
+            'semester'        => $semester,
+            'start_date'      => $mulai,
+            'end_date'        => $selesai,
+            'duration_months' => self::DEFAULT_DURATION_MONTHS,
+            'study_programs'  => $usulan,
+            'is_active'       => false,
+        ]);
+    }
+
     /** Nilai penyaring yang bukan id periode. */
     const PILIHAN_SEMUA = 'semua';
 
