@@ -78,21 +78,18 @@
   @endforeach
 </div>
 
-@unless($disaring)
-  {{-- Tab Menunggu lepas dari penyaring periode; katakan terus terang supaya
-       angka yang beda dari tab lain tidak terbaca sebagai kekeliruan. --}}
-  <div class="info-note" style="margin-bottom:12px;">
-    Pendaftar baru ditampilkan seluruhnya, lintas periode — mereka belum masuk
-    angkatan mana pun sampai kamu menyetujuinya.
-  </div>
-@endunless
-
 {{-- Info penjelasan saat di tab Menunggu --}}
 @if($status === 'pending')
+  {{-- Hanya muncul bila memang ada yang menunggu: saat daftarnya kosong,
+       keadaan kosong di bawah sudah mengatakannya, dan dua kotak bertumpuk
+       hanya jadi kebisingan. Keterangan lintas-periode digabung ke sini supaya
+       tab ini tak pernah punya lebih dari satu kotak. --}}
+  @if($counts['pending'] > 0)
 <div class="info-note">
   <span style="font-size:16px;">ℹ️</span>
-  <span>Mahasiswa berikut baru mendaftar dan <strong>belum bisa masuk ke sistem</strong> sampai Anda menyetujui akunnya. Klik <strong>Setujui</strong> untuk mengaktifkan, atau <strong>Tolak</strong> jika data tidak valid.</span>
+  <span>Mahasiswa berikut baru mendaftar dan <strong>belum bisa masuk ke sistem</strong> sampai Anda menyetujui akunnya. Klik <strong>Setujui</strong> untuk mengaktifkan, atau <strong>Tolak</strong> jika data tidak valid. Daftar ini <strong>lintas periode</strong> — pendaftar belum masuk angkatan mana pun sampai disetujui.</span>
 </div>
+  @endif
 @elseif($status === 'rejected')
 <div class="info-note">
   <span style="font-size:16px;">ℹ️</span>

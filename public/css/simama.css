@@ -424,6 +424,34 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
 .search-bar input { border: none; background: transparent; outline: none; flex: 1; font-size: 14px; color: var(--text); font-family: inherit; }
 .search-bar input::placeholder { color: var(--text-muted); }
 
+/* Pemilih periode magang — disamakan dengan .search-bar (rangka, radius,
+   tinggi) supaya tak menonjol sebagai kontrol bawaan peramban di tengah
+   halaman yang kontrolnya sudah dipoles. */
+.periode-select {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 9px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0 12px;
+  color: var(--text-muted);
+}
+.periode-select:focus-within { border-color: var(--primary); }
+.periode-select > select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  border: none; background: transparent; outline: none;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: var(--text); cursor: pointer;
+  padding: 10px 20px 10px 0;
+}
+/* Panah sendiri: appearance:none membuang panah bawaan. */
+.periode-select::after {
+  content: ''; position: absolute; right: 13px;
+  width: 7px; height: 7px; margin-top: -3px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
 /* Filter chips */
 .chips { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .chip {
