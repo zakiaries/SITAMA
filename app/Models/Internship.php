@@ -165,6 +165,22 @@ class Internship extends Model
     }
 
     /**
+     * Rincian nilai per BUTIR untuk dokumen cetak.
+     *
+     * nilaiSummary() hanya memberi rata-rata per komponen — cukup untuk layar,
+     * tapi lembar nilai resmi mencantumkan tiap butir penilaian beserta
+     * skornya, karena itulah yang ditandatangani.
+     */
+    public function rincianNilai(string $scorerType)
+    {
+        return AssessmentComponent::forScorer($scorerType)
+            ->with(['detailedComponents.scores' => fn ($q) => $q
+                ->where('internship_id', $this->id)
+                ->where('scorer_type', $scorerType)])
+            ->get();
+    }
+
+    /**
      * Rangkum nilai satu penilai.
      * @param  bool  $weighted  true = rata berbobot (pakai kolom weight komponen).
      */

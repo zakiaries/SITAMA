@@ -60,6 +60,20 @@
     </div>
   </div>
 
+  {{-- Unduh hanya muncul bila kedua penilai sudah selesai: lembar setengah jadi
+       tak ada gunanya dibawa minta tanda tangan, dan yang menandatanganinya
+       justru bisa mengira nilainya memang sebegitu. --}}
+  @if($nilai['final'] !== null)
+    <div style="margin-bottom:16px;">
+      <a href="{{ route('mahasiswa.nilai.pdf') }}" class="btn btn-outline btn-sm">
+        <x-icon name="download" :size="13"/> Unduh Lembar Nilai (PDF)
+      </a>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">
+        Untuk dicetak dan dimintakan tanda tangan dosen pembimbing serta pembimbing industri.
+      </div>
+    </div>
+  @endif
+
   {{-- Info Magang singkat --}}
   <div class="card" style="margin-bottom:16px;">
     <div class="card-header" style="margin-bottom:12px;">
