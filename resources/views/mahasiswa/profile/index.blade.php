@@ -3,6 +3,8 @@
 @php $title = 'Profile'; @endphp
 @section('content')
 
+  <x-form-errors/>
+
   @if(session('success'))
     <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
       {{ session('success') }}

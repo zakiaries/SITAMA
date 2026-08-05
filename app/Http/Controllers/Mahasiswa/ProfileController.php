@@ -29,6 +29,11 @@ class ProfileController extends Controller
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
+        ], [
+            // Pesan bawaan Laravel berbahasa Inggris, sedangkan seluruh
+            // aplikasi berbahasa Indonesia.
+            'password.min'       => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $user->update(['name' => $request->name, 'email' => $request->email]);
