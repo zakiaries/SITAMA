@@ -11,9 +11,11 @@ use Tests\FeatureTestCase;
 /**
  * Lembar nilai magang untuk dicetak dan ditandatangani.
  *
- * Diminta partner: mahasiswa perlu membawa nilai dari dosen pembimbing DAN
- * pembimbing industri dalam bentuk kertas, untuk dimintakan tanda tangan basah.
- * Sebelumnya nilai hanya bisa dilihat di layar.
+ * DUA lembar terpisah, mengikuti form resmi Polines: satu ditandatangani dosen
+ * pembimbing, satu ditandatangani pembimbing industri, lalu diserahkan
+ * sendiri-sendiri. Susunan barisnya disalin persis dari kedua form itu,
+ * termasuk penomoran, baris kepala yang tak dinilai, dan kolom skala 1–10 yang
+ * dicentang.
  */
 class LembarNilaiPdfTest extends FeatureTestCase
 {
@@ -22,135 +24,188 @@ class LembarNilaiPdfTest extends FeatureTestCase
         return $this->userByUsername('3.34.23.2.01');
     }
 
-    /** Isi nilai lengkap dari kedua penilai, skala 1–10. */
-    private function nilaiLengkap(int $internshipId, int $skorDosen = 8, int $skorIndustri = 9): void
+    /** Isi nilai satu penilai, skala 1–10. */
+    private function nilai(int $internshipId, string $penilai, int $skor): void
     {
-        foreach (['lecturer' => $skorDosen, 'lecturer_industry' => $skorIndustri] as $penilai => $skor) {
-            AssessmentComponent::forScorer($penilai)->with('detailedComponents')->get()
-                ->flatMap->detailedComponents
-                ->each(fn ($detail) => StudentScore::updateOrCreate([
-                    'internship_id'                    => $internshipId,
-                    'detailed_assessment_component_id' => $detail->id,
-                    'scorer_type'                      => $penilai,
-                ], ['score' => $skor]));
-        }
+        AssessmentComponent::forScorer($penilai)->with('detailedComponents')->get()
+            ->flatMap->detailedComponents
+            ->each(fn ($detail) => StudentScore::updateOrCreate([
+                'internship_id'                    => $internshipId,
+                'detailed_assessment_component_id' => $detail->id,
+                'scorer_type'                      => $penilai,
+            ], ['score' => $skor]));
     }
 
-    public function test_belum_lengkap_tak_bisa_diunduh(): void
+    private function magang()
     {
-        $this->actingAs($this->mahasiswa())
-            ->get(route('mahasiswa.nilai.pdf'))
-            ->assertRedirect();
-
-        $this->assertNotNull(session('error'));
+        return $this->mahasiswa()->student->activeInternship()->first();
     }
 
-    public function test_tombol_unduh_tersembunyi_sebelum_nilai_lengkap(): void
+    private function render(string $berkas)
     {
-        $this->actingAs($this->mahasiswa())
-            ->get(route('mahasiswa.nilai'))
-            ->assertOk()
-            ->assertDontSee('Unduh Lembar Nilai (PDF)');
-    }
-
-    public function test_tombol_unduh_muncul_setelah_kedua_penilai_selesai(): void
-    {
-        $mahasiswa  = $this->mahasiswa();
-        $internship = $mahasiswa->student->activeInternship()->first();
-        $this->nilaiLengkap($internship->id);
-
-        $this->actingAs($mahasiswa)
-            ->get(route('mahasiswa.nilai'))
-            ->assertOk()
-            ->assertSee('Unduh Lembar Nilai (PDF)');
-    }
-
-    public function test_lembar_memuat_kedua_penilai_dan_nilai_akhir(): void
-    {
-        $mahasiswa  = $this->mahasiswa();
-        $internship = $mahasiswa->student->activeInternship()->first();
-        $this->nilaiLengkap($internship->id, 8, 9);
-
-        $internship->refresh()->load(['company', 'lecturer.user', 'lecturerIndustry.user', 'student.user', 'student.period']);
-        $nilai = $internship->nilaiSummary();
+        $internship = $this->magang()->fresh()
+            ->load(['company', 'lecturer.user', 'lecturerIndustry.user', 'student.user', 'student.period']);
 
         // Blade dirender langsung: isi PDF dari dompdf termampatkan sehingga
         // teksnya tak bisa dicari, sedangkan yang perlu dibuktikan justru
-        // angka-angka yang tercetak.
-        $html = view('mahasiswa.nilai.pdf', [
-            'internship' => $internship,
-            'nilai'      => $nilai,
-            'dosen'      => $internship->rincianNilai('lecturer'),
-            'industri'   => $internship->rincianNilai('lecturer_industry'),
-        ])->render();
-
-        $this->assertStringContainsString('Penilaian Dosen Pembimbing', $html);
-        $this->assertStringContainsString('Penilaian Pembimbing Industri', $html);
-
-        // Rata dosen 8 + rata industri 9 = 17.
-        $this->assertSame(17.0, $nilai['final']);
-        $this->assertStringContainsString('17', $html);
-
-        // Butir penilaian ikut tercetak, bukan cuma rata-ratanya.
-        $this->assertStringContainsString('Sistematika penulisan', $html);
-        $this->assertStringContainsString('Kedisiplinan', $html);
-
-        // Ruang tanda tangan kedua penilai.
-        $this->assertStringContainsString('Dosen Pembimbing,', $html);
-        $this->assertStringContainsString('Pembimbing Industri,', $html);
-    }
-
-    /** Periode diambil dari periode magang, bukan tanggal dokumen dicetak. */
-    public function test_lembar_menyebut_periode_magangnya(): void
-    {
-        $mahasiswa  = $this->mahasiswa();
-        $internship = $mahasiswa->student->activeInternship()->first();
-        $this->nilaiLengkap($internship->id);
-
-        $periode = Period::create([
-            'academic_year' => '2025/2026',
-            'semester'      => 'genap',
-            'start_date'    => '2026-02-01',
-            'end_date'      => '2026-07-31',
-        ]);
-        $mahasiswa->student->update(['period_id' => $periode->id]);
-
-        $internship->refresh()->load(['company', 'lecturer.user', 'lecturerIndustry.user', 'student.user', 'student.period']);
-
-        $html = view('mahasiswa.nilai.pdf', [
+        // susunan baris dan angkanya.
+        return view("mahasiswa.nilai.{$berkas}", [
             'internship' => $internship,
             'nilai'      => $internship->nilaiSummary(),
             'dosen'      => $internship->rincianNilai('lecturer'),
             'industri'   => $internship->rincianNilai('lecturer_industry'),
         ])->render();
-
-        $this->assertStringContainsString('Semester Genap', $html);
-        $this->assertStringContainsString('2025/2026', $html);
     }
 
-    public function test_rute_mengembalikan_berkas_pdf(): void
+    public function test_tiap_lembar_menunggu_penilainya_sendiri(): void
     {
-        $mahasiswa  = $this->mahasiswa();
-        $internship = $mahasiswa->student->activeInternship()->first();
-        $this->nilaiLengkap($internship->id);
+        $this->actingAs($this->mahasiswa())
+            ->get(route('mahasiswa.nilai.pdf', 'dosen'))
+            ->assertRedirect();
+        $this->assertStringContainsString('dosen pembimbing', session('error'));
 
-        $this->actingAs($mahasiswa)
-            ->get(route('mahasiswa.nilai.pdf'))
+        $this->actingAs($this->mahasiswa())
+            ->get(route('mahasiswa.nilai.pdf', 'industri'))
+            ->assertRedirect();
+        $this->assertStringContainsString('pembimbing industri', session('error'));
+    }
+
+    /** Tanda tangan dosen tak perlu menunggu pihak perusahaan. */
+    public function test_lembar_dosen_terbit_walau_industri_belum_menilai(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 8);
+
+        $this->actingAs($this->mahasiswa())
+            ->get(route('mahasiswa.nilai.pdf', 'dosen'))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+
+        $this->actingAs($this->mahasiswa())
+            ->get(route('mahasiswa.nilai.pdf', 'industri'))
+            ->assertRedirect();
     }
 
-    public function test_mahasiswa_lain_dapat_lembarnya_sendiri(): void
+    public function test_tombol_muncul_terpisah_sesuai_kesiapan(): void
     {
-        $internship = $this->mahasiswa()->student->activeInternship()->first();
-        $this->nilaiLengkap($internship->id);
+        $this->nilai($this->magang()->id, 'lecturer', 8);
 
-        // Mahasiswa kedua belum punya magang bernilai — tak boleh kebagian
-        // lembar milik orang lain, melainkan ditolak dengan penjelasan.
-        $this->actingAs($this->userByUsername('3.34.23.2.02'))
-            ->get(route('mahasiswa.nilai.pdf'))
-            ->assertRedirect();
+        $this->actingAs($this->mahasiswa())
+            ->get(route('mahasiswa.nilai'))
+            ->assertOk()
+            ->assertSee('Lembar Nilai Dosen Pembimbing')
+            ->assertDontSee('Lembar Nilai Pembimbing Industri');
 
-        $this->assertNotNull(session('error'));
+        $this->nilai($this->magang()->id, 'lecturer_industry', 9);
+
+        $this->actingAs($this->mahasiswa())
+            ->get(route('mahasiswa.nilai'))
+            ->assertSee('Lembar Nilai Pembimbing Industri');
+    }
+
+    /** Susunan baris form dosen disalin persis, termasuk baris kepala. */
+    public function test_lembar_dosen_mengikuti_susunan_form_resmi(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 8);
+        $html = $this->render('pdf-dosen');
+
+        $this->assertStringContainsString('Daftar Penilaian Magang', $html);
+        // Disalin apa adanya, termasuk ketidakkonsistenan form aslinya:
+        // "bobot nilai 20 %" untuk Proposal, "bobot 80 %" untuk Laporan.
+        $this->assertStringContainsString('Proposal (bobot nilai 20 %)', $html);
+        $this->assertStringContainsString('Laporan (bobot 80 %)', $html);
+
+        // Baris kepala yang TIDAK dinilai, ada di form tapi bukan butir rubrik.
+        $this->assertStringContainsString('2. Kelengkapan proposal Magang', $html);
+        $this->assertStringContainsString('2. Bahasa', $html);
+        $this->assertStringContainsString('3. Isi', $html);
+
+        // Penomoran butir persis form.
+        $this->assertStringContainsString('a. Kesesuaian antara tujuan dan sasaran', $html);
+        $this->assertStringContainsString('e. Kelengkapan lampiran', $html);
+
+        // Petunjuk pengisian & kolom skala.
+        $this->assertStringContainsString('Berilah tanda cek', $html);
+        $this->assertStringContainsString('Keterangan', $html);
+    }
+
+    public function test_lembar_dosen_memuat_total_dan_rata_rata(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 8);
+        $html = $this->render('pdf-dosen');
+
+        // 12 butir bernilai 8 → total 96, rata-rata berbobot tetap 8.
+        $this->assertStringContainsString('Total Nilai', $html);
+        $this->assertStringContainsString('96', $html);
+        $this->assertStringContainsString('Nilai Rata-rata', $html);
+    }
+
+    /** Skor tercetak sebagai centang di kolom yang sesuai, seperti diisi tangan. */
+    public function test_skor_dicentang_di_kolom_skala(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 7);
+        $html = $this->render('pdf-dosen');
+
+        $this->assertStringContainsString('√', $html);
+    }
+
+    /** Sub-butir komponen industri ikut tercetak, seperti di formnya. */
+    public function test_lembar_industri_memuat_rincian_sub_butir(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer_industry', 9);
+        $html = $this->render('pdf-industri');
+
+        $this->assertStringContainsString('Keterampilan dalam Menjalankan Tugas', $html);
+        $this->assertStringContainsString('c. Ketepatan waktu', $html);
+        $this->assertStringContainsString('d. Hubungan dengan relasi', $html);
+        $this->assertStringContainsString('e. Penampilan', $html);
+
+        // 8 komponen bernilai 9 → total 72, rata-rata 9.
+        $this->assertStringContainsString('72', $html);
+    }
+
+    /** Tiap lembar hanya memuat SATU tanda tangan — itu inti pemisahannya. */
+    public function test_tiap_lembar_hanya_satu_penandatangan(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 8);
+        $this->nilai($this->magang()->id, 'lecturer_industry', 9);
+
+        $dosen = $this->render('pdf-dosen');
+        $this->assertStringContainsString('Dosen Pembimbing,', $dosen);
+        $this->assertStringNotContainsString('Pembimbing Industri,', $dosen);
+
+        $industri = $this->render('pdf-industri');
+        $this->assertStringContainsString('Pembimbing Industri,', $industri);
+        $this->assertStringNotContainsString('Dosen Pembimbing,', $industri);
+    }
+
+    /** Identitas mengikuti form: nama, NIM, tempat magang, alamat. */
+    public function test_identitas_mengikuti_form_resmi(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 8);
+        $html = $this->render('pdf-dosen');
+
+        foreach (['Nama Mahasiswa', 'NIM', 'Tempat Magang', 'Alamat'] as $baris) {
+            $this->assertStringContainsString($baris, $html);
+        }
+    }
+
+    public function test_lembar_menyebut_periode_magangnya(): void
+    {
+        $this->nilai($this->magang()->id, 'lecturer', 8);
+
+        $periode = Period::create([
+            'academic_year' => '2025/2026', 'semester' => 'genap',
+            'start_date' => '2026-02-01', 'end_date' => '2026-07-31',
+        ]);
+        $this->mahasiswa()->student->update(['period_id' => $periode->id]);
+
+        $this->assertStringContainsString('2025/2026 Genap', $this->render('pdf-dosen'));
+    }
+
+    public function test_penilai_tak_dikenal_ditolak(): void
+    {
+        $this->actingAs($this->mahasiswa())
+            ->get('/mahasiswa/nilai/pdf/kaprodi')
+            ->assertNotFound();
     }
 }

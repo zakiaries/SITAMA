@@ -60,17 +60,24 @@
     </div>
   </div>
 
-  {{-- Unduh hanya muncul bila kedua penilai sudah selesai: lembar setengah jadi
-       tak ada gunanya dibawa minta tanda tangan, dan yang menandatanganinya
-       justru bisa mengira nilainya memang sebegitu. --}}
-  @if($nilai['final'] !== null)
-    <div style="margin-bottom:16px;">
-      <a href="{{ route('mahasiswa.nilai.pdf') }}" class="btn btn-outline btn-sm">
-        <x-icon name="download" :size="13"/> Unduh Lembar Nilai (PDF)
-      </a>
-      <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">
-        Untuk dicetak dan dimintakan tanda tangan dosen pembimbing serta pembimbing industri.
-      </div>
+  {{-- Dua lembar terpisah, mengikuti form resminya: masing-masing ditandatangani
+       orang yang berbeda. Tiap tombol muncul begitu penilainya sendiri selesai,
+       jadi tanda tangan dosen tak perlu menunggu pihak perusahaan. --}}
+  @if($nilai['lecturer']['average'] !== null || $nilai['industry']['average'] !== null)
+    <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+      @if($nilai['lecturer']['average'] !== null)
+        <a href="{{ route('mahasiswa.nilai.pdf', 'dosen') }}" class="btn btn-outline btn-sm">
+          <x-icon name="download" :size="13"/> Lembar Nilai Dosen Pembimbing
+        </a>
+      @endif
+      @if($nilai['industry']['average'] !== null)
+        <a href="{{ route('mahasiswa.nilai.pdf', 'industri') }}" class="btn btn-outline btn-sm">
+          <x-icon name="download" :size="13"/> Lembar Nilai Pembimbing Industri
+        </a>
+      @endif
+    </div>
+    <div style="font-size:11.5px;color:var(--text-muted);margin-top:-8px;margin-bottom:16px;">
+      Cetak lalu mintakan tanda tangan ke masing-masing penilai.
     </div>
   @endif
 

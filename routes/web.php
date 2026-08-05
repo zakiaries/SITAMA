@@ -125,7 +125,8 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth', 'role:studen
         Route::post('/magang-saya/batal-selesai',  [MagangSayaController::class, 'cancelFinish'])->name('magang-saya.batal-selesai');
 
         Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai');
-        Route::get('/nilai/pdf', [NilaiController::class, 'pdf'])->name('nilai.pdf');
+        Route::get('/nilai/pdf/{penilai}', [NilaiController::class, 'pdf'])
+            ->whereIn('penilai', ['dosen', 'industri'])->name('nilai.pdf');
 
         Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
         Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('chatbot.ask');
