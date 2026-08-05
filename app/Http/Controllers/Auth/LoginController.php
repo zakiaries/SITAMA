@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -76,6 +77,22 @@ class LoginController extends Controller
                     $request->session()->regenerateToken();
                     return back()->withErrors([
                         'username' => 'Pendaftaran Anda ditolak oleh Kaprodi. Silakan hubungi pihak program studi.',
+                    ])->withInput($request->only('username'));
+                }
+
+                // Nonaktif: alasannya ikut ditampilkan. Ditolak masuk tanpa
+                // penjelasan hanya akan berakhir jadi pertanyaan ke Kaprodi
+                // yang jawabannya sudah tercatat di sistem.
+                if ($status === Student::NONAKTIF) {
+                    $alasan = $user->student->status_note;
+
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    return back()->withErrors([
+                        'username' => 'Akun Anda sedang dinonaktifkan oleh Kaprodi'
+                            . ($alasan ? ": {$alasan}" : '.')
+                            . ' Hubungi program studi bila ingin mengaktifkannya kembali.',
                     ])->withInput($request->only('username'));
                 }
             }

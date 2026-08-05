@@ -72,6 +72,9 @@ class MahasiswaController extends Controller
             case 'rejected':
                 $query->where('status', 'rejected');
                 break;
+            case 'nonaktif':
+                $query->where('status', Student::NONAKTIF);
+                break;
             default:
                 $query->where('status', 'active');
         }
@@ -89,6 +92,7 @@ class MahasiswaController extends Controller
             'selesai'      => $dalamPeriode()->where('status', 'active')->whereHas('internships', fn($q) => $q->where('is_finished', true))->count(),
             'belum_magang' => $dalamPeriode()->where('status', 'active')->whereDoesntHave('internships')->count(),
             'rejected'     => $dalamPeriode()->where('status', 'rejected')->count(),
+            'nonaktif'     => $dalamPeriode()->where('status', Student::NONAKTIF)->count(),
         ];
 
         // Dropdown "Plot Dosen" hanya untuk dosen kampus (role lecturer), BUKAN
@@ -283,6 +287,45 @@ class MahasiswaController extends Controller
         $student->user->update(['password' => Hash::make($request->new_password)]);
 
         return back()->with('success', "Password {$student->user->name} berhasil direset.");
+    }
+
+    /**
+     * Nonaktifkan atau aktifkan kembali seorang mahasiswa.
+     *
+     * Alasan WAJIB saat menonaktifkan, dan itu inti fiturnya: tanpa alasan,
+     * setahun kemudian tak ada yang ingat kenapa seseorang dinonaktifkan, dan
+     * Kaprodi berikutnya tak berani mengaktifkannya kembali.
+     *
+     * Hanya mahasiswa yang sudah disetujui yang bisa dinonaktifkan. Pendaftar
+     * yang masih menunggu ditangani lewat Setujui/Tolak, dan menonaktifkan yang
+     * pendaftarannya ditolak tak punya arti apa-apa.
+     */
+    public function ubahStatus(Request $request, Student $student)
+    {
+        $keAktif = $student->nonaktif();
+
+        if (! $keAktif && $student->status !== 'active') {
+            return back()->with('error', 'Hanya mahasiswa aktif yang bisa dinonaktifkan.');
+        }
+
+        $request->validate(
+            $keAktif ? [] : ['status_note' => 'required|string|max:500'],
+            ['status_note.required' => 'Sebutkan alasan menonaktifkan mahasiswa ini.']
+        );
+
+        $student->update([
+            'status'            => $keAktif ? 'active' : Student::NONAKTIF,
+            // Alasan lama DIPERTAHANKAN saat diaktifkan kembali — ia jejak
+            // riwayat, bukan penanda keadaan sekarang.
+            'status_note'       => $keAktif ? $student->status_note : $request->status_note,
+            'status_changed_at' => now(),
+        ]);
+
+        $nama = $student->user->name ?? 'Mahasiswa';
+
+        return back()->with('success', $keAktif
+            ? "{$nama} diaktifkan kembali."
+            : "{$nama} dinonaktifkan.");
     }
 
     public function assignLecturer(Request $request, Student $student)

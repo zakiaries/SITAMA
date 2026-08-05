@@ -10,8 +10,26 @@ class Student extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'period_id', 'status', 'lecturer_id',
+        'user_id', 'the_class', 'study_program', 'major', 'academic_year', 'period_id',
+        'status', 'status_note', 'status_changed_at', 'lecturer_id',
     ];
+
+    protected $casts = [
+        'status_changed_at' => 'datetime',
+    ];
+
+    /**
+     * Mahasiswa sah tapi sedang berhenti — cuti, gap year, atau tersendat.
+     *
+     * Beda dari `rejected`: pendaftarannya diterima, hanya studinya berhenti
+     * sementara, jadi ia bisa diaktifkan lagi tanpa mendaftar ulang.
+     */
+    const NONAKTIF = 'nonaktif';
+
+    public function nonaktif(): bool
+    {
+        return $this->status === self::NONAKTIF;
+    }
 
     /**
      * Program studi yang memakai SIMAMA — daftar tertutup, bukan teks bebas.

@@ -68,7 +68,7 @@
 {{-- Filter Tabs --}}
 <div class="filter-tabs">
   @php
-    $tabs = ['pending'=>'Menunggu','semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang','rejected'=>'Ditolak'];
+    $tabs = ['pending'=>'Menunggu','semua'=>'Semua','aktif'=>'Aktif','selesai'=>'Selesai','belum_magang'=>'Belum Magang','nonaktif'=>'Nonaktif','rejected'=>'Ditolak'];
   @endphp
   @foreach($tabs as $key => $label)
   <a href="{{ route('kaprodi.mahasiswa.index', ['status' => $key, 'search' => request('search'), 'periode' => $periode]) }}"
@@ -145,6 +145,20 @@
       @csrf
       <button type="submit" class="btn-setujui" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="refresh" :size="14"/> Pulihkan</button>
     </form>
+  @elseif($student->nonaktif())
+    {{-- Nonaktif: alasannya ditampilkan, karena itulah yang dibutuhkan Kaprodi
+         saat memutuskan mengaktifkannya kembali. --}}
+    <span class="st-badge" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border);display:inline-flex;align-items:center;gap:4px;">
+      <x-icon name="clock" :size="12"/> Nonaktif
+    </span>
+    @if($student->status_note)
+      <span style="font-size:11.5px;color:var(--text-muted);max-width:260px;">{{ $student->status_note }}</span>
+    @endif
+    <form method="POST" action="{{ route('kaprodi.mahasiswa.status', $student) }}"
+      data-confirm="Aktifkan kembali {{ $student->user->name }}? Mahasiswa akan bisa login lagi.">
+      @csrf
+      <button type="submit" class="btn-setujui" style="display:inline-flex;align-items:center;gap:5px;"><x-icon name="refresh" :size="14"/> Aktifkan</button>
+    </form>
   @elseif(!$internship)
     <span class="st-badge st-belum">Belum Magang</span>
     <a href="{{ route('kaprodi.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">Detail</a>
@@ -152,6 +166,8 @@
       onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
       {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
     </button>
+    <button type="button" class="btn btn-outline btn-sm"
+      onclick="openStatus({{ $student->id }}, '{{ addslashes($student->user->name) }}')">Ubah Status</button>
   @else
     <span class="st-badge {{ $internship->is_finished ? 'st-selesai' : 'st-aktif' }}">
       {{ $internship->is_finished ? 'Selesai' : 'Aktif' }}
@@ -161,6 +177,8 @@
       onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
       {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
     </button>
+    <button type="button" class="btn btn-outline btn-sm"
+      onclick="openStatus({{ $student->id }}, '{{ addslashes($student->user->name) }}')">Ubah Status</button>
   @endif
 </div>
 @empty
@@ -206,10 +224,49 @@
   </div>
 </div>
 
+{{-- Modal Nonaktifkan Mahasiswa --}}
+<div class="modal-overlay" id="modal-status" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Nonaktifkan Mahasiswa</div>
+      <button class="modal-close" onclick="document.getElementById('modal-status').classList.remove('open')"><x-icon name="x" :size="14"/></button>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+      <strong id="status-name" style="color:var(--text);"></strong> tidak akan bisa masuk ke sistem
+      dan berhenti terhitung sebagai mahasiswa aktif. Bisa diaktifkan kembali kapan saja.
+    </p>
+    <form id="form-status" method="POST" action="">
+      @csrf
+      <div class="form-group">
+        <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Alasan</label>
+        {{-- Wajib: tanpa alasan, setahun kemudian tak ada yang ingat kenapa
+             seseorang dinonaktifkan, dan tak ada yang berani memulihkannya. --}}
+        <textarea name="status_note" required rows="3" maxlength="500"
+          placeholder="cth: Cuti akademik semester ini"
+          style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);outline:none;resize:vertical;"></textarea>
+        <div style="font-size:11.5px;color:var(--text-muted);margin-top:6px;">
+          Alasan ini ditampilkan ke mahasiswanya saat ia mencoba masuk.
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-status').classList.remove('open')">Batal</button>
+        <button type="submit" class="btn-tolak">Nonaktifkan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
+function openStatus(studentId, name) {
+  document.getElementById('status-name').textContent = name;
+  document.getElementById('form-status').action = '/kaprodi/mahasiswa/' + studentId + '/status';
+  document.getElementById('form-status').reset();
+  document.getElementById('modal-status').classList.add('open');
+}
+
 function openAssign(studentId, name, currentLecturerId) {
   document.getElementById('assign-name').textContent = name;
   document.getElementById('form-assign').action = '/kaprodi/mahasiswa/' + studentId + '/assign-lecturer';

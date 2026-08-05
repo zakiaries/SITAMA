@@ -203,6 +203,7 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:kaprodi'])
     Route::post('/mahasiswa/{student}/reset-password',    [KaprodiMahasiswaController::class, 'resetPassword'])->name('mahasiswa.reset-password');
     Route::post('/mahasiswa/{student}/internship',      [KaprodiMahasiswaController::class, 'storeInternship'])->name('mahasiswa.internship.store');
     Route::post('/mahasiswa/{student}/assign-lecturer', [KaprodiMahasiswaController::class, 'assignLecturer'])->name('mahasiswa.assign');
+    Route::post('/mahasiswa/{student}/status',          [KaprodiMahasiswaController::class, 'ubahStatus'])->name('mahasiswa.status');
     Route::post('/mahasiswa/{student}/approve',         [KaprodiMahasiswaController::class, 'approve'])->name('mahasiswa.approve');
     Route::post('/mahasiswa/{student}/reject',          [KaprodiMahasiswaController::class, 'reject'])->name('mahasiswa.reject');
 

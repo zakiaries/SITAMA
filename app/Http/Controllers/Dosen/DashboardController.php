@@ -23,7 +23,12 @@ class DashboardController extends Controller
         $ownScores = fn($q) => $q->where('scorer_type', 'lecturer');
         $gradedInternship = fn($q) => $q->where('lecturer_id', $lecturer->id)->whereHas('scores', $ownScores);
 
+        // Mahasiswa nonaktif (cuti/gap year) dikeluarkan dari DAFTAR, tapi
+        // SENGAJA tidak dari gerbang akses: dosen tetap boleh membuka detail
+        // dan berkasnya, karena bisa saja ia berhenti di tengah magang dan
+        // riwayatnya masih perlu ditengok atau dinilai.
         $query = Student::dibimbingOleh($lecturer->id)
+            ->where('status', '!=', Student::NONAKTIF)
             ->with([
                 'user',
                 'internships' => fn($q) => $q->where('lecturer_id', $lecturer->id)
@@ -71,7 +76,10 @@ class DashboardController extends Controller
         // Hitungan untuk tab status (mengabaikan filter status, tetap ikut
         // filter dasar bimbingan dosen DAN periode yang sedang dilihat — angka
         // di tab harus menjawab pertanyaan yang sama dengan daftarnya).
-        $base = fn() => Period::terapkan(Student::dibimbingOleh($lecturer->id), $periode);
+        $base = fn() => Period::terapkan(
+            Student::dibimbingOleh($lecturer->id)->where('status', '!=', Student::NONAKTIF),
+            $periode
+        );
         $counts = [
             'semua'   => $base()->count(),
             'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),

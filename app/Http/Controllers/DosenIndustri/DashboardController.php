@@ -17,7 +17,10 @@ class DashboardController extends Controller
 
         if (!$lecturer) abort(403, 'Akses ditolak.');
 
+        // Nonaktif keluar dari daftar, bukan dari gerbang akses — sama seperti
+        // portal dosen kampus.
         $query = Student::whereHas('internships', fn($q) => $q->where('lecturer_industry_id', $lecturer->id))
+            ->where('status', '!=', Student::NONAKTIF)
             ->with([
                 'user',
                 'internships' => fn($q) => $q->where('lecturer_industry_id', $lecturer->id)

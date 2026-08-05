@@ -17,7 +17,9 @@ class DashboardController extends ApiController
         $ownScores        = fn ($q) => $q->where('scorer_type', 'lecturer');
         $gradedInternship = fn ($q) => $q->where('lecturer_id', $lecturer->id)->whereHas('scores', $ownScores);
 
+        // Paritas dengan web: nonaktif keluar dari daftar, bukan dari gerbang akses.
         $query = Student::dibimbingOleh($lecturer->id)
+            ->where('status', '!=', Student::NONAKTIF)
             ->with([
                 'user',
                 'internships' => fn ($q) => $q->where('lecturer_id', $lecturer->id)
@@ -81,7 +83,10 @@ class DashboardController extends ApiController
             ];
         });
 
-        $base = fn () => Period::terapkan(Student::dibimbingOleh($lecturer->id), $periode);
+        $base = fn () => Period::terapkan(
+            Student::dibimbingOleh($lecturer->id)->where('status', '!=', Student::NONAKTIF),
+            $periode
+        );
         $counts = [
             'semua'   => $base()->count(),
             'dinilai' => $base()->whereHas('internships', $gradedInternship)->count(),
