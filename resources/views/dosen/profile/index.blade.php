@@ -4,7 +4,6 @@
 
 @section('content')
 
-<x-form-errors/>
 
 @if(session('success'))
   <div style="background:var(--success-bg);border:1px solid #A7E8CF;color:var(--success-text);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
@@ -85,6 +84,8 @@
     <div class="modal-header">
       <div class="modal-title">Edit Profil</div>
     </div>
+
+      <x-form-errors/>
     <form method="POST" action="{{ route('dosen.profile.update') }}" enctype="multipart/form-data">
       @csrf
       @method('PUT')
@@ -94,11 +95,11 @@
       </div>
       <div class="form-group">
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Nama Lengkap</label>
-        <input type="text" name="name" value="{{ $user->name }}" required>
+        <input type="text" name="name" value="{{ old('name', $user->name) }}" required>
       </div>
       <div class="form-group">
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">Email</label>
-        <input type="email" name="email" value="{{ $user->email }}" required>
+        <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
       </div>
       <div class="form-group">
         <label style="text-transform:none;font-size:13px;font-weight:600;color:var(--text);">
@@ -124,4 +125,10 @@
   </div>
 </div>
 
+{{-- Dialog dibuka ulang saat validasi gagal. Tanpa ini galatnya tertinggal di
+     balik dialog yang sudah tertutup: pengguna harus membukanya lagi dan
+     mengetik ulang semuanya hanya untuk tahu apa yang salah. --}}
+@if($errors->any())
+  <script>document.getElementById('modal-edit-profile').classList.add('open');</script>
+@endif
 @endsection

@@ -77,6 +77,28 @@ class ProfilSandiTest extends FeatureTestCase
         }
     }
 
+    /**
+     * Galat harus muncul DI DALAM dialog yang terbuka kembali, bukan di halaman
+     * di belakangnya — kalau tidak, pengguna melihat pesan merah sementara
+     * formulir yang ia isi sudah lenyap, dan harus mengetik ulang semuanya.
+     */
+    public function test_dialog_terbuka_kembali_dan_isian_dipertahankan(): void
+    {
+        $user = $this->userByUsername('3.34.23.2.01');
+
+        $this->actingAs($user)->put(route('mahasiswa.profile.update'), [
+            'name'                  => 'Nama Yang Baru Diketik',
+            'email'                 => $user->email,
+            'password'              => 'sandibaru123',
+            'password_confirmation' => 'sandilain456',
+        ]);
+
+        $this->actingAs($user)->get(route('mahasiswa.profile'))
+            ->assertOk()
+            ->assertSee("getElementById('modal-edit-profile').classList.add('open')", false)
+            ->assertSee('Nama Yang Baru Diketik', false);
+    }
+
     public function test_konfirmasi_cocok_mengganti_sandi(): void
     {
         foreach ($this->peran() as [$username, $rute]) {
