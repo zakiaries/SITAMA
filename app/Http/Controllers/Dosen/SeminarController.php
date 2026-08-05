@@ -147,45 +147,59 @@ class SeminarController extends Controller
             return back()->with('error', 'Sesi ini tidak dapat dijadwalkan lagi.');
         }
 
-        if ($seminar->jadwalSudahLewat()) {
-            return back()->with('error', 'Tanggal seminar sudah lewat — jam dan ruang tidak bisa diubah lagi. Sesi tinggal disahkan.');
-        }
+        /**
+         * Tanggal BOLEH diubah, termasuk setelah sesi terjadwal dan termasuk
+         * setelah tanggalnya lewat.
+         *
+         * Dulu ia dikunci sekali tetapkan, dengan alasan mengganti tanggal
+         * membatalkan kesiapan penyaji. Tapi justru di situ jebakannya: kalau
+         * dosen berhalangan — sakit, tugas luar, ruang dipakai — seminarnya
+         * tidak berlangsung, dan sesi itu terkunci selamanya di tanggal yang
+         * sudah telanjur lewat. Satu-satunya jalan keluar adalah membatalkan
+         * sesi dan membuat ulang dari nol, yang membuang ketersediaan tanggal
+         * yang sudah diisi para penyaji.
+         *
+         * Penyaji tetap diberi tahu setiap kali jadwalnya bergeser, jadi
+         * kekhawatiran aslinya tertangani lewat pemberitahuan, bukan lewat
+         * penguncian.
+         */
+        $sebelumnya = $seminar->date?->copy();
 
-        // Tanggal ditetapkan SEKALI saat penjadwalan awal. Sesi yang sudah
-        // terjadwal hanya boleh diubah jam dan lokasinya — mengganti tanggal
-        // membatalkan kesiapan penyaji dan audiens yang sudah diberi tahu.
-        $sudahTerjadwal = $seminar->status === 'scheduled';
-
-        $aturan = [
+        $request->validate([
+            'date'     => 'required|date|after_or_equal:today',
             'time'     => 'nullable|string|max:50',
             'location' => 'required|string|max:255',
-        ];
-
-        if (! $sudahTerjadwal) {
-            $aturan['date'] = 'required|date|after_or_equal:today';
-        }
-
-        $request->validate($aturan, [
+        ], [
+            'date.required'       => 'Tanggal seminar wajib diisi.',
             'date.after_or_equal' => 'Tanggal tidak boleh sebelum hari ini.',
             'location.required'   => 'Ruang/tempat wajib diisi.',
         ]);
 
         $seminar->update([
-            'date'         => $sudahTerjadwal ? $seminar->date : $request->date,
+            'date'         => $request->date,
             'time'         => $request->time,
             'location'     => $request->location,
             'status'       => 'scheduled',
             'access_token' => $seminar->access_token ?: Str::random(48),
         ]);
 
+        $berubah = $sebelumnya !== null && ! $sebelumnya->isSameDay($seminar->date);
+
+        $rincian = 'Tanggal ' . $seminar->date->format('d M Y')
+            . ($seminar->time ? ' pukul ' . $seminar->time : '')
+            . ' di ' . $seminar->location . '.';
+
         $this->notifyPresenters(
             $seminar,
-            'Jadwal seminar ditetapkan: ' . $seminar->title,
-            'Tanggal ' . $seminar->date->format('d M Y') . ($seminar->time ? ' pukul ' . $seminar->time : '')
-                . ' di ' . $seminar->location . '.'
+            ($berubah ? 'Jadwal seminar DIUBAH: ' : 'Jadwal seminar ditetapkan: ') . $seminar->title,
+            $berubah
+                ? "Semula {$sebelumnya->format('d M Y')}. {$rincian}"
+                : $rincian
         );
 
-        return back()->with('success', 'Jadwal seminar ditetapkan. Mahasiswa penyaji telah diberi tahu.');
+        return back()->with('success', $berubah
+            ? 'Jadwal seminar dipindahkan. Mahasiswa penyaji telah diberi tahu perubahannya.'
+            : 'Jadwal seminar ditetapkan. Mahasiswa penyaji telah diberi tahu.');
     }
 
     /** Ubah detail deskriptif sesi (judul & deskripsi). Jadwal/lokasi lewat finalize. */

@@ -109,8 +109,17 @@ class NotifikasiSeminarTest extends FeatureTestCase
             ->assertDontSee('Seminar Bimbingan');
     }
 
-    /** Sesi terjadwal: jam & lokasi boleh berubah, tanggal tidak. */
-    public function test_tanggal_seminar_terjadwal_tidak_bisa_diubah(): void
+    /**
+     * Sesi terjadwal: tanggal, jam, dan lokasi semuanya boleh berubah.
+     *
+     * Dulu tanggal dikunci sekali tetapkan. Aturan itu dicabut karena menjebak
+     * dosen yang berhalangan: sesinya tertinggal di tanggal yang telanjur lewat
+     * dan hanya bisa dibatalkan lalu dibuat ulang dari nol. Kekhawatiran
+     * aslinya — penyaji sudah menyiapkan diri untuk tanggal lama — ditangani
+     * lewat pemberitahuan yang menyebutkan jadwal lamanya, bukan lewat
+     * penguncian.
+     */
+    public function test_tanggal_seminar_terjadwal_bisa_dipindahkan(): void
     {
         $dosen   = $this->userByUsername('dosen1');
         $student = $this->mahasiswa()->student;
@@ -127,16 +136,16 @@ class NotifikasiSeminarTest extends FeatureTestCase
         ]);
         SeminarPresenter::create(['seminar_id' => $seminar->id, 'student_id' => $student->id]);
 
-        $tanggalAwal = $seminar->date->toDateString();
+        $tanggalBaru = now()->addDays(30)->toDateString();
 
         $this->actingAs($dosen)->post("/dosen/seminar/{$seminar->id}/finalize", [
-            'date'     => now()->addDays(30)->toDateString(), // sengaja dikirim, harus diabaikan
+            'date'     => $tanggalBaru,
             'time'     => '13.00 - 15.00',
             'location' => 'Ruang B',
         ]);
 
         $seminar->refresh();
-        $this->assertSame($tanggalAwal, $seminar->date->toDateString(), 'Tanggal seharusnya tidak berubah.');
+        $this->assertSame($tanggalBaru, $seminar->date->toDateString(), 'Tanggal seharusnya ikut pindah.');
         $this->assertSame('13.00 - 15.00', $seminar->time);
         $this->assertSame('Ruang B', $seminar->location);
     }

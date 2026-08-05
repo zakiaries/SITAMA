@@ -37,7 +37,16 @@ class SeminarTerkunciTest extends FeatureTestCase
         ]);
     }
 
-    public function test_jam_dan_ruang_tak_bisa_diubah_setelah_tanggal_lewat(): void
+    /**
+     * Jam & ruang sesi yang tanggalnya lewat tak bisa digeser sendirian.
+     *
+     * Sejak dosen boleh menjadwalkan ulang sesi yang batal, satu-satunya cara
+     * menyentuh sesi lewat adalah MEMINDAHKANNYA ke tanggal baru. Menggeser jam
+     * saja, sambil membiarkan tanggalnya tetap di masa lalu, tetap ditolak —
+     * itu menyunting catatan seminar yang sudah berlangsung, bukan menjadwalkan
+     * ulang yang batal.
+     */
+    public function test_jam_dan_ruang_tak_bisa_digeser_tanpa_memindahkan_tanggal(): void
     {
         $s = $this->seminar(now()->subDay()->toDateString());
 
@@ -46,11 +55,25 @@ class SeminarTerkunciTest extends FeatureTestCase
                 'time'     => '13.00 - 15.00 WIB',
                 'location' => 'Ruang Lain',
             ])
-            ->assertSessionHas('error');
+            ->assertSessionHasErrors('date');
 
         $s->refresh();
         $this->assertSame('09.00 - 11.00 WIB', $s->time);
         $this->assertSame('Ruang Seminar TI-01', $s->location);
+    }
+
+    /** Tanggal lama tak bisa dipertahankan: yang lewat harus benar-benar pindah. */
+    public function test_tanggal_lewat_tak_bisa_dipertahankan(): void
+    {
+        $s = $this->seminar(now()->subDay()->toDateString());
+
+        $this->from('/dosen/seminar')->actingAs($this->dosen())
+            ->post("/dosen/seminar/{$s->id}/finalize", [
+                'date'     => $s->date->toDateString(),
+                'time'     => '13.00 - 15.00 WIB',
+                'location' => 'Ruang Lain',
+            ])
+            ->assertSessionHasErrors('date');
     }
 
     public function test_detail_tak_bisa_diubah_setelah_tanggal_lewat(): void
@@ -70,6 +93,7 @@ class SeminarTerkunciTest extends FeatureTestCase
 
         $this->from('/dosen/seminar')->actingAs($this->dosen())
             ->post("/dosen/seminar/{$hariIni->id}/finalize", [
+                'date'     => $hariIni->date->toDateString(),
                 'time'     => '13.00 - 15.00 WIB',
                 'location' => 'Ruang Seminar TI-02',
             ])

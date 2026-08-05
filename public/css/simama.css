@@ -412,6 +412,24 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
 .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
 .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 6px; }
 
+/* Tombol mati — belum bisa diklik ATAU sudah tidak bisa lagi.
+   Sebelumnya hanya diberi opacity, sehingga tombol biru tetap terbaca biru
+   pucat dan orang tetap mencoba menekannya. Abu-abu penuh membuat keadaannya
+   terbaca sekali lihat, tanpa perlu menebak. */
+.btn:disabled, .btn[disabled], .btn.is-disabled {
+  background: #E9EAEE !important;
+  color: var(--text-muted) !important;
+  border-color: #E9EAEE !important;
+  cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none;
+}
+.btn:disabled:hover, .btn[disabled]:hover, .btn.is-disabled:hover {
+  background: #E9EAEE !important;
+  color: var(--text-muted) !important;
+  border-color: #E9EAEE !important;
+}
+
 /* Search */
 .search-bar {
   display: flex; align-items: center; gap: 9px;

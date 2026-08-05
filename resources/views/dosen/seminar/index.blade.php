@@ -121,7 +121,11 @@
       <form method="POST" action="{{ route('dosen.seminar.sahkan', $s) }}"
             data-confirm="Sahkan bahwa seminar ini telah berlangsung dan selesai?">
         @csrf
-        <button type="submit" class="btn btn-primary btn-sm" {{ $guests >= \App\Models\Seminar::MIN_GUESTS ? '' : 'disabled title=\'Audiens belum mencapai minimal\' style=opacity:.55;cursor:not-allowed;' }}>
+        @php $cukupAudiens = $guests >= \App\Models\Seminar::MIN_GUESTS; @endphp
+        {{-- Warna tombol menandakan keadaannya: biru saat bisa ditekan, abu-abu
+             saat belum bisa. Gayanya diurus .btn:disabled di simama.css. --}}
+        <button type="submit" class="btn btn-primary btn-sm" @disabled(! $cukupAudiens)
+          title="{{ $cukupAudiens ? 'Sahkan sesi ini' : 'Audiens baru ' . $guests . ' dari ' . \App\Models\Seminar::MIN_GUESTS . ' — belum bisa disahkan' }}">
           <x-icon name="check" :size="14"/> Sahkan Seminar (Saksi)
         </button>
       </form>
@@ -129,20 +133,29 @@
         <div style="margin-top:10px;display:flex;align-items:flex-start;gap:8px;background:var(--warm);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--text-secondary);line-height:1.55;">
           <span style="color:var(--text-muted);flex-shrink:0;margin-top:1px;"><x-icon name="lock" :size="13"/></span>
           <span>
-            Tanggal seminar <strong style="color:var(--text);">{{ $s->date?->format('d M Y') }}</strong> sudah lewat,
-            jadi jam, ruang, dan detail sesi tidak bisa diubah lagi. Yang tersisa tinggal mengesahkan sesi ini.
+            Tanggal seminar <strong style="color:var(--text);">{{ $s->date?->format('d M Y') }}</strong> sudah lewat.
+            Bila seminarnya berlangsung, tinggal disahkan. Bila berhalangan,
+            <strong style="color:var(--text);">jadwalkan ulang</strong> lewat kotak di bawah.
           </span>
         </div>
-      @else
-      <details style="margin-top:10px;">
-        <summary style="font-size:12px;color:var(--primary);cursor:pointer;">Ubah jam / lokasi</summary>
+      @endif
+
+      <details style="margin-top:10px;" {{ $terkunci ? 'open' : '' }}>
+        <summary style="font-size:12px;color:var(--primary);cursor:pointer;">
+          {{ $terkunci ? 'Jadwalkan ulang seminar' : 'Ubah jadwal / jam / lokasi' }}
+        </summary>
         <form method="POST" action="{{ route('dosen.seminar.finalize', $s) }}" style="margin-top:8px;">
           @csrf
+          {{-- Tanggal kini ikut bisa diubah. Dulu dikunci sekali tetapkan, dan
+               itu menjebak dosen yang berhalangan: sesinya tertinggal di
+               tanggal yang sudah lewat, dan satu-satunya jalan keluar adalah
+               membatalkan sesi lalu membuat ulang dari nol — membuang
+               ketersediaan tanggal yang sudah diisi para penyaji. --}}
           <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px;">
-            Tanggal <strong style="color:var(--text);">{{ $s->date?->format('d M Y') }}</strong> sudah ditetapkan
-            dan tidak bisa diubah lagi. Yang masih bisa disesuaikan hanya jam dan lokasinya.
+            Memindahkan tanggal akan memberi tahu semua mahasiswa penyaji beserta jadwal lamanya.
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:8px;">
+            <input type="date" name="date" value="{{ $s->date?->toDateString() }}" min="{{ now()->toDateString() }}" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
             <input type="text" name="time" value="{{ $s->time }}" placeholder="Waktu (mis. 09:00-11:00)" style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
             <input type="text" name="location" value="{{ $s->location }}" placeholder="Ruang/tempat" required style="padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
           </div>
@@ -150,7 +163,6 @@
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Mahasiswa penyaji akan diberi tahu perubahannya.</div>
         </form>
       </details>
-      @endif
     </div>
 
   @elseif($s->status === 'completed')
