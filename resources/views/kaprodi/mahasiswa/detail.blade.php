@@ -241,7 +241,63 @@
         <div class="info-row"><div class="info-key">Kelas</div><div class="info-val">{{ $student->the_class }}</div></div>
         <div class="info-row"><div class="info-key">Jurusan</div><div class="info-val">{{ $student->major }}</div></div>
         <div class="info-row"><div class="info-key">Prodi</div><div class="info-val">{{ $student->study_program }}</div></div>
-        <div class="info-row"><div class="info-key">T. Akademik</div><div class="info-val">{{ $student->academic_year }}</div></div>
+        <div class="info-row"><div class="info-key">T. Akademik</div><div class="info-val">{{ $student->period?->label ?? $student->academic_year }}</div></div>
+      </div>
+    </div>
+
+    {{-- Berkas mahasiswa.
+
+         Kaprodi-lah yang meng-ACC selesai magang, dan checklist yang ia setujui
+         memuat sertifikat serta laporan akhir yang sudah di-ACC dosen. Sampai
+         kini halaman ini tak menautkan satu pun di antaranya: ia menyetujui
+         tanpa bisa membuka yang disetujuinya. --}}
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px;">Berkas Mahasiswa</div>
+
+      <div class="info-row">
+        <div class="info-key">Sertifikat</div>
+        <div class="info-val">
+          @if($internship->certificate_path)
+            <a href="{{ route('berkas.sertifikat', $internship) }}" target="_blank" style="color:var(--primary);font-weight:600;">
+              <x-icon name="doc" :size="13"/> Lihat sertifikat
+            </a>
+          @else
+            <span style="color:var(--text-muted);">Belum diunggah</span>
+          @endif
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-key">Laporan Akhir</div>
+        <div class="info-val">
+          @if($student->report)
+            <a href="{{ route('berkas.laporan', $student->report) }}" target="_blank" style="color:var(--primary);font-weight:600;">
+              <x-icon name="doc" :size="13"/> Lihat laporan
+            </a>
+            @php $st = $student->report->status; @endphp
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:6px;
+              background:{{ $st === 'approved' ? 'var(--success-bg)' : ($st === 'rejected' ? 'var(--danger-bg)' : 'var(--warn-bg)') }};
+              color:{{ $st === 'approved' ? 'var(--success-text)' : ($st === 'rejected' ? 'var(--danger)' : 'var(--warn-text)') }};">
+              {{ $st === 'approved' ? 'Di-ACC dosen' : ($st === 'rejected' ? 'Perlu revisi' : 'Menunggu ACC') }}
+            </span>
+          @else
+            <span style="color:var(--text-muted);">Belum diunggah</span>
+          @endif
+        </div>
+      </div>
+
+      @php $lampiran = $student->guidances->filter(fn ($g) => $g->name_file); @endphp
+      <div class="info-row">
+        <div class="info-key">Berkas Bimbingan</div>
+        <div class="info-val">
+          @forelse($lampiran as $g)
+            <a href="{{ route('berkas.bimbingan', $g) }}" target="_blank" style="color:var(--primary);font-weight:600;display:block;margin-bottom:2px;">
+              <x-icon name="doc" :size="13"/> {{ $g->date?->format('d M Y') ?? 'Bimbingan' }}
+            </a>
+          @empty
+            <span style="color:var(--text-muted);">Tidak ada lampiran</span>
+          @endforelse
+        </div>
       </div>
     </div>
 

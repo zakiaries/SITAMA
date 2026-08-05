@@ -53,7 +53,9 @@ class MahasiswaController extends Controller
     {
         $lecturer   = $this->getLecturer();
         $internship = $this->getInternship($student, $lecturer);
-        $student->load('user');
+        // `report` dimuat untuk tautan berkas — gerbang aksesnya sudah lama
+        // mengizinkan peran ini, hanya tautannya yang belum pernah ada.
+        $student->load(['user', 'report']);
 
         $filter = $request->input('filter', 'semua');
         $period = $request->input('period', 'semua');

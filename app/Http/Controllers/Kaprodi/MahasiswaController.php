@@ -120,7 +120,12 @@ class MahasiswaController extends Controller
 
     public function detail(Student $student)
     {
-        $student->load('user');
+        // `report` & `guidances` dimuat untuk berkas yang bisa dibuka Kaprodi.
+        // Sebelumnya halaman ini tak menautkan satu pun unggahan mahasiswa,
+        // padahal Kaprodi-lah yang meng-ACC selesai magang — dan checklist yang
+        // ia setujui memuat sertifikat serta laporan yang di-ACC dosen. Ia
+        // menyetujui tanpa bisa membuka yang disetujuinya.
+        $student->load(['user', 'report', 'guidances' => fn ($q) => $q->latest()]);
 
         $internship = $student->internships()
             ->with(['company', 'lecturer.user', 'lecturerIndustry.user'])

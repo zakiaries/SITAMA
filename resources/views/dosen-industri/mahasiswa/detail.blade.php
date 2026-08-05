@@ -190,6 +190,36 @@
   </div>
 </div>
 
+{{-- Berkas mahasiswa.
+
+     Gerbang aksesnya sudah lama mengizinkan pembimbing industri membuka berkas
+     mahasiswa bimbingannya, tapi tak ada satu pun tautan di layar — jadi izin
+     itu tak pernah bisa dipakai. Laporan akhir yang paling relevan bagi peran
+     ini: isinya menceritakan magang yang ia bimbing sendiri. --}}
+<div class="ctx-card" style="margin-bottom:16px;">
+  <h4>Berkas Mahasiswa</h4>
+  <div class="ctx-row">
+    <span class="k">Laporan akhir</span>
+    <span class="v">
+      @if($student->report)
+        <a href="{{ route('berkas.laporan', $student->report) }}" target="_blank" style="color:var(--primary);font-weight:600;">Lihat laporan</a>
+      @else
+        <span style="font-weight:400;color:var(--text-muted);">Belum diunggah</span>
+      @endif
+    </span>
+  </div>
+  <div class="ctx-row">
+    <span class="k">Sertifikat magang</span>
+    <span class="v">
+      @if($internship->certificate_path)
+        <a href="{{ route('berkas.sertifikat', $internship) }}" target="_blank" style="color:var(--primary);font-weight:600;">Lihat sertifikat</a>
+      @else
+        <span style="font-weight:400;color:var(--text-muted);">Belum diunggah</span>
+      @endif
+    </span>
+  </div>
+</div>
+
 {{-- Status penilaian oleh pembimbing industri (tugas utama peran ini) --}}
 <div class="ctx-card" style="margin-bottom:16px;">
   <h4>Penilaian Anda</h4>

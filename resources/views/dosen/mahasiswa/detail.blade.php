@@ -190,6 +190,19 @@
           <div class="info-key">Selesai</div>
           <div class="info-val">{{ $internship->end_date ? $internship->end_date->format('d M Y') : 'Belum selesai' }}</div>
         </div>
+        {{-- Sertifikat sebelumnya tak bisa dibuka dosen dari mana pun, padahal
+             ia salah satu syarat selesai magang dan dosennya yang paling tahu
+             apakah isinya cocok dengan magang yang ia bimbing. --}}
+        <div class="info-row">
+          <div class="info-key">Sertifikat</div>
+          <div class="info-val">
+            @if($internship->certificate_path)
+              <a href="{{ route('berkas.sertifikat', $internship) }}" target="_blank" style="color:var(--primary);font-weight:600;">Lihat sertifikat</a>
+            @else
+              <span style="color:var(--text-muted);">Belum diunggah</span>
+            @endif
+          </div>
+        </div>
       @else
         {{-- Sudah diplot Kaprodi tapi magangnya belum terbentuk. Bimbingan sudah
              boleh masuk, jadi halaman ini tetap dibuka. --}}
