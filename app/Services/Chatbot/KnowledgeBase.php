@@ -134,7 +134,11 @@ class KnowledgeBase
             ],
             [
                 'pertanyaan' => 'Berapa jumlah audiens minimal untuk seminar dan bagaimana mendaftarnya?',
-                'kata_kunci' => 'audiens peserta seminar minimal sepuluh 10 adik tingkat daftar mendaftar seminar mahasiswa lain kuota',
+                // "seminar" sempat tertulis dua kali di sini. Pengulangan itu
+                // menaikkan bobot TF-nya sehingga entri ini memenangi kueri yang
+                // hanya menyisakan kata "seminar" — misalnya "Kapan saya boleh
+                // seminar?", yang seharusnya dijawab entri syarat seminar.
+                'kata_kunci' => 'audiens peserta seminar minimal sepuluh 10 adik tingkat daftar mendaftar mahasiswa lain kuota',
                 'jawaban'    => 'Seminar membutuhkan minimal 10 audiens (adik tingkat) yang mendaftar. Kamu juga dapat mendaftar sebagai audiens pada seminar mahasiswa lain melalui bagian "Seminar Mahasiswa Lain".',
                 'kategori'   => 'Seminar',
             ],
@@ -146,7 +150,11 @@ class KnowledgeBase
             ],
             [
                 'pertanyaan' => 'Bagaimana absensi seminar dengan QR Code dan berita acara?',
-                'kata_kunci' => 'qr code seminar absensi kehadiran scan pindai berita acara tamu tanda tangan identitas hadir',
+                // "absen" ditulis terpisah dari "absensi": stemmer tidak
+                // memotong akhiran -si, sehingga tanpa kata ini pertanyaan
+                // "Absen seminar pakai apa?" kehilangan kata pembedanya dan
+                // menyusut menjadi "seminar" saja.
+                'kata_kunci' => 'qr code seminar absensi absen kehadiran scan pindai berita acara tamu tanda tangan identitas hadir',
                 'jawaban'    => 'Kehadiran audiens seminar dikonfirmasi melalui pemindaian QR Code. Tamu mengisi identitas dan tanda tangan pada halaman berita acara yang terbuka saat QR Code dipindai.',
                 'kategori'   => 'Seminar',
             ],

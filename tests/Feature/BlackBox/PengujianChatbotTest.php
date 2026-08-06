@@ -72,22 +72,33 @@ class PengujianChatbotTest extends FeatureTestCase
     /** TABEL 4.6 — Pengujian jawaban pertanyaan prosedural. */
     public function test_tabel_46_jawaban_pertanyaan_prosedural(): void
     {
+        // Entri yang diharapkan ditulis utuh, bukan sekadar kategorinya: Bab IV
+        // menuntut jawaban dari entri yang tepat, dan pemeriksaan sebatas
+        // kategori pernah meloloskan nomor 5 yang sebenarnya salah entri.
         $uji = [
-            ['Bagaimana cara mengajukan magang?',            'Magang'],
-            ['Apa saja syarat mengajukan seminar?',          'Seminar'],
-            ['Bagaimana cara mengunggah laporan akhir?',     'Laporan'],
-            ['Saya ingin daftar magang, mulai dari mana?',   'Magang'],   // parafrase no. 1
-            ['Kapan saya boleh seminar?',                    'Seminar'],  // parafrase no. 2
-            ['Saya lupa kata sandi, harus bagaimana?',       'Akun'],
+            ['Bagaimana cara mengajukan magang?',          'Magang',
+             'Bagaimana cara mengajukan magang di SIMAMA?'],
+            ['Apa saja syarat mengajukan seminar?',        'Seminar',
+             'Apa saja syarat agar bisa mengajukan seminar magang?'],
+            ['Bagaimana cara mengunggah laporan akhir?',   'Laporan',
+             'Bagaimana cara mengunggah laporan akhir magang?'],
+            ['Saya ingin daftar magang, mulai dari mana?', 'Magang',      // parafrase no. 1
+             'Bagaimana cara mengajukan magang di SIMAMA?'],
+            ['Kapan saya boleh seminar?',                  'Seminar',     // parafrase no. 2
+             'Apa saja syarat agar bisa mengajukan seminar magang?'],
+            ['Saya lupa kata sandi, harus bagaimana?',     'Akun',
+             'Saya lupa kata sandi, bagaimana cara reset password?'],
         ];
 
         $baris = [];
         $sesuai = 0;
 
-        foreach ($uji as $no => [$pertanyaan, $kategoriHarapan]) {
+        foreach ($uji as $no => [$pertanyaan, $kategoriHarapan, $entriHarapan]) {
             $hasil = $this->chatbot->answer($pertanyaan);
 
-            $cocok = $hasil['found'] && $hasil['category'] === $kategoriHarapan;
+            $cocok = $hasil['found']
+                && $hasil['category'] === $kategoriHarapan
+                && $hasil['question'] === $entriHarapan;
             $sesuai += $cocok ? 1 : 0;
 
             $baris[] = sprintf(
@@ -273,15 +284,13 @@ class PengujianChatbotTest extends FeatureTestCase
             . sprintf("\n>>> %d/%d sesuai = %.2f%%\n", $sesuai, count($uji),
                 $sesuai / count($uji) * 100));
 
-        // Satu-satunya kegagalan yang diterima adalah nomor 11: "Absen seminar
-        // pakai apa?". Stemmer tidak menyatukan "absen" dengan "absensi",
-        // sehingga kueri menyusut menjadi "seminar" saja dan tertarik ke entri
-        // seminar lain. Ini keterbatasan pencocokan leksikal TF-IDF, bukan cacat
-        // alur — dan sengaja dibiarkan sebagai temuan pada Bab IV.
-        $this->assertSame([11], $gagal,
-            'Baris yang gagal berubah dari yang didokumentasikan di Tabel 4.8: '
-            . implode(', ', $gagal));
-        $this->assertSame(17, $sesuai);
+        // Nomor 11 "Absen seminar pakai apa?" dulu gagal karena stemmer tidak
+        // menyatukan "absen" dengan "absensi", sehingga kuerinya menyusut jadi
+        // "seminar" saja. Kata "absen" kini terdaftar pada entri absensi QR,
+        // dan seluruh baris harus lulus.
+        $this->assertSame([], $gagal,
+            'Ada baris Tabel 4.8 yang gagal: ' . implode(', ', $gagal));
+        $this->assertSame(18, $sesuai);
     }
 
     /**
