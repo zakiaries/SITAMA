@@ -43,10 +43,17 @@
   .iwrap{position:relative;}
   .eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:5px;display:flex;border-radius:8px;}
   .eye:hover{color:var(--primary);}
-  .field input{width:100%;height:46px;padding:0 14px;border:1.5px solid transparent;border-radius:11px;font-size:13.5px;font-family:inherit;color:var(--text);background:var(--warm);outline:none;transition:border-color .18s var(--ease),box-shadow .18s var(--ease),background .18s;}
+  .field input,.field select{width:100%;height:46px;padding:0 14px;border:1.5px solid transparent;border-radius:11px;font-size:13.5px;font-family:inherit;color:var(--text);background:var(--warm);outline:none;transition:border-color .18s var(--ease),box-shadow .18s var(--ease),background .18s;}
   .field .iwrap input{padding-right:40px;}
+  /* Panah bawaan peramban dimatikan lalu digambar sendiri: bentuk dan warnanya
+     berbeda-beda antar peramban, dan yang bawaan tak mengikuti radius kolom. */
+  .field select{appearance:none;-webkit-appearance:none;-moz-appearance:none;padding-right:38px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
   .field input::placeholder{color:var(--text-muted);}
-  .field input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(0,97,255,.12);}
+  /* Selama prodi belum dipilih, option kosongnya disabled sehingga select
+     berstatus :invalid — dipakai untuk menyamarkan teksnya seperti placeholder
+     kolom sebelahnya. */
+  .field select:invalid{color:var(--text-muted);}
+  .field input:focus,.field select:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 4px rgba(0,97,255,.12);}
   /* Hide browser's built-in password reveal/clear (Edge/IE) so it doesn't duplicate our eye. */
   .field input::-ms-reveal,.field input::-ms-clear{display:none;}
   .btn{width:100%;height:50px;margin-top:14px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:-0.01em;box-shadow:0 12px 24px rgba(0,97,255,.28);transition:background .15s,transform .1s var(--ease),box-shadow .15s;}
