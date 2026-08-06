@@ -116,7 +116,7 @@ class ChatbotService
 
         // Skor kemiripan ke kedua korpus.
         [$bestFaqIndex, $bestFaqScore, $faqScores] = $this->scoreAgainst($tokens, $this->faqVectorizer, $this->faqVectors);
-        [, $bestJobScore, $jobScores] = $this->scoreAgainst($tokens, $this->jobVectorizer, $this->jobVectors);
+        [$bestJobIndex, $bestJobScore, $jobScores] = $this->scoreAgainst($tokens, $this->jobVectorizer, $this->jobVectors);
 
         $recoIntent  = $this->looksLikeRecommendation($query);
         $hasListings = count($this->jobEntries) > 0;
@@ -135,7 +135,8 @@ class ChatbotService
         }
 
         // 3) Tanpa kata kunci eksplisit, tapi ternyata sangat cocok ke lowongan.
-        if ($hasListings && $bestJobScore >= self::JOB_THRESHOLD && $bestJobScore > $bestFaqScore) {
+        if ($hasListings && $bestJobScore >= self::JOB_THRESHOLD && $bestJobScore > $bestFaqScore
+            && ! $this->hanyaBeririsanLokasi($tokens, $bestJobIndex)) {
             return $this->recommendationResponse($query, $jobScores, $bestJobScore);
         }
 
@@ -167,6 +168,39 @@ class ChatbotService
         $bestIndex = array_key_first($scores);
 
         return [$bestIndex, $scores[$bestIndex], $scores];
+    }
+
+    /**
+     * Apakah kecocokan ke lowongan hanya bertumpu pada nama tempat?
+     *
+     * Teks dokumen lowongan ikut memuat lokasi, sehingga satu nama kota di
+     * pertanyaan yang sama sekali tak berhubungan dengan magang sudah cukup
+     * melewati ambang. Contoh nyata di data produksi: "Cuaca Semarang hari ini"
+     * mencetak cosine 0,4313 ke korpus lowongan — jauh di atas ambang — lalu
+     * dijawab dengan daftar tempat magang.
+     *
+     * Ini hanya berlaku pada jalur TANPA maksud eksplisit. Kalau penggunanya
+     * memang menyatakan sedang mencari ("cari magang di Semarang"), pencarian
+     * berdasarkan kota tetap berjalan lewat jalur pertama.
+     *
+     * @param  string[]  $tokens  token kueri yang sudah dipraproses
+     */
+    private function hanyaBeririsanLokasi(array $tokens, ?int $index): bool
+    {
+        if ($index === null || ! isset($this->jobEntries[$index])) {
+            return false;
+        }
+
+        $entry = $this->jobEntries[$index];
+        $irisan = array_intersect($tokens, $this->preprocessor->process($entry['text']));
+
+        if ($irisan === []) {
+            return false;   // biarkan ambang yang memutuskan
+        }
+
+        $lokasi = $this->preprocessor->process((string) ($entry['location'] ?? ''));
+
+        return array_diff($irisan, $lokasi) === [];
     }
 
     /** Deteksi maksud "mencari/merekomendasikan tempat magang". */

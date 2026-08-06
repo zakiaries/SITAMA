@@ -202,4 +202,109 @@ class PengujianChatbotTest extends FeatureTestCase
             'Jawaban FAQ tidak menyertakan saran pertanyaan lain.');
         $this->assertLessThanOrEqual(3, count($hasil['suggestions']));
     }
+
+    /**
+     * TABEL 4.8 — Ketahanan chatbot terhadap variasi pertanyaan.
+     *
+     * Delapan belas pertanyaan yang sama persis dengan Bab IV, dikelompokkan
+     * menjadi kata kunci sama, parafrase, salah ketik, dan di luar cakupan.
+     * Harapan tiap baris ditulis eksplisit: untuk kelompok yang harus dijawab,
+     * entri basis pengetahuan yang benar; untuk yang di luar cakupan, null yang
+     * berarti wajib ditolak.
+     */
+    public function test_tabel_48_ketahanan_terhadap_variasi_pertanyaan(): void
+    {
+        $magang   = 'Bagaimana cara mengajukan magang di SIMAMA?';
+        $seminar  = 'Apa saja syarat agar bisa mengajukan seminar magang?';
+        $laporan  = 'Bagaimana cara mengunggah laporan akhir magang?';
+        $sandi    = 'Saya lupa kata sandi, bagaimana cara reset password?';
+        $bimbing  = 'Bagaimana cara mengajukan bimbingan ke dosen pembimbing?';
+        $absensi  = 'Bagaimana absensi seminar dengan QR Code dan berita acara?';
+
+        // [kelompok, pertanyaan, entri KB yang benar (null = wajib ditolak)]
+        $uji = [
+            ['Kata kunci sama', $magang,  $magang],
+            ['Kata kunci sama', $seminar, $seminar],
+            ['Kata kunci sama', $laporan, $laporan],
+            ['Kata kunci sama', $sandi,   $sandi],
+            ['Kata kunci sama', 'Bagaimana cara mengajukan bimbingan?', $bimbing],
+            ['Kata kunci sama', 'Bagaimana absensi seminar dengan QR?', $absensi],
+            ['Parafrase',   'Saya ingin daftar magang, mulai dari mana?',    $magang],
+            ['Parafrase',   'Gimana caranya upload laporan?',                $laporan],
+            ['Parafrase',   'Password saya hilang',                          $sandi],
+            ['Parafrase',   'Mau konsultasi sama dosen pembimbing caranya?', $bimbing],
+            ['Parafrase',   'Absen seminar pakai apa?',                      $absensi],
+            ['Parafrase',   'Syarat seminar apa saja ya?',                   $seminar],
+            ['Salah ketik', 'bgaimana cara mngajukan magang',                $magang],
+            ['Salah ketik', 'cara upload laporan akhr',                      $laporan],
+            ['Salah ketik', 'lupa pasword gimana',                           $sandi],
+            ['Luar cakupan', 'Berapa harga tiket kereta ke Jakarta?',        null],
+            ['Luar cakupan', 'Siapa presiden Indonesia?',                    null],
+            ['Luar cakupan', 'Resep nasi goreng enak',                       null],
+        ];
+
+        $baris = [];
+        $sesuai = 0;
+        $gagal = [];
+
+        foreach ($uji as $i => [$kelompok, $pertanyaan, $harapan]) {
+            $hasil = $this->chatbot->answer($pertanyaan);
+
+            $cocok = $harapan === null
+                ? ! $hasil['found']
+                : ($hasil['found'] && $hasil['question'] === $harapan);
+
+            $sesuai += $cocok ? 1 : 0;
+            if (! $cocok) {
+                $gagal[] = $i + 1;
+            }
+
+            $jenis = ['faq' => 'FAQ', 'recommendation' => 'Rekomendasi', 'fallback' => 'Fallback'];
+
+            $baris[] = sprintf('%2d | %-15s | %-52s | %-11s | %.4f | %s',
+                $i + 1, $kelompok, mb_strimwidth($pertanyaan, 0, 52),
+                $jenis[$hasil['type']] ?? $hasil['type'], $hasil['score'],
+                $cocok ? 'Sesuai' : 'Tidak sesuai');
+        }
+
+        fwrite(STDERR, "\n\n=== TABEL 4.8 — Ketahanan Chatbot terhadap Variasi Pertanyaan ===\n"
+            . "No | Kelompok | Pertanyaan Uji | Jenis Keluaran | Nilai Kemiripan | Keterangan\n"
+            . implode("\n", $baris)
+            . sprintf("\n>>> %d/%d sesuai = %.2f%%\n", $sesuai, count($uji),
+                $sesuai / count($uji) * 100));
+
+        // Satu-satunya kegagalan yang diterima adalah nomor 11: "Absen seminar
+        // pakai apa?". Stemmer tidak menyatukan "absen" dengan "absensi",
+        // sehingga kueri menyusut menjadi "seminar" saja dan tertarik ke entri
+        // seminar lain. Ini keterbatasan pencocokan leksikal TF-IDF, bukan cacat
+        // alur — dan sengaja dibiarkan sebagai temuan pada Bab IV.
+        $this->assertSame([11], $gagal,
+            'Baris yang gagal berubah dari yang didokumentasikan di Tabel 4.8: '
+            . implode(', ', $gagal));
+        $this->assertSame(17, $sesuai);
+    }
+
+    /**
+     * Nama kota saja tidak boleh memicu rekomendasi.
+     *
+     * Sebelum penjagaan ini ada, "Cuaca Semarang hari ini" mencetak cosine
+     * 0,4313 ke korpus lowongan pada data produksi lalu dijawab dengan daftar
+     * tempat magang — hanya karena kata "Semarang" ada di kolom lokasi.
+     */
+    public function test_nama_kota_saja_tidak_memicu_rekomendasi(): void
+    {
+        foreach (['Cuaca Semarang hari ini', 'Ada apa di Jakarta?',
+                  'Kuliner khas Yogyakarta'] as $pertanyaan) {
+            $hasil = $this->chatbot->answer($pertanyaan);
+
+            $this->assertFalse($hasil['found'],
+                "\"{$pertanyaan}\" dijawab sebagai {$hasil['type']} "
+                . "(skor {$hasil['score']}), padahal hanya menyebut nama tempat.");
+        }
+
+        // Pencarian yang memang menyebut kota tetap harus berjalan.
+        $hasil = $this->chatbot->answer('cari magang di Semarang');
+        $this->assertTrue($hasil['found'], 'Pencarian magang berdasarkan kota ikut terblokir.');
+        $this->assertNotEmpty($hasil['recommendations']);
+    }
 }
