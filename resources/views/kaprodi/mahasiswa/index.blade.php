@@ -17,6 +17,19 @@
   padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;
 }
 .mhs-card.is-pending { border-color:#F3D9A0;background:var(--warn-bg);border-left:4px solid var(--warn-text); }
+/* Kartu pendaftar memuat empat hal yang tiga di antaranya MENOLAK menyusut:
+   avatar 46px, lencana ~94px, dan dua tombol ~178px. Bersama jarak dan padding,
+   totalnya ±392px — sudah melewati lebar layar 375px sebelum nama mahasiswa
+   kebagian sepiksel pun.
+
+   flex-wrap saja tidak cukup. `.mhs-info` memakai flex:1 yang berarti
+   flex-basis:0, sehingga ia tak pernah MENUNTUT ruang; ia hanya mengalah
+   sampai nol dan barisnya tetap meluber. Memberinya lebar minimum-lah yang
+   membuat tombol-tombol itu turun ke baris kedua. */
+@media (max-width: 760px) {
+  .mhs-card { flex-wrap:wrap; }
+  .mhs-info { min-width:150px; }
+}
 .pending-actions { display:flex;gap:8px;flex-shrink:0; }
 .btn-setujui { background:var(--success-text);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit; }
 .btn-setujui:hover { background:var(--success-text); }
