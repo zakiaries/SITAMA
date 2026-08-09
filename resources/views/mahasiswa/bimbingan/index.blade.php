@@ -36,8 +36,11 @@
     </div>
   @endif
 
-  <div class="page-header">
-    <div class="page-title">Daftar Bimbingan</div>
+  {{-- Judulnya sudah dicetak topbar dari $title. Tanpa judul di baris ini,
+       perataannya dipindah ke kanan supaya tombolnya tetap di tempat semula —
+       .page-header memakai space-between, yang akan melempar tombol tunggal
+       ke kiri. --}}
+  <div class="page-header" style="justify-content:flex-end;">
     @if($lecturer && !$terkunci)
       <button class="btn btn-primary" onclick="document.getElementById('modal-bimb').classList.add('open')">+ Tambah Bimbingan</button>
     @else

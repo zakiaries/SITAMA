@@ -31,9 +31,8 @@
     </div>
   </div>
 
-  <div class="page-header">
-    <div class="page-title">Laporan Akhir Magang</div>
-  </div>
+  {{-- Tanpa judul badan: topbar sudah mencetaknya dari $title, dan tak ada
+       tombol maupun keterangan lain di baris ini. --}}
 
   {{-- Status laporan --}}
   @if($report)

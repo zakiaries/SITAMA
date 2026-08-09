@@ -59,9 +59,10 @@
 @section('content')
 
   <div class="page-header">
+    {{-- Judulnya sudah dicetak topbar dari $title; keterangannya tetap karena
+         ia menjelaskan hal yang tak muat di topbar. --}}
     <div>
-      <div class="page-title">Chatbot Rekomendasi</div>
-      <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+      <div style="color:var(--text-secondary);font-size:13px;">
         Asisten SIMAMA berbasis TF-IDF &amp; Cosine Similarity — tanyakan seputar prosedur magang, bimbingan, seminar, dan fitur lainnya.
       </div>
     </div>

@@ -4,9 +4,10 @@
 @section('content')
 
 <div class="page-header">
+  {{-- Judulnya sudah dicetak topbar dari $title; keterangannya tetap karena
+       ia menjelaskan hal yang tak muat di topbar. --}}
   <div>
-    <div class="page-title">Seminar Magang</div>
-    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+    <div style="color:var(--text-secondary);font-size:13px;">
       Pemantauan sesi seminar. Penjadwalan &amp; pengesahan dilakukan dosen pembimbing.
     </div>
   </div>

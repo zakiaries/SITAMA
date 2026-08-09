@@ -14,9 +14,10 @@
 @endif
 
 <div class="page-header">
+  {{-- Judulnya sudah dicetak topbar dari $title; keterangannya tetap karena
+       ia menjelaskan alurnya, yang tak muat di topbar. --}}
   <div>
-    <div class="page-title">Seminar Hasil Magang</div>
-    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+    <div style="color:var(--text-secondary);font-size:13px;">
       Dosen pembimbing membuat sesi seminar dan menetapkanmu sebagai penyaji. Isi ketersediaan tanggalmu, lalu pantau jadwal finalnya di sini.
     </div>
   </div>

@@ -66,8 +66,20 @@ class JudulTakTercetakDuaKaliTest extends FeatureTestCase
                         continue;
                     }
 
-                    $samaPersis   = $l === $teks;
-                    $samaLiteral  = in_array($l, array_map('trim', $literalBadan), true);
+                    /* Mengulang SEBAGIAN pun dihitung ganda: topbar "Bimbingan"
+                       dengan badan "Daftar Bimbingan" tetap membuat kata yang
+                       sama tercetak dua kali, satu tepat di bawah yang lain.
+                       Keputusan user 9 Agt 2026, setelah kelima halaman
+                       semacam itu ikut diminta dibetulkan. */
+                    $samaPersis  = $l === $teks || str_contains($teks, $l);
+                    $samaLiteral = false;
+
+                    foreach (array_map('trim', $literalBadan) as $lb) {
+                        if ($lb === $l || str_contains($lb, $l)) {
+                            $samaLiteral = true;
+                            break;
+                        }
+                    }
 
                     if ($samaPersis || $samaLiteral) {
                         $temuan[] = [
