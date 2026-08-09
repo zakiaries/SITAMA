@@ -640,6 +640,29 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
 .modal-close  { background: var(--warm); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
 .modal-close:hover { background: var(--warm-2); color: var(--text); }
 .modal-icon  { width: 36px; height: 36px; background: var(--blue-tint); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary); }
+/* Sebuah <select> melebar mengikuti PILIHAN TERPANJANGNYA, bukan mengikuti
+   wadahnya. Di SIMAMA sebagian besar pilihan datang dari basis data — alamat
+   lengkap lowongan, nama perusahaan seperti "Dinas Tenaga Kerja dan
+   Transmigrasi Provinsi Jawa Tengah", nama dosen — sehingga dropdown-nya
+   tumbuh jauh melewati kartunya dan menyeret seluruh halaman jadi bisa digeser
+   mendatar. Terlihat di HP pada halaman Lowongan Magang, tapi tujuh dropdown
+   lain memuat data serupa dan menunggu masalah yang sama.
+
+   Berlaku di semua lebar layar, bukan hanya di dalam @media: dropdown yang
+   melewati wadahnya adalah cacat pada lebar berapa pun. Aturan ini tak pernah
+   mengubah yang sudah muat — ia hanya menahan yang berlebih. */
+select { max-width: 100%; }
+
+/* Deretan penyaring di atas daftar. Di desktop sebaris seperti sebelumnya;
+   di layar sempit tiap kendali mengambil satu baris penuh, karena berdesakan
+   setengah-setengah membuat dropdown terpotong di tengah kata. */
+.filter-form { display: flex; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 760px) {
+  .filter-form { flex-direction: column; align-items: stretch; }
+  .filter-form > * { width: 100%; }
+}
+
 .form-group  { margin-bottom: 13px; }
 .form-group label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 5px; letter-spacing: 0; font-weight: 600; }
 .form-group input, .form-group textarea, .form-group select {

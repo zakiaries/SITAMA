@@ -93,7 +93,7 @@
   </div>
 
   {{-- Filters --}}
-  <form method="GET" action="{{ route('dosen.dashboard') }}" style="display:flex;gap:8px;flex-wrap:wrap;">
+  <form method="GET" action="{{ route('dosen.dashboard') }}" class="filter-form">
     @if(request('search'))
       <input type="hidden" name="search" value="{{ request('search') }}">
     @endif

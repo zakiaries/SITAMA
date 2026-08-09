@@ -11,7 +11,7 @@
     Perusahaan di luar daftar ini tetap bisa kamu ajukan sendiri lewat menu tersebut.
   </p>
 
-  <form method="GET" action="{{ route('mahasiswa.lowongan') }}" style="display:flex;gap:8px;flex-wrap:wrap;">
+  <form method="GET" action="{{ route('mahasiswa.lowongan') }}" class="filter-form">
     <input type="text" name="q" value="{{ $q }}" placeholder="Cari posisi, perusahaan…"
       style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
     <select name="bidang" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
