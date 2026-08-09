@@ -13,7 +13,7 @@ Baca dulu memory-ku (MEMORY.md + `project_*.md`, terutama `project_utang_pasca_s
 - **https://simama.site** — Docker Compose di `/var/www/simama` (Caddy + PHP-FPM + MariaDB).
 - VPS **Rumahweb**, IP `202.10.38.76`. Domain + DNS di **Hostinger** (ns `dns-parking.com`).
   Claude tak punya akses SSH — semua perintah server dijalankan user.
-- **347 feature test hijau** (`php artisan test`; butuh MySQL XAMPP di `D:\xampp` nyala).
+- **472 feature test hijau** (`php artisan test`; butuh MySQL XAMPP di `D:\xampp` nyala).
 - SMTP aktif (Gmail App Password, pengirim `SIMAMA <lanangbayup@gmail.com>`).
 
 ### Isi produksi per 4 Agustus 2026
@@ -41,17 +41,41 @@ mereka. Sisa 2 placeholder: Eri Eli Lavindi & Suko Tyas Pernanda → reset lewat
   (terpisah dari `sitama` yang dipakai ngoding — jangan tertukar).
 
 ### Alur deploy
+Kode duduk di *bind mount* host, jadi `git pull` sudah memperbarui berkasnya; `--build` hanya
+perlu bila `Dockerfile` berubah.
 ```bash
 cd /var/www/simama && git pull origin web \
-  && docker compose exec -T app php artisan migrate --force \
-  && docker compose exec -T app php artisan config:cache \
-  && docker compose exec -T app php artisan route:cache \
-  && docker compose exec -T app php artisan view:cache
+  && docker compose exec app php artisan migrate --force \
+  && docker compose restart app
+```
+
+**Bila commit-nya menyentuh berkas `.blade.php`, tambahkan ini** — kalau tidak, halaman itu
+(dan hanya halaman itu) akan 500. Lihat "Izin storage produksi" di bawah.
+```bash
+docker compose exec app sh -c "chown -R www-data:www-data storage bootstrap/cache"
 ```
 
 ---
 
 ## YANG TERSISA
+
+### 0. PRIORITAS — sidang dulu, revisi belakangan
+Keputusan user 7 Agt: **"penting sidang, dimasak di sidang, lalu revisi."** Jangan memoles
+laporan lagi tanpa diminta. Yang benar-benar berisiko kalau dilewat:
+
+1. **Enam diagram `.drawio` belum ditempel ke laporan.** Ini yang paling rawan — teks v62 sudah
+   menyebut kelas `Period`, entitas `periods`, dan tabel `periods`, jadi kalau gambarnya masih
+   yang lama, narasi dan gambar saling bertentangan di depan penguji. Ekspor PNG dari draw.io
+   lalu ganti Gambar 3.3, 3.9, 3.13, 3.14, 3.15, 3.16.
+2. **Ctrl+A lalu F9 di Word** — Daftar Isi/Gambar/Tabel masih memuat nomor halaman lama.
+3. Semua commit sudah live per 7 Agt 02:30. Tidak ada yang menunggu deploy.
+
+**Yang mungkin ditanya penguji, jawabannya sudah ada di data:** tidak ada responden dosen
+(rekomendasi dospem); 21 responden bukan 22 (satu orang mengirim dua kali, NIM & skor sama);
+keterbatasan chatbot yang tersisa = pencocokan berbasis kata, bergantung kelengkapan kata kunci
+manual; angka Bab IV bisa dijalankan ulang di depan penguji dengan `php artisan test`.
+**Titik lemah yang sebaiknya diakui duluan:** pembimbing industri & Kaprodi masing-masing hanya
+1 responden — laporan sudah menyebutnya penilaian kualitatif yang tidak digeneralisasi.
 
 ### 1. ~~Belum dideploy — 4 commit~~ SELESAI 5 Agt
 `619334c`, `d38c682`, `ec95bbf`, `ef07ccd` sudah live, dan `simama:impor-dosen --prodi=semua`
@@ -86,15 +110,90 @@ Wiktasari **tidak berduplikat**: akunnya di produksi sudah memakai NIP yang bena
 - Temuan penting: `penilaian_screen.dart` **tak pernah bisa dikompilasi** sejak dulu (impor
   `app_theme.dart` hilang) — baru ketahuan setelah analyze pertama kali dijalankan.
 
-### 4. Laporan — partner yang menulis
-Prompt untuk Claude-nya sudah diberikan user. Berkas rujukan chatbot:
-`C:\Users\ASUS\Downloads\Penjelasan TF-IDF dan Cosine Similarity - SIMAMA.txt` (12 bagian,
-angka nyata, siap dibawa bimbingan).
+### 4. Laporan — sekarang dikerjakan di sesi ini, bukan partner
+Versi cetak: **`Laporan TA SIMAMA (revisi dosen) v62.docx`** di `Downloads`. Rantai v56→v62
+lengkap di sana; jangan mundur ke versi lama. Skrip penyuntingnya ada di scratchpad sesi
+(`terapkan58.py`, `terapkan59.py`, `terapkan60.py`, `perbaiki_miring.py`) — pola yang dipakai:
+sunting `word/document.xml` langsung, tiap sasaran diperiksa lewat `assert` sebelum diganti.
+
+Berkas rujukan chatbot: `C:\Users\ASUS\Downloads\Penjelasan TF-IDF dan Cosine Similarity -
+SIMAMA.txt`.
+
+### 6. Utang teknis yang ditunda sampai sesudah sidang
+- **Izin `storage/` di produksi** — tambalan permanennya (skrip entrypoint yang menjalankan
+  `chown` tiap kontainer start) ditunda karena menyentuh `Dockerfile` menuntut deploy
+  `--build`. Sementara pakai perintah manual di bagian Alur deploy.
+- **Basis data lokal `sitama` tertinggal 12 migrasi**, tersandung penjaga
+  `drop_industri_role_from_users_table`: masih ada akun berperan `industri` dan migrasi
+  **sengaja berhenti** daripada menebak peran penggantinya. Keputusan user, bukan bug.
+  Akibatnya halaman yang menyentuh `periods` akan 500 di lokal.
+- **`seminar_registrations`** masih ada di basis data, sisa rancangan seminar lama, tak
+  terdokumentasi di laporan. Pilihannya: dokumentasikan sebagai tabel warisan, atau hapus.
+  Belum diputuskan.
+- **UI mobile & web** masih ada yang mau dirapikan user, belum dirinci.
 
 ### 5. Utang pasca-sidang
 Lihat `project_utang_pasca_sidang.md` — 5 hal yang **sengaja** dibiarkan (sandi seragam, email
 dosen placeholder, magang lama tanpa layar edit periode, pengirim email Gmail pribadi, kuota
 per perusahaan). Semuanya keputusan sadar, bukan cacat terlewat.
+
+---
+
+## Selesai di sesi 2026-08-05/07 — 30 commit (`9daea26` … `7bf74e6`), semua pushed & live
+
+**Periode magang — mekanik inti yang selama ini hilang** (`db55619` dst.)
+Sebelumnya `students.academic_year` teks bebas yang DIKETIK mahasiswa, menghasilkan nilai
+seperti "2023/2026" sehingga penyaring Kaprodi tak berguna. Sekarang ada tabel `periods`
+(satu semester = satu periode; Gasal Agustus–Januari, Genap Februari–Juli, lama 5 bulan) yang
+**dibangkitkan sistem mengikuti kalender** — Kaprodi hanya memilih prodi peserta dan periode
+yang berjalan, tidak pernah mengetik tahun. Prodi berselang-seling: bila IK magang, TI tidak.
+`period_id` menyusul ke `students` dan `seminars`. Penyaring periode dipasang di portal
+Kaprodi, dosen, dan pembimbing industri; pendaftar tak lagi mengetik prodi maupun tahun.
+
+**Seminar**
+- `a86a6f6` Daftar hadir QR hanya terbuka **hari-H pada jamnya** (toleransi 30 menit sebelum,
+  60 sesudah). Sebelumnya bisa dipindai sejak jadwal ditetapkan — syarat jumlah audiens jadi
+  tak bermakna.
+- `6f93644`/`3d6ec36` Dosen bisa menjadwalkan ulang sesi yang belum berlangsung, dan
+  **jumlah audiens minimal kini per sesi** (kolom `min_guests`, bawaan 15), bukan tetapan kode.
+  Web dan API disamakan — sempat lupa API-nya, ketahuan dan dibetulkan di `3d6ec36`.
+- `0a84b8b` Berita acara mencetak periode magangnya, bukan hasil hitungan dari tanggal seminar.
+  Yang magang Genap 2025/2026 lalu seminar Agustus 2026 dulu tercetak "Gasal 2026/2027".
+
+**Nilai & berkas**
+- `9b781c4`/`1e9865f`/`1ffe926` Lembar nilai PDF, dipecah dua (dosen & industri), disalin
+  persis dari form resmi Polines termasuk kisi centang 1–10.
+- `739ad77` Kolom Keterangan penilaian industri akhirnya tersimpan (`student_scores.note`).
+- `034688a` Sertifikat/laporan/bimbingan bisa dibuka dari layar yang membutuhkannya —
+  izinnya sudah ada dan teruji, yang hilang hanya tautannya. Kaprodi dulu menyetujui
+  "selesai magang" tanpa bisa melihat berkas syaratnya.
+
+**Chatbot** — dua perbaikan, keduanya sudah live
+- `e1c47d7` Nama kota saja tak lagi memicu rekomendasi. Teks dokumen lowongan memuat kolom
+  lokasi, sehingga "Cuaca Semarang hari ini" mencetak cosine **0,4313** di data produksi lalu
+  dijawab daftar tempat magang. Penjagaannya sempit: hanya jalur tanpa maksud eksplisit, dan
+  hanya bila irisan katanya **seluruhnya** token lokasi.
+- `e516495` Kata `absen` didaftarkan pada entri absensi QR (stemmer tak memotong `-si`), dan
+  pengulangan kata `seminar` pada entri jumlah audiens dibuang. **Perbaikan di basis
+  pengetahuan, bukan algoritma.** Ada migrasi `2026_08_06_000004` karena seeder-nya
+  `firstOrCreate` dan tak menyentuh entri yang sudah ada.
+- Tabel 4.6 kini **6/6**, Tabel 4.7 **6/6**, Tabel 4.8 **18/18**. Tabel 4.8 dulu tak punya tes
+  sama sekali (angkanya dirakit tangan) — sekarang dicetak `PengujianChatbotTest`.
+
+**UI** — `a92b6de`/`6b69d5e`/`1dc30dc` pesan galat muncul di 15 halaman berformulir yang dulu
+menolak diam-diam; `81dd79b`/`71f6739`/`4e315a7` garis sidebar sejajar, ikon tak berulang,
+judul & menu ganda dihapus; `7bf74e6` dropdown prodi di halaman daftar disamakan dengan kolom
+lain (dulu `<select>` polos bawaan peramban, tinggi 18px lawan 46px).
+
+**Laporan TA** — dikerjakan di sesi ini, bukan oleh partner
+Rantai versi `v56 → v62` di `C:\Users\ASUS\Downloads\`. **v62 yang dicetak.** Isinya: klaim
+Bootstrap dicabut (nyatanya CSS sendiri), Batasan Masalah diselaraskan dengan
+`syncDirectoryListing()`, tabel `periods` didokumentasikan, **seluruh responden dosen dihapus**
+(rekomendasi dospem — tidak memungkinkan mengisi kuesioner), data 21 responden mahasiswa
+dimasukkan (92,45%; 22 baris dikurangi 1 kiriman ganda), dan angka chatbot disamakan dengan
+kode. Enam diagram dibangun ulang sebagai `.drawio` di `Downloads` (Gambar 3.3, 3.9, 3.13,
+3.14, 3.15, 3.16) — **belum ditempel ke laporan**, padahal teksnya sudah menyebut kelas
+`Period` dan tabel `periods`.
 
 ---
 
@@ -135,6 +234,18 @@ per perusahaan). Semuanya keputusan sadar, bukan cacat terlewat.
 ---
 
 ## Catatan penting (mahal didapat, jangan diulang)
+
+### Izin storage produksi — gejalanya menipu (7 Agt)
+`storage/framework/views` tidak bisa ditulisi `www-data`: kode di *bind mount*, `git pull`
+dijalankan root. **Hanya halaman yang berkas `.blade.php`-nya baru berubah yang jatuh 500**;
+sisanya normal karena disajikan dari kompilasi lama. Halaman 500-nya generik
+(`APP_DEBUG=false`), galat aslinya cuma di log. Pernah 5 Agt (halaman untuk pengguna login) dan
+7 Agt (`/register`). **Bukan cacat kode — me-revert commit tidak menolong.**
+
+Membaca galat produksi tanpa perlu menggulung terminal:
+```bash
+docker compose exec app sh -c "cut -c1-260 storage/logs/laravel.log | grep 'production.ERROR' | tail -5"
+```
 
 ### Kesalahan yang SUDAH pernah dibuat sesi ini
 - **JANGAN menyimpulkan prodi dosen dari prodi mahasiswanya.** Pembimbingan lintas prodi hal
@@ -186,5 +297,12 @@ per perusahaan). Semuanya keputusan sadar, bukan cacat terlewat.
 ### Cara kerja yang diminta user
 - **Verifikasi manual milik user & partner.** Claude cukup: perbaiki → `php artisan test` → commit
   → push. Jangan menyuruh user membuka browser untuk mengecek.
+- **Kalau perlu melihat sendiri hasil perubahan UI, buka `https://simama.site` — situsnya hidup.**
+  JANGAN menyalakan server lokal lebih dulu: basis data `sitama` tertinggal migrasi (lihat
+  Utang teknis) sehingga halaman yang menyentuh `periods` akan 500. Kalau benar-benar butuh
+  lokal, `sitama_testing` punya skema lengkap:
+  `DB_DATABASE=sitama_testing php artisan serve --port=8002`.
+  Kesalahan ini nyata terjadi 7 Agt — habis waktu menyalakan server lokal, memigrasi, dan
+  menyunting `.env`, padahal cukup membuka halaman produksinya.
 - **Satu bug satu commit**, supaya user bisa memeriksa bertahap.
 - Badan commit menjelaskan **sebab**, bukan daftar perubahan.
