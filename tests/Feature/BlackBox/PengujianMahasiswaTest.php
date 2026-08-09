@@ -183,7 +183,8 @@ class PengujianMahasiswaTest extends FeatureTestCase
     public function test_u08_laporan_diunggah_dan_ditinjau(): void
     {
         Storage::fake('local');
-        $mhs   = $this->userByUsername('3.34.23.2.01');
+        // Peninjauan laporan oleh dosen terkunci setelah magang ditutup Kaprodi.
+        $mhs   = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
         $dosen = $this->userByUsername('dosen1');
 
         $this->actingAs($mhs)->post('/mahasiswa/laporan', [

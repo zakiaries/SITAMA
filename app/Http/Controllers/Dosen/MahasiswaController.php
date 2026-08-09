@@ -62,16 +62,18 @@ class MahasiswaController extends Controller
      *
      * @return \Illuminate\Http\RedirectResponse|null null bila masih boleh diubah.
      */
-    private function tolakBilaSelesai($internship, string $hal = 'catatan')
+    private function tolakBilaSelesai($internship, string $hal = 'catatan', string $tab = 'logbook')
     {
-        if (! $internship->is_finished) {
+        // Null-safe: bimbingan boleh masuk sebelum magang terbentuk, jadi
+        // "belum punya magang" berarti belum terkunci, bukan galat.
+        if (! $internship?->is_finished) {
             return null;
         }
 
         return back()->with('error',
             "Magang mahasiswa ini sudah ditandai selesai, sehingga {$hal} terkunci. "
             . 'Minta Kaprodi membuka kembali status selesai bila ada yang perlu dikoreksi.')
-            ->with('tab', 'logbook');
+            ->with('tab', $tab);
     }
 
     public function detail(Request $request, Student $student)
@@ -145,6 +147,10 @@ class MahasiswaController extends Controller
         $this->pastikanDibimbing($student, $lecturer);
         abort_unless($guidance->student_id === $student->id, 404);
 
+        if ($terkunci = $this->tolakBilaSelesai($this->magangOpsional($student, $lecturer), 'bimbingan', 'bimbingan')) {
+            return $terkunci;
+        }
+
         $guidance->update([
             'status'       => 'approved',
             'lecturer_note' => $request->input('note'),
@@ -160,6 +166,10 @@ class MahasiswaController extends Controller
         $lecturer = $this->getLecturer();
         $this->pastikanDibimbing($student, $lecturer);
         abort_unless($guidance->student_id === $student->id, 404);
+
+        if ($terkunci = $this->tolakBilaSelesai($this->magangOpsional($student, $lecturer), 'bimbingan', 'bimbingan')) {
+            return $terkunci;
+        }
 
         $request->validate(['note' => 'required|string'], [
             'note.required' => 'Catatan revisi wajib diisi.',
@@ -177,10 +187,14 @@ class MahasiswaController extends Controller
 
     public function approveLaporan(Request $request, Student $student, InternshipReport $report)
     {
-        $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
 
         if ($report->student_id !== $student->id) abort(404);
+
+        if ($terkunci = $this->tolakBilaSelesai($internship, 'laporan akhir', 'laporan')) {
+            return $terkunci;
+        }
 
         $report->update([
             'status'        => 'approved',
@@ -195,10 +209,14 @@ class MahasiswaController extends Controller
 
     public function revisiLaporan(Request $request, Student $student, InternshipReport $report)
     {
-        $lecturer = $this->getLecturer();
-        $this->getInternship($student, $lecturer);
+        $lecturer   = $this->getLecturer();
+        $internship = $this->getInternship($student, $lecturer);
 
         if ($report->student_id !== $student->id) abort(404);
+
+        if ($terkunci = $this->tolakBilaSelesai($internship, 'laporan akhir', 'laporan')) {
+            return $terkunci;
+        }
 
         $request->validate(['note' => 'required|string'], [
             'note.required' => 'Catatan revisi wajib diisi.',

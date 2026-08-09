@@ -341,6 +341,15 @@
                   <x-icon name="x" :size="13"/> Diminta revisi — menunggu mahasiswa mengirim ulang.
                 @endif
               </div>
+            @elseif($internship?->is_finished)
+              {{-- Magang sudah ditutup Kaprodi: status bimbingan ikut jadi jejak
+                   akademik yang sah. Formulirnya dihilangkan, bukan cuma ditolak
+                   server — dulu tombol Setujui/Revisi tetap terpampang tepat di
+                   bawah lencana "Selesai". --}}
+              <div style="margin-top:12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+                <x-icon name="lock" :size="13"/>
+                Magang sudah selesai — bimbingan terkunci.
+              </div>
             @else
               {{-- Approve Form --}}
               <form method="POST" action="{{ route('dosen.mahasiswa.bimbingan.approve', [$student, $g]) }}"
@@ -499,6 +508,14 @@
                 <div style="margin-top:12px;font-size:12px;color:var(--text-muted);"><x-icon name="check" :size="13"/> Laporan ini sudah disetujui.</div>
               @elseif($rpt->status === 'rejected')
                 <div style="margin-top:12px;font-size:12px;color:var(--text-muted);"><x-icon name="x" :size="13"/> Diminta revisi — menunggu mahasiswa mengirim ulang.</div>
+              @elseif($internship?->is_finished)
+                {{-- Magang sudah ditutup Kaprodi: status laporan ikut jadi jejak
+                     akademik yang sah, dan "laporan di-ACC" adalah salah satu
+                     syarat yang diperiksa Kaprodi sebelum menutupnya. --}}
+                <div style="margin-top:12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+                  <x-icon name="lock" :size="13"/>
+                  Magang sudah selesai — laporan akhir terkunci.
+                </div>
               @else
                 {{-- Approve Form --}}
                 <form method="POST" action="{{ route('dosen.mahasiswa.laporan.approve', [$student, $rpt]) }}"
