@@ -4,9 +4,11 @@
 @section('content')
 
 <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+  {{-- Judulnya sudah dicetak topbar dari $title di atas; mengulanginya di sini
+       membuatnya muncul dua kali persis. Keterangannya tetap, sebab ia memberi
+       konteks yang tak ada di topbar. --}}
   <div>
-    <div class="page-title">Riwayat &amp; Statistik Chatbot</div>
-    <div style="color:var(--text-secondary);font-size:13px;margin-top:4px;">
+    <div style="color:var(--text-secondary);font-size:13px;">
       Pantau pertanyaan mahasiswa. Pertanyaan yang belum terjawab bisa jadi bahan menambah FAQ.
     </div>
   </div>

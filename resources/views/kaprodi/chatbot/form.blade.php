@@ -3,9 +3,8 @@
 @php $title = $item ? 'Edit FAQ Chatbot' : 'Tambah FAQ Chatbot'; @endphp
 @section('content')
 
-<div class="page-header">
-  <div class="page-title">{{ $item ? 'Edit FAQ Chatbot' : 'Tambah FAQ Chatbot' }}</div>
-</div>
+{{-- Judulnya sudah dicetak topbar dari $title di atas; mengulanginya di sini
+     membuatnya muncul dua kali persis, satu di bawah yang lain. --}}
 
 @if($errors->any())
   <div style="background:var(--danger-bg);border:1px solid #F0C4BE;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;">
