@@ -22,8 +22,61 @@ class KartuDaftarMelipatTest extends FeatureTestCase
 {
     private function sumberKartu(): string
     {
+        return $this->sumber('kaprodi/mahasiswa/index');
+    }
+
+    private function sumber(string $halaman): string
+    {
         return preg_replace('/\s+/', '',
-            file_get_contents(resource_path('views/kaprodi/mahasiswa/index.blade.php')));
+            file_get_contents(resource_path("views/{$halaman}.blade.php")));
+    }
+
+    /**
+     * Kartu mahasiswa bimbingan di kedua dasbor.
+     *
+     * Yang dosen memuat EMPAT anak dan tiga di antaranya menolak menyusut:
+     * avatar 46px, dua angka statistik ±110px, dan lencana status ±80px. Di
+     * layar 375px sisanya untuk nama, NIM, tiga keterangan, dan penanda tugas
+     * tinggal ±65px, sehingga semuanya terpecah satu kata per baris.
+     *
+     * Kartu ini sempat saya nilai aman saat menyapu Lapis 4 — penyapuannya
+     * berhenti sebelum mencapai .student-stats dan lencananya, sehingga
+     * terbaca hanya punya avatar dan satu blok yang bisa menyusut. Karena itu
+     * di sini yang diperiksa sumbernya, bukan kesimpulan penyapuan.
+     */
+    public function test_kartu_dasbor_dosen_dan_industri_melipat(): void
+    {
+        foreach (['dosen/dashboard/index', 'dosen-industri/dashboard/index'] as $halaman) {
+            $blade = $this->sumber($halaman);
+
+            $this->assertStringContainsString('.student-card{flex-wrap:wrap;}', $blade,
+                "{$halaman}: kartu mahasiswa tak melipat di layar sempit.");
+
+            $this->assertStringContainsString('.student-info{min-width:150px;}', $blade,
+                "{$halaman}: .student-info memakai flex:1 (flex-basis:0), jadi ia tak pernah "
+                . 'menuntut ruang dan hanya mengalah sampai nol. Tanpa lebar minimum, '
+                . 'flex-wrap sama sekali tak berefek.');
+
+            $this->assertStringContainsString('@media(max-width:760px){.student-card{flex-wrap:wrap;}', $blade,
+                "{$halaman}: perbaikannya harus di dalam @media, supaya desktop tak bergeser.");
+        }
+    }
+
+    /** Kedua dasbor memang masih merender kartunya. */
+    public function test_kedua_dasbor_masih_memakai_kartu_itu(): void
+    {
+        foreach ([
+            'dosen'          => ['dosen1',    'dosen.dashboard'],
+            'dosen-industri' => ['industri1', 'dosen-industri.dashboard'],
+        ] as $peran => [$username, $rute]) {
+            $html = $this->actingAs($this->userByUsername($username))
+                ->get(route($rute))
+                ->assertOk()
+                ->getContent();
+
+            $this->assertStringContainsString('student-card', $html,
+                "Dasbor {$peran} tak lagi memakai student-card — tes ini perlu disesuaikan.");
+        }
     }
 
     public function test_kartu_pendaftar_melipat_di_layar_sempit(): void

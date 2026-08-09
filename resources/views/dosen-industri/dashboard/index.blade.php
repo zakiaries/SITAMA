@@ -36,6 +36,15 @@
   gap:14px;cursor:pointer;transition:all .15s;text-decoration:none;
 }
 .student-card:hover { border-color:var(--primary);box-shadow:0 2px 12px rgba(45,62,110,0.1);transform:translateY(-1px); }
+/* Sama seperti kartu di portal dosen: avatar dan lencana status menolak
+   menyusut, sehingga nama, NIM, keterangan, dan bilah progres logbook berdesak
+   di sisa ruang. Lebar minimum pada .student-info yang mendorong lencananya
+   turun ke baris kedua — flex-wrap sendirian tak cukup karena flex:1 berarti
+   flex-basis:0, yang tak pernah menuntut ruang. */
+@media (max-width: 760px) {
+  .student-card { flex-wrap: wrap; }
+  .student-info { min-width: 150px; }
+}
 .student-av   { width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px; }
 .student-info { flex:1;min-width:0; }
 .student-name { font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px; }

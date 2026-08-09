@@ -38,6 +38,20 @@
   gap: 14px; cursor: pointer; transition: all .15s; text-decoration: none;
 }
 .student-card:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(45,62,110,0.08); transform: translateY(-1px); }
+/* Di layar sempit kartu ini memuat empat hal yang TIGA di antaranya menolak
+   menyusut: avatar 46px, dua angka statistik (±110px), dan lencana status
+   (±80px). Bersama jarak antar-item dan padding kartu, yang tersisa untuk
+   nama, NIM, tiga keterangan, dan penanda tugas tinggal ±65px — semuanya
+   terpecah satu kata per baris.
+
+   flex-wrap saja tidak cukup: .student-info memakai flex:1, yang berarti
+   flex-basis:0, sehingga ia tak pernah MENUNTUT ruang — ia hanya mengalah
+   sampai nol sementara ketiga saudaranya bertahan. Lebar minimumnyalah yang
+   mendorong statistik dan lencana turun ke baris kedua. */
+@media (max-width: 760px) {
+  .student-card { flex-wrap: wrap; }
+  .student-info { min-width: 150px; }
+}
 .student-av {
   width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
