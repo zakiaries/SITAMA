@@ -2,6 +2,13 @@
   $authUser = Auth::user();
 @endphp
 <div class="topbar">
+  {{-- Hanya berwujud di bawah 900px; di desktop CSS menyembunyikannya sehingga
+       ia tak jadi item flex dan susunan topbar lama tak bergeser sedikit pun. --}}
+  <label for="nav-toggle" class="nav-open-btn" title="Menu">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </label>
   <div class="tb-title">{{ $title ?? 'Dashboard' }}</div>
   <div class="tb-right">
     <x-notif-bell peran="dosen" />

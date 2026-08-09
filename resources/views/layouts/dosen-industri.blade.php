@@ -15,7 +15,14 @@
 </head>
 <body>
 <div class="app">
+  {{-- Laci menu layar sempit. Kotak centang ini mekanismenya, bukan JavaScript:
+       simama-anim.js berhenti lebih awal bila pengguna memilih "kurangi animasi",
+       sehingga tombol menu yang menumpang di sana akan mati justru bagi orang itu.
+       Letaknya WAJIB sebelum sidebar & kelambu — pemilih `~` hanya menjangkau
+       saudara yang datang sesudahnya. --}}
+  <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Buka menu navigasi">
   @include('components.dosen-industri.sidebar')
+  <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
   <div class="main">
     @include('components.dosen-industri.topbar', ['title' => $title ?? 'Dashboard'])
     <div class="content">

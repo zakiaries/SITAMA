@@ -802,3 +802,105 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
   }
   .content > *, .nav > *, .sb-logo, .sb-user { opacity: 1 !important; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   LAYAR SEMPIT — sidebar jadi laci geser
+   ════════════════════════════════════════════════════════════
+   Seluruh blok ini hanya berlaku di bawah 900px, jadi tampilan
+   desktop tidak tersentuh sama sekali.
+
+   Mekanismenya kotak centang + label, BUKAN JavaScript. Alasannya
+   spesifik: simama-anim.js berhenti di baris pertamanya bila
+   pengguna menyalakan "kurangi animasi" di setelan ponselnya. Kalau
+   tombol menu ikut menumpang di sana, justru orang itulah yang
+   kehilangan satu-satunya jalan membuka menu — dan kerusakannya tak
+   akan terlihat saat diuji di perangkat biasa. Dengan CSS murni,
+   lacinya tetap hidup meski JavaScript gagal dimuat sekalipun. */
+
+/* Di desktop ketiganya tak berwujud; .nav-toggle tetap perlu ditaruh
+   di luar layar (bukan display:none) supaya tetap bisa difokus papan
+   ketik saat lacinya aktif. */
+.nav-toggle   { position: absolute; width: 0; height: 0; opacity: 0; }
+.nav-open-btn { display: none; }
+.nav-scrim    { display: none; }
+
+/* Tinggi layar sebenarnya di peramban ponsel. 100vh menghitung bilah
+   alamat sebagai ruang yang ada, sehingga bagian bawah terpotong;
+   100dvh ikut menyusut saat bilah itu muncul. Baris 100vh sengaja
+   ditinggal lebih dulu sebagai cadangan bagi peramban lama. */
+@media (max-width: 900px) {
+  .app     { height: 100vh; height: 100dvh; }
+  .sidebar { height: 100vh; height: 100dvh; }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    box-shadow: var(--sh-overlay);
+    /* visibility ikut dimatikan supaya menu yang sedang tertutup tak
+       bisa disusuri Tab — kalau hanya digeser keluar layar, fokus
+       tetap bisa mendarat di tautan yang tak terlihat. Jedanya
+       menunggu geseran selesai agar tak berkedip saat menutup. */
+    visibility: hidden;
+    transition: transform .22s ease, visibility 0s linear .22s;
+  }
+  .nav-toggle:checked ~ .sidebar {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform .22s ease, visibility 0s;
+  }
+
+  /* Kelambu gelap: sekaligus jadi tombol tutup, karena ia juga
+     <label> yang menunjuk kotak centang yang sama. */
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(30, 25, 25, .42);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .22s ease, visibility 0s linear .22s;
+  }
+  .nav-toggle:checked ~ .nav-scrim {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .22s ease, visibility 0s;
+  }
+
+  /* Bentuknya sengaja disamakan dengan tombol lonceng di sebelahnya. */
+  .nav-open-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .nav-open-btn:hover { color: var(--primary); border-color: var(--primary); }
+  .nav-toggle:focus-visible ~ .main .nav-open-btn { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .topbar { padding: 0 14px; gap: 10px; }
+  /* Judul memanjang mengisi sisa ruang lalu dipotong elipsis; tanpa
+     min-width:0 ia menolak menyusut dan mendorong tombol kanan keluar. */
+  .tb-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tb-right { gap: 8px; }
+
+  .content { padding: 18px 14px; }
+}
