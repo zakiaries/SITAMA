@@ -5,6 +5,7 @@
 @push('styles')
 <style>
 .stat-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px; }
+@media (max-width: 760px) { .stat-grid-2 { grid-template-columns:1fr; } }
 .stat-mini { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center; }
 .stat-mini .val { font-size:24px;font-weight:800;color:var(--primary); }
 .stat-mini .lbl { font-size:11px;color:var(--text-muted);margin-top:2px; }

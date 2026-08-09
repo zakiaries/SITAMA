@@ -25,6 +25,7 @@
 .hero-email  { font-size: 13px; color: var(--text-secondary); }
 
 .stats-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 760px) { .stats-row { grid-template-columns: 1fr; } }
 .stat-box    { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
 .stat-box-val { font-size: 28px; font-weight: 800; color: var(--primary); }
 .stat-box-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }

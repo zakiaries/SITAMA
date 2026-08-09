@@ -20,6 +20,8 @@
 .hero-badge { display:inline-flex;align-items:center;gap:5px;background:var(--blue-tint);color:var(--primary);font-size:11px;font-weight:700;padding:4px 10px;border-radius:9999px; }
 
 .stat-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
+/* Dua berjajar, bukan satu: kartu angka masih terbaca di lebar segitu. */
+@media (max-width: 760px) { .stat-grid { grid-template-columns:repeat(2,1fr); } }
 .stat-card-k {
   background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px;
 }
@@ -29,6 +31,9 @@
 .stat-card-k .sc-sub  { font-size:11px;color:var(--text-muted);margin-top:6px; }
 
 .chart-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px; }
+/* Grafik dipaksa satu kolom: dua bagan berdampingan di layar ponsel
+   membuat sumbu dan labelnya saling menindih sampai tak terbaca. */
+@media (max-width: 760px) { .chart-grid { grid-template-columns:1fr; } }
 .chart-card {
   background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:20px;
 }

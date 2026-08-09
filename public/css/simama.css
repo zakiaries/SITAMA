@@ -904,3 +904,35 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
 
   .content { padding: 18px 14px; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   LAYAR SEMPIT — grid banyak kolom melipat
+   ════════════════════════════════════════════════════════════
+   Ambangnya 760px, bukan 900px seperti laci. Di 900px sidebar justru
+   sudah pergi sehingga isi halaman mendapat SELURUH lebar layar, dan
+   dua kolom masih lega di sana; yang benar-benar sesak baru terasa di
+   bawah ~760px.
+
+   .grid-duo untuk baris dua kolom di dalam formulir dan kartu detail.
+   Sengaja berdiri sendiri, bukan menumpang .grid-2, supaya tak ikut
+   membawa align-items:start dan margin-bottom bawaannya — kelima
+   pemakainya sudah mengatur jaraknya masing-masing, dan menumpang akan
+   menggeser tampilan desktop yang sekarang sudah benar. */
+.grid-duo { display: grid; grid-template-columns: 1fr 1fr; }
+
+@media (max-width: 760px) {
+  .grid-2   { grid-template-columns: 1fr; }
+  .grid-duo { grid-template-columns: 1fr; }
+
+  /* Kartu angka tetap dua berjajar, bukan satu. Di layar 375px tiap
+     kartu masih kebagian ±170px — cukup untuk angka beserta labelnya —
+     sedangkan satu kolom mengubah dasbor jadi tumpukan panjang yang
+     harus digulung hanya untuk melihat empat angka. */
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+
+  /* Judul halaman berbagi satu baris dengan tombol aksinya. Tanpa
+     izin melipat, tombolnya terjepit sampai tulisannya terpotong. */
+  .page-header { flex-wrap: wrap; gap: 10px; }
+  .page-title  { font-size: 20px; }
+  .card-header { flex-wrap: wrap; gap: 8px; }
+}

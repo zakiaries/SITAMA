@@ -27,7 +27,7 @@
 
   <div class="card" style="margin-bottom:16px;">
     <div class="card-title" style="margin-bottom:12px;">Perusahaan (Afiliasi)</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="grid-duo" style="gap:14px;">
       <div style="grid-column:1 / -1;">
         <label style="{{ $lbl }}">Nama Perusahaan <span style="color:var(--danger);">*</span></label>
         <input type="text" name="company_name" value="{{ $fld('company_name') }}" required style="{{ $inp }}" placeholder="mis. PT Teknologi Nusantara">
@@ -46,7 +46,7 @@
 
   <div class="card" style="margin-bottom:16px;">
     <div class="card-title" style="margin-bottom:12px;">Detail Lowongan</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="grid-duo" style="gap:14px;">
       <div style="grid-column:1 / -1;">
         <label style="{{ $lbl }}">Judul / Posisi <span style="color:var(--danger);">*</span></label>
         <input type="text" name="title" value="{{ $fld('title') }}" required style="{{ $inp }}" placeholder="mis. Web Developer Intern">

@@ -83,7 +83,7 @@
   @endif
 
   {{-- Detail grid --}}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+  <div class="grid-duo" style="gap:16px;margin-bottom:14px;">
     <div>
       <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Data Perusahaan</div>
       <div style="font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:4px;">

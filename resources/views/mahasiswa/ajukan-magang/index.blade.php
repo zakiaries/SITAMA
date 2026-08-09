@@ -138,7 +138,7 @@
         <input type="text" name="position" value="{{ old('position') }}" placeholder="Contoh: Backend Developer (Laravel)"
           style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+      <div class="grid-duo" style="gap:14px;margin-bottom:18px;">
         <div class="form-group" style="margin:0;">
           <label style="display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">
             Tanggal Mulai <span style="color:var(--danger);">*</span>

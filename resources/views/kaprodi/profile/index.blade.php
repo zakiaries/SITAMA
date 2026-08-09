@@ -5,6 +5,8 @@
 @push('styles')
 <style>
 .stat-grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px; }
+/* Dua berjajar, bukan satu: kartu angka masih terbaca di lebar segitu. */
+@media (max-width: 760px) { .stat-grid-4 { grid-template-columns:repeat(2,1fr); } }
 .stat-mini { background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center; }
 .stat-mini .val { font-size:24px;font-weight:800;color:var(--primary); }
 .stat-mini .lbl { font-size:11px;color:var(--text-muted);margin-top:2px; }

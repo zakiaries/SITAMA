@@ -20,6 +20,8 @@
 .hero-search input { border:none;outline:none;background:transparent;font-size:14px;color:var(--text);width:100%;font-family:inherit; }
 
 .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px; }
+/* Dua berjajar, bukan satu: kartu angka masih terbaca di lebar segitu. */
+@media (max-width: 760px) { .stat-grid { grid-template-columns:repeat(2,1fr); } }
 .stat-industri {
   background:#fff;border:1.5px solid var(--border);border-radius:12px;
   padding:16px;text-align:center;
