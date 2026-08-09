@@ -235,28 +235,38 @@
           + Input Nilai
         </a>
       </div>
-      @php
-        $allScoresList = [];
-        foreach($assessments as $comp) {
-          $compScores = $comp->detailedComponents->flatMap->scores->pluck('score')->filter();
-          $avg = $compScores->count() > 0 ? round($compScores->avg(), 2) : null;
-          $allScoresList[] = ['name' => $comp->name, 'avg' => $avg];
-        }
-        $filledScores = collect($allScoresList)->pluck('avg')->filter();
-        $overallAvg   = $filledScores->count() > 0 ? round($filledScores->avg(), 2) : null;
-      @endphp
-      @foreach($allScoresList as $item)
-      <div class="nilai-row">
-        <div style="font-size:13px;color:var(--text);">{{ $item['name'] }}</div>
-        <div class="nilai-badge">{{ $item['avg'] ?? '-' }}</div>
-      </div>
-      @endforeach
-      <div class="nilai-row total">
-        <div style="font-size:13px;">Rata - rata</div>
-        <div class="nilai-badge" style="background:var(--primary);color:#fff;">
-          {{ $overallAvg ?? '-' }}
+      {{-- Susunannya sengaja disamakan persis dengan portal Kaprodi dan portal
+           mahasiswa: dua penilai dipisah, bobot dosen ditampilkan, dan nilai
+           akhir adalah PENJUMLAHAN rata dosen + rata industri seperti bunyi
+           form resmi ("Nilai Akhir = Nilai rata-rata dari perusahaan + Nilai
+           rata-rata dari dosen pembimbing"). Ketiga layar kini membaca angka
+           yang sama dari nilaiSummary(). --}}
+      @if($nilai)
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Dosen Pembimbing</div>
+        @foreach($nilai['lecturer']['components'] as $item)
+        <div class="nilai-row">
+          <div style="font-size:13px;color:var(--text);">{{ $item['name'] }}@if($item['weight']) <span style="color:var(--text-muted);font-size:11px;">({{ intval($item['weight']) }}%)</span>@endif</div>
+          <div class="nilai-badge {{ $item['avg'] === null ? 'empty' : '' }}">{{ $item['avg'] ?? '-' }}</div>
         </div>
-      </div>
+        @endforeach
+        <div class="nilai-row"><div style="font-size:12.5px;font-weight:600;">Rata Dosen</div><div class="nilai-badge">{{ $nilai['lecturer']['average'] ?? '-' }}</div></div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin:12px 0 2px;">Pembimbing Industri</div>
+        @foreach($nilai['industry']['components'] as $item)
+        <div class="nilai-row">
+          <div style="font-size:13px;color:var(--text);">{{ $item['name'] }}</div>
+          <div class="nilai-badge {{ $item['avg'] === null ? 'empty' : '' }}">{{ $item['avg'] ?? '-' }}</div>
+        </div>
+        @endforeach
+        <div class="nilai-row"><div style="font-size:12.5px;font-weight:600;">Rata Industri</div><div class="nilai-badge">{{ $nilai['industry']['average'] ?? '-' }}</div></div>
+
+        <div class="nilai-row total">
+          <div style="font-size:13px;font-weight:700;">Nilai Akhir (Dosen + Industri)</div>
+          <div class="nilai-badge" style="background:var(--primary);color:#fff;">{{ $nilai['final'] ?? '-' }}</div>
+        </div>
+      @else
+        <div style="font-size:13px;color:var(--text-muted);">Belum ada data magang, sehingga nilai belum bisa ditampilkan.</div>
+      @endif
     </div>
   </div>
 

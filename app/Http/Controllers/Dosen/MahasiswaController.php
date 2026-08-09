@@ -89,16 +89,18 @@ class MahasiswaController extends Controller
             'report',
         ]);
 
-        $assessments = AssessmentComponent::with(['detailedComponents' => function ($q) use ($internship) {
-            $q->with(['scores' => fn($q2) => $q2->where('internship_id', $internship?->id ?? 0)]);
-        }])->get();
+        /* Nilai dibaca lewat nilaiSummary(), sumber yang sama dengan portal
+           mahasiswa dan Kaprodi.
 
-        $allScores = $assessments->flatMap(fn($c) => $c->detailedComponents)
-            ->flatMap(fn($d) => $d->scores)
-            ->pluck('score')
-            ->filter();
-
-        $overallAvg = $allScores->count() > 0 ? round($allScores->avg(), 2) : null;
+           Sebelumnya halaman ini memuat SELURUH AssessmentComponent tanpa
+           menyaring scorer_type, lalu merata-ratakan kesepuluhnya polos. Dua
+           komponen dosen (Proposal, Laporan) berbaur dengan delapan komponen
+           industri dalam satu daftar tanpa keterangan, bobot 20%/80% diabaikan,
+           dan "Rata-rata" yang tercetak — (8+8+9×8)÷10 = 8,8 — bukan nilai
+           siapa pun: bukan nilai dosen, bukan nilai industri, bukan nilai
+           akhir. Angka itu tak ada padanannya di form resmi maupun di layar
+           mana pun yang lain. */
+        $nilai = $internship?->nilaiSummary();
 
         $filter = $request->input('filter', 'semua');
         $period = $request->input('period', 'semua');
@@ -131,7 +133,7 @@ class MahasiswaController extends Controller
         $sudahDicatat = $student->logBooks()->whereNotNull('lecturer_note')->count();
 
         return view('dosen.mahasiswa.detail', compact(
-            'student', 'internship', 'assessments', 'overallAvg',
+            'student', 'internship', 'nilai',
             'logBooks', 'filter', 'period', 'totalLog', 'sudahDicatat'
         ));
     }
