@@ -604,6 +604,19 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
 .nilai-badge { background: var(--blue-tint); color: var(--primary); font-weight: 700; font-size: 14px; padding: 5px 15px; border-radius: 9999px; min-width: 50px; text-align: center; }
 .nilai-badge.empty { background: var(--warm-2); color: var(--text-muted); font-weight: 600; }
 
+/* Butir penilaian di bawah komponennya. Dibuat lebih kecil dan menjorok ke
+   dalam supaya terbaca sebagai DASAR dari angka komponen di atasnya, bukan
+   sebagai daftar nilai yang setara — yang terakhir akan membuat orang mengira
+   ada belasan nilai terpisah, padahal komponennyalah yang dijumlahkan. */
+.nilai-rincian { padding: 2px 0 8px 14px; }
+.nilai-rincian-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  padding: 3px 0;
+}
+.nrr-nama  { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+.nrr-nilai { font-size: 12px; font-weight: 700; color: var(--primary); flex-shrink: 0; min-width: 18px; text-align: right; }
+.nrr-nilai.kosong { color: var(--text-muted); font-weight: 600; }
+
 /* ── Notifikasi ── */
 .notif-item { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 15px 16px; margin-bottom: 10px; box-shadow: var(--sh-raised); }
 .notif-item.unread { border-left: 3px solid var(--primary); }

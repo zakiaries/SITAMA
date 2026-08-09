@@ -248,6 +248,7 @@
           <div style="font-size:13px;color:var(--text);">{{ $item['name'] }}@if($item['weight']) <span style="color:var(--text-muted);font-size:11px;">({{ intval($item['weight']) }}%)</span>@endif</div>
           <div class="nilai-badge {{ $item['avg'] === null ? 'empty' : '' }}">{{ $item['avg'] ?? '-' }}</div>
         </div>
+        <x-nilai-rincian :komponen="$item" />
         @endforeach
         <div class="nilai-row"><div style="font-size:12.5px;font-weight:600;">Rata Dosen</div><div class="nilai-badge">{{ $nilai['lecturer']['average'] ?? '-' }}</div></div>
 

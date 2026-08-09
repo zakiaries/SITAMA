@@ -199,6 +199,17 @@ class Internship extends Model
                 'name'   => $comp->name,
                 'weight' => $comp->weight !== null ? (float) $comp->weight : null,
                 'avg'    => $scores->count() > 0 ? round($scores->avg(), 2) : null,
+                /* Butir penilaian beserta nilainya masing-masing.
+                   Rubrik dosen menyimpan 12 butir (Proposal 4, Laporan 8) persis
+                   seperti form resmi, dan dosen memang menilainya satu per satu —
+                   selama ini hanya rata-rata komponennya yang pernah ditampilkan,
+                   sehingga mahasiswa dan Kaprodi tak pernah melihat dasar
+                   angkanya. Relasi scores sudah tersaring internship + penilai
+                   pada eager load di atas, jadi first() memang skor yang tepat. */
+                'details' => $comp->detailedComponents->map(fn ($d) => [
+                    'name'  => $d->name,
+                    'score' => $d->scores->first()?->score,
+                ])->values()->all(),
             ];
         });
 

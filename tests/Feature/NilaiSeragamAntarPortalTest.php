@@ -109,6 +109,63 @@ class NilaiSeragamAntarPortalTest extends FeatureTestCase
     }
 
     /**
+     * Butir penilaian dosen ikut tampil di ketiga portal.
+     *
+     * Rubrik dosen menyimpan 12 butir — Proposal 4, Laporan 8 — persis seperti
+     * form resmi, dan dosen memang menilainya satu per satu. Sebelumnya hanya
+     * rata-rata komponennya yang pernah ditampilkan, sehingga mahasiswa dan
+     * Kaprodi melihat "Proposal 8" tanpa tahu apa saja yang dinilai di dalamnya.
+     * Itu yang mereka keluhkan saat uji coba.
+     */
+    public function test_butir_penilaian_dosen_tampil_di_ketiga_portal(): void
+    {
+        $internship = $this->siapkanNilai();
+        $student    = $internship->student;
+
+        $halaman = [
+            'dosen'     => [$this->userByUsername('dosen1'),       route('dosen.mahasiswa.detail', $student)],
+            'kaprodi'   => [$this->userByUsername('kaprodi'),      route('kaprodi.mahasiswa.detail', $student)],
+            'mahasiswa' => [$this->userByUsername('3.34.23.2.01'), route('mahasiswa.nilai')],
+        ];
+
+        foreach ($halaman as $peran => [$pengguna, $url]) {
+            $html = $this->actingAs($pengguna)->get($url)->assertOk()->getContent();
+
+            foreach ([
+                'Tujuan dan sasaran Magang',
+                'Kesesuaian perencanaan kerja',
+                'Bahasa: Bahasa Indonesia sesuai EYD',
+                'Isi: kemampuan menyimpulkan',
+            ] as $butir) {
+                $this->assertStringContainsString($butir, $html,
+                    "Portal {$peran} tak menampilkan butir \"{$butir}\" — mahasiswa dan "
+                    . 'Kaprodi hanya melihat rata-rata komponen tanpa dasar angkanya.');
+            }
+        }
+    }
+
+    /**
+     * Komponen industri TIDAK boleh dapat sub-baris.
+     *
+     * Rubriknya menyimpan satu butir per komponen yang isinya keterangan, bukan
+     * kriteria terpisah. Menampilkannya akan terbaca sebagai nilai kedua yang
+     * sebetulnya tak ada.
+     */
+    public function test_komponen_industri_tak_dapat_sub_baris(): void
+    {
+        $student = $this->siapkanNilai()->student;
+
+        $html = $this->actingAs($this->userByUsername('kaprodi'))
+            ->get(route('kaprodi.mahasiswa.detail', $student))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('Penyesuaian diri dengan lingkungan kerja', $html,
+            'Keterangan komponen industri tampil sebagai sub-baris bernilai — pembacanya '
+            . 'akan mengira ada nilai terpisah untuk keterangan itu.');
+    }
+
+    /**
      * Penjaga inti: tiga angka yang sama harus muncul di ketiga portal.
      * Kalau salah satu berubah cara hitungnya sendiri, tes ini jatuh.
      */

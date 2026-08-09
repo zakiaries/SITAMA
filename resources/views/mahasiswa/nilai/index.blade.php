@@ -116,6 +116,7 @@
       </div>
       <div class="nilai-badge {{ $item['avg'] === null ? 'empty' : '' }}">{{ $item['avg'] ?? 'Belum dinilai' }}</div>
     </div>
+    <x-nilai-rincian :komponen="$item" />
     @endforeach
   </div>
 
