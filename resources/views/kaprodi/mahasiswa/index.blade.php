@@ -192,10 +192,23 @@
       {{ $internship->is_finished ? 'Selesai' : 'Aktif' }}
     </span>
     <a href="{{ route('kaprodi.mahasiswa.detail', $student) }}" class="btn btn-outline btn-sm">Detail</a>
-    <button type="button" class="btn btn-outline btn-sm"
-      onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
-      {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
-    </button>
+    {{-- Magang yang sudah ditutup: dosen pembimbingnya sudah tercetak di lembar
+         nilai dan berita acara seminar, jadi tak boleh diganti diam-diam.
+         Tombolnya dimatikan supaya keadaannya terbaca sekali lihat — dulu
+         lencana "Selesai" tercetak tepat di sebelah tombol yang masih hidup.
+         Penjaga sungguhannya ada di controller; yang di sini hanya supaya tak
+         perlu dicoba dulu baru tahu ditolak. --}}
+    @if($internship->is_finished)
+      <button type="button" class="btn btn-outline btn-sm" disabled
+        title="Magang sudah selesai. Buka kembali status selesainya lebih dulu di halaman detail bila dosen pembimbing perlu diganti.">
+        Ganti Dosen
+      </button>
+    @else
+      <button type="button" class="btn btn-outline btn-sm"
+        onclick="openAssign({{ $student->id }}, '{{ addslashes($student->user->name) }}', {{ $assignedLecturer?->id ?? 'null' }})">
+        {{ $assignedLecturer ? 'Ganti Dosen' : '+ Plot Dosen' }}
+      </button>
+    @endif
     <button type="button" class="btn btn-outline btn-sm"
       onclick="openStatus({{ $student->id }}, '{{ addslashes($student->user->name) }}')">Ubah Status</button>
   @endif

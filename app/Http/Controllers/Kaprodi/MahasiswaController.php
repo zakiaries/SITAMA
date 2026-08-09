@@ -341,11 +341,31 @@ class MahasiswaController extends Controller
             'lecturer_id.required' => 'Silakan pilih dosen pembimbing.',
         ]);
 
+        /* Magang yang sudah ditutup adalah jejak akademik yang sah, dan dosen
+           pembimbingnya ikut tercetak di lembar nilai serta berita acara
+           seminar. Menggantinya sesudah itu membuat dokumen yang sudah
+           ditandatangani menunjuk orang yang berbeda dari yang tercatat
+           sekarang — dan tak ada jejak bahwa pernah ada pergantian.
+
+           Diperiksa di sini, bukan cukup dengan mematikan tombolnya: tombol
+           yang mati hanya menyembunyikan jalannya, sementara endpoint-nya tetap
+           menerima kiriman.
+
+           Jalan keluarnya tetap ada, jadi ini bukan jalan buntu: Kaprodi bisa
+           membuka kembali status selesainya di halaman detail mahasiswa. */
+        $internship = $student->internships()->latest()->first();
+
+        if ($internship?->is_finished) {
+            return back()->with('error',
+                'Magang ' . $student->user->name . ' sudah ditandai selesai, sehingga dosen '
+                . 'pembimbingnya terkunci. Buka kembali status selesainya lebih dulu lewat '
+                . 'halaman detail mahasiswa bila memang perlu diganti.');
+        }
+
         // Plot dosen ke student langsung (sebelum magang dimulai)
         $student->update(['lecturer_id' => $request->lecturer_id]);
 
-        // Jika sudah ada internship aktif, sinkronkan juga
-        $internship = $student->internships()->latest()->first();
+        // Jika sudah ada magang, sinkronkan juga.
         if ($internship) {
             $internship->update(['lecturer_id' => $request->lecturer_id]);
         }
