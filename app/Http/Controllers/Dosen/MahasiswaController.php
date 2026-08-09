@@ -55,17 +55,43 @@ class MahasiswaController extends Controller
     }
 
     /**
-     * Magang yang sudah ditutup Kaprodi adalah jejak akademik yang sah: catatan
-     * logbook maupun nilainya tak boleh berubah lagi. Bila memang perlu
-     * dikoreksi, Kaprodi membuka kembali status selesainya lebih dulu — jadi
-     * kunci ini tetap punya jalan keluar, bukan jalan buntu.
+     * Bimbingan dan laporan akhir menutup di SEMINAR, bukan di akhir magang.
+     *
+     * Sesudah magangnya selesai, mahasiswa masih berkonsultasi menyiapkan
+     * laporan dan seminarnya — mengunci bimbingan di titik itu memutus
+     * pembimbingan justru saat paling dibutuhkan. Yang benar-benar menutup
+     * rangkaiannya adalah pengesahan seminar.
+     *
+     * Berbeda dari kunci selesai-magang, kunci ini FINAL: seminar yang sudah
+     * disahkan tak bisa dibatalkan maupun dihapus, jadi pesannya sengaja tidak
+     * menjanjikan jalan membuka kembali yang memang tidak ada.
+     *
+     * @return \Illuminate\Http\RedirectResponse|null null bila masih boleh diubah.
+     */
+    private function tolakBilaSeminarSelesai(Student $student, string $hal, string $tab)
+    {
+        if (! $student->seminarSelesai()) {
+            return null;
+        }
+
+        return back()->with('error',
+            "Seminar magang mahasiswa ini sudah disahkan, sehingga {$hal} terkunci "
+            . 'sebagai jejak akademik.')
+            ->with('tab', $tab);
+    }
+
+    /**
+     * Catatan logbook dan nilai menutup di akhir magang.
+     *
+     * Keduanya adalah data tentang MASA magang itu sendiri, jadi wajar ditutup
+     * bersama magangnya. Bila memang perlu dikoreksi, Kaprodi membuka kembali
+     * status selesainya lebih dulu — jadi kunci ini punya jalan keluar.
      *
      * @return \Illuminate\Http\RedirectResponse|null null bila masih boleh diubah.
      */
     private function tolakBilaSelesai($internship, string $hal = 'catatan', string $tab = 'logbook')
     {
-        // Null-safe: bimbingan boleh masuk sebelum magang terbentuk, jadi
-        // "belum punya magang" berarti belum terkunci, bukan galat.
+        // Null-safe: mahasiswa yang baru diplot belum punya magang.
         if (! $internship?->is_finished) {
             return null;
         }
@@ -134,8 +160,13 @@ class MahasiswaController extends Controller
         $totalLog     = $student->logBooks()->count();
         $sudahDicatat = $student->logBooks()->whereNotNull('lecturer_note')->count();
 
+        // Titik tutup bimbingan & laporan. Sengaja terpisah dari is_finished:
+        // sesudah magang selesai mahasiswa masih berkonsultasi menyiapkan
+        // laporan dan seminarnya.
+        $seminarSelesai = $student->seminarSelesai();
+
         return view('dosen.mahasiswa.detail', compact(
-            'student', 'internship', 'nilai',
+            'student', 'internship', 'nilai', 'seminarSelesai',
             'logBooks', 'filter', 'period', 'totalLog', 'sudahDicatat'
         ));
     }
@@ -147,7 +178,7 @@ class MahasiswaController extends Controller
         $this->pastikanDibimbing($student, $lecturer);
         abort_unless($guidance->student_id === $student->id, 404);
 
-        if ($terkunci = $this->tolakBilaSelesai($this->magangOpsional($student, $lecturer), 'bimbingan', 'bimbingan')) {
+        if ($terkunci = $this->tolakBilaSeminarSelesai($student, 'bimbingan', 'bimbingan')) {
             return $terkunci;
         }
 
@@ -167,7 +198,7 @@ class MahasiswaController extends Controller
         $this->pastikanDibimbing($student, $lecturer);
         abort_unless($guidance->student_id === $student->id, 404);
 
-        if ($terkunci = $this->tolakBilaSelesai($this->magangOpsional($student, $lecturer), 'bimbingan', 'bimbingan')) {
+        if ($terkunci = $this->tolakBilaSeminarSelesai($student, 'bimbingan', 'bimbingan')) {
             return $terkunci;
         }
 
@@ -192,7 +223,7 @@ class MahasiswaController extends Controller
 
         if ($report->student_id !== $student->id) abort(404);
 
-        if ($terkunci = $this->tolakBilaSelesai($internship, 'laporan akhir', 'laporan')) {
+        if ($terkunci = $this->tolakBilaSeminarSelesai($student, 'laporan akhir', 'laporan')) {
             return $terkunci;
         }
 
@@ -214,7 +245,7 @@ class MahasiswaController extends Controller
 
         if ($report->student_id !== $student->id) abort(404);
 
-        if ($terkunci = $this->tolakBilaSelesai($internship, 'laporan akhir', 'laporan')) {
+        if ($terkunci = $this->tolakBilaSeminarSelesai($student, 'laporan akhir', 'laporan')) {
             return $terkunci;
         }
 

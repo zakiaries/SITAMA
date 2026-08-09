@@ -57,9 +57,7 @@ class NotifikasiSeminarTest extends FeatureTestCase
 
     public function test_acc_dan_revisi_dosen_memberi_notifikasi_ke_mahasiswa(): void
     {
-        // ACC/revisi dosen terkunci setelah magang ditutup Kaprodi, jadi
-        // notifikasinya diuji pada magang yang masih berjalan.
-        $mhs      = $this->magangBerjalan($this->mahasiswa());
+        $mhs      = $this->mahasiswa();
         $student  = $mhs->student;
         $dosen    = $this->userByUsername('dosen1');
 

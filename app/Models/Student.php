@@ -74,6 +74,29 @@ class Student extends Model
         return $this->hasMany(Guidance::class);
     }
 
+    /** Sesi seminar tempat mahasiswa ini menjadi penyaji. */
+    public function seminars()
+    {
+        return $this->belongsToMany(Seminar::class, 'seminar_presenters');
+    }
+
+    /**
+     * Seminar magangnya sudah disahkan dosen.
+     *
+     * Inilah titik tutup akademik yang sebenarnya — BUKAN berakhirnya magang.
+     * Sesudah magangnya selesai, mahasiswa masih berkonsultasi menyiapkan
+     * laporan dan seminarnya, jadi bimbingan harus tetap terbuka sampai
+     * seminarnya disahkan.
+     *
+     * Perlu diketahui: pengesahan seminar tak bisa dibatalkan maupun dihapus,
+     * sehingga kunci yang bertumpu padanya bersifat final — berbeda dari kunci
+     * selesai-magang yang masih bisa dibuka kembali oleh Kaprodi.
+     */
+    public function seminarSelesai(): bool
+    {
+        return $this->seminars()->where('seminars.status', 'completed')->exists();
+    }
+
     public function logBooks()
     {
         return $this->hasMany(LogBook::class);

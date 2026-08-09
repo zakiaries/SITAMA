@@ -64,10 +64,7 @@ class PengujianDosenTest extends FeatureTestCase
     /** U-07 — Dosen menyetujui bimbingan dan meminta revisi. */
     public function test_u07_dosen_menyetujui_dan_meminta_revisi_bimbingan(): void
     {
-        // Bimbingan terkunci setelah magang ditutup Kaprodi, jadi skenarionya
-        // memakai magang yang masih berjalan — di alur nyata dosen memang tak
-        // pernah menanggapi bimbingan magang yang sudah selesai.
-        $mhs   = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
+        $mhs   = $this->userByUsername('3.34.23.2.01');
         $dosen = $this->userByUsername('dosen1');
 
         $setuju = Guidance::create([
@@ -96,9 +93,7 @@ class PengujianDosenTest extends FeatureTestCase
     /** U-08 — Dosen meninjau laporan akhir: menyetujui dan meminta revisi. */
     public function test_u08_dosen_meninjau_laporan(): void
     {
-        // Laporan terkunci setelah magang ditutup — "laporan di-ACC" justru
-        // salah satu syarat yang diperiksa Kaprodi sebelum menutupnya.
-        $mhs   = $this->magangBerjalan($this->userByUsername('3.34.23.2.01'));
+        $mhs   = $this->userByUsername('3.34.23.2.01');
         $dosen = $this->userByUsername('dosen1');
 
         $laporan = InternshipReport::create([

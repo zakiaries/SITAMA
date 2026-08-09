@@ -341,14 +341,14 @@
                   <x-icon name="x" :size="13"/> Diminta revisi — menunggu mahasiswa mengirim ulang.
                 @endif
               </div>
-            @elseif($internship?->is_finished)
-              {{-- Magang sudah ditutup Kaprodi: status bimbingan ikut jadi jejak
-                   akademik yang sah. Formulirnya dihilangkan, bukan cuma ditolak
-                   server — dulu tombol Setujui/Revisi tetap terpampang tepat di
-                   bawah lencana "Selesai". --}}
+            @elseif($seminarSelesai)
+              {{-- Menutup di SEMINAR, bukan di akhir magang: sesudah magangnya
+                   selesai mahasiswa masih berkonsultasi menyiapkan laporan dan
+                   seminarnya, jadi mengunci di titik itu memutus pembimbingan
+                   justru saat paling dibutuhkan. --}}
               <div style="margin-top:12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
                 <x-icon name="lock" :size="13"/>
-                Magang sudah selesai — bimbingan terkunci.
+                Seminar sudah disahkan — bimbingan terkunci.
               </div>
             @else
               {{-- Approve Form --}}
@@ -508,13 +508,13 @@
                 <div style="margin-top:12px;font-size:12px;color:var(--text-muted);"><x-icon name="check" :size="13"/> Laporan ini sudah disetujui.</div>
               @elseif($rpt->status === 'rejected')
                 <div style="margin-top:12px;font-size:12px;color:var(--text-muted);"><x-icon name="x" :size="13"/> Diminta revisi — menunggu mahasiswa mengirim ulang.</div>
-              @elseif($internship?->is_finished)
-                {{-- Magang sudah ditutup Kaprodi: status laporan ikut jadi jejak
-                     akademik yang sah, dan "laporan di-ACC" adalah salah satu
-                     syarat yang diperiksa Kaprodi sebelum menutupnya. --}}
+              @elseif($seminarSelesai)
+                {{-- Sama seperti bimbingan: laporan masih boleh direvisi sesudah
+                     magang berakhir, karena justru itu yang disiapkan untuk
+                     seminar. Yang menutupnya adalah pengesahan seminar. --}}
                 <div style="margin-top:12px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
                   <x-icon name="lock" :size="13"/>
-                  Magang sudah selesai — laporan akhir terkunci.
+                  Seminar sudah disahkan — laporan akhir terkunci.
                 </div>
               @else
                 {{-- Approve Form --}}
