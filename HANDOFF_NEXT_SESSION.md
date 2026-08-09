@@ -119,7 +119,7 @@ sunting `word/document.xml` langsung, tiap sasaran diperiksa lewat `assert` sebe
 Berkas rujukan chatbot: `C:\Users\ASUS\Downloads\Penjelasan TF-IDF dan Cosine Similarity -
 SIMAMA.txt`.
 
-### 6. Utang teknis yang ditunda sampai sesudah sidang
+### 5. Utang teknis yang ditunda sampai sesudah sidang
 - **Izin `storage/` di produksi** — tambalan permanennya (skrip entrypoint yang menjalankan
   `chown` tiap kontainer start) ditunda karena menyentuh `Dockerfile` menuntut deploy
   `--build`. Sementara pakai perintah manual di bagian Alur deploy.
@@ -132,7 +132,7 @@ SIMAMA.txt`.
   Belum diputuskan.
 - **UI mobile & web** masih ada yang mau dirapikan user, belum dirinci.
 
-### 5. Utang pasca-sidang
+### 6. Utang pasca-sidang
 Lihat `project_utang_pasca_sidang.md` — 5 hal yang **sengaja** dibiarkan (sandi seragam, email
 dosen placeholder, magang lama tanpa layar edit periode, pengirim email Gmail pribadi, kuota
 per perusahaan). Semuanya keputusan sadar, bukan cacat terlewat.
