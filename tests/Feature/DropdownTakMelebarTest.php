@@ -51,15 +51,56 @@ class DropdownTakMelebarTest extends FeatureTestCase
     public function test_aturannya_berlaku_di_semua_lebar(): void
     {
         $css = $this->css();
-        $posAturan = strpos($css, 'select{max-width:100%;}');
 
-        $this->assertNotFalse($posAturan, 'Aturan select tak ditemukan.');
+        $this->assertNotFalse(strpos($css, 'select{max-width:100%;}'),
+            'Aturan select tak ditemukan.');
 
-        $posMediaPertama = strpos($css, '@media');
+        foreach ($this->blokMedia($css) as $blok) {
+            $this->assertStringNotContainsString('select{max-width:100%;}', $blok,
+                'Aturan select berada di dalam blok @media — seharusnya berlaku di semua '
+                . 'lebar layar, sebab dropdown meluber bukan masalah khusus layar sempit.');
+        }
+    }
 
-        $this->assertLessThan($posMediaPertama, $posAturan,
-            'Aturan select berada di dalam blok @media — seharusnya berlaku di semua '
-            . 'lebar layar, sebab dropdown meluber bukan masalah khusus layar sempit.');
+    /**
+     * Isi tiap blok @media.
+     *
+     * Kurungnya dihitung manual karena blok @media memuat blok lain di
+     * dalamnya. Versi awal tes ini memakai jalan pintas "aturannya harus muncul
+     * sebelum @media PERTAMA" — dan itu patah begitu ada blok @media baru
+     * ditambahkan di posisi yang lebih awal dalam berkas, padahal aturan select
+     * sendiri tak bergeser sedikit pun.
+     */
+    private function blokMedia(string $css): array
+    {
+        $blok = [];
+        $pos  = 0;
+        $len  = strlen($css);
+
+        while (($mulai = strpos($css, '@media', $pos)) !== false) {
+            $buka = strpos($css, '{', $mulai);
+
+            if ($buka === false) {
+                break;
+            }
+
+            $dalam = 1;
+            $i     = $buka + 1;
+
+            while ($i < $len && $dalam > 0) {
+                if ($css[$i] === '{') {
+                    $dalam++;
+                } elseif ($css[$i] === '}') {
+                    $dalam--;
+                }
+                $i++;
+            }
+
+            $blok[] = substr($css, $mulai, $i - $mulai);
+            $pos    = $i;
+        }
+
+        return $blok;
     }
 
     public function test_deretan_penyaring_menumpuk_di_layar_sempit(): void

@@ -219,6 +219,29 @@ a.sb-user.sb-user-active { background: var(--blue-tint); }
   z-index: 200;
   overflow: hidden;
 }
+/* Di layar ponsel panelnya dilepas dari loncengnya dan dipatok ke layar.
+   Sebabnya aritmetika: `right: 0` menempelkan tepi kanan panel pada LONCENG,
+   bukan pada tepi layar, padahal di kanan lonceng masih ada avatar 34px, jarak
+   8px, dan padding topbar 14px — seluruhnya 56px. Panel selebar 340px karena
+   itu mulai di `lebar_layar − 56 − 340`, yang bernilai NEGATIF pada layar mana
+   pun di bawah 396px: tepi kirinya terpotong keluar layar sementara kanannya
+   menyisakan 56px kosong, sehingga panelnya terlihat terjeblos ke pojok.
+
+   `max-width: calc(100vw - 32px)` tidak menolong karena ia membatasi LEBAR,
+   sedangkan yang salah adalah titik tumpunya. Dipatok ke layar dengan jarak
+   kiri-kanan yang sama, letaknya tak lagi bergantung pada lebar avatar maupun
+   lencana peran di sebelahnya — angka-angka yang bisa berubah kapan saja. */
+@media (max-width: 520px) {
+  .notif-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: calc(var(--topbar-h) + 8px);
+    width: auto;
+    max-width: none;
+  }
+}
+
 .notif-panel-head {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 11px 14px;
