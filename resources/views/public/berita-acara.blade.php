@@ -2,7 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+{{-- Cubit-perbesar TIDAK dikunci. `maximum-scale=1.0, user-scalable=no` dulu
+     ada di sini karena halaman ini memuat kanvas tanda tangan: gerakan mencubit
+     akan beradu dengan gerakan menggores. Kanvas itu sudah lama dibongkar —
+     kehadiran kini dicatat dari akun yang login, sehingga isi halaman tinggal
+     teks dan satu tombol. Yang tersisa dari kunci itu hanya ruginya: audiens
+     yang matanya kurang awas tak bisa memperbesar tulisan untuk memastikan
+     namanya benar sebelum menekan Hadir. --}}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daftar Hadir Seminar — SIMAMA</title>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
