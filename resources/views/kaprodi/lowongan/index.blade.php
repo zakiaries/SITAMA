@@ -26,8 +26,16 @@
 @if($listings->isEmpty())
   <div class="card" style="text-align:center;padding:32px 16px;color:var(--text-muted);font-size:13px;">Belum ada lowongan. Klik "Tambah Lowongan" untuk memulai.</div>
 @else
-  <div class="card" style="padding:0;overflow:hidden;">
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+  {{-- overflow-x:auto, bukan hidden. Dulu hidden memotong tabel enam kolom ini
+       di layar sempit, dan yang terpotong justru kolom Aksi di ujung kanan —
+       tombol Ubah & Hapus jadi tak terjangkau sama sekali, tanpa petunjuk
+       apa pun bahwa masih ada isi di sebelah kanan. Sudut membulat kartunya
+       tetap terpotong rapi karena overflow-nya tetap bukan visible. --}}
+  <div class="card" style="padding:0;overflow-x:auto;">
+    {{-- Digeser, bukan dipadatkan: enam kolom yang dipaksa muat di 375px
+         menyisakan ±60px per kolom sehingga tiap sel pecah jadi tumpukan
+         satu-dua huruf. --}}
+    <table style="width:100%;min-width:640px;border-collapse:collapse;font-size:13px;">
       <thead>
         <tr style="background:var(--bg);text-align:left;">
           <th style="padding:11px 14px;">Posisi</th>

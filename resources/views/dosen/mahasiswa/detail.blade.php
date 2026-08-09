@@ -42,6 +42,12 @@
 
 /* Tabs */
 .tab-nav { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+/* Digeser mendatar, bukan dilipat: strip bertepi bawah yang melipat jadi dua
+   baris terlihat seperti garisnya patah, bukan seperti tab yang berlanjut. */
+@media (max-width: 760px) {
+  .tab-nav { overflow-x: auto; }
+  .tab-btn { flex-shrink: 0; white-space: nowrap; }
+}
 .tab-btn {
   padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
   border: none; background: none; color: var(--text-muted); border-bottom: 2px solid transparent;
